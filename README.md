@@ -70,9 +70,9 @@ The command name is the filename without `.md` (`windup-nt.md` → `/windup-nt`)
 
 ## NakliTechie
 
-*Nakli* (नकली) is Hindi for "fake" or "imitation" — so **NakliTechie**, the cheerfully self-appointed *fake techie*, is the maker handle of **[Chirag Patnaik](http://www.chiragpatnaik.com)** (Bombay — two decades across media, technology, marketing and politics, none of it formally "engineering"). The 80-plus public repos rather give the game away: mostly **single-file web apps that run entirely in your browser — no accounts, no servers, no data leaving your device.** House tagline: *"all these tools, none of your data."*
+*Nakli* (नकली) is Hindi for "fake" or "imitation" — so **NakliTechie**, the cheerfully self-appointed *fake techie*, is the maker handle of **[Chirag Patnaik](http://www.chiragpatnaik.com)** (Bombay — two decades across media, technology, marketing and politics, none of it formally "engineering"). The 80-plus public repos rather give the game away: mostly **single-file web apps that run entirely in your browser — no accounts, no servers, no data leaving your device** (house tagline: *"all these tools, none of your data"*). The current research focus is newer and heavier: **small-language-model training and distributed inference** — getting capable models to fine-tune and serve on the hardware you actually have.
 
-ntkit is the odd one out — a coding-agent toolkit, not a browser app — but it keeps the ethos: local-first, sovereign, no lock-in.
+ntkit sits closer to that second thread than the first — a coding-agent toolkit, not a browser app — but it keeps the same ethos: local-first, sovereign, no lock-in.
 
 **Wander in:**
 - 🖥️ **[NakliOS](https://naklios.dev/)** — a whole desktop in your browser; the hub for 40+ of the apps

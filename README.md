@@ -4,6 +4,10 @@
 
 Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, shipping without leaking a secret. `ntkit` is eighteen [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
 
+<p align="center">
+  <img src="assets/workflow.png" alt="ntkit workflow map — 18 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
+</p>
+
 Most share one idea: a **gitignored `plan/` folder** in each repo holding three files —
 
 - `history.md` — Decisions · Log · Dead ends

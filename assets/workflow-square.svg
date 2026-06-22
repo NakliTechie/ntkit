@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img">
+<title>ntkit — when to use what</title>
+<desc>A square light-mode workflow map of ntkit's 18 Claude Code commands across six phases plus a daily session loop and a knowledge-vault pair.</desc>
+<style>
+text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+.h1{fill:#1f2328;font-size:52px;font-weight:800}
+.tag{fill:#656d76;font-size:18px}
+.pill{fill:#ecfeff;stroke:#9bdfec;stroke-width:1}
+.pilltxt{fill:#0e7490;font-size:15px;font-weight:600}
+.loopbox{fill:#ecfeff;stroke:#7cd4e3;stroke-width:1}
+.loop{fill:#0e7490;font-size:16px}
+.loopb{fill:#0891b2;font-weight:700}
+.card{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1}
+.num{fill:#0891b2}
+.numt{fill:#ffffff;font-size:19px;font-weight:800}
+.pname{fill:#1f2328;font-size:24px;font-weight:700}
+.pwhen{fill:#656d76;font-size:14.5px}
+.div{stroke:#d8dee4;stroke-width:1}
+.cmd{fill:#1f2328;font-size:18px;font-weight:500}
+.sl{fill:#0891b2;font-weight:700}
+.suf{fill:#98a1ab}
+.chev{fill:#c2cbd4;font-size:28px;font-weight:700}
+.foot{fill:#656d76;font-size:16px}
+.fb{fill:#24292f;font-weight:600}
+</style>
+<rect width="1200" height="1200" fill="#ffffff"/>
+<text x="52" y="86" class="h1">ntkit</text>
+<rect x="196" y="52" width="13" height="37" rx="2" fill="#0891b2"/>
+<text x="54" y="120" class="tag">when to use what  ·  the rigor layer for AI-assisted dev</text>
+<rect x="996" y="50" width="152" height="36" rx="18" class="pill"/>
+<text x="1072" y="73" class="pilltxt" text-anchor="middle">18 commands</text>
+<rect x="52" y="146" width="1096" height="40" rx="10" class="loopbox"/>
+<text x="72" y="172" class="loop"><tspan class="loopb">↻  The daily loop:</tspan>  /resume picks up exactly where /windup left off — every session.</text>
+<g transform="translate(52,212)">
+<rect width="535" height="262" rx="16" class="card"/>
+<circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">1</text>
+<text x="74" y="50" class="pname">START</text><text x="74" y="74" class="pwhen">kick off a new repo</text>
+<line x1="24" y1="96" x2="511" y2="96" class="div"/>
+<text x="28" y="130" class="cmd"><tspan class="sl">/</tspan>scaffold<tspan class="suf">-nt</tspan></text>
+</g>
+<g transform="translate(613,212)">
+<rect width="535" height="262" rx="16" class="card"/>
+<circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">2</text>
+<text x="74" y="50" class="pname">OPEN</text><text x="74" y="74" class="pwhen">begin a day or session</text>
+<line x1="24" y1="96" x2="511" y2="96" class="div"/>
+<text x="28" y="130" class="cmd"><tspan class="sl">/</tspan>standup<tspan class="suf">-nt</tspan></text>
+<text x="28" y="158" class="cmd"><tspan class="sl">/</tspan>resume<tspan class="suf">-nt</tspan></text>
+</g>
+<g transform="translate(52,496)">
+<rect width="535" height="262" rx="16" class="card"/>
+<circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">3</text>
+<text x="74" y="50" class="pname">BUILD</text><text x="74" y="74" class="pwhen">capture the why, mid-build</text>
+<line x1="24" y1="96" x2="511" y2="96" class="div"/>
+<text x="28" y="130" class="cmd"><tspan class="sl">/</tspan>decide<tspan class="suf">-nt</tspan></text>
+<text x="28" y="158" class="cmd"><tspan class="sl">/</tspan>idea<tspan class="suf">-nt</tspan></text>
+</g>
+<g transform="translate(613,496)">
+<rect width="535" height="262" rx="16" class="card"/>
+<circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">4</text>
+<text x="74" y="50" class="pname">REVIEW</text><text x="74" y="74" class="pwhen">audit cold, fix in batches</text>
+<line x1="24" y1="96" x2="511" y2="96" class="div"/>
+<text x="28" y="128" class="cmd"><tspan class="sl">/</tspan>forward-pass<tspan class="suf">-nt</tspan></text>
+<text x="28" y="156" class="cmd"><tspan class="sl">/</tspan>walkthrough<tspan class="suf">-nt</tspan></text>
+<text x="28" y="184" class="cmd"><tspan class="sl">/</tspan>ux-review<tspan class="suf">-nt</tspan></text>
+<text x="28" y="212" class="cmd"><tspan class="sl">/</tspan>maintain<tspan class="suf">-nt</tspan></text>
+<text x="28" y="240" class="cmd"><tspan class="sl">/</tspan>execute<tspan class="suf">-nt</tspan></text>
+</g>
+<g transform="translate(52,780)">
+<rect width="535" height="262" rx="16" class="card"/>
+<circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">5</text>
+<text x="74" y="50" class="pname">SHIP</text><text x="74" y="74" class="pwhen">demo, document, release</text>
+<line x1="24" y1="96" x2="511" y2="96" class="div"/>
+<text x="28" y="128" class="cmd"><tspan class="sl">/</tspan>guide<tspan class="suf">-nt</tspan></text>
+<text x="28" y="156" class="cmd"><tspan class="sl">/</tspan>demo<tspan class="suf">-nt</tspan></text>
+<text x="28" y="184" class="cmd"><tspan class="sl">/</tspan>package<tspan class="suf">-nt</tspan></text>
+<text x="28" y="212" class="cmd"><tspan class="sl">/</tspan>release<tspan class="suf">-nt</tspan></text>
+</g>
+<g transform="translate(613,780)">
+<rect width="535" height="262" rx="16" class="card"/>
+<circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">6</text>
+<text x="74" y="50" class="pname">CLOSE</text><text x="74" y="74" class="pwhen">save state, hand off</text>
+<line x1="24" y1="96" x2="511" y2="96" class="div"/>
+<text x="28" y="130" class="cmd"><tspan class="sl">/</tspan>windup<tspan class="suf">-nt</tspan></text>
+<text x="28" y="158" class="cmd"><tspan class="sl">/</tspan>replan<tspan class="suf">-nt</tspan></text>
+</g>
+<text x="592" y="356" class="chev">›</text><text x="592" y="640" class="chev">›</text><text x="592" y="924" class="chev">›</text>
+<rect x="52" y="1090" width="14" height="14" rx="3" fill="#0891b2"/>
+<text x="78" y="1102" class="foot"><tspan class="fb">Knowledge vault</tspan> — any repo:  <tspan class="sl">/</tspan><tspan class="fb">capture-nt</tspan> save  ·  <tspan class="sl">/</tspan><tspan class="fb">ask-nt</tspan> recall</text>
+<text x="1148" y="1102" class="foot" text-anchor="end">github.com/NakliTechie/ntkit  ·  MIT</text>
+</svg>

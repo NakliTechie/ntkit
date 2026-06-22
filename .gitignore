@@ -1,0 +1,5 @@
+# OS cruft
+.DS_Store
+
+# Working notes, if you run the ntkit workflow commands on ntkit itself
+plan/

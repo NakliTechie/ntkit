@@ -64,6 +64,23 @@ The command name is the filename without `.md` (`windup-nt.md` → `/windup-nt`)
 
 `/forward-pass-nt`. Every other review tool looks at your diff; this one reads the whole app cold and hands back an ordered, checkboxed fix-plan with stable finding IDs — the kind of thing you actually work through instead of skim once.
 
+## The name
+
+`nt` is the namespace every command carries — that `-nt` suffix — short for **NakliTechie**. `kit` is what it is. It started life as a pile of one-off prompts in [NakliTechie/prompts](https://github.com/NakliTechie/prompts), grew into a `claude-code-commands/` folder, and spun out into its own repo in June 2026.
+
+## NakliTechie
+
+*Nakli* (नकली) is Hindi for "fake" or "imitation" — so **NakliTechie**, the cheerfully self-appointed *fake techie*, is the maker handle of **[Chirag Patnaik](http://www.chiragpatnaik.com)** (Bombay — two decades across media, technology, marketing and politics, none of it formally "engineering"). The 80-plus public repos rather give the game away: mostly **single-file web apps that run entirely in your browser — no accounts, no servers, no data leaving your device.** House tagline: *"all these tools, none of your data."*
+
+ntkit is the odd one out — a coding-agent toolkit, not a browser app — but it keeps the ethos: local-first, sovereign, no lock-in.
+
+**Wander in:**
+- 🖥️ **[NakliOS](https://naklios.dev/)** — a whole desktop in your browser; the hub for 40+ of the apps
+- 🗂️ **[All projects](https://naklitechie.github.io/)**  ·  **[github.com/NakliTechie](https://github.com/NakliTechie)**
+- ✍️ **[chiragpatnaik.com](http://www.chiragpatnaik.com)**  ·  **[naklitechie.com](https://naklitechie.com)**  ·  **[Substack](https://naklitechie.substack.com/)**
+
+A few siblings an ntkit user might like: **[LocalMind](https://naklitechie.github.io/LocalMind/)** (private AI research agent), **[VaultMind](https://vaultmind.naklitechie.com/)** (an Obsidian-vault explorer — a natural front-end for what `/capture-nt` writes), and **[Private Mesh](https://github.com/NakliTechie/private-mesh)** (the sovereign capability fabric under NakliOS).
+
 ## License
 
 MIT © Chirag Patnaik. See [LICENSE](LICENSE).

@@ -1,5 +1,5 @@
 ---
-description: Cold-first-timer UX review — wipe all state, walk the app as a brand-new user, and report where build-order accretion fails the newcomer (arrival, onboarding sequence, nav/IA, time-to-first-value), plus an objective Lighthouse a11y + performance pass. Read-only: ranks findings and proposes an ideal first-run + IA; never restructures.
+description: "Cold-first-timer UX review — wipe all state, walk the app as a brand-new user, and report where build-order accretion fails the newcomer (arrival, onboarding sequence, nav/IA, time-to-first-value), plus an objective Lighthouse a11y + performance pass. Read-only: ranks findings and proposes an ideal first-run + IA; never restructures."
 argument-hint: "[area to focus, e.g. first-run | settings | nav]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 ---

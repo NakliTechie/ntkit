@@ -2,10 +2,10 @@
 
 **The rigor layer for AI-assisted development.**
 
-Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, shipping without leaking a secret. `ntkit` is eighteen [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
+Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, shipping without leaking a secret. `ntkit` is nineteen [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
 
 <p align="center">
-  <img src="assets/workflow.png" alt="ntkit workflow map — 18 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
+  <img src="assets/workflow.png" alt="ntkit workflow map — 19 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
 </p>
 
 Most share one idea: a **gitignored `plan/` folder** in each repo holding three files —
@@ -31,6 +31,7 @@ The commands read and write those files, so every session picks up exactly where
 | `/demo-nt` | live demo | Presenter mode for showing WIP to customers/execs — boot the app with the **shared demo seed** (the same asset `/walkthrough-nt` + `/guide-nt` use) and open an interactive **explorer** (features · connections · deps, drill-down + inline search), then hand you clickable links to both the live app and the explorer. |
 | `/ux-review-nt` | anytime | Cold-first-timer UX review: wipe all state, walk the app **as a brand-new user**, and report where build-order accretion fails the newcomer (arrival, onboarding, nav/IA) — plus a Lighthouse a11y + perf pass. Read-only; proposes an ideal first-run + IA. Writes `plan/ux-review-<date>.md`. |
 | `/execute-nt` | anytime | Work a batched fix-workplan from a `/forward-pass-nt` / `/ux-review-nt` / `/maintain-nt` report — fix + verify each item, check it off, log the SHA, pause between batches. The **executor** for static findings. |
+| `/autopilot-nt` | away | Unattended executor — run the plan while you're in a meeting or asleep. Inverts `/execute-nt`'s pause-at-boundaries: it **keeps going**, verifies + commits each item continuously, **parks** anything needing a human call or crossing a stop-line (no push / send / delete / money), and leaves a **morning report** `/resume-nt` reads. |
 | `/maintain-nt` | upkeep | Maintenance sweep — outdated/deprecated deps, stale GitHub Actions, security advisories, dead links, lockfile drift → a ranked fix-workplan. Read-only (offers safe quick-fixes). Writes `plan/maintenance-<date>.md`. |
 | `/release-nt` | launch | Cut a release — suggest a semver bump from the commits, write `CHANGELOG.md`, draft notes, then on confirm tag + push + GitHub release + deploy. The mechanics, where `/package-nt` is the marketing. |
 | `/package-nt` | launch | Ship a project to the world — the bookend to `/scaffold-nt`: a deep readiness gate (`/security-review` + `/forward-pass-nt` + a secrets + essentials check), social-framed screenshots (committed to `marketing/`), and drafted X / LinkedIn / Show HN / subreddit collateral (local). **Drafts, never posts.** |

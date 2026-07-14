@@ -15,6 +15,7 @@ Look inside `plan/` for:
 - `pending.md` — open items, especially the `## Open questions` section
 - `history.md` — quick scan of `## Decisions` (recent ones) for context
 - The most recent `plan/YYYY-MM-DD-summary.md` — freshest "where we left off"
+- The most recent `plan/YYYY-MM-DD-autopilot.md` — an unattended run's morning report (branch · final gate · Landed / Needs you / Assumed). If it's **newer than the newest summary**, the run is *unreviewed* — its branch is sitting unmerged, and reviewing it outranks the workplan's top chunk.
 
 If none exist, fall back: read README, run `git log --oneline -10` and `git status`, and orient from those. Note in the brief that no `plan/` handoff is on file and suggest running `/windup-nt` at the next end-of-session to start building one.
 
@@ -53,6 +54,14 @@ Blocking (if any):
   - <open questions from pending.md that relate to this chunk; or top 2-3 open questions if relevance unclear>
 ```
 
+**If an unreviewed autopilot run is on file** (report newer than the newest summary), insert this block right after the `Last session` lines — it's the most urgent thing in the brief:
+
+```
+Autopilot ran <date> — branch autopilot/<date> · final gate <GREEN | RED: what>:
+  Landed: <N> items (unmerged) · Needs you: <top 1–2 items> · Assumed: <N>
+  Review: git diff main...autopilot/<date> → merge or discard
+```
+
 If there's no `workplan.md` or it's empty but `pending.md` has items, show the top 3-5 items from `## Now` instead of a chunk, and note that running `/replan-nt` would generate a proper workplan.
 
 ## Step 4: Ask for direction (one question, open-ended)
@@ -60,6 +69,10 @@ If there's no `workplan.md` or it's empty but `pending.md` has items, show the t
 End with a single open-ended question:
 
 > Ready to start on **"<chunk title>"**, or want to pick a different chunk / look at something else?
+
+When an unreviewed autopilot run is on file, ask this instead — the unmerged branch comes first:
+
+> Review the **autopilot/<date>** branch first (merge or discard), or skip to **"<chunk title>"**?
 
 Keep it conversational. The user might respond with "go", "skip to chunk 3", "actually let me look at file X first", or anything else.
 

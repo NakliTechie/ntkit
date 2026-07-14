@@ -10,7 +10,8 @@ If the current directory is not inside a git repo with a `plan/` folder, stop an
 
 List everything currently in `plan/` (excluding any existing `_archive/`). Classify each file into exactly one bucket:
 
-- **Daily summary** — matches `plan/YYYY-MM-DD-summary.md` or similar dated pattern. → folds into `history.md`
+- **Daily summary** — matches `plan/YYYY-MM-DD-summary.md`, or a similar dated note that isn't one of the report types below. → folds into `history.md`
+- **Autopilot morning report** — `plan/YYYY-MM-DD-autopilot.md` (from `/autopilot-nt`). → sweep **Parked — needs you** items into `pending.md` (questions → `Open questions`, stop-lined actions the human must perform → `Now`); fold **Assumed** entries into `history.md` Decisions, dated and marked `(autopilot default)`; carry any `[~]` items into `workplan.md`; then archive the report. If the `autopilot/<date>` branch it names is still unmerged, add one `Now` item: `Review/merge autopilot/<date>`.
 - **Unnamed scratch** — generic names like `notes.md`, `scratch.md`, `thoughts.md`, untitled drafts. → folds into `history.md`
 - **Forward-pass audit report** — `plan/forward-pass-YYYY-MM-DD.md` (from `/forward-pass-nt`). → sweep open (`[ ]`/`[~]`) workplan items into `pending.md`/`workplan.md`, fold its verified false-positives into `history.md` Dead ends, then archive the report
 - **Walkthrough audit report** — `plan/walkthrough-YYYY-MM-DD.md` (from `/walkthrough-nt`). → same handling as a forward-pass report: sweep open (`[ ]`/`[~]`) / deferred items into `pending.md`/`workplan.md`, fold any verified non-issues into `history.md` Dead ends, then archive the report
@@ -83,7 +84,7 @@ Regenerate `plan/workplan.md` from the freshly restructured pending Now. Same sh
 
 ## Step 5: Archive source files
 
-Create `plan/_archive/` if it doesn't exist. Move (don't copy, don't delete) all files classified as "Daily summary", "Unnamed scratch", "Forward-pass audit report", "Walkthrough audit report", "UX-review report", or "Maintenance report" into it. Preserve filenames. (For audit reports, make sure open/deferred items landed in `pending.md`/`workplan.md` and verified non-issues landed in `history.md` Dead ends — per Steps 2 & 3 — before archiving.)
+Create `plan/_archive/` if it doesn't exist. Move (don't copy, don't delete) all files classified as "Daily summary", "Unnamed scratch", "Autopilot morning report", "Forward-pass audit report", "Walkthrough audit report", "UX-review report", or "Maintenance report" into it. Preserve filenames. (For audit reports, make sure open/deferred items landed in `pending.md`/`workplan.md` and verified non-issues landed in `history.md` Dead ends — and for autopilot reports, that Parked landed in pending and Assumed in Decisions — per Steps 2 & 3 — before archiving.)
 
 ## Step 6: Verify gitignore
 

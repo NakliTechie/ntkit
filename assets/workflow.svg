@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img">
 <title>ntkit — when to use what</title>
-<desc>A light-mode workflow map of ntkit's 18 Claude Code commands across six phases plus a daily session loop and a knowledge-vault pair.</desc>
+<desc>A light-mode workflow map of ntkit's 20 Claude Code commands across six phases plus a daily session loop and a knowledge-vault pair.</desc>
 <style>
 text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 .h1{fill:#1f2328;font-size:58px;font-weight:800}
@@ -28,7 +28,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <rect x="214" y="56" width="15" height="40" rx="2" fill="#0891b2"/>
 <text x="58" y="128" class="tag">when to use what  ·  the rigor layer for AI-assisted development</text>
 <rect x="1368" y="52" width="176" height="38" rx="19" class="pill"/>
-<text x="1456" y="77" class="pilltxt" text-anchor="middle">18 slash commands</text>
+<text x="1456" y="77" class="pilltxt" text-anchor="middle">20 slash commands</text>
 <rect x="56" y="150" width="1488" height="40" rx="10" class="loopbox"/>
 <text x="80" y="176" class="loop"><tspan class="loopb">↻  The daily loop —</tspan>  /standup → /resume → …work… → /windup,  so every session resumes exactly where the last one left off.</text>
 <g transform="translate(56,210)">
@@ -65,6 +65,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <text x="28" y="195" class="cmd"><tspan class="sl">/</tspan>ux-review<tspan class="suf">-nt</tspan></text>
 <text x="28" y="225" class="cmd"><tspan class="sl">/</tspan>maintain<tspan class="suf">-nt</tspan></text>
 <text x="28" y="255" class="cmd"><tspan class="sl">/</tspan>execute<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— work the fix-batches</tspan></text>
+<text x="28" y="285" class="cmd"><tspan class="sl">/</tspan>autopilot<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— unattended, runs solo</tspan></text>
 </g>
 <g transform="translate(561,528)">
 <rect width="477" height="296" rx="16" class="card"/>
@@ -83,6 +84,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <line x1="24" y1="98" x2="453" y2="98" class="div"/>
 <text x="28" y="135" class="cmd"><tspan class="sl">/</tspan>windup<tspan class="suf">-nt</tspan></text>
 <text x="28" y="165" class="cmd"><tspan class="sl">/</tspan>replan<tspan class="suf">-nt</tspan></text>
+<text x="28" y="195" class="cmd"><tspan class="sl">/</tspan>notify<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— ping when a run finishes</tspan></text>
 </g>
 <rect x="56" y="852" width="14" height="14" rx="3" fill="#0891b2"/>
 <text x="82" y="864" class="foot"><tspan class="fb">Knowledge vault</tspan> — from any repo:  <tspan class="sl">/</tspan><tspan class="fb">capture-nt</tspan> save  ·  <tspan class="sl">/</tspan><tspan class="fb">ask-nt</tspan> recall</text>

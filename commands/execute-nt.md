@@ -21,7 +21,7 @@ Find the workplan: the most recent `plan/forward-pass-*.md` / `plan/ux-review-*.
 For each `[ ]` item in the batch:
 1. **Read the finding** — its ID, precise location, and the one-line "what + why".
 2. **Make the fix** — match the surrounding code; the smallest change that resolves it. If the item is really a *decision* (a UX/structural call), don't force it — `/decide-nt` and skip.
-3. **Verify it** — the right way for *this* item: a unit test, typecheck, or build for logic; a **runtime / browser** check for any `[test]`-marked item (use `/walkthrough-nt` discipline — and **WebGPU flows via the Chrome MCP**, never headless).
+3. **Verify it** — the right way for *this* item: a unit test, typecheck, or build for logic; a **runtime / browser** check for any `[test]`-marked item (use `/walkthrough-nt` discipline — and **WebGPU flows via the Chrome MCP**, never headless). For anything non-trivial, verify with **fresh eyes** — a Task subagent that sees only the item, the diff, and how to check, so the context that wrote the fix isn't grading it. And never satisfy a check by weakening it: a fix that modifies, skips, or deletes its own test isn't a fix — flag any test-file change in the batch summary.
 4. **Check it off** — flip `[ ]` → `[x]` in the report, and append a **progress-log entry**: what changed · how it was verified · the commit SHA once committed.
 
 A `[~]` partial states what's done, what's left, and what would un-defer it. A blocker that needs a decision → `/decide-nt`.

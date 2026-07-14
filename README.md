@@ -2,10 +2,10 @@
 
 **The rigor layer for AI-assisted development.**
 
-Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, shipping without leaking a secret. `ntkit` is nineteen [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
+Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, shipping without leaking a secret. `ntkit` is twenty [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
 
 <p align="center">
-  <img src="assets/workflow.png" alt="ntkit workflow map — 19 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
+  <img src="assets/workflow.png" alt="ntkit workflow map — 20 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
 </p>
 
 Most share one idea: a **gitignored `plan/` folder** in each repo holding three files —
@@ -31,7 +31,8 @@ The commands read and write those files, so every session picks up exactly where
 | `/demo-nt` | live demo | Presenter mode for showing WIP to customers/execs — boot the app with the **shared demo seed** (the same asset `/walkthrough-nt` + `/guide-nt` use) and open an interactive **explorer** (features · connections · deps, drill-down + inline search), then hand you clickable links to both the live app and the explorer. |
 | `/ux-review-nt` | anytime | Cold-first-timer UX review: wipe all state, walk the app **as a brand-new user**, and report where build-order accretion fails the newcomer (arrival, onboarding, nav/IA) — plus a Lighthouse a11y + perf pass. Read-only; proposes an ideal first-run + IA. Writes `plan/ux-review-<date>.md`. |
 | `/execute-nt` | anytime | Work a batched fix-workplan from a `/forward-pass-nt` / `/ux-review-nt` / `/maintain-nt` report — fix + verify each item, check it off, log the SHA, pause between batches. The **executor** for static findings. |
-| `/autopilot-nt` | away | Unattended executor — run the plan while you're in a meeting or asleep. Inverts `/execute-nt`'s pause-at-boundaries: it **keeps going**, verifies + commits each item continuously, **parks** anything needing a human call or crossing a stop-line (no push / send / delete / money), and leaves a **morning report** `/resume-nt` reads. |
+| `/autopilot-nt` | away | Unattended executor — run the plan while you're in a meeting or asleep, **in its own git worktree** (branch `autopilot/<date>` — morning review is one diff: merge or discard). Inverts `/execute-nt`'s pause-at-boundaries: it **keeps going**, verifies each item with a **fresh-eyes subagent**, commits continuously, **parks** anything needing a human call or crossing a stop-line (no push / send / delete / money), runs a **final whole-project gate**, and leaves a **morning report** `/resume-nt` reads. |
+| `/notify-nt` | after a run | Completion ping — desktop notification + optional phone push (ntfy.sh topic). `/autopilot-nt` fires it when a run finishes; degrades silently if unconfigured. |
 | `/maintain-nt` | upkeep | Maintenance sweep — outdated/deprecated deps, stale GitHub Actions, security advisories, dead links, lockfile drift → a ranked fix-workplan. Read-only (offers safe quick-fixes). Writes `plan/maintenance-<date>.md`. |
 | `/release-nt` | launch | Cut a release — suggest a semver bump from the commits, write `CHANGELOG.md`, draft notes, then on confirm tag + push + GitHub release + deploy. The mechanics, where `/package-nt` is the marketing. |
 | `/package-nt` | launch | Ship a project to the world — the bookend to `/scaffold-nt`: a deep readiness gate (`/security-review` + `/forward-pass-nt` + a secrets + essentials check), social-framed screenshots (committed to `marketing/`), and drafted X / LinkedIn / Show HN / subreddit collateral (local). **Drafts, never posts.** |
@@ -60,6 +61,27 @@ cp ntkit/commands/*.md ~/.claude/commands/                 # available in all pr
 ```
 
 The command name is the filename without `.md` (`windup-nt.md` → `/windup-nt`). First run will offer to add `plan/` to your `.gitignore`. If you don't keep repos under `~/Code`, set your scan root at the top of `commands/standup-nt.md`.
+
+## Scheduling — the heartbeat
+
+Every command above waits for you to type it. Two are built to run without you — the loop-engineering half of the kit: stop being the person who prompts the agent, design the system that does.
+
+- **`/maintain-nt` weekly** — rot detection is recurring and deterministically checkable: ideal cron work. Findings land in `plan/`; `/standup-nt` surfaces them.
+- **`/autopilot-nt` nightly** — it already handles the no-human case (skips the launch contract, takes the safest scope: top batch, default budget, nothing destructive), and the worktree isolation + stop-lines + final gate are precisely what make an unattended run safe.
+
+Claude Code runs headless with `-p` — custom slash commands expand inside the prompt string — and an unattended run needs a permission mode, or it hangs waiting for an approval nobody is there to give:
+
+```cron
+# Monday 07:00 — maintenance sweep; findings land in plan/
+0 7 * * 1  cd ~/code/myproject && timeout 30m claude -p "/maintain-nt" --dangerously-skip-permissions >> ~/.ntkit-cron.log 2>&1
+
+# Nightly 02:00 — work the top batch on an autopilot branch
+0 2 * * *  cd ~/code/myproject && timeout 6h claude -p "/autopilot-nt" --dangerously-skip-permissions >> ~/.ntkit-cron.log 2>&1
+```
+
+(macOS: `launchd` if you prefer; cron works. Cron doesn't load your shell profile — make sure `claude` is on cron's `PATH` and auth is available non-interactively, e.g. via `claude setup-token`.)
+
+Three honest notes. **`--dangerously-skip-permissions` is exactly what it says** — the command's own guardrails replace the prompts, so schedule only commands that carry their own: `/maintain-nt` is read-only by contract; `/autopilot-nt` parks anything irreversible and never pushes. Tighter fences exist (`--allowedTools`, `--max-turns`, `--max-budget-usd`) — use them where they fit. **The `timeout` wrapper is the outer budget** — a stuck agent runs until something kills it. And **a scheduled run still ends at a human**: the morning report, the unmerged branch, `/resume-nt`. The loop finds and does the work; you stay the one who ships it.
 
 ## The one to try first
 

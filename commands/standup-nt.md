@@ -33,7 +33,7 @@ For each project with plan/, gather:
 - **Top chunk title** — first `## ` heading inside `plan/workplan.md` (skip the `# Workplan` h1 if present). Truncate to ~40 chars with `…`. If file missing/empty → `—`.
 - **Pending counts** — count `- ` items under `## Now` and `## Open questions` in `plan/pending.md`. If file missing → `0 / 0`.
 - **Git dirty** — `git -C <root> status --porcelain 2>/dev/null | wc -l`. If non-zero, flag.
-- **Unreviewed autopilot run** — newest `plan/YYYY-MM-DD-autopilot.md` is newer than the newest summary → flag `[autopilot: unreviewed]`. It means an unmerged `autopilot/<date>` branch is waiting on a human.
+- **Recent autopilot run** — newest `plan/YYYY-MM-DD-autopilot.md` is newer than the newest summary → read its `Shipped:` line and flag accordingly: `[autopilot: held]` (red gate / conflict — an unmerged `autopilot/<date>` branch is waiting on a human) or `[autopilot: shipped]` (a green run already merged to the default branch — pull it).
 
 Many small reads is fine — plan/ files are short. Use Bash + Read efficiently.
 
@@ -55,7 +55,7 @@ Output in this shape, sorted newest-first within each bucket, project names left
 === Standup — <today's date> ===
 
 Active (windup ≤ 3 days):
-  <project>    — <N>d ago · "<chunk>" (<X> Now / <Y> Q)  [<N> dirty] [autopilot: unreviewed]
+  <project>    — <N>d ago · "<chunk>" (<X> Now / <Y> Q)  [<N> dirty] [autopilot: held]
   ...
 
 Idle (4–14 days):
@@ -74,7 +74,7 @@ No plan/ folder:
   <project>, <project>, ...
 ```
 
-Skip empty buckets (don't print a header with nothing under it). Keep it dense — single line per project; flags (`[dirty]`, `[autopilot: unreviewed]`) render only when they fire.
+Skip empty buckets (don't print a header with nothing under it). Keep it dense — single line per project; flags (`[dirty]`, `[autopilot: held]`, `[autopilot: shipped]`) render only when they fire.
 
 ## Step 5: Wait
 

@@ -49,23 +49,23 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <g transform="translate(1066,210)">
 <rect width="477" height="296" rx="16" class="card"/>
 <circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">3</text>
-<text x="74" y="50" class="pname">BUILD</text><text x="74" y="75" class="pwhen">capture the why, mid-build</text>
+<text x="74" y="50" class="pname">BUILD</text><text x="74" y="75" class="pwhen">do the work, capture the why</text>
 <line x1="24" y1="98" x2="453" y2="98" class="div"/>
 <text x="28" y="135" class="cmd"><tspan class="sl">/</tspan>decide<tspan class="suf">-nt</tspan></text>
 <text x="28" y="165" class="cmd"><tspan class="sl">/</tspan>idea<tspan class="suf">-nt</tspan></text>
+<text x="28" y="195" class="cmd"><tspan class="sl">/</tspan>execute<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— work the fix-batches</tspan></text>
+<text x="28" y="225" class="cmd"><tspan class="sl">/</tspan>autopilot<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— unattended, runs solo</tspan></text>
 </g>
 <text x="547" y="370" class="chev">›</text><text x="1052" y="370" class="chev">›</text>
 <g transform="translate(56,528)">
 <rect width="477" height="296" rx="16" class="card"/>
 <circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">4</text>
-<text x="74" y="50" class="pname">REVIEW</text><text x="74" y="75" class="pwhen">audit cold, fix in batches</text>
+<text x="74" y="50" class="pname">REVIEW</text><text x="74" y="75" class="pwhen">audit cold, plan the fixes</text>
 <line x1="24" y1="98" x2="453" y2="98" class="div"/>
 <text x="28" y="135" class="cmd"><tspan class="sl">/</tspan>forward-pass<tspan class="suf">-nt</tspan></text>
 <text x="28" y="165" class="cmd"><tspan class="sl">/</tspan>walkthrough<tspan class="suf">-nt</tspan></text>
 <text x="28" y="195" class="cmd"><tspan class="sl">/</tspan>ux-review<tspan class="suf">-nt</tspan></text>
 <text x="28" y="225" class="cmd"><tspan class="sl">/</tspan>maintain<tspan class="suf">-nt</tspan></text>
-<text x="28" y="255" class="cmd"><tspan class="sl">/</tspan>execute<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— work the fix-batches</tspan></text>
-<text x="28" y="285" class="cmd"><tspan class="sl">/</tspan>autopilot<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— unattended, runs solo</tspan></text>
 </g>
 <g transform="translate(561,528)">
 <rect width="477" height="296" rx="16" class="card"/>

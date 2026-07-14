@@ -49,22 +49,22 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <g transform="translate(52,496)">
 <rect width="535" height="262" rx="16" class="card"/>
 <circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">3</text>
-<text x="74" y="50" class="pname">BUILD</text><text x="74" y="74" class="pwhen">capture the why, mid-build</text>
+<text x="74" y="50" class="pname">BUILD</text><text x="74" y="74" class="pwhen">do the work, capture the why</text>
 <line x1="24" y1="96" x2="511" y2="96" class="div"/>
 <text x="28" y="130" class="cmd"><tspan class="sl">/</tspan>decide<tspan class="suf">-nt</tspan></text>
 <text x="28" y="158" class="cmd"><tspan class="sl">/</tspan>idea<tspan class="suf">-nt</tspan></text>
+<text x="28" y="186" class="cmd"><tspan class="sl">/</tspan>execute<tspan class="suf">-nt</tspan></text>
+<text x="28" y="214" class="cmd"><tspan class="sl">/</tspan>autopilot<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="14">— unattended</tspan></text>
 </g>
 <g transform="translate(613,496)">
 <rect width="535" height="262" rx="16" class="card"/>
 <circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">4</text>
-<text x="74" y="50" class="pname">REVIEW</text><text x="74" y="74" class="pwhen">audit cold, fix in batches</text>
+<text x="74" y="50" class="pname">REVIEW</text><text x="74" y="74" class="pwhen">audit cold, plan the fixes</text>
 <line x1="24" y1="96" x2="511" y2="96" class="div"/>
-<text x="28" y="126" class="cmd"><tspan class="sl">/</tspan>forward-pass<tspan class="suf">-nt</tspan></text>
-<text x="28" y="150" class="cmd"><tspan class="sl">/</tspan>walkthrough<tspan class="suf">-nt</tspan></text>
-<text x="28" y="174" class="cmd"><tspan class="sl">/</tspan>ux-review<tspan class="suf">-nt</tspan></text>
-<text x="28" y="198" class="cmd"><tspan class="sl">/</tspan>maintain<tspan class="suf">-nt</tspan></text>
-<text x="28" y="222" class="cmd"><tspan class="sl">/</tspan>execute<tspan class="suf">-nt</tspan></text>
-<text x="28" y="246" class="cmd"><tspan class="sl">/</tspan>autopilot<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="14">— unattended</tspan></text>
+<text x="28" y="130" class="cmd"><tspan class="sl">/</tspan>forward-pass<tspan class="suf">-nt</tspan></text>
+<text x="28" y="158" class="cmd"><tspan class="sl">/</tspan>walkthrough<tspan class="suf">-nt</tspan></text>
+<text x="28" y="186" class="cmd"><tspan class="sl">/</tspan>ux-review<tspan class="suf">-nt</tspan></text>
+<text x="28" y="214" class="cmd"><tspan class="sl">/</tspan>maintain<tspan class="suf">-nt</tspan></text>
 </g>
 <g transform="translate(52,780)">
 <rect width="535" height="262" rx="16" class="card"/>

@@ -2,6 +2,9 @@
 description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, and lockfile drift; rank them and batch into a fix-workplan. Read-only audit (offers safe, confirmed quick-fixes); writes plan/maintenance-<date>.md.
 argument-hint: "[focus: deps | actions | security | links]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+entry: "a repo with dependencies or workflows"
+exit: "ranked fix-workplan written (read-only; safe quick-fixes offered)"
+writes: "plan/maintenance-<date>.md"
 ---
 
 Keep a shipped project alive. `/maintain-nt` sweeps for the rot that accumulates after launch — outdated/deprecated dependencies, stale GitHub Actions, security advisories, dead links, lockfile drift — ranks what it finds, and hands back a batched fix-workplan in the `/forward-pass-nt` shape. It's **read-only**: it reports and suggests, applying only *safe, confirmed* quick-fixes, because a dependency bump can break you.

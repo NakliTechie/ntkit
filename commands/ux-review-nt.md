@@ -2,6 +2,9 @@
 description: "Cold-first-timer UX review — wipe all state, walk the app as a brand-new user, and report where build-order accretion fails the newcomer (arrival, onboarding sequence, nav/IA, time-to-first-value), plus an objective Lighthouse a11y + performance pass. Read-only: ranks findings and proposes an ideal first-run + IA; never restructures."
 argument-hint: "[area to focus, e.g. first-run | settings | nav]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
+entry: "app boots; state wipeable to cold-start"
+exit: "first-run + IA report written (read-only run)"
+writes: "plan/ux-review-<date>.md"
 ---
 
 Review the app **as a cold first-time user** — the person who wasn't there when each feature was bolted on. Features get added in build-order, which makes sense to whoever built it; to a newcomer the nav, setup, settings, and first-run flow are an accretion, not a journey. This command walks the genuine newcomer path and reports where that accretion trips them.

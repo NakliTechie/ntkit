@@ -2,6 +2,9 @@
 description: Unattended executor — work the plan autonomously while you're away (in a meeting, overnight), in an isolated git worktree. Keeps going instead of pausing: does every reversible item, verifies each with fresh eyes, commits continuously, parks anything that needs a human decision or crosses a stop-line, runs a final whole-project gate, then ships a green run — merge to the default branch and push — or holds a red one back, and leaves a morning report /resume-nt can read.
 argument-hint: "[goal or batch, e.g. \"finish the auth refactor\" | workplan | B]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+entry: "briefed or building with an open workplan or explicit goal; clean base branch — never launched from blocked at the same wall"
+exit: "run MERGED (gate green) or HELD (gate red) with a morning report written; never a silent end"
+writes: "its own worktree, plan/<date>-autopilot.md"
 ---
 
 Run the project on autopilot while you're not watching — a meeting, a commute, overnight. Every other executor in the kit (`/execute-nt`, `/walkthrough-nt`) deliberately **pauses at boundaries** because you're there to steer. This one inverts that: it keeps working *because* you're not. The discipline that makes that safe isn't "ask before each step" — you're away, there's no one to ask — it's **run in an isolated worktree, verify every change with fresh eyes, commit continuously so nothing is ever lost, park anything you can't safely decide alone, never cross a stop-line, and ship only what a whole-project gate proves green — merge a passing run to the default branch and push it, hold a failing one back for review.** Autonomy earns its keep only if the morning review finds trustworthy work and an honest list of what it couldn't touch.

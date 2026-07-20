@@ -1,6 +1,9 @@
 ---
 description: "Ask your knowledge vault (~/Code/knowledge) a question — search + read the notes, answer in plain language grounded ONLY in the vault, with citations to the notes used. The read-side sibling of /capture-nt; the \"search\" half of your personal Google. Read-only."
 argument-hint: "<your question>  [realm: knowledge|personal|work]"
+entry: "knowledge vault present"
+exit: "answer grounded only in the vault, with note citations (read-only)"
+writes: "nothing"
 ---
 
 Query the **knowledge vault** and answer from it. `/ask-nt` is the read-side sibling of `/capture-nt`: capture writes the substrate, ask reads it back. It answers **only** from what's in the vault and **cites** the notes it used — your personal Google, where the index is your own captured notes.

@@ -2,6 +2,9 @@
 description: Launch the project for a live demo — boot it with the shared demo-seed data (the same asset /walkthrough-nt and /guide-nt use), and generate + open an interactive HTML explorer (features · connections · dependencies, high-level → drill-down, with inline search), then hand you clickable links to both the live app and the explorer. For demoing work-in-progress to customers or execs.
 argument-hint: "[focus: seed | explorer | launch]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+entry: "app boots with the shared demo seed"
+exit: "live-app and explorer links handed to the presenter"
+writes: "nothing durable"
 ---
 
 A presenter's launcher for live demos. When you need to show work-in-progress to a customer or a senior exec, `/demo-nt` does two things: boots the real app **seeded and ready** (no empty-state fumbling in front of the room), and builds + opens an **interactive explorer** — a drill-down map of what's been built (features · connections · dependencies) with inline search — then hands you **clickable links to both**.

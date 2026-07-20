@@ -1,5 +1,8 @@
 ---
 description: Resume a project — read plan/workplan.md + pending.md + history.md + latest day summary, present a resumption brief, and pause for direction
+entry: "any state; plan/ preferred, degrades to git-only"
+exit: "brief printed naming the current state and its legal next moves; paused for direction"
+writes: "nothing"
 ---
 
 Brief the user on where to pick up in the current project. `/resume-nt` is the counterpart to `/windup-nt` — windup writes the resumption context into `plan/`, resume reads it back.
@@ -30,6 +33,15 @@ Get:
 
 This goes into the brief so the user sees the physical state they're picking up in.
 
+## Step 2.5: Determine and validate the state
+
+Name the repo's current state per `STATES.md` (`fresh` / `briefed` / `building` / `verifying` / `blocked` / `shipped`) from the evidence just gathered — open workplan items, uncommitted work, unexecuted audit reports, tried-trails, HELD autopilot branches. Then check consistency, and flag (don't fix) anything that doesn't add up:
+
+- workplan says mid-chunk but the tree is clean and nothing recent in `git log` — chunk state may be stale
+- an audit report (`forward-pass` / `ux-review` / `maintenance`) has open items but the workplan doesn't mention it — unexecuted findings
+- the latest summary claims a clean close but there's uncommitted work — dishonest windup, trust the tree
+- a HELD `autopilot/<date>` branch is waiting — reviewing it outranks the workplan (already covered in Step 1)
+
 ## Step 3: Present the resumption brief
 
 Output in this exact shape:
@@ -39,6 +51,8 @@ Resuming <project-name>.
 
 Folder: <absolute path>
 Branch: <branch> · <ahead/behind status> · <clean | N uncommitted files>
+State: <state per STATES.md> · legal next: <the 2–3 moves that fit this state>
+<⚠ one line per inconsistency found in Step 2.5, if any>
 
 Last session (<date from latest summary, or "no summary on file">):
   Shipped: <one-line bullet, or "—">

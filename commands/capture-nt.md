@@ -1,6 +1,9 @@
 ---
 description: "Capture a URL / file / PDF into your knowledge vault (~/Code/knowledge) — fetch + extract (full text, OCR scanned PDFs), follow & summarise embedded links (esp. listicles), write a schema'd source note in sources/, tag its realm (knowledge|personal|work), link it into the right topics/ MOC with backlinks, and optionally promote a distilled insight to notes/, then commit + push automatically. Idempotent on re-run."
 argument-hint: "<url | file path>  [realm: knowledge|personal|work]"
+entry: "knowledge vault present at the configured path"
+exit: "schema'd source note written, linked, committed + pushed; idempotent on re-run"
+writes: "the knowledge vault"
 ---
 
 Capture something into the **knowledge vault** and wire it into the web of notes. Turns a raw link / file into a schema'd **source note** (what _they_ said), linked into the right **topic MOC**, with an optional **evergreen note** (what _you_ concluded) promoted on top.

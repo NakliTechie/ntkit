@@ -2,6 +2,9 @@
 description: Role-driven browser walkthrough — identify each user role, drive the running app through their journeys in a real browser, catch logical errors as they surface, and fix them. A live runtime audit, not a static read.
 argument-hint: "[role or flow to focus, e.g. admin | checkout]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+entry: "app boots with the shared demo seed"
+exit: "every role walked in a real browser; fixes committed; report written"
+writes: "code, plan/walkthrough-<date>.md"
 ---
 
 Drive the **running app through a real browser, one user role at a time** — walking each role's journeys exactly as that user would — and **fix the logical errors you hit along the way**. This is a *live runtime* audit: the inverse of `/forward-pass-nt`, which reads the code cold and never runs or touches anything. Walkthrough boots the app, clicks through it as each role, watches what actually happens, and repairs what's broken.

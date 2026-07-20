@@ -2,6 +2,9 @@
 description: Scaffold a new project from attached handoff materials OR an inline description — create local folder, init git + remote repo, seed plan/, brief the first move
 argument-hint: "[name | parent/name]  (attach md/zip OR describe inline)"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
+entry: "fresh — no repo yet; handoff materials attached"
+exit: "repo + remote exist, plan/ seeded, first-move brief printed"
+writes: "plan/history.md, plan/pending.md, plan/workplan.md, git"
 ---
 
 Bootstrap a new project from the handoff materials the user attached this session (md files, zip, or a combination). End state: local folder + remote repo + seeded `plan/` + a `/resume-nt`-style brief on the first move.

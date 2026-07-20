@@ -1,6 +1,9 @@
 ---
 description: Record a load-bearing decision into plan/history.md Decisions section — one-line surgical capture mid-session
 argument-hint: <short rationale, e.g., "Chose JWT for stateless validation">
+entry: "any state"
+exit: "dated one-line decision appended"
+writes: "plan/history.md"
 ---
 
 Record a decision in the current project's `plan/history.md`.

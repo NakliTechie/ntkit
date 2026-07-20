@@ -2,6 +2,9 @@
 description: Package a project for launch — a deep ship-readiness gate (/security-review + /forward-pass-nt + secrets + a launch-essentials checklist), social-framed marketing screenshots (committed), and drafted distribution collateral for X / LinkedIn / Show HN / tailored subreddits (local). Drafts, never posts.
 argument-hint: "[focus: gate | assets | drafts]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
+entry: "shipped or gate-green verifying; the readiness gate must pass — a red gate stops the run"
+exit: "gate report + committed screenshots + drafted collateral (drafts, never posts)"
+writes: "marketing/, local draft files"
 ---
 
 Take the project from "the code is done" to "ready to announce." `/package-nt` is the bookend to `/scaffold-nt`: scaffold opens a project from a handoff; package ships it to the world. It runs a deep ship-readiness gate, generates social-ready screenshots, and drafts the distribution collateral — but it **drafts, it never posts**. Posting is outward-facing; that's yours to pull the trigger on.
@@ -31,7 +34,7 @@ Don't generate launch assets for an unshippable repo. Run the full gate:
 - **A `/guide-nt`** (or equivalent docs), a live/demo link, screenshots, a clear value prop.
 - **Repo hygiene** — GitHub description + topics set; no debug/junk files; and a **clean install from a fresh clone** (the newcomer path — same cold-start ethos as `/ux-review-nt`).
 
-**Output — a scorecard:** `Ready ✓ · Blockers (must-fix before launch) · Nice-to-haves`. If there are blockers, say so loudly and **stop** (unless `$ARGUMENTS` overrides, then proceed with a warning). Don't auto-fix code — flag + suggest; you may offer to generate a *missing* README/LICENSE (new file only). Launch-blocking *decisions* point at `/decide-nt`.
+**Output — a scorecard:** `Ready ✓ · Blockers (must-fix before launch) · Nice-to-haves`. If there are blockers, say so loudly and **stop** — an illegal transition per `STATES.md`. The only path past a blocker is a deliberate, logged override: a `/decide-nt "packaging despite <X> because <why>"` entry in this session, after which proceed with a warning. (Secrets and tracked-`plan/` blockers are never overridable.) Don't auto-fix code — flag + suggest; you may offer to generate a *missing* README/LICENSE (new file only). Launch-blocking *decisions* point at `/decide-nt`.
 
 ## Phase 2 — Marketing assets → committed `marketing/`
 

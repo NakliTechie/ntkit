@@ -2,6 +2,9 @@
 description: Completion ping — send yourself a desktop notification and (optionally) a phone push via an ntfy.sh topic. The finish-line half of unattended runs — /autopilot-nt fires it; long /execute-nt batches can too. Degrades silently; a failed ping never fails the run that sent it.
 argument-hint: "<message, e.g. \"myapp: autopilot done — gate GREEN, 7 landed\">"
 allowed-tools: ["Bash"]
+entry: "any state"
+exit: "ping attempted on every configured channel; never fails the caller"
+writes: "nothing"
 ---
 
 Send a short completion ping to the user. This is the smallest command in the kit and it must stay that way: compose one line, deliver it on every channel that's configured, never block, never fail loudly.

@@ -41,6 +41,16 @@ The commands read and write those files, so every session picks up exactly where
 
 They speak one vocabulary, so each hands off to the next: `/windup-nt` writes what `/resume-nt` reads, `/forward-pass-nt` and `/walkthrough-nt` feed `/replan-nt`, `/decide-nt` feeds `history.md`.
 
+## The state machine
+
+That vocabulary was always secretly a state machine — `plan/` is the external state, the commands are events, windup→resume is a transition. [`STATES.md`](STATES.md) makes it explicit: six session states (`fresh → briefed → building → verifying → blocked / shipped`), which commands are legal from which, and the guards that enforce it. Three rules do the enforcing:
+
+- **Every command declares its contract in frontmatter** — `entry` (what it requires), `exit` (the machine-checkable condition that means it finished), `writes` (which plan files it touches). A command whose entry fails refuses; it doesn't proceed politely. `/release-nt` won't tag over a failing verifier or an open fix-workplan; `/execute-nt` won't invent a plan when none exists.
+- **"Done" is the verifier's word**, never the agent's — no state advances on a self-report.
+- **Overrides are deliberate and logged** — any guard yields to an explicit `/decide-nt` entry stating why. Bypassed on purpose with a reason is a decision; bypassed by drift is a bug.
+
+Parallel `/autopilot-nt` runs follow the actor rule: each in its own worktree, no shared state, the morning report as the only mailbox, `/standup-nt` the sole cross-repo reader. And `history.md` is an event log — `/replan-nt` replays it against `pending.md` and reports drift before archiving anything. No framework, no dependency: the formalism is a markdown table and three frontmatter lines.
+
 ## Knowledge vault
 
 Two commands operate on a single Obsidian-compatible **knowledge vault** (plain-markdown, git-backed) instead of a repo's `plan/` folder — the write and read halves of a second brain. They keep one rule: **sources** (what *they* said) stay separate from **notes** (what *you* concluded).

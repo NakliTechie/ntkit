@@ -1,5 +1,8 @@
 ---
 description: Consolidate plan/ folder — fold daily summaries and scratch into history.md, restructure pending.md (Now/Parked/Open questions), refresh workplan.md, archive source files
+entry: "plan/ accumulated beyond the three canonical files"
+exit: "three canonical files rebuilt; replay check reported; sources archived"
+writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/_archive/"
 ---
 
 Consolidate the project's `plan/` folder into three canonical files. Run when plan/ has accumulated daily summaries and ad-hoc scratch and needs a reset.
@@ -81,6 +84,15 @@ Existing pending.md items are categorized by best judgment. Items pulled from th
 Regenerate `plan/workplan.md` from the freshly restructured pending Now. Same shape as /windup-nt produces: each chunk gets a short title, 2–5 items from Now, and a rough size estimate ("30 min", "half day", "1–2 hours"). Items that don't yet cluster go under `## Unbatched`.
 
 **Preserve in-flight chunks:** If a chunk in the existing workplan still has all its items in pending Now, copy it through verbatim. Don't shuffle chunks for no reason — the user may be mid-execution.
+
+## Step 4.5: Replay check
+
+`history.md` is the event log; `pending.md` is derived state. Before archiving anything, replay the log — read the rebuilt `## Decisions` + `## Log` in order and ask of each item now in `pending.md`: does the log explain how it got there (opened, parked, resolved)? Two kinds of divergence to report:
+
+- **Orphan** — a Now/Parked item no log entry accounts for (state drift: work happened off the record)
+- **Ghost** — a log/decision thread with no closure and no pending item (dropped silently, never parked)
+
+Don't fix silently: list divergences in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts — <one line each>`) and fold the obvious ones back (an orphan gets a dated log line; a ghost gets parked or explicitly closed). Divergence found here is drift caught before it's archived — the cheap structural check that keeps the three files honest with each other.
 
 ## Step 5: Archive source files
 

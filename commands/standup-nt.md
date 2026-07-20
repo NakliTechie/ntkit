@@ -1,6 +1,9 @@
 ---
 description: Multi-project status — scan your projects for plan/ folders, report active / idle / stale with top chunk and pending counts
 argument-hint: "[scan root, default ~/code]"
+entry: "any state, any repo (read-only, cross-project)"
+exit: "status table printed with each repo's state; illegal states and unreviewed autopilot runs flagged"
+writes: "nothing"
 ---
 
 Show a cross-project status snapshot. Use at the start of a day or when deciding what to work on next.
@@ -55,7 +58,7 @@ Output in this shape, sorted newest-first within each bucket, project names left
 === Standup — <today's date> ===
 
 Active (windup ≤ 3 days):
-  <project>    — <N>d ago · "<chunk>" (<X> Now / <Y> Q)  [<N> dirty] [autopilot: held]
+  <project>    — <N>d ago · <state> · "<chunk>" (<X> Now / <Y> Q)  [<N> dirty] [autopilot: held]
   ...
 
 Idle (4–14 days):
@@ -75,6 +78,8 @@ No plan/ folder:
 ```
 
 Skip empty buckets (don't print a header with nothing under it). Keep it dense — single line per project; flags (`[dirty]`, `[autopilot: held]`, `[autopilot: shipped]`) render only when they fire.
+
+**`<state>`** is the repo's session state per `STATES.md` (`briefed` / `building` / `verifying` / `blocked` / `shipped`), read from the cheap evidence already gathered — open workplan items, dirty tree, unexecuted audit reports, tried-trails. Add an `[⚑ <why>]` flag for any repo in an **inconsistent state**: an audit report with open items nobody has executed, a summary claiming a clean close over a dirty tree, a HELD autopilot branch older than 3 days. Standup is the sole cross-repo reader of autopilot mailboxes (the actor rule in `STATES.md`) — inconsistencies surface here or nowhere.
 
 ## Step 5: Wait
 

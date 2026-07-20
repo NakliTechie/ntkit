@@ -2,6 +2,9 @@
 description: Execute a batched fix-workplan from a /forward-pass-nt, /ux-review-nt, or /maintain-nt report (or plan/workplan.md) — work the top batch item by item, fix and verify each, check it off, log progress with the commit SHA, and pause between batches. The executor for static findings.
 argument-hint: "[report or batch, e.g. forward-pass | A]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+entry: "an open fix-workplan exists — refuse otherwise (see Phase 0)"
+exit: "batch items [x] with commit SHAs, or blocked with a tried-trail"
+writes: "code, the source report's checkboxes + progress log"
 ---
 
 Work through a batched fix-workplan and actually do the fixes. The audit commands — `/forward-pass-nt`, `/ux-review-nt`, `/maintain-nt` — *find* and *plan*: they hand you a `## Batch A/B` workplan of items with stable IDs (`C1`, `H2`, …) and leave execution to you. `/execute-nt` is that missing verb. It picks up the top batch, works each item (fix → verify → check off → progress-log), and **pauses between batches** so you stay in control. (`/walkthrough-nt` fixes inline as it drives the browser; this is its counterpart for a *static* report.)
@@ -11,6 +14,10 @@ It edits code and verifies — but it is **not a runaway**: it verifies every fi
 If the current directory isn't a git repo, ask which project — don't guess.
 
 `$ARGUMENTS` (optional): which report (`forward-pass`, `ux-review`, `maintenance`) or which batch (`A`, `B`). Default: the keystone/top batch of the most recent report in `plan/`, else the top chunk of `plan/workplan.md`.
+
+## Phase 0 — Entry guard
+
+`/execute-nt` executes an existing plan; it never invents one. If no report with open `[ ]` items and no `plan/workplan.md` with an open chunk exists, **refuse and stop**: "Nothing to execute — no open fix-workplan. Run `/forward-pass-nt`, `/ux-review-nt`, or `/maintain-nt` first, or point me at a batch." Don't improvise a plan from the codebase; that's an audit command's job, and the maker–checker split only holds if finding and fixing stay separate runs.
 
 ## Phase 1 — Pick the plan and the batch
 

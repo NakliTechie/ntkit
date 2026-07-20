@@ -1,10 +1,15 @@
 ---
 description: End-of-day windup — write day summary in plan/, update plan/pending.md, ensure plan/ is gitignored, commit/push non-plan changes, print resume handoff
+entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
+exit: "summary + pending + workplan updated, non-plan work pushed, resume handoff printed"
+writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md"
 ---
 
 Wind up the current project for today. Execute these 6 steps in order, working in the current project's repo root.
 
 If the current directory is not inside a git repo, stop and ask the user which project to wind up — do not guess.
+
+**Closing-state guard.** Windup persists whatever state the repo is in (see `STATES.md`) — it never blocks — but it must be honest about which state that is. If closing from `building` (uncommitted work, a half-done chunk, a verifier not run or not green), say so out loud before writing anything — "Closing from `building`, not `verifying`: <what's unfinished>" — and record that state and the unfinished item explicitly in both the day summary and the resume handoff, so tomorrow's `/resume-nt` reopens on the truth, not on an implied clean close. A windup that papers over a mid-chunk state is the one bug this command can have.
 
 ## 1. Day summary
 

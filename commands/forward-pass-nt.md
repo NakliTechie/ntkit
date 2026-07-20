@@ -2,6 +2,9 @@
 description: Fresh-eyes whole-app audit — walk the codebase start to finish hunting bugs, security issues, stray code, and stubs masquerading as done; rank findings with stable IDs, batch them into a fix-workplan, save to plan/
 argument-hint: "[path or focus, e.g. src/api | security]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Task", "Write"]
+entry: "briefed or later; a codebase to read"
+exit: "batched workplan with stable finding IDs written"
+writes: "plan/forward-pass-<date>.md"
 ---
 
 Do a **fresh-eyes forward pass** over the project's code — a cold read of the whole app as if you've never seen it — hunting four things: **bugs**, **security issues**, **stray code**, and **stubs masquerading as done**. This is an AUDIT of the entire codebase, not a review of recent changes (that's what `/code-review`, `/review`, and `/security-review` are for — they're all diff-scoped).

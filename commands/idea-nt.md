@@ -1,6 +1,9 @@
 ---
 description: Capture a future-work idea into the backlog — append a dated one-liner to plan/ideas.md (or the repo's IDEAS.md if it has one), without derailing the current task. The /decide-nt pattern, for ideas instead of decisions.
 argument-hint: <the idea, e.g. "add a dark-mode toggle">
+entry: "any state"
+exit: "idea appended to the backlog"
+writes: "plan/ideas.md (or IDEAS.md)"
 ---
 
 Park an idea without losing your place. `/idea-nt` is `/decide-nt`'s sibling: where decide records a load-bearing *decision* into history, idea drops a *future-work* idea into the backlog — friction-free, no follow-up questions, so a passing thought doesn't derail what you're doing.

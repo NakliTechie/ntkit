@@ -2,6 +2,9 @@
 description: Generate a searchable HTML guide — identify each role, walk the running app through their features in a real browser capturing screenshots, and build a single-file guide (role + feature sections, captions, inline search). Regenerates from a committed generator; never hand-edits the output.
 argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+entry: "app boots; guide generator committed (or created this run)"
+exit: "single-file HTML guide regenerated from the generator — never hand-edited"
+writes: "guide generator + output"
 ---
 
 Build a **searchable HTML guide** for the app: identify each user role, drive the running app through their features **in a real browser capturing screenshots**, and assemble a single-file `guide/index.html` — role sections × feature subsections × captioned screenshots, with **inline search**. This is the documentation sibling of `/walkthrough-nt`: same role-driven browser spine, but it *captures and documents* the app instead of *finding and fixing* bugs.

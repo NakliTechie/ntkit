@@ -23,7 +23,7 @@ List everything currently in `plan/` (excluding any existing `_archive/`). Class
 - **Canonical output** — `pending.md`, `workplan.md`, `history.md`. → gets rewritten this run
 - **Named design / intentional artifact** — anything with a meaningful name: `feature-x-design.md`, `<milestone>-breakdown.md`, `pending-from-<source>.md`, charters, spec drafts. → **leave untouched**
 
-Show the classification to the user before consolidating. Ask about anything ambiguous — don't guess. If unsure whether a file is "named design" or "unnamed scratch", treat it as named (preserve) and ask.
+Print the classification and proceed — no waiting. Ambiguity defaults to the safe side: if unsure whether a file is "named design" or "unnamed scratch", treat it as named (preserve untouched) and list it under `Preserved` in the Step 7 summary. A default that safe needs no question.
 
 ## Step 2: Rewrite history.md
 

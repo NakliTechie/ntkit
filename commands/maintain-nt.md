@@ -1,13 +1,13 @@
 ---
-description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, and lockfile drift; rank them and batch into a fix-workplan. Read-only audit (offers safe, confirmed quick-fixes); writes plan/maintenance-<date>.md.
+description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, and lockfile drift; rank them and batch into a fix-workplan. Applies safe quick-fixes automatically (verified, reverted on failure); majors defer to /execute-nt. Writes plan/maintenance-<date>.md.
 argument-hint: "[focus: deps | actions | security | links]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "a repo with dependencies or workflows"
-exit: "ranked fix-workplan written (read-only; safe quick-fixes offered)"
+exit: "ranked fix-workplan written; safe quick-fixes applied + verified"
 writes: "plan/maintenance-<date>.md"
 ---
 
-Keep a shipped project alive. `/maintain-nt` sweeps for the rot that accumulates after launch — outdated/deprecated dependencies, stale GitHub Actions, security advisories, dead links, lockfile drift — ranks what it finds, and hands back a batched fix-workplan in the `/forward-pass-nt` shape. It's **read-only**: it reports and suggests, applying only *safe, confirmed* quick-fixes, because a dependency bump can break you.
+Keep a shipped project alive. `/maintain-nt` sweeps for the rot that accumulates after launch — outdated/deprecated dependencies, stale GitHub Actions, security advisories, dead links, lockfile drift — ranks what it finds, and hands back a batched fix-workplan in the `/forward-pass-nt` shape. The sweep itself is read-only; the **safe class** — SHA-pins, patch bumps, dead links — gets applied on the spot and verified, because that class is defined by reversibility. Anything that can break you (major bumps, breaking changes) stays in the workplan for `/execute-nt`.
 
 This is the on-demand version of a scheduled upkeep routine — run it on a cadence.
 
@@ -31,6 +31,6 @@ Assign stable IDs and rank by **risk**: a security advisory or a deprecated-and-
 
 ## Phase 4 — Report + safe quick-fixes
 
-**Write `plan/maintenance-YYYY-MM-DD.md`** in the `/forward-pass-nt` report shape: findings by ID, a batched Workplan, and a coverage note (what was checked, what wasn't) — plain teammate language throughout, no AI-speak or filler. Then **offer to apply the safe quick-fixes now** — SHA-pin actions, patch-level bumps, fix dead links — with confirmation. **Defer major bumps to `/execute-nt`** (so each is fixed and verified individually); point breaking-change calls at `/decide-nt`.
+**Write `plan/maintenance-YYYY-MM-DD.md`** in the `/forward-pass-nt` report shape: findings by ID, a batched Workplan, and a coverage note (what was checked, what wasn't) — plain teammate language throughout, no AI-speak or filler. Then **apply the safe quick-fixes now, no confirmation** — SHA-pin actions, patch-level bumps, fix dead links — verifying each (install/build still green) and reverting any that fails its check; report what landed with evidence. **Defer major bumps to `/execute-nt`** (so each is fixed and verified individually); point breaking-change calls at `/decide-nt`.
 
 End by naming the highest-risk finding, and that `/execute-nt` works the workplan while `/replan-nt` folds it.

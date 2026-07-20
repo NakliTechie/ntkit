@@ -3,7 +3,7 @@ description: Scaffold a new project from attached handoff materials OR an inline
 argument-hint: "[name | parent/name]  (attach md/zip OR describe inline)"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 entry: "fresh — no repo yet; handoff materials attached"
-exit: "repo + remote exist, plan/ seeded, first-move brief printed"
+exit: "repo + remote exist, plan/ seeded, brief printed, top chunk underway"
 writes: "plan/history.md, plan/pending.md, plan/workplan.md, git"
 ---
 
@@ -18,7 +18,7 @@ Bootstrap a new project from the handoff materials the user attached this sessio
 **A. Attached files.** Markdown handoffs, zips, or a combination.
 - Markdown files → go to the project root
 - Zip files → extracted at the project root, preserving structure
-- Anything else → ask before including
+- Anything else → include it at the project root and note it in the brief
 
 **B. Inline description.** `$ARGUMENTS` and/or the natural-language context around the user's `/scaffold-nt` invocation IS the handoff. Examples: *"a static site tracking wage data over 50 years, Python + Pandas + Quarto"* or *"tiny CLI that watches a folder and runs pytest on change, single-file Bash for v0"*. Treat the prose as the handoff and synthesize a starter `README.md` from it in Phase 3.
 
@@ -31,18 +31,18 @@ If neither files nor a substantive description is present (e.g., bare `/scaffold
 ## Phase 2 — Project name + location
 
 Parse `$ARGUMENTS`:
-- **Empty** → derive a name from the handoff (top `# H1` heading, "Project:" line, or filename of a README-like file). If ambiguous, ask.
+- **Empty** → derive a name from the handoff (top `# H1` heading, "Project:" line, or filename of a README-like file). If ambiguous, pick the strongest candidate, announce it, and proceed — a rename later is cheap.
 - **Single token** (`myapp`) → location: `$ROOT/myapp/`.
 - **Slash-separated** (`research/myapp`, `apps/myapp`, etc.) → location: `$ROOT/<parent>/<name>/`. Useful if you organize repos by category.
 
-If the target folder exists and isn't empty, stop and ask for a different name. If the parent dir doesn't exist, create it.
+If the target folder exists and isn't empty, suffix `-2` (then `-3`), announce the adjusted path, and proceed. If the parent dir doesn't exist, create it.
 
 ## Phase 3 — Materialize the local folder
 
 1. `mkdir -p` the target folder.
 2. **For attached files** (mode A or C):
-   - For each attached zip: `unzip <zip> -d <target>` — preserve structure; ask before overwriting.
-   - Copy each attached md file into the target root. If a name collides with the zip's contents, ask which is authoritative or merge by renaming (`README.md` + `HANDOFF.md`).
+   - For each attached zip: `unzip <zip> -d <target>` — preserve structure; on a collision keep both (suffix the incoming file) rather than overwriting or stopping to ask.
+   - Copy each attached md file into the target root. If a name collides with the zip's contents, merge by renaming (`README.md` + `HANDOFF.md`) and note it in the brief.
 3. **For inline description** (mode B, or to augment mode C): synthesize a starter `README.md` from the user's prose and write it to the target root. Structure it lightly:
    ```markdown
    # <name>
@@ -66,16 +66,14 @@ If the target folder exists and isn't empty, stop and ask for a different name. 
 
 ## Phase 5 — Remote repo
 
-Ask the user (one focused question):
-- **GitHub org/account** — the user's own account or any org they have push rights to. Or "skip remote" for local-only.
-- **Visibility** — public or private. Default private for handoffs that may contain sensitive info.
+Default, no question: the user's **own account** (`gh api user --jq .login`) and **private** — the safe posture for handoffs that may contain sensitive info. Announce the choice in the brief; if the user wants an org, public visibility, or no remote, they'll say so (or pass it in the `$ARGUMENTS` prose) — don't poll.
 
 Then:
 ```bash
 gh repo create <org>/<name> --<private|public> --source=. --remote=origin --push
 ```
 
-If `gh` isn't authed or the org doesn't have permission, surface the error and let the user fix it. Capture the repo URL on success.
+If `gh` isn't authed or lacks permission, continue local-only and note the owed remote in the brief — don't block the scaffold on auth. Capture the repo URL on success.
 
 ## Phase 6 — Seed plan/
 
@@ -114,8 +112,8 @@ Blocking (if any):
   - <open question>
 ```
 
-End with one open-ended question:
+End the brief with a heads-up, then go:
 
-> Ready to start on **"<chunk title>"**, or want to read the handoff first?
+> Starting on **"<chunk title>"** — redirect me if you'd rather read the handoff first.
 
-Do NOT start work without confirmation. /scaffold-nt's job is to set the stage; the user decides when to step on it.
+Then begin the top chunk. The brief is a veto window, not a questionnaire — the user steers by interrupting, not by being polled.

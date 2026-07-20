@@ -15,7 +15,7 @@ If the current directory isn't a git repo, ask which project — don't guess. Th
 
 ## Phase 0 — The launch contract (the one interactive moment)
 
-Before going dark, state the plan back so the user can approve it *before* they walk away. Show:
+Before going dark, state the plan back so the user can veto or amend it *before* they walk away. Show:
 - **The goal spec** — three lines, not one:
   1. **Done when:** the machine-checkable condition (from `$ARGUMENTS` or the workplan) and where the run stops (batch, goal, or "until the safe work runs out").
   2. **Because:** one line of why the goal matters — pulled from the workplan/handoff or asked for. This is what guides trade-offs when instructions run out; a condition without a why gets satisfied literally and wrongly.
@@ -24,9 +24,9 @@ Before going dark, state the plan back so the user can approve it *before* they 
 - **Default-decision policy** — for reversible design forks it hits, it will pick the option most consistent with the surrounding code and existing decisions in `history.md`, record the assumption, and move on rather than block.
 - **Budget** — the run's hard ceiling: a wall-clock cap and/or item cap (default: the scoped batch, 6 hours — whichever ends first). A loop without a budget is the most expensive bug in unattended work.
 - **Where it runs** — the worktree and branch it will create (Phase 0.5), so the user knows their own checkout stays untouched.
-- **Checker model** — ask whether the fresh-eyes verification should run on a **different model family** where the setup allows it (an external CLI, a different provider). Fresh context is the floor; a different family can't share the maker's blind spots. Default when unattended or unanswered: same family, fresh context — never block on this.
+- **Checker model** — state the default: fresh-eyes verification on the same family, fresh context. Where the setup allows a **different model family** (an external CLI, another provider), name it as the available upgrade — a different family can't share the maker's blind spots — and use it if the user says so. A stated default to veto, never a question to answer.
 
-Then go. This is the **only** pause — everything after runs to completion. If the user isn't present to approve (e.g. this was itself scheduled), skip straight to Phase 0.5 using the safest reading of scope: the top batch only, nothing destructive, default budget.
+Then go — the contract is a **veto window, not a questionnaire**: state it and start; a present user amends or cancels it in the moment, an absent one reads it back in the morning report. This is the only pause-shaped moment — everything after runs to completion. If the user isn't present at all (e.g. this was itself scheduled), skip straight to Phase 0.5 using the safest reading of scope: the top batch only, nothing destructive, default budget.
 
 ## Phase 0.5 — Isolate in a worktree
 

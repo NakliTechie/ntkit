@@ -52,7 +52,7 @@ live outside the repo entirely.
 
 ## Guards
 
-Three rules make the table enforceable, not decorative:
+Four rules make the table enforceable, not decorative:
 
 1. **Every command declares its contract in frontmatter** — `entry` (the state and
    artifacts it requires), `exit` (the machine-checkable condition that means it
@@ -65,6 +65,12 @@ Three rules make the table enforceable, not decorative:
    not a jail — but only through an explicit `/decide-nt` entry stating why. A
    guard bypassed by drift is a bug; bypassed on purpose with a reason is a
    decision.
+4. **Ask only at the unanswerable or the outward-facing.** A command asks the
+   user only when the answer can't be derived (missing input, unknown
+   credentials, no repo) or the action is outward-facing (publish, post,
+   release, push to the world). Everything else takes the safe default,
+   announces it, and logs it — the user steers by interrupting, not by being
+   polled.
 
 ## Scaling — guards fire on evidence, not on ceremony
 

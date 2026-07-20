@@ -9,7 +9,7 @@ writes: "code, the committed verification harness, plan/walkthrough-<date>.md"
 
 Drive the **running app through a real browser, one user role at a time** — walking each role's journeys exactly as that user would — and **fix the logical errors you hit along the way**. This is a *live runtime* audit: the inverse of `/forward-pass-nt`, which reads the code cold and never runs or touches anything. Walkthrough boots the app, clicks through it as each role, watches what actually happens, and repairs what's broken.
 
-**This command edits code, iteratively.** The moment it hits a logical error it fixes it *in place* — reproduce, root-cause, fix, re-verify in the browser — then walks on. It does not collect a findings dump and fix later: you're already booted, seeded, and logged in at the exact spot the bug lives, and fixing now unblocks the downstream journey a broken step would otherwise hide. Only *clear* logical errors get fixed inline; anything that changes product behavior, needs a design call, or is a large refactor gets **deferred** to the workplan (point at `/decide-nt`), never force-applied. It does not commit or push — the fixes sit in the working tree for review (`/windup-nt` ships them).
+**This command edits code, iteratively.** The moment it hits a logical error it fixes it *in place* — reproduce, root-cause, fix, re-verify in the browser — then walks on. It does not collect a findings dump and fix later: you're already booted, seeded, and logged in at the exact spot the bug lives, and fixing now unblocks the downstream journey a broken step would otherwise hide. Only *clear* logical errors get fixed inline; anything that changes product behavior, needs a design call, or is a large refactor gets **deferred** to the workplan (point at `/decide-nt`), never force-applied. Each verified fix is **committed locally** — one focused commit, by path — so a reload or crash can't eat the session's work; nothing is pushed (`/windup-nt` ships).
 
 If the project has no browser surface (pure CLI, library, backend-only), say so and suggest `/forward-pass-nt` instead. If the current directory isn't a git repo, ask which project — don't guess.
 
@@ -29,7 +29,7 @@ Always include two roles the code rarely names explicitly but every real user pa
 - **Anonymous visitor** — unauthenticated; landing, signup, public pages, and the auth wall itself.
 - **Brand-new user with zero data** — the **first-run** path. This is literally a new user's first action and is the least-exercised flow in daily dev (which always runs against existing data), so it's where silent breakage hides.
 
-Produce a **role inventory**: for each role — name · how it authenticates · what it can reach · the credentials or seed to enter as it. If a role's auth or credentials are unknown, **ask the user** — never invent or hardcode auth. If roles are ambiguous, confirm the list before driving.
+Produce a **role inventory**: for each role — name · how it authenticates · what it can reach · the credentials or seed to enter as it. Try seed/fixture/test credentials first; if a role still can't be entered, **ask the user** — credentials are an unanswerable, and never invent or hardcode auth. Otherwise announce the inventory and drive — the report's coverage map is the accountability, not a pre-approval.
 
 ## Phase 2 — Map each role's journeys
 
@@ -69,6 +69,7 @@ For each role, drive the browser through each journey, repeating this loop per s
    - **Root-cause** it — read the handler / component / service. Common culprits: an exception thrown inside an event handler or async callback; reading DOM/state *after* a teardown (modal close, unmount); a promise resolved inside a handler that hangs when the handler throws.
    - **Fix minimally** — match the surrounding code; smallest change that corrects the behavior.
    - **Re-verify in the browser** — re-walk that exact step; confirm it works *and* throws no new console error. If the edit triggered an HMR reload or a restart, **re-establish the role's session and seed before continuing** — a reload can silently drop you back to anonymous.
+   - **Commit it** — one focused commit for the fix, by path, local only. The runtime state you're carrying (booted, seeded, logged in) is expensive and fragile; the commit makes the fix durable even if the session isn't.
 4. **Continue** the journey from where you were.
 
 **Two guardrails so the loop stays a walkthrough, not a refactor:**
@@ -105,4 +106,4 @@ Create `plan/` if missing and ensure it's gitignored. If today's report already 
 
 **Print to chat:** the counts, the issues grouped *fixed* vs. *deferred* (with one-line evidence each), and the coverage map's blind spots. Keep the full detail in the file.
 
-The code fixes are **live in the working tree, uncommitted** — don't commit or push. End by naming what changed, what's deferred (and why), and that `/windup-nt` will ship the fixes when the user is ready.
+The fixes are **committed locally, unpushed**. End by naming what changed (with SHAs), what's deferred (and why), and that `/windup-nt` pushes when the user is ready.

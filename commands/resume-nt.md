@@ -1,5 +1,6 @@
 ---
-description: Resume a project — read plan/workplan.md + pending.md + history.md + latest day summary, present a resumption brief, and pause for direction
+description: Resume a project — read plan/workplan.md + pending.md + history.md + latest day summary, present a resumption brief, and pause for direction (or `go` to start the top chunk straight off a clean brief)
+argument-hint: "[go — brief, then start the top chunk immediately]"
 entry: "any state; plan/ preferred, degrades to git-only"
 exit: "brief printed naming the current state and its legal next moves; paused for direction"
 writes: "nothing"
@@ -7,7 +8,7 @@ writes: "nothing"
 
 Brief the user on where to pick up in the current project. `/resume-nt` is the counterpart to `/windup-nt` — windup writes the resumption context into `plan/`, resume reads it back.
 
-**This is a READ-ONLY command.** Don't write to plan/, don't auto-start work, don't invoke /windup-nt or /replan. Present the brief and pause for direction.
+**This is a READ-ONLY briefing.** Don't write to plan/, don't invoke /windup-nt or /replan. Present the brief, then: with `go` in `$ARGUMENTS` and a clean picture (no HELD autopilot branch, no ⚠ inconsistencies from Step 2.5), announce and start the top chunk; otherwise pause for direction.
 
 If the current directory is not inside a git repo, ask the user which project to resume — don't guess.
 
@@ -79,9 +80,11 @@ Autopilot ran <date> — branch autopilot/<date> · gate <GREEN | RED: what> · 
 
 If there's no `workplan.md` or it's empty but `pending.md` has items, show the top 3-5 items from `## Now` instead of a chunk, and note that running `/replan-nt` would generate a proper workplan.
 
-## Step 4: Ask for direction (one question, open-ended)
+## Step 4: Hand off — `go` or one open-ended question
 
-End with a single open-ended question:
+**With `go` and a clean picture:** skip the question — print `Starting "<chunk title>".` after the brief and begin. (A HELD autopilot branch or a ⚠ inconsistency cancels the `go` — those need eyes before hands.)
+
+Otherwise end with a single open-ended question:
 
 > Ready to start on **"<chunk title>"**, or want to pick a different chunk / look at something else?
 

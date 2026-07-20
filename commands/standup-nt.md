@@ -83,4 +83,4 @@ Skip empty buckets (don't print a header with nothing under it). Keep it dense �
 
 ## Step 5: Wait
 
-After rendering, don't editorialize, don't recommend, don't auto-resume. The user is choosing what to work on. They'll say "let's do <project>" or `/resume-nt` in whichever project — then act on that.
+After rendering, add exactly one line of judgment — `Sharpest next move: <project> — <one-line why>` (⚑ flags and HELD autopilot runs outrank everything else) — then wait. Don't auto-resume: the user is choosing what to work on. They'll say "let's do <project>" or `/resume-nt` in whichever project — then act on that.

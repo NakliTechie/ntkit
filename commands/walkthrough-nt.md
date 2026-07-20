@@ -3,8 +3,8 @@ description: Role-driven browser walkthrough — identify each user role, drive 
 argument-hint: "[role or flow to focus, e.g. admin | checkout]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "app boots with the shared demo seed"
-exit: "every role walked in a real browser; fixes committed; report written"
-writes: "code, plan/walkthrough-<date>.md"
+exit: "every role walked in a real browser; fixes committed; verification harness created or extended; report written"
+writes: "code, the committed verification harness, plan/walkthrough-<date>.md"
 ---
 
 Drive the **running app through a real browser, one user role at a time** — walking each role's journeys exactly as that user would — and **fix the logical errors you hit along the way**. This is a *live runtime* audit: the inverse of `/forward-pass-nt`, which reads the code cold and never runs or touches anything. Walkthrough boots the app, clicks through it as each role, watches what actually happens, and repairs what's broken.
@@ -12,6 +12,8 @@ Drive the **running app through a real browser, one user role at a time** — wa
 **This command edits code, iteratively.** The moment it hits a logical error it fixes it *in place* — reproduce, root-cause, fix, re-verify in the browser — then walks on. It does not collect a findings dump and fix later: you're already booted, seeded, and logged in at the exact spot the bug lives, and fixing now unblocks the downstream journey a broken step would otherwise hide. Only *clear* logical errors get fixed inline; anything that changes product behavior, needs a design call, or is a large refactor gets **deferred** to the workplan (point at `/decide-nt`), never force-applied. It does not commit or push — the fixes sit in the working tree for review (`/windup-nt` ships them).
 
 If the project has no browser surface (pure CLI, library, backend-only), say so and suggest `/forward-pass-nt` instead. If the current directory isn't a git repo, ask which project — don't guess.
+
+**Stronger with different eyes.** This is a checker command — its whole value is that it doesn't share the maker's blind spots. Fresh context is the floor; running it from a **different model family** than the one that built the code is the stronger posture, since two contexts of the same model still misjudge the same things identically. If you *are* the family that built most of this code, say so in the report header — the reader should know which grade of eyes graded it.
 
 `$ARGUMENTS` (optional): a role (`admin`) or a flow (`checkout`) to scope to. If empty, cover every role and their primary journeys.
 
@@ -77,9 +79,21 @@ Run a **cross-role authorization probe** as part of the walk: as a low-privilege
 
 For surfaces the browser can't drive — payments, outbound email, native file pickers/dialogs — **stub the seam** (monkeypatch the global, e.g. `window.showSaveFilePicker = async () => fakeHandle`) so the journey continues, and note what was stubbed vs. genuinely exercised.
 
+## Phase 4.5 — Leave the lever
+
+A walkthrough that only fixes what it found re-derives everything next time. Before reporting, **distill the journeys just walked into a committed, rerunnable verification harness** — a script (`scripts/verify.*` or whatever the repo's convention is) that drives the app through each role's core journeys and exits non-zero on failure. Committed to the repo, not `plan/` — the point is that anyone (or any later run) can rerun the evidence.
+
+- **First walkthrough:** create it from the journeys walked — the smallest script that proves each role's happy path.
+- **Later walkthroughs:** run it first (regressions surface for free), then walk what it can't reach, then extend it with anything new.
+- **What it can't drive** (payment, email, native dialogs) stays in the report's blind-spot list — the harness covers what's automatable, never pretends to more.
+
+This harness **is the project's verifier** from now on: `/release-nt`'s gate runs it, `/autopilot-nt`'s final gate runs it. A repo with one no longer passes the release guard vacuously — the lever is the definition of green.
+
 ## Phase 5 — Report + handoff
 
 **Write `plan/walkthrough-YYYY-MM-DD.md`** — a self-contained record, in this order:
+
+> Plain teammate language throughout — concrete actions, no AI-speak, no filler; a line nobody would audit doesn't earn its place.
 1. **Header** — date, scope (roles × journeys covered), counts: *found / fixed / deferred*.
 2. **Role inventory + coverage map** — each role, the journeys walked, and — crucially — **what was NOT reached**: roles you couldn't authenticate, flows you couldn't drive (payment, email, native dialogs), states you couldn't reach. The blind spots.
 3. **Issues** by ID, grouped Critical → High → Medium → Low — each: role · journey step · symptom · root cause · then either **FIXED: `path:line` + verification evidence** or **DEFERRED: why + what unblocks** (`→ /decide-nt`).

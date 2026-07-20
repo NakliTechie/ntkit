@@ -21,6 +21,7 @@ Before going dark, state the plan back so the user can approve it *before* they 
 - **Default-decision policy** — for reversible design forks it hits, it will pick the option most consistent with the surrounding code and existing decisions in `history.md`, record the assumption, and move on rather than block.
 - **Budget** — the run's hard ceiling: a wall-clock cap and/or item cap (default: the scoped batch, 6 hours — whichever ends first). A loop without a budget is the most expensive bug in unattended work.
 - **Where it runs** — the worktree and branch it will create (Phase 0.5), so the user knows their own checkout stays untouched.
+- **Checker model** — ask whether the fresh-eyes verification should run on a **different model family** where the setup allows it (an external CLI, a different provider). Fresh context is the floor; a different family can't share the maker's blind spots. Default when unattended or unanswered: same family, fresh context — never block on this.
 
 Then go. This is the **only** pause — everything after runs to completion. If the user isn't present to approve (e.g. this was itself scheduled), skip straight to Phase 0.5 using the safest reading of scope: the top batch only, nothing destructive, default budget.
 
@@ -77,7 +78,7 @@ Anything genuinely ambiguous about reversibility → treat as a stop-line and pa
 
 ## Phase 4.5 — The final gate
 
-Per-item checks prove each fix in isolation; they don't prove the fixes coexist — an early item can break a later one's assumptions while every individual check stays green. So before shipping, run the **whole-project deterministic gate once**: the full test suite, the typecheck, the build, the linter — whatever the project has. Green → the run is **landed**, proceed to Phase 5 to ship it. Red → the run is **not landed**, whatever the per-item log says: bisect if cheap (revert the most recent suspect commits on the branch until green, park what you reverted), otherwise **skip Phase 5** and report the branch red with the failure output front and center. "Done" is the gate's word, never the agent's — and only a green gate ships.
+Per-item checks prove each fix in isolation; they don't prove the fixes coexist — an early item can break a later one's assumptions while every individual check stays green. So before shipping, run the **whole-project deterministic gate once**: the full test suite, the typecheck, the build, the linter — and the committed verification harness if `/walkthrough-nt` has left one (the lever outranks ad-hoc checks) — whatever the project has. Green → the run is **landed**, proceed to Phase 5 to ship it. Red → the run is **not landed**, whatever the per-item log says: bisect if cheap (revert the most recent suspect commits on the branch until green, park what you reverted), otherwise **skip Phase 5** and report the branch red with the failure output front and center. "Done" is the gate's word, never the agent's — and only a green gate ships.
 
 ## Phase 5 — Ship it (green gate only)
 
@@ -98,6 +99,8 @@ Each of these **cancels the ship** and falls back to leaving the branch for revi
 Never `--force`, never touch a branch-protection rule, never open or merge a PR on the user's behalf. **Leave the worktree in place regardless** — the human removes it after a glance. On a clean ship, the branch is merged into the default branch and the remote is updated.
 
 ## Phase 6 — The morning report
+
+**Audit the trail before you write it.** Draft the report, then walk it against what actually happened — `git log` on the branch, the per-item checker outputs, the reverts: every claimed item maps to a real commit; every "how verified" points to evidence that resolves (a SHA, a check output, a `file:line`) and shows what the line claims; any pivot, revert, or abandoned approach that shaped the run but isn't in the draft gets added; anything aspirational or padded gets cut. **Fix the report, not the story** — if the work diverged from what a line claims, the line is wrong. Write it in plain teammate language: concrete actions, no AI-speak, no filler; a line nobody would audit doesn't earn its place.
 
 Write `plan/$(date +%Y-%m-%d)-autopilot.md` and end with a tight handoff in this shape:
 

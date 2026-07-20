@@ -31,6 +31,6 @@ Assign stable IDs and rank by **risk**: a security advisory or a deprecated-and-
 
 ## Phase 4 — Report + safe quick-fixes
 
-**Write `plan/maintenance-YYYY-MM-DD.md`** in the `/forward-pass-nt` report shape: findings by ID, a batched Workplan, and a coverage note (what was checked, what wasn't). Then **offer to apply the safe quick-fixes now** — SHA-pin actions, patch-level bumps, fix dead links — with confirmation. **Defer major bumps to `/execute-nt`** (so each is fixed and verified individually); point breaking-change calls at `/decide-nt`.
+**Write `plan/maintenance-YYYY-MM-DD.md`** in the `/forward-pass-nt` report shape: findings by ID, a batched Workplan, and a coverage note (what was checked, what wasn't) — plain teammate language throughout, no AI-speak or filler. Then **offer to apply the safe quick-fixes now** — SHA-pin actions, patch-level bumps, fix dead links — with confirmation. **Defer major bumps to `/execute-nt`** (so each is fixed and verified individually); point breaking-change calls at `/decide-nt`.
 
 End by naming the highest-risk finding, and that `/execute-nt` works the workplan while `/replan-nt` folds it.

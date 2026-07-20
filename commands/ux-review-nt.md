@@ -13,6 +13,8 @@ Review the app **as a cold first-time user** — the person who wasn't there whe
 
 It's the third browser-walkthrough sibling: `/walkthrough-nt` finds bugs and fixes them, `/guide-nt` captures screenshots and documents — both **seed data so screens aren't empty**. `/ux-review-nt` does the **opposite**: it wipes all state, because the whole point is to experience exactly what a newcomer experiences — the empty state, the first-run asks, the "what is this and what do I do" moment.
 
+**Stronger with different eyes.** This is a checker command — its whole value is that it doesn't share the maker's blind spots. Fresh context is the floor; running it from a **different model family** than the one that built the code is the stronger posture, since two contexts of the same model still misjudge the same things identically. If you *are* the family that built most of this code, say so in the report header — the reader should know which grade of eyes graded it.
+
 If the project has no browser surface, say so. If the current directory isn't a git repo, ask which project — don't guess.
 
 `$ARGUMENTS` (optional): an area to focus — `first-run`, `settings`, `nav`. If empty, walk the whole cold journey from arrival to first value.
@@ -61,6 +63,8 @@ Across the journey and the whole surface, score these:
 ## Phase 6 — Write the report
 
 **Write `plan/ux-review-YYYY-MM-DD.md`**, in this order:
+
+> Plain teammate language throughout — concrete actions, no AI-speak, no filler; a line nobody would audit doesn't earn its place.
 1. **Header** — date, scope, the cold-start state used, the newcomer persona walked.
 2. **The newcomer journey** — the numbered step narrative from Phase 2, friction flagged inline.
 3. **Findings** — ranked `C/H/M/L`, each tied to a step, with fix + quick-win/structural tag.

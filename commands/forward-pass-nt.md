@@ -9,6 +9,8 @@ writes: "plan/forward-pass-<date>.md"
 
 Do a **fresh-eyes forward pass** over the project's code — a cold read of the whole app as if you've never seen it — hunting four things: **bugs**, **security issues**, **stray code**, and **stubs masquerading as done**. This is an AUDIT of the entire codebase, not a review of recent changes (that's what `/code-review`, `/review`, and `/security-review` are for — they're all diff-scoped).
 
+**Stronger with different eyes.** This is a checker command — its whole value is that it doesn't share the maker's blind spots. Fresh context is the floor; running it from a **different model family** than the one that built the code is the stronger posture, since two contexts of the same model still misjudge the same things identically. If you *are* the family that built most of this code, say so in the report header — the reader should know which grade of eyes graded it.
+
 **READ-ONLY.** Report, rank, and plan — never edit code, never auto-fix.
 
 `$ARGUMENTS` (optional): a path to scope the pass (e.g. `src/api`), or a focus hint (e.g. `security`). If empty, audit the whole app with all three lenses.
@@ -74,6 +76,8 @@ Turn the actionable findings (everything except false-positives/non-issues) into
 ## Phase 5 — Write the report + print
 
 **Write `plan/forward-pass-YYYY-MM-DD.md`** — a self-contained audit-and-fix artifact, in this order:
+
+> Plain teammate language throughout — concrete actions, no AI-speak, no filler; a line nobody would audit doesn't earn its place.
 
 1. **Header** — date, scope, one-line summary counts (e.g. "2 Critical · 9 High · 7 Medium · 8 Low · 9 Stray · 4 Stub").
 2. **Verification reality** — a short note on how this app can/can't be tested (browser runtime needed? no headless path? pure-logic harness available?), so the `[test]` markers have context.

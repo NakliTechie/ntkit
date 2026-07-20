@@ -32,6 +32,7 @@ Don't generate launch assets for an unshippable repo. Run the full gate:
 - **README** — exists with: one-line what-it-is, a hero screenshot/demo, install that actually works, usage, links (demo / source), license.
 - **LICENSE** — present and appropriate to intent.
 - **A `/guide-nt`** (or equivalent docs), a live/demo link, screenshots, a clear value prop.
+- **An `llms.txt`** — the docs' agent face (the human-face/agent-face rule applied to documentation): a compact, LLM-ready summary of what the tool is, its API surface (`window.<app>` hooks, message channel, file formats), and how to drive it — so a coding agent pointed at the repo gets the surface without scraping. Offer to generate it from the README + code if missing. A large project may add `llms-full.txt` with the complete detail.
 - **Repo hygiene** — GitHub description + topics set; no debug/junk files; and a **clean install from a fresh clone** (the newcomer path — same cold-start ethos as `/ux-review-nt`).
 
 **Output — a scorecard:** `Ready ✓ · Blockers (must-fix before launch) · Nice-to-haves`. If there are blockers, say so loudly and **stop** — an illegal transition per `STATES.md`. The only path past a blocker is a deliberate, logged override: a `/decide-nt "packaging despite <X> because <why>"` entry in this session, after which proceed with a warning. (Secrets and tracked-`plan/` blockers are never overridable.) Don't auto-fix code — flag + suggest; you may offer to generate a *missing* README/LICENSE (new file only). Launch-blocking *decisions* point at `/decide-nt`.

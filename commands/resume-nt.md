@@ -35,7 +35,7 @@ This goes into the brief so the user sees the physical state they're picking up 
 
 ## Step 2.5: Determine and validate the state
 
-Name the repo's current state per `STATES.md` (`fresh` / `briefed` / `building` / `verifying` / `blocked` / `shipped`) from the evidence just gathered — open workplan items, uncommitted work, unexecuted audit reports, tried-trails, HELD autopilot branches. Then check consistency, and flag (don't fix) anything that doesn't add up:
+Name the repo's current state per ntkit's `STATES.md` (kit doctrine — not a file in this project): `fresh` / `briefed` / `building` / `verifying` / `blocked` / `shipped`, from the evidence just gathered — open workplan items, uncommitted work, unexecuted audit reports, tried-trails, HELD autopilot branches. Then check consistency, and flag (don't fix) anything that doesn't add up:
 
 - workplan says mid-chunk but the tree is clean and nothing recent in `git log` — chunk state may be stale
 - an audit report (`forward-pass` / `ux-review` / `maintenance`) has open items but the workplan doesn't mention it — unexecuted findings
@@ -51,7 +51,7 @@ Resuming <project-name>.
 
 Folder: <absolute path>
 Branch: <branch> · <ahead/behind status> · <clean | N uncommitted files>
-State: <state per STATES.md> · legal next: <the 2–3 moves that fit this state>
+State: <state from Step 2.5> · legal next: <the 2–3 moves that fit this state>
 <⚠ one line per inconsistency found in Step 2.5, if any>
 
 Last session (<date from latest summary, or "no summary on file">):

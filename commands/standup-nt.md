@@ -79,7 +79,7 @@ No plan/ folder:
 
 Skip empty buckets (don't print a header with nothing under it). Keep it dense — single line per project; flags (`[dirty]`, `[autopilot: held]`, `[autopilot: shipped]`) render only when they fire.
 
-**`<state>`** is the repo's session state per `STATES.md` (`briefed` / `building` / `verifying` / `blocked` / `shipped`), read from the cheap evidence already gathered — open workplan items, dirty tree, unexecuted audit reports, tried-trails. Add an `[⚑ <why>]` flag for any repo in an **inconsistent state**: an audit report with open items nobody has executed, a summary claiming a clean close over a dirty tree, a HELD autopilot branch older than 3 days. Standup is the sole cross-repo reader of autopilot mailboxes (the actor rule in `STATES.md`) — inconsistencies surface here or nowhere.
+**`<state>`** is the repo's session state per ntkit's `STATES.md` (kit doctrine — not a file in the scanned repos): `briefed` / `building` / `verifying` / `blocked` / `shipped`, read from the cheap evidence already gathered — open workplan items, dirty tree, unexecuted audit reports, tried-trails. Add an `[⚑ <why>]` flag for any repo in an **inconsistent state**: an audit report with open items nobody has executed, a summary claiming a clean close over a dirty tree, a HELD autopilot branch older than 3 days. Standup is the sole cross-repo reader of autopilot mailboxes (the actor rule in ntkit's `STATES.md`) — inconsistencies surface here or nowhere.
 
 ## Step 5: Wait
 

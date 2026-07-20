@@ -15,7 +15,7 @@ If the current directory isn't a git repo, ask which project — don't guess.
 
 ## Phase 0 — Entry guard (illegal-transition check)
 
-A release is the transition to `shipped` (see `STATES.md`), and it's guarded. Before anything else, check:
+A release is the transition to `shipped` (per ntkit's `STATES.md` — kit doctrine, not a file in this project), and it's guarded. Before anything else, check:
 
 1. **Verifier green** — run the project's own check (tests / typecheck / build — and the committed verification harness if `/walkthrough-nt` has left one; the lever is the definition of green). A failing verifier stops the run. **No verifier defined** (a single-file tool with no tests or build) → the check passes vacuously; note "no verifier defined" in the release notes draft and move on — the guard blocks on red, never on absent.
 2. **No open fix-workplan** — scan `plan/` for the most recent `forward-pass-*` / `ux-review-*` / `maintenance-*` report; any unchecked `[ ]` item in its keystone batch stops the run.

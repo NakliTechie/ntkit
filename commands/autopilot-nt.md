@@ -16,7 +16,10 @@ If the current directory isn't a git repo, ask which project — don't guess. Th
 ## Phase 0 — The launch contract (the one interactive moment)
 
 Before going dark, state the plan back so the user can approve it *before* they walk away. Show:
-- **Scope** — the ordered list of items it will attempt (from `$ARGUMENTS` or the workplan), and where it will stop (batch, goal, or "until the safe work runs out").
+- **The goal spec** — three lines, not one:
+  1. **Done when:** the machine-checkable condition (from `$ARGUMENTS` or the workplan) and where the run stops (batch, goal, or "until the safe work runs out").
+  2. **Because:** one line of why the goal matters — pulled from the workplan/handoff or asked for. This is what guides trade-offs when instructions run out; a condition without a why gets satisfied literally and wrongly.
+  3. **Never degrade:** 2–3 protected properties the run must not sacrifice while pursuing the goal — existing tests stay green, the sovereignty invariants hold, no new dependencies, bundle size, whatever this repo protects. Derive from the doctrines and the repo; confirm with the user. **The final gate (Phase 4.5) checks these too** — a goal met by degrading a protected property is a red gate, not a shipped run.
 - **The stop-line** — the actions it will refuse to do autonomously and will park instead (Phase 4). Name them.
 - **Default-decision policy** — for reversible design forks it hits, it will pick the option most consistent with the surrounding code and existing decisions in `history.md`, record the assumption, and move on rather than block.
 - **Budget** — the run's hard ceiling: a wall-clock cap and/or item cap (default: the scoped batch, 6 hours — whichever ends first). A loop without a budget is the most expensive bug in unattended work.
@@ -41,7 +44,7 @@ All commits from here on land on the `autopilot/<date>` branch. Don't remove the
 
 ## Phase 1 — Order the work
 
-Resolve scope into an ordered queue. From a workplan/report, respect sequencing — keystone and depended-on batches first. From a prose goal, decompose it into a checkboxed list written to `plan/workplan.md` under a chunk titled after the goal, so progress survives a crash and the morning review has something to read. Front-load the items most likely to unblock others; defer the ones most likely to hit a stop-line.
+If the repo carries a Vision-and-Roadmap (or vision doc), skim its top section first — three lines of strategy in context is what lets default decisions (Phase 0's policy) land on the product's side of a fork rather than the generic side. Then resolve scope into an ordered queue. From a workplan/report, respect sequencing — keystone and depended-on batches first. From a prose goal, decompose it into a checkboxed list written to `plan/workplan.md` under a chunk titled after the goal, so progress survives a crash and the morning review has something to read. Front-load the items most likely to unblock others; defer the ones most likely to hit a stop-line.
 
 ## Phase 2 — The autonomous loop
 
@@ -78,7 +81,7 @@ Anything genuinely ambiguous about reversibility → treat as a stop-line and pa
 
 ## Phase 4.5 — The final gate
 
-Per-item checks prove each fix in isolation; they don't prove the fixes coexist — an early item can break a later one's assumptions while every individual check stays green. So before shipping, run the **whole-project deterministic gate once**: the full test suite, the typecheck, the build, the linter — and the committed verification harness if `/walkthrough-nt` has left one (the lever outranks ad-hoc checks) — whatever the project has. Green → the run is **landed**, proceed to Phase 5 to ship it. Red → the run is **not landed**, whatever the per-item log says: bisect if cheap (revert the most recent suspect commits on the branch until green, park what you reverted), otherwise **skip Phase 5** and report the branch red with the failure output front and center. "Done" is the gate's word, never the agent's — and only a green gate ships.
+Per-item checks prove each fix in isolation; they don't prove the fixes coexist — an early item can break a later one's assumptions while every individual check stays green. So before shipping, run the **whole-project deterministic gate once**: the full test suite, the typecheck, the build, the linter — and the committed verification harness if `/walkthrough-nt` has left one (the lever outranks ad-hoc checks) — whatever the project has — **plus the never-degrade list from the goal spec**: each protected property gets an explicit check here, and a degraded one is a red gate even with every test green. Green → the run is **landed**, proceed to Phase 5 to ship it. Red → the run is **not landed**, whatever the per-item log says: bisect if cheap (revert the most recent suspect commits on the branch until green, park what you reverted), otherwise **skip Phase 5** and report the branch red with the failure output front and center. "Done" is the gate's word, never the agent's — and only a green gate ships.
 
 ## Phase 5 — Ship it (green gate only)
 

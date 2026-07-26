@@ -35,6 +35,14 @@ Don't generate launch assets for an unshippable repo. Run the full gate:
 - **An `llms.txt`** — the docs' agent face (the human-face/agent-face rule applied to documentation): a compact, LLM-ready summary of what the tool is, its API surface (`window.<app>` hooks, message channel, file formats), and how to drive it — so a coding agent pointed at the repo gets the surface without scraping. Offer to generate it from the README + code if missing. A large project may add `llms-full.txt` with the complete detail.
 - **Repo hygiene** — GitHub description + topics set; no debug/junk files; and a **clean install from a fresh clone** (the newcomer path — same cold-start ethos as `/ux-review-nt`).
 
+**Machine-face audit (web projects) — run Lighthouse against the DEPLOYED site.**
+Two categories that nothing else in the kit covers, and both are launch-facing:
+- **SEO** — title, meta description, descriptive link text, viewport, and a **valid `robots.txt`**.
+- **Agentic Browsing** — how well an AI agent can read and drive the page. It is the machine-scored version of the `llms.txt` concern above, so audit them together. It's driven mostly by a well-formed accessibility tree plus layout stability; a single `aria-label` on a role-less `div` can sink it.
+
+**Verify against the deployed URL, not localhost — this is the whole point of the check.** A local static server 404s a missing file; most hosts (Cloudflare Pages, Netlify, Vercel SPA mode) serve `index.html` instead. So a missing `robots.txt` or `llms.txt` returns **200 with an HTML body**, Lighthouse parses it as a malformed text file, and you get hundreds of syntax errors — *invisible* locally, where the audit is skipped rather than failed. Fetch `/robots.txt` and `/llms.txt` from the live host and confirm each returns `text/plain`, not `text/html`.
+- **Third-party requests** — count them on the live page (Resource Timing, or the network panel). If the project's pitch is "runs entirely in your browser / no tracking", every third-party host is a claim you can't make. A vendored font or script beats a CDN one here.
+
 **Output — a scorecard:** `Ready ✓ · Blockers (must-fix before launch) · Nice-to-haves`. If there are blockers, say so loudly and **stop** — an illegal transition per ntkit's `STATES.md` (kit doctrine — not a file in this project). The only path past a blocker is a deliberate, logged override: a `/decide-nt "packaging despite <X> because <why>"` entry in this session, after which proceed with a warning. (Secrets and tracked-`plan/` blockers are never overridable.) Don't auto-fix code — flag + suggest; you may offer to generate a *missing* README/LICENSE (new file only). Launch-blocking *decisions* point at `/decide-nt`.
 
 ## Phase 2 — Marketing assets → committed `marketing/`

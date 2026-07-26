@@ -1,6 +1,6 @@
 ---
-description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, and lockfile drift; rank them and batch into a fix-workplan. Applies safe quick-fixes automatically (verified, reverted on failure); majors defer to /execute-nt. Writes plan/maintenance-<date>.md.
-argument-hint: "[focus: deps | actions | security | links]"
+description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, lockfile drift, and (web projects) Core Web Vitals drift plus new third-party requests; rank them and batch into a fix-workplan. Applies safe quick-fixes automatically (verified, reverted on failure); majors defer to /execute-nt. Writes plan/maintenance-<date>.md.
+argument-hint: "[focus: deps | actions | security | links | perf]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "a repo with dependencies or workflows"
 exit: "ranked fix-workplan written; safe quick-fixes applied + verified"
@@ -24,6 +24,10 @@ Manifests + locks (`package.json` + lockfile, `pyproject.toml` + `uv.lock`, `Car
 - **Security** — known advisories against the lockfile (`npm audit`, `pip-audit`, `osv-scanner`). (Deep code-vuln review is `/security-review`.)
 - **Dead links** — `curl -I` the URLs in README/docs; flag 4xx/5xx.
 - **Lockfile drift** — lock out of sync with the manifest.
+- **Performance drift (web projects)** — Core Web Vitals regress by creep, exactly like dependency drift, which is why they belong in a recurring sweep rather than a one-off review. Measure **CLS** and **LCP** on a **mobile viewport with CPU + network throttling** — an unthrottled desktop run hides both. Note that a Lighthouse "accessibility/SEO" run may **not** include Performance (the Chrome DevTools MCP `lighthouse_audit` tool excludes it by design), so take CLS from a performance trace or a `layout-shift` PerformanceObserver, not from the headline scores. When CLS is non-zero, get the *shifting elements* rather than the number alone — a `PerformanceObserver` on `layout-shift` reports `sources`, which names them.
+- **Third-party requests** — list every non-same-origin request the deployed page makes. New ones appear quietly (a font, an analytics snippet, a CDN'd library someone added) and each is a privacy claim, a render-blocking risk, and an availability dependency. For a self-contained app, the correct count is zero.
+
+**Measure twice before reporting a regression.** A single first reading is unreliable — cold caches, warm caches, and one-off timing all produce numbers that look exactly like a regression. Re-run before you report, and if it *is* a regression, bisect against the previous known-good state rather than blaming the most recent change. A baseline you recorded once, long ago, is a hypothesis, not a fact.
 
 ## Phase 3 — Rank + batch
 

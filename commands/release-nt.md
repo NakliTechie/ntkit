@@ -1,9 +1,9 @@
 ---
-description: Cut a release — suggest a semver bump from the commits since the last tag, generate/update CHANGELOG.md, draft release notes, then (only on confirmation) commit the bump, tag, push, create the GitHub release, and note the deploy. The mechanics, where /package-nt is the marketing.
+description: Cut a release — suggest a semver bump from the commits since the last tag, generate/update CHANGELOG.md, draft release notes, then (only on confirmation) commit the bump, tag, push, create the GitHub release, then verify the deploy actually landed against the live URL. The mechanics, where /package-nt is the marketing.
 argument-hint: "[major | minor | patch | x.y.z]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "verifying with gate green — no failing verifier, no open fix-workplan items; refuse otherwise (override via /decide-nt)"
-exit: "tag + GitHub release + CHANGELOG landed, or an explicit refusal naming the guard"
+exit: "tag + GitHub release + CHANGELOG landed and the deploy verified live, or an explicit refusal naming the guard"
 writes: "CHANGELOG.md, version bump, git tag"
 ---
 
@@ -45,6 +45,14 @@ Show the planned **version**, the **CHANGELOG diff**, the **release notes**, and
 - On **yes**: commit the bump + CHANGELOG, `git tag vX.Y.Z`, push commits + tag, `gh release create vX.Y.Z` with the notes, and note (or trigger) the deploy. Never force-push.
 - On **no**: leave the bump + CHANGELOG staged for you to edit.
 
+## Phase 4.5 — Verify the deploy actually landed
+
+A push is not a deploy, and a green local check is not a green live one. Once the deploy reports done, verify **against the deployed URL**:
+- **Fetch a marker from the new build** — a string that exists only in this release. If it's missing, the deploy is still propagating or it failed; don't report success on the basis of having pushed.
+- **Bust the cache when you check.** A first read straight after a deploy can be served stale and look like a half-finished rollout — new assets live, old HTML. Re-fetch with a cache-busting query and `Cache-Control: no-cache` before concluding anything is wrong.
+- **Re-run the checks that can only fail in production.** Anything depending on host routing behaves differently locally: a static dev server 404s a missing file, while most hosts serve `index.html` for it, so `/robots.txt`, `/llms.txt`, redirects, headers and 404 handling are **untestable until deployed**. Confirm each returns the right status *and* the right `content-type`.
+- Confirm response **headers** the repo claims (cache-control, security headers) are actually applied — a `_headers` / `netlify.toml` / `vercel.json` rule that never took effect is silent.
+
 ## Phase 5 — Handoff
 
-Print the released version, the release URL, and the deploy status. Suggest `/package-nt` for the announcement collateral. (CHANGELOG is committed; any working drafts stay in local `plan/`.)
+Print the released version, the release URL, and the **verified** deploy status — what you fetched from the live host, not just that the push succeeded. Suggest `/package-nt` for the announcement collateral. (CHANGELOG is committed; any working drafts stay in local `plan/`.)

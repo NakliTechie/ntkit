@@ -1,5 +1,5 @@
 ---
-description: "Capture a URL / file / PDF into your knowledge vault (~/Code/knowledge) — fetch + extract (full text, OCR scanned PDFs), follow & summarise embedded links (esp. listicles), write a schema'd source note in sources/, tag its realm (knowledge|personal|work), link it into the right topics/ MOC with backlinks, and optionally promote a distilled insight to notes/, then commit + push automatically. Idempotent on re-run."
+description: "Capture a URL / file / PDF / claude.ai chat session into your knowledge vault (~/Code/knowledge) — fetch + extract (full text, OCR scanned PDFs), follow & summarise embedded links (esp. listicles), write a schema'd source note in sources/, tag its realm (knowledge|personal|work), link it into the right topics/ MOC with backlinks, and optionally promote a distilled insight to notes/, then commit + push automatically. Idempotent on re-run."
 argument-hint: "<url | file path>  [realm: knowledge|personal|work]"
 entry: "knowledge vault present at the configured path"
 exit: "schema'd source note written, linked, committed + pushed; idempotent on re-run"
@@ -12,8 +12,8 @@ Capture something into the **knowledge vault** and wire it into the web of notes
 
 ## Step 1 — Resolve the input
 `$ARGUMENTS` is a **URL** or a **file path** (optionally followed by a realm word — see Step 5). If empty, ask _"What am I capturing — a URL or a file path?"_ and use the next message. Classify:
-- starts with `http(s)://` → **URL**
-- otherwise → **file path** (expand `~`; confirm it exists). It may already live **inside** the vault — a PDF / doc dropped into `$VAULT/inbox/` or `$VAULT/assets/`. That's fine; capture it in place.
+- starts with `http(s)://` → **URL**. A `claude.ai/share/<id>` URL is a **chat session** — the chat-session rules in Steps 3–6 apply on top of the normal flow.
+- otherwise → **file path** (expand `~`; confirm it exists). It may already live **inside** the vault — a PDF / doc dropped into `$VAULT/inbox/` or `$VAULT/assets/`. That's fine; capture it in place. A markdown file whose frontmatter declares `capture_mode: capture-file` — or that the user says is a chat's own capture/distillation — is a **pre-distilled chat session**: file it as `source_type: chat-session` (Step 6) and see the promote offer in Step 8.
 
 If `$VAULT` doesn't exist, stop and say so — this command captures _into_ an existing vault, it doesn't create one.
 
@@ -35,6 +35,7 @@ Pick the tool by source type — the goal is the readable text + key media, not 
 | `.docx` / Word (link or local file) | the **`docx`** skill — full text + structure (headings, tables) |
 | Video (YouTube, …) | fetch the page for title + description, plus transcript if present; else summarize from what's available and note the gap |
 | GitHub repo | `gh repo view <owner>/<repo>` for stars / desc / license; WebFetch the README for detail |
+| claude.ai chat share (`claude.ai/share/<id>`) | **WebFetch**; fall back to the Chrome MCP if the share page doesn't render. Extract the **full transcript**, strip UI chrome, and **keep the Human/Assistant turn structure** — the alternation is the content. |
 
 **Extract completely.** The goal is the _whole_ readable text, not an abstract or first page — so the note (and any future full-text search) sees everything. For a long PDF / doc, also **save the extracted (OCR'd) text to `$VAULT/assets/<slug>.txt`** alongside the binary, so the full text is grep-able, not just your summary.
 
@@ -54,6 +55,7 @@ Many captures are **pointers, not destinations** — a listicle ("10 repos that�
   - **Repo:** `gh repo view` for stars/license **+** the full README (key files, usage, claims). New note `source_type: repo`.
   - **arXiv / paper:** run the **`pdf` skill** on the PDF (`arxiv.org/pdf/<id>`) for the **full text**; save the extract to `assets/<slug>.txt`. New note `source_type: pdf` (abstract + claims + numbers + figure captions).
   - Still respect the **~15-link bound**: if one source cites more repos/papers than that, full-capture the load-bearing ones and **`log` the deferred rest** (one-line those) — never silently drop. The one-line summary is the *floor* for incidental listicle items; a repo or paper that the content actually rests on gets the *full treatment*.
+- **Chat session → don't deep-index its links.** Chats reference many URLs in passing; the repo/paper full-capture rule above does **not** apply to `chat-session` sources. List every substantive URL in a `## References mentioned` section of the source note instead, and deep-index one only if the user asked explicitly in the invocation or confirms when offered.
 - **Bound it.** Cap at ~15 followed links; beyond that, follow the most important and **`log` what you skipped** — never silently truncate. Dedupe; skip chrome (login / share / home links).
 - **Flag discrepancies.** When a followed fact contradicts the source, record both: _"claimed 51K → verified 69K (at capture)"_.
 
@@ -62,7 +64,8 @@ The followed summaries become part of `## Key claims & data` (e.g. one enriched 
 ## Step 5 — Derive metadata
 - **slug** — kebab-case from the title (drop stopwords; short and recognizable; avoid a leading number right after the date prefix).
 - **date prefix** — the source's **publish date** (`YYYY-MM-DD`) if discoverable, else today. Filename: `sources/<date>-<slug>.md`.
-- **source_type** — `article|tweet|pdf|video|repo|doc`, inferred (x.com `/status/` → `tweet`; `/i/article/` → `article`; `.pdf` → `pdf`; `github.com` → `repo`; `.docx` → `doc`).
+- **source_type** — `article|tweet|pdf|video|repo|doc|chat-session`, inferred (x.com `/status/` → `tweet`; `/i/article/` → `article`; `.pdf` → `pdf`; `github.com` → `repo`; `.docx` → `doc`; `claude.ai/share/` → `chat-session`).
+- **chat-session extras** — title from the shared chat's title if extractable, else the first user message (truncated); **date prefix = the conversation's date**, not the capture date; set `platform` (`claude.ai` for now — the field future-proofs other assistants), `session_date`, and `capture_mode` (`share-url` | `capture-file`) in the frontmatter.
 - **domain** — which **realm** this belongs to: **`knowledge`** (general learning — the default), **`personal`** (your own life: health, money, home, family), or **`work`** (a job / client / employer). If the user named a realm in the invocation, use it; else infer from the content. Set it when it's clearly personal or work; default `knowledge` when unsure — and if the content looks **sensitive** (a statement, a contract, medical), ask before filing. (Absent ⇒ `knowledge`.)
 - **tags** — reuse existing tags first:
   ```bash
@@ -78,15 +81,19 @@ Write (or rewrite, if updating) `sources/<date>-<slug>.md` using the vault's sou
 title:
 url:
 author:
-source_type: article|tweet|pdf|video|repo|doc
+source_type: article|tweet|pdf|video|repo|doc|chat-session
 captured: <today>
 published:
 domain: knowledge        # knowledge | personal | work
 tags: []
 status: processed        # 'inbox' if it's only a stub
 rating:
+platform: claude.ai      # chat-session only — which assistant hosted the conversation
+session_date: YYYY-MM-DD # chat-session only — date of the conversation, not the capture
+capture_mode: share-url  # chat-session only — share-url | capture-file
 ---
 ```
+The three `chat-session` fields appear **only** on chat-session notes. Never rewrite existing notes to backfill fields — old notes stay untouched.
 Then the body, in order — **record what the source said, not your opinion of it:**
 - `## TL;DR` — ≤3 lines.
 - `## Key claims & data` — bullets; preserve concrete numbers; fold in the **followed-link summaries** from Step 4.
@@ -94,6 +101,8 @@ Then the body, in order — **record what the source said, not your opinion of i
 - `## Why it matters / connections` — `[[wikilinks]]` to related notes / sources / topics.
 - `## Open questions`.
 - Raw link(s) at the bottom.
+
+For a **chat session**, the body keeps the **Human/Assistant turn structure** (condensed is fine — the alternation is the content, so don't flatten it into a summary), and adds `## References mentioned` — the URLs the conversation touched, one line each, not deep-indexed (Step 4).
 
 For a **dropped PDF / doc / image**, keep the file under `$VAULT/assets/` and point the note at it with a relative link (`[paper.pdf](../assets/paper.pdf)`); the note carries the TL;DR + claims, so the vault stays searchable without opening the binary.
 
@@ -104,6 +113,8 @@ For a **dropped PDF / doc / image**, keep the file under `$VAULT/assets/` and po
 
 ## Step 8 — Optional: promote a synthesis
 If the source genuinely shifts the user's thinking, or combines with existing notes into a reusable insight, offer to write an **evergreen note** in `notes/` — in the _user's_ voice, `status: evergreen`, same `domain`, linking down to the source(s). Don't force it: most captures are just sources. Ask before creating, unless the user already said to.
+
+**Chat capture files are the exception that earns the offer by default:** a capture file is already a distillation — the "what I concluded" side, not raw source material. After filing it as a `chat-session` source, offer to promote it straight to `notes/` in the same pass. Ask; don't assume.
 
 ## Step 9 — Commit & push (automatic)
 Capture isn't done until it's saved. Stage exactly what this capture wrote — the source note, any new / updated topic MOC, a promoted note, any saved `assets/` file — then commit and push, no prompt:

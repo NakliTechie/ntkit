@@ -58,7 +58,7 @@ Two commands operate on a single Obsidian-compatible **knowledge vault** (plain-
 
 | Command | When | What it does |
 |---------|------|--------------|
-| `/capture-nt <url\|file>` | save something | Fetch + extract a URL / file / PDF (full text, OCR for scans), **follow & fully index any referenced repo or arXiv paper**, write a schema'd **source note**, tag its realm (knowledge / personal / work), link it into the right topic map with backlinks, and optionally promote a distilled **note** — then commit + push. Idempotent on re-run. |
+| `/capture-nt <url\|file>` | save something | Fetch + extract a URL / file / PDF (full text, OCR for scans), **follow & fully index any referenced repo or arXiv paper**, write a schema'd **source note**, tag its realm (knowledge / personal / work), link it into the right topic map with backlinks, and optionally promote a distilled **note** — then commit + push. Idempotent on re-run. Also captures **claude.ai chat sessions** (share URLs or downloaded capture files) as `chat-session` sources with the turn structure preserved. |
 | `/ask-nt <question>` | recall something | Search + read the vault and answer **grounded only in your own notes**, with citations to the notes used. The read-side sibling of `/capture-nt` — the "search" half of your personal Google. Read-only. |
 
 Both expect a vault at `~/Code/knowledge` (edit that path at the top of `commands/capture-nt.md` and `commands/ask-nt.md` if yours lives elsewhere).

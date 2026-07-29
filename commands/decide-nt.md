@@ -6,7 +6,7 @@ exit: "dated one-line decision appended"
 writes: "plan/history.md"
 ---
 
-Record a decision in the current project's `plan/history.md`.
+Record a decision in the current project's `plan/history.md`. (One of three mid-flow captures: a load-bearing *decision* → here; future *work* → `/idea-nt`; unfiltered thinking-out-loud → `/soc-nt`.)
 
 ## Step 1: Get the decision text
 

@@ -17,6 +17,7 @@ Write `plan/$(date +%Y-%m-%d)-summary.md` with what happened today. Gather conte
 - This session's conversation
 - `git log --since=midnight --oneline --all` for commits made today
 - `git status` and `git diff` for any uncommitted work
+- `plan/soc.md` — today's stream-of-consciousness entries (from `/soc-nt`): fold the load-bearing ones into the summary's sections, but leave the file in place — `/replan-nt` owns its triage and archival
 
 Cover, in this order:
 - **Shipped** — what landed (PRs, commits, deploys), each with its commit SHA

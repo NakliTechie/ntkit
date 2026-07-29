@@ -6,7 +6,7 @@ exit: "idea appended to the backlog"
 writes: "plan/ideas.md (or IDEAS.md)"
 ---
 
-Park an idea without losing your place. `/idea-nt` is `/decide-nt`'s sibling: where decide records a load-bearing *decision* into history, idea drops a *future-work* idea into the backlog — friction-free, no follow-up questions, so a passing thought doesn't derail what you're doing.
+Park an idea without losing your place. `/idea-nt` is `/decide-nt`'s sibling: where decide records a load-bearing *decision* into history, idea drops a *future-work* idea into the backlog — friction-free, no follow-up questions, so a passing thought doesn't derail what you're doing. (Thinking-out-loud that isn't yet a decision *or* a crisp idea goes to `/soc-nt`.)
 
 ## Step 1: Get the idea text
 

@@ -25,6 +25,7 @@ The commands read and write those files, so every session picks up exactly where
 | `/resume-nt` | start of session | Read the handoff (workplan + pending + history + latest summary + git state), name the repo's **state** and its legal next moves, flag anything that doesn't add up, and wait — or `/resume-nt go` to start the top chunk straight off a clean brief. Read-only. |
 | `/decide-nt "<why>"` | mid-session | Append a dated one-line decision to `history.md`. Captures the *why* before it evaporates. |
 | `/idea-nt "<idea>"` | anytime | Park a future-work idea into the backlog (`plan/ideas.md`, or `IDEAS.md` if present) — the `/decide-nt` pattern, for ideas. Friction-free, no derailing the current task. |
+| `/soc-nt "<thought>"` | mid-build | Stream-of-consciousness capture — timestamped, near-verbatim commentary into `plan/soc.md`, zero processing, the build keeps the floor. `/replan-nt` triages it later (decisions → history, ideas → backlog, questions → pending). |
 | `/forward-pass-nt` | anytime | Fresh-eyes whole-app audit — bugs / security / stray code — that outputs a **batched workplan**, not a findings dump; `fix` flows straight into executing the keystone batch. Writes `plan/forward-pass-<date>.md`. |
 | `/walkthrough-nt` | anytime | Live counterpart to `/forward-pass-nt`: identify each user role, drive the running app through their journeys **in a real browser**, catch logical errors as they surface, and **fix them** — then leave a committed, rerunnable **verification harness** that becomes the project's verifier (the `/release-nt` and `/autopilot-nt` gates run it). Writes `plan/walkthrough-<date>.md`. |
 | `/guide-nt` | anytime | Documentation sibling of `/walkthrough-nt`: walk each role's features **in a browser capturing screenshots**, then build a single-file **searchable HTML guide**. Regenerates from a committed generator — never hand-edits the output. |
@@ -39,7 +40,7 @@ The commands read and write those files, so every session picks up exactly where
 | `/windup-nt` | end of session | Day summary + pending + workplan + push + tomorrow's handoff. Honest about the closing state — a mid-chunk close gets named, never papered over. |
 | `/replan-nt` | occasionally | Fold accumulated summaries + scratch back into the three files; archive the rest. Runs the **replay check** first — history replayed against pending, orphans and ghosts reported before anything is archived. |
 
-They speak one vocabulary, so each hands off to the next: `/windup-nt` writes what `/resume-nt` reads, `/forward-pass-nt` and `/walkthrough-nt` feed `/replan-nt`, `/decide-nt` feeds `history.md`.
+They speak one vocabulary, so each hands off to the next: `/windup-nt` writes what `/resume-nt` reads, `/forward-pass-nt` and `/walkthrough-nt` feed `/replan-nt`, `/decide-nt` feeds `history.md`, `/soc-nt` feeds `/replan-nt`'s triage.
 
 ## The state machine
 

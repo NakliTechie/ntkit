@@ -2,7 +2,7 @@
 
 **The rigor layer for AI-assisted development.**
 
-Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, shipping without leaking a secret. `ntkit` is twenty [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
+Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, shipping without leaking a secret. `ntkit` is twenty-one [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
 
 <p align="center">
   <img src="assets/workflow.png" alt="ntkit workflow map — 20 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">

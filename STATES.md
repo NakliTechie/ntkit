@@ -40,13 +40,13 @@ whatever state the repo is in. The state survives the session; that's the point.
 | State | Legal | Illegal (refuse or warn) |
 | --- | --- | --- |
 | `fresh` | `/scaffold-nt` | Everything that reads `plan/` |
-| `briefed` | audits, `/execute-nt` (if a report is open), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
-| `building` | `/decide-nt`, `/idea-nt`, `/windup-nt` (warns), `/autopilot-nt` | `/release-nt`, `/package-nt` |
-| `verifying` | `/execute-nt`, `/walkthrough-nt`, `/forward-pass-nt` | `/release-nt` with open items |
+| `briefed` | audits, `/autopilot-nt` (if a report is open), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
+| `building` | `/decide-nt`, `/soc-nt`, `/windup-nt` (warns), `/autopilot-nt` | `/release-nt`, `/package-nt` |
+| `verifying` | `/autopilot-nt`, `/walkthrough-nt`, `/forward-pass-nt` | `/release-nt` with open items |
 | `blocked` | `/resume-nt`, `/decide-nt` (unblock), `/replan-nt` | `/autopilot-nt` at the same wall |
 | `shipped` | `/package-nt`, `/release-nt` (next), `/maintain-nt` | — |
 
-Always legal, any state: `/standup-nt`, `/resume-nt`, `/decide-nt`, `/idea-nt`,
+Always legal, any state: `/standup-nt`, `/resume-nt`, `/decide-nt`, `/soc-nt`,
 `/notify-nt`, and the vault pair (`/capture-nt`, `/ask-nt`) — they read, log, or
 live outside the repo entirely.
 

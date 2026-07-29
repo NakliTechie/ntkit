@@ -1,19 +1,23 @@
 ---
-description: Unattended executor — work the plan autonomously while you're away (in a meeting, overnight), in an isolated git worktree. Keeps going instead of pausing: does every reversible item, verifies each with fresh eyes, commits continuously, parks anything that needs a human decision or crosses a stop-line, runs a final whole-project gate, then ships a green run — merge to the default branch and push — or holds a red one back, and leaves a morning report /resume-nt can read.
-argument-hint: "[goal or batch, e.g. \"finish the auth refactor\" | workplan | B]"
+description: The executor — work a batched fix-workplan (from /forward-pass-nt, /ux-review-nt, /maintain-nt, or plan/workplan.md) or a prose goal to completion, attended or fully away (a meeting, overnight), always in an isolated git worktree. Keeps going instead of pausing: does every reversible item, verifies each with fresh eyes, commits continuously, parks anything that needs a human decision or crosses a stop-line, runs a final whole-project gate, then ships a green run — merge to the default branch and push — or holds a red one back, and leaves a report /resume-nt can read.
+argument-hint: "[goal, report, or batch, e.g. \"finish the auth refactor\" | forward-pass | B]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
-entry: "briefed or building with an open workplan or explicit goal; clean base branch — never launched from blocked at the same wall"
-exit: "run MERGED (gate green) or HELD (gate red) with a morning report written; never a silent end"
-writes: "its own worktree, plan/<date>-autopilot.md"
+entry: "briefed or building with an open report/workplan or explicit goal; clean base branch — never launched from blocked at the same wall"
+exit: "run MERGED (gate green) or HELD (gate red) with a report written; never a silent end"
+writes: "its own worktree, the source report or plan/workplan.md (checkboxes), plan/<date>-autopilot.md"
 ---
 
-Run the project on autopilot while you're not watching — a meeting, a commute, overnight. Every other executor in the kit (`/execute-nt`, `/walkthrough-nt`) deliberately **pauses at boundaries** because you're there to steer. This one inverts that: it keeps working *because* you're not. The discipline that makes that safe isn't "ask before each step" — you're away, there's no one to ask — it's **run in an isolated worktree, verify every change with fresh eyes, commit continuously so nothing is ever lost, park anything you can't safely decide alone, never cross a stop-line, and ship only what a whole-project gate proves green — merge a passing run to the default branch and push it, hold a failing one back for review.** Autonomy earns its keep only if the morning review finds trustworthy work and an honest list of what it couldn't touch.
+`/autopilot-nt` is the kit's executor — it picks up a batched fix-workplan (from `/forward-pass-nt`, `/ux-review-nt`, `/maintain-nt`, or `plan/workplan.md`) or a prose goal and actually does the work: fix → verify → commit → check off → log, batch to batch, until the queue is done or it hits a wall. (`/walkthrough-nt` is its live-runtime counterpart — it fixes inline as it drives the browser; this is the executor for a *static* plan.)
 
-If the current directory isn't a git repo, ask which project — don't guess. This command commits and runs unattended; it must be pointed at the right place.
+**Run it attended or away — the mechanics don't change.** Sit and watch it grind through a batch (`cd` into its worktree, tail the log, interrupt if something looks wrong), or send it off in a meeting, a commute, overnight, and read the report when you're back. What makes it safe either way isn't "ask before each step" — even attended, polling you for every item defeats the point — it's **run in an isolated worktree, verify every change with fresh eyes, commit continuously so nothing is ever lost, park anything you can't safely decide alone, never cross a stop-line, and ship only what a whole-project gate proves green** — merge a passing run to the default branch and push it, hold a failing one back for review. Autonomy earns its keep only if the review finds trustworthy work and an honest list of what it couldn't touch.
 
-`$ARGUMENTS` (optional): a **goal** in prose (`"finish the auth refactor and get tests green"`), or a named batch/plan (`workplan`, `B`). Default: the keystone/top batch of the most recent report in `plan/`, else the top chunk of `plan/workplan.md`.
+If the current directory isn't a git repo, ask which project — don't guess. This command commits (and may run unattended); it must be pointed at the right place.
+
+`$ARGUMENTS` (optional): a **goal** in prose (`"finish the auth refactor and get tests green"`), a **report name** to scope which audit's batch to run (`forward-pass`, `ux-review`, `maintenance`), or a **batch letter** (`B`). Default: the keystone/top batch of the most recent report in `plan/`, else the top chunk of `plan/workplan.md`.
 
 ## Phase 0 — The launch contract (the one interactive moment)
+
+**Refuses cleanly, never invents a plan.** If no report with open `[ ]` items, no `plan/workplan.md` with an open chunk, and no explicit goal in `$ARGUMENTS` exists, stop and say so: "Nothing to execute — no open fix-workplan and no goal given. Run `/forward-pass-nt`, `/ux-review-nt`, or `/maintain-nt` first, point me at `plan/workplan.md`, or give me a goal." Improvising a plan from the codebase is an audit command's job, not this one's — the maker–checker split only holds if finding and fixing stay separate runs.
 
 Before going dark, state the plan back so the user can veto or amend it *before* they walk away. Show:
 - **The goal spec** — three lines, not one:
@@ -53,7 +57,7 @@ For each item, in order:
 2. **Do it** — the smallest change that resolves it, matching the surrounding code.
 3. **Verify it — with fresh eyes.** Spawn a verification subagent (Task) whose context is only the item's spec (ID · location · what + why), the diff, and how to check — not the maker's reasoning. The model that wrote a fix is too kind to it; a checker that never saw the justification isn't. It runs the right check for *this* item — unit test / typecheck / build for logic; a **runtime or browser** check for anything UI-facing or `[test]`-marked (Chrome MCP for WebGPU/real-browser flows, never headless where it matters) — and returns pass/fail with evidence. One rule it enforces without exception: **a fix may never modify, skip, or delete the check that verifies it.** If the diff touches a test file, the item goes in the report's **Tests changed** section whatever the verdict. Autonomy without verification is how a silent break survives to morning — this step is non-negotiable.
 4. **Commit it** — one focused commit per item (or tight cluster), by path, never `git add -A`. Committing continuously is what makes an overnight run safe to interrupt: a killed session loses at most the item in flight. Don't push **per item** — the single end-of-run push happens once in Phase 5, and only if the final gate is green. Per-item commits stay local on the `autopilot/<date>` branch, so the tree is always recoverable.
-5. **Log it** — flip `[ ]` → `[x]` in the workplan and append a one-line progress entry: what changed · how verified · commit SHA.
+5. **Log it** — flip `[ ]` → `[x]` **in the file the item came from** (the source report, or `plan/workplan.md`) and append a progress-log row with three cells: **what changed · evidence · result** — evidence is a resolvable pointer (commit SHA, `file:line`, a check's output), never prose; result is the outcome state (`tests green` / `build clean` / `reverted` / `deferred: <why>`). A row whose evidence doesn't resolve is the audit catching a gap, not bureaucracy.
 
 Then take the next item. No pause between items, no pause between batches — that's the whole point. Between items, glance at the launch-contract budget: the clock and the item cap are exits, not suggestions.
 

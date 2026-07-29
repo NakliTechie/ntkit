@@ -13,7 +13,7 @@ Do a **fresh-eyes forward pass** over the project's code — a cold read of the 
 
 **READ-ONLY.** Report, rank, and plan — never edit code, never auto-fix.
 
-`$ARGUMENTS` (optional): a path to scope the pass (e.g. `src/api`), a focus hint (e.g. `security`), and/or `fix` — after the report lands, flow straight into the `/execute-nt` discipline on the keystone batch. (The maker–checker split holds: the audit completes and the report is written first; fixing is a second pass with its own verification.) If empty, audit the whole app with all four lenses.
+`$ARGUMENTS` (optional): a path to scope the pass (e.g. `src/api`), a focus hint (e.g. `security`), and/or `fix` — after the report lands, hand the keystone batch to `/autopilot-nt` (works it in an isolated worktree, verifies with fresh eyes, commits continuously, parks anything risky, ships on a green gate). (The maker–checker split holds: the audit completes and the report is written first; fixing is a second pass with its own verification.) If empty, audit the whole app with all four lenses.
 
 ## Phase 1 — Map the codebase
 
@@ -100,4 +100,4 @@ End with a tight next-steps note (don't act on it):
 - As you work the batches: check items off in the report, and append progress-log entries with **verification evidence** (`tests pass; still needs runtime test: C1`) and the **commit SHA** pushed
 - `/replan-nt` will fold open batch items into `pending.md`/`workplan.md`, record dismissed false-positives into history's Dead ends, and archive this report
 
-Without `fix` in `$ARGUMENTS`: do NOT start fixing — the forward pass finds, ranks, and plans; the user decides what to execute. With `fix`: the audit is complete and the report is on disk — now pick up the keystone batch under the `/execute-nt` discipline (fix · verify · commit · log evidence, rolling forward, red-flag pauses) and go.
+Without `fix` in `$ARGUMENTS`: do NOT start fixing — the forward pass finds, ranks, and plans; the user decides what to execute. With `fix`: the audit is complete and the report is on disk — now hand the keystone batch to `/autopilot-nt` (fix · verify · commit · log evidence, rolling forward, parking anything risky instead of stopping) and go.

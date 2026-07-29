@@ -1,5 +1,5 @@
 ---
-description: Completion ping — send yourself a desktop notification and (optionally) a phone push via an ntfy.sh topic. The finish-line half of unattended runs — /autopilot-nt fires it; long /execute-nt batches can too. Degrades silently; a failed ping never fails the run that sent it.
+description: Completion ping — send yourself a desktop notification and (optionally) a phone push via an ntfy.sh topic. The finish-line half of unattended runs — /autopilot-nt fires it automatically; call it yourself after any long manual session too. Degrades silently; a failed ping never fails the run that sent it.
 argument-hint: "<message, e.g. \"myapp: autopilot done — gate GREEN, 7 landed\">"
 allowed-tools: ["Bash"]
 entry: "any state"
@@ -13,7 +13,7 @@ Send a short completion ping to the user. This is the smallest command in the ki
 
 ## Step 1 — Compose the message
 
-If `$ARGUMENTS` is non-empty, that's the message — use it verbatim. If empty, write one line summarizing what just finished in this session (command · project · outcome), e.g. `myapp: execute-nt Batch A done — 5 fixed, 1 deferred`. One line, plain text, no markdown.
+If `$ARGUMENTS` is non-empty, that's the message — use it verbatim. If empty, write one line summarizing what just finished in this session (command · project · outcome), e.g. `myapp: autopilot-nt Batch A done — 5 fixed, 1 deferred`. One line, plain text, no markdown.
 
 ## Step 2 — Deliver, best-effort, every configured channel
 

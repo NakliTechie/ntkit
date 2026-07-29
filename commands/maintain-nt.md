@@ -1,5 +1,5 @@
 ---
-description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, lockfile drift, and (web projects) Core Web Vitals drift plus new third-party requests; rank them and batch into a fix-workplan. Applies safe quick-fixes automatically (verified, reverted on failure); majors defer to /execute-nt. Writes plan/maintenance-<date>.md.
+description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, lockfile drift, and (web projects) Core Web Vitals drift plus new third-party requests; rank them and batch into a fix-workplan. Applies safe quick-fixes automatically (verified, reverted on failure); majors defer to /autopilot-nt. Writes plan/maintenance-<date>.md.
 argument-hint: "[focus: deps | actions | security | links | perf]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "a repo with dependencies or workflows"
@@ -7,7 +7,7 @@ exit: "ranked fix-workplan written; safe quick-fixes applied + verified"
 writes: "plan/maintenance-<date>.md"
 ---
 
-Keep a shipped project alive. `/maintain-nt` sweeps for the rot that accumulates after launch — outdated/deprecated dependencies, stale GitHub Actions, security advisories, dead links, lockfile drift — ranks what it finds, and hands back a batched fix-workplan in the `/forward-pass-nt` shape. The sweep itself is read-only; the **safe class** — SHA-pins, patch bumps, dead links — gets applied on the spot and verified, because that class is defined by reversibility. Anything that can break you (major bumps, breaking changes) stays in the workplan for `/execute-nt`.
+Keep a shipped project alive. `/maintain-nt` sweeps for the rot that accumulates after launch — outdated/deprecated dependencies, stale GitHub Actions, security advisories, dead links, lockfile drift — ranks what it finds, and hands back a batched fix-workplan in the `/forward-pass-nt` shape. The sweep itself is read-only; the **safe class** — SHA-pins, patch bumps, dead links — gets applied on the spot and verified, because that class is defined by reversibility. Anything that can break you (major bumps, breaking changes) stays in the workplan for `/autopilot-nt`.
 
 This is the on-demand version of a scheduled upkeep routine — run it on a cadence.
 
@@ -35,6 +35,6 @@ Assign stable IDs and rank by **risk**: a security advisory or a deprecated-and-
 
 ## Phase 4 — Report + safe quick-fixes
 
-**Write `plan/maintenance-YYYY-MM-DD.md`** in the `/forward-pass-nt` report shape: findings by ID, a batched Workplan, and a coverage note (what was checked, what wasn't) — plain teammate language throughout, no AI-speak or filler. Then **apply the safe quick-fixes now, no confirmation** — SHA-pin actions, patch-level bumps, fix dead links — verifying each (install/build still green) and reverting any that fails its check; report what landed with evidence. **Defer major bumps to `/execute-nt`** (so each is fixed and verified individually); point breaking-change calls at `/decide-nt`.
+**Write `plan/maintenance-YYYY-MM-DD.md`** in the `/forward-pass-nt` report shape: findings by ID, a batched Workplan, and a coverage note (what was checked, what wasn't) — plain teammate language throughout, no AI-speak or filler. Then **apply the safe quick-fixes now, no confirmation** — SHA-pin actions, patch-level bumps, fix dead links — verifying each (install/build still green) and reverting any that fails its check; report what landed with evidence. **Defer major bumps to `/autopilot-nt`** (so each is fixed and verified individually); point breaking-change calls at `/decide-nt`.
 
-End by naming the highest-risk finding, and that `/execute-nt` works the workplan while `/replan-nt` folds it.
+End by naming the highest-risk finding, and that `/autopilot-nt` works the workplan while `/replan-nt` folds it.

@@ -1,12 +1,12 @@
 ---
-description: "Stream-of-consciousness capture — log running commentary mid-build to plan/soc.md (timestamped, near-verbatim), zero processing, work continues. The third sibling of /decide-nt (decisions) and /idea-nt (ideas), for everything that's neither yet. /replan-nt triages the file later."
+description: "Stream-of-consciousness capture — log running commentary mid-build to plan/soc.md (timestamped, near-verbatim), zero processing, work continues. /decide-nt's sibling for everything that isn't yet a load-bearing decision — including future-work ideas. /replan-nt triages the file later."
 argument-hint: "<the thought, e.g. \"login feels slow — maybe preload the session\">"
 entry: "any state — especially mid-build"
 exit: "timestamped entry appended to plan/soc.md; the work continues"
 writes: "plan/soc.md"
 ---
 
-Log a passing thought while the build keeps moving. `/soc-nt` completes the mid-flow capture trio: `/decide-nt` records a *decision* (curated, into history), `/idea-nt` parks an *actionable idea* (into the backlog), and `/soc-nt` takes **everything else** — observations, hunches, gripes, half-formed connections — as a raw stream. Route by certainty: know it's a decision → decide; know it's future work → idea; thinking out loud → soc.
+Log a passing thought while the build keeps moving. `/soc-nt` is `/decide-nt`'s sibling: decide records a load-bearing *decision*, curated, into history — soc takes **everything else**: future-work ideas, observations, hunches, gripes, half-formed connections, as a raw stream. Route by certainty: know it's a decision → decide; anything else, including an idea that isn't backlog-ready yet → soc. `/replan-nt` sorts the stream out later — actionable ideas promote to the backlog, load-bearing calls surface as decisions, questions land in `pending.md`.
 
 The contract: **capture, don't process.** No analysis, no follow-up questions, no acting on it now.
 

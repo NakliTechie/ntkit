@@ -14,14 +14,14 @@ Query the **knowledge vault** and answer from it. `/ask-nt` is the read-side sib
 `$ARGUMENTS` is the question. If empty, ask _"What do you want to know?"_ and use the next message. Note any **realm** the question implies (`personal` / `work` / `knowledge`) — you'll filter on it in Step 2.
 
 ## Step 2 — Search the vault (broad → narrow)
-The vault is structured for retrieval; use the structure, don't just grep blindly:
+The vault is structured for retrieval; use the structure, don't just grep blindly — but don't let a guessed topic narrow your search terms before you've cast a wide net. A note is filed by what it's *about*, not by every term someone might use to ask for it; searching only within an assumed domain is how a real hit gets missed entirely.
 
-1. **Topics first.** `ls "$VAULT/topics/"` and read any MOC matching the question's theme — MOCs are the curated indexes; their linked notes are the high-signal set.
-2. **Full-text search** across `sources/` and `notes/` for the question's key terms _and synonyms_:
+1. **Full-text search first, unscoped.** `rg` the question's key terms across ALL of `sources/`, `notes/`, and `topics/` — not just the topic you think it belongs to:
    ```bash
-   rg -l -i -e "term1" -e "term2" "$VAULT"/sources "$VAULT"/notes
+   rg -l -i -e "term1" -e "term2" "$VAULT"/sources "$VAULT"/notes "$VAULT"/topics
    ```
-   Look at titles, tags, TL;DRs, and claims — not just bodies.
+   Look at titles, tags, authors, TL;DRs, and claims — not just bodies. **For a short or ambiguous term** (an acronym, initials, a two-word phrase), try its most likely literal expansions too, before picking a domain and searching only that domain's jargon — "MS" could mean Microsoft, a maturity model, or something else; the wrong first guess silently forecloses the right one.
+2. **Topics next, to narrow.** `ls "$VAULT/topics/"` and read any MOC matching the question's theme — MOCs are the curated indexes, and their linked notes are the high-signal set for *narrowing among* what Step 1 already found. Don't use topic-guessing to decide what to search for in the first place.
 3. **Realm filter** when the question scopes it: add `rg "^domain: work"` etc., or restrict to the matching notes.
 4. **Follow the graph.** From strong hits, follow `[[wikilinks]]` one hop (and their backlinks via `rg "\[\[<slug>\]\]"`) to pull in connected context.
 

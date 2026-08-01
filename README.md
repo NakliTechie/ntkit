@@ -51,6 +51,10 @@ That vocabulary was always secretly a state machine — `plan/` is the external 
 
 Parallel `/autopilot-nt` runs follow the actor rule: each in its own worktree, no shared state, the morning report as the only mailbox, `/standup-nt` the sole cross-repo reader. And `history.md` is an event log — `/replan-nt` replays it against `pending.md` and reports drift before archiving anything. No framework, no dependency: the formalism is a markdown table and three frontmatter lines.
 
+## The report format
+
+The rule the state machine runs on — **"done" is the verifier's word** — also governs how the agent *talks to you*. [`ATTEST.md`](ATTEST.md) makes that checkable. Every status report, blocker, and handback is typed blocks — RESULT / STATUS / BLOCKER / QUESTION / RISK / DIFF / PLAN / ESCALATION, worst news first — and every factual claim carries an evidence class: `verified` (a check ran and passed, cited with the command and its exit code), down through `observed`, `inferred`, `assumed`, to `reported`. The success words — *done, fixed, passing, works, no regressions* — are locked to `verified` claims with a resolving pointer; anywhere else the agent writes the honest downgrade ("implemented, not yet verified"). Banned outright: hedges (*should work*, *probably*), minimizers (*just*, *trivial*), and success theater (*perfect*, *all set*, exclamation marks). Drop it in a `CLAUDE.md` and reference it; a linter judges conformance, not vibes. It governs communication, not code.
+
 ## Knowledge vault
 
 Two commands operate on a single Obsidian-compatible **knowledge vault** (plain-markdown, git-backed) instead of a repo's `plan/` folder — the write and read halves of a second brain. They keep one rule: **sources** (what *they* said) stay separate from **notes** (what *you* concluded).

@@ -25,6 +25,7 @@ Cover, in this order:
 - **Decisions** — what was chosen and why (especially anything non-obvious)
 - **Tried then rolled back** — dead ends worth remembering so we don't repeat them
 - **Open questions** — anything that surfaced today but isn't resolved
+- **Deferred / parked** — anything raised today but consciously *not* done now (skipped, "later", out of current scope, not abandoned) → seeds `## Parked` in pending.md, so a "not now" said out loud doesn't evaporate
 
 Keep it tight — bullet points, not prose. The future-self reading this wants signal, not a transcript.
 
@@ -46,7 +47,7 @@ Write or update `plan/pending.md`. The canonical structure (shared with /replan-
 ```
 
 Merge rules:
-- **File exists with sections:** preserve them. New items surfaced today go into `Now` by default, or `Open questions` if phrased as a question. Remove items finished today from wherever they sit. Don't touch `Parked` unless something explicitly moved out of scope today.
+- **File exists with sections:** preserve them. New items surfaced today go into `Now` by default, `Open questions` if phrased as a question, or **`Parked` if it was deferred this session** — raised but chosen against for now (skipped, "later", out of current scope, not abandoned). Remove items finished today from wherever they sit. Actively move a "not now" into `Parked` rather than dropping it; leave already-parked items alone unless they came back into scope today.
 - **File exists, flat (no sections):** keep it flat — don't restructure mid-windup. Just add new items and remove finished ones. (User can run `/replan-nt` when ready to migrate to the structured form.)
 - **File doesn't exist:** create it with the three sections (canonical from day one).
 

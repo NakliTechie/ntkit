@@ -6,7 +6,7 @@ exit: "timestamped entry appended to plan/soc.md; the work continues"
 writes: "plan/soc.md"
 ---
 
-Log a passing thought while the build keeps moving. `/soc-nt` is `/decide-nt`'s sibling: decide records a load-bearing *decision*, curated, into history — soc takes **everything else**: future-work ideas, observations, hunches, gripes, half-formed connections, as a raw stream. Route by certainty: know it's a decision → decide; anything else, including an idea that isn't backlog-ready yet → soc. `/replan-nt` sorts the stream out later — actionable ideas promote to the backlog, load-bearing calls surface as decisions, questions land in `pending.md`.
+Log a passing thought while the build keeps moving. `/soc-nt` is `/decide-nt`'s sibling: decide records a load-bearing *decision*, curated, into history — soc takes **everything else**: future-work ideas, observations, hunches, gripes, half-formed connections, and "park it / not now" deferrals — anything raised but consciously not done now — as a raw stream. Route by certainty: know it's a decision → decide; anything else, including an idea that isn't backlog-ready yet or a "skip this for now" → soc. `/replan-nt` sorts the stream out later — actionable ideas promote to the backlog, deferrals land in `pending.md` `## Parked`, load-bearing calls surface as decisions, questions land in `pending.md`.
 
 The contract: **capture, don't process.** No analysis, no follow-up questions, no acting on it now.
 

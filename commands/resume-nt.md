@@ -16,7 +16,7 @@ If the current directory is not inside a git repo, ask the user which project to
 
 Look inside `plan/` for:
 - `workplan.md` — the chunked execution play (primary)
-- `pending.md` — open items, especially the `## Open questions` section
+- `pending.md` — open items, especially the `## Open questions` section; also scan `## Parked` so deferred "not now" items resurface instead of rotting
 - `history.md` — quick scan of `## Decisions` (recent ones) for context
 - The most recent `plan/YYYY-MM-DD-summary.md` — freshest "where we left off"
 - The most recent `plan/YYYY-MM-DD-autopilot.md` — an unattended run's morning report (branch · final gate · **Shipped: merged or held** · Landed / Needs you / Assumed). If it's **newer than the newest summary**, it's the freshest thing that happened — read its `Shipped:` line: **HELD** (red gate / conflict) means an unmerged `autopilot/<date>` branch is waiting on you, and reviewing it outranks the workplan's top chunk; **MERGED** means a green run already shipped to the default branch — pull it and glance at what landed.
@@ -59,6 +59,7 @@ Last session (<date from latest summary, or "no summary on file">):
   Shipped: <one-line bullet, or "—">
   Decisions: <one-line bullet, or "—">
   Open questions: <bullet, or "—">
+  Parked (<count>): <top 2–3 deferred items, or "—"> — not abandoned, still waiting
 
 Next chunk — "<title from top of workplan.md>" (<size estimate>):
   - <item 1>

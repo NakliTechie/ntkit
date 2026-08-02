@@ -77,6 +77,11 @@ If you have not run the verifier, write the honest downgrade instead:
 - not "works" → "ran without error on <input> (observed)"
 - not "no regressions" → "suite <id> passed" or say which suites did not run
 
+A **refusal-only** outcome is never a "done": if only the refusal or guard path is
+built and the positive capability is not, report it as unfinished — "refusal path
+implemented; capability not yet built" — never inside a reserved word. (The
+delivery-side rule this mirrors: `SUBSTANCE.md` §4.)
+
 ## 4. Banned words — never, in any block
 
 - Predictive hedges: should work, probably, likely, hopefully, seems to,

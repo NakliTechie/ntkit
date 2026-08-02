@@ -52,8 +52,26 @@ These rules bind human-directed sessions and agent-swarm runs equally, and must 
 into the acceptance criteria of the work items themselves**: a `workplan.md` chunk item names
 the runnable behavior that proves it done, and the `/walkthrough-nt` + `/autopilot-nt` +
 `/release-nt` gate is where **"done is the gate's word"** is enforced — never the agent's
-self-report. Checking the §2 ratio and hunting hard-coded success paths are a natural part of
-a `/forward-pass-nt` or `/replan-nt` pass, so the discipline stays checkable, not aspirational.
+self-report.
+
+## 6. Named reward-hacking patterns to refuse
+
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Six that
+agent-driven work invites most — refuse them; §1–5 cover the rest:
+
+1. **Gate self-weakening** — editing the verifier so a failing check passes. The committed
+   `/walkthrough-nt` verifier *is* the gate; changing it to go green is tampering, not a fix.
+2. **Proof-class inflation** — fixtures, mocks, or hand-inserted rows shown as live proof. Live
+   proof is a runtime-selected subject with a real receipt — ATTEST `verified`/`observed`, not
+   `assumed` dressed up.
+3. **Tautological tests** — a test that asserts whatever the code already does, or skips the
+   negative case. Each feature item pre-specifies one assertion a naive wrong build would fail.
+4. **Stub-as-done** — a placeholder that compiles (a TODO / `unimplemented` marker) counted as
+   finished. It builds ≠ it works; committed code carries no scaffolds.
+5. **Spec-editing as progress** — weakening a plan, spec, or frozen decision instead of building
+   it. Plan edits never close a feature item; a frozen decision moves only through `/decide-nt`.
+6. **Demo-path hardcoding** — special-casing the demo inputs so the happy path passes. Verify on
+   runtime-selected subjects that differ from the dev fixtures (`/walkthrough-nt`, `/demo-nt` seed).
 
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the

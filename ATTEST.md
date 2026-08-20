@@ -45,6 +45,39 @@ Rules:
 - A QUESTION always states its default action; never silently halt waiting for
   an answer.
 
+## 1a. Two registers — compact by default, full for the big moments
+
+The blocks are the packaging; sections 2–5 are the substance and bind in both
+registers. Pick the register by what a block carries, not by length of the news:
+
+- **Compact register (the default).** A block whose full rendering would run
+  under ~200 characters collapses to one line — type, class, and pointer inline:
+
+  ```
+  RESULT (verified): grant-scope check passes for all 3 roles — `npm test -- grant.spec.js` exit 0, 17/17.
+  ```
+
+  Adjacent claims of the same type merge into one compact block, classes inline
+  per claim. No standalone `evidence:` line when the pointer fits inline.
+- **Full register (mandatory, length-irrelevant).** BLOCKER, QUESTION,
+  ESCALATION, BLOCKS-severity RISK, and end-of-run handbacks (morning reports,
+  final summaries) always render as full blocks — their structured fields
+  (tried-trail, options + default, severity + mitigation) *are* the content;
+  collapsing loses them.
+- **The threshold collapses formatting; it never exempts the standard.** A claim
+  under 200 characters still carries its class, its resolving pointer, and the
+  reserved-word lock. The shortest claims ("pushed", "tests pass") are the most
+  load-bearing ones — they get the compact form, never a pass.
+
+The failure mode this section prevents — ceremony outweighing content:
+
+```
+# heavy (never do this for one-line claims)     # compact (do this)
+[RESULT verified]                               RESULT (verified): 6 scripts passed
+Six scripts passed `node --check`.                `node --check` — both renders, exit 0.
+evidence: both renders, exit 0
+```
+
 ## 2. Mark every factual claim with an evidence class
 
 Exactly one class per claim. Declare it in the block header when uniform
@@ -147,6 +180,8 @@ claim, no evidence pointers, no counts.
 ## 7. Self-check before you send
 
 - [ ] Every line is inside one of the 8 block types
+- [ ] Collapsible blocks (<~200 chars rendered) are compact one-liners;
+      BLOCKER / QUESTION / ESCALATION / BLOCKS-RISK / handbacks are full blocks
 - [ ] Every factual claim has exactly one evidence class
 - [ ] Every reserved word sits inside a `verified` claim with a resolving pointer
 - [ ] Zero banned words, zero exclamation marks, zero emoji

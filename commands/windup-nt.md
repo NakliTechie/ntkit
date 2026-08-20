@@ -1,7 +1,7 @@
 ---
 description: End-of-day windup — implicit /replan-nt first when plan/ has accumulated, then day summary in plan/, update plan/pending.md, ensure plan/ is gitignored, commit/push non-plan changes, print resume handoff
 entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
-exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, resume handoff printed"
+exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, clean closes merged to main, stray worktrees swept, resume handoff printed"
 writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/_archive/"
 ---
 
@@ -88,13 +88,25 @@ Order chunks so the next session can pick the top one and start. `pending.md` is
 
 Check that `plan/` (or `/plan/`) appears in the repo's `.gitignore`. If not, add it. The plan/ folder is local-only working notes — its contents must not be pushed to remote.
 
-## 5. Commit and push non-plan changes
+## 5. Commit, merge to main, push — and sweep stray worktrees
 
+**Commit + push:**
 - Run `git status` to see what's outside plan/.
 - If there are uncommitted changes outside plan/: stage them (by path, never `git add -A`), commit with a clear one-line message summarizing the day's work, then `git push` to the current branch's upstream.
 - If there's nothing to commit, skip the commit but still attempt `git push` in case earlier local commits haven't been pushed.
 - If the repo has no remote configured or the push fails, note it in the final handoff message rather than silently swallowing the error.
 - Never force-push. Otherwise, push without prompting — including to `main`/`master`. (windup is end-of-session ritual; if the user invoked it, they're authorizing the push.)
+
+**Merge to main (conditional — the closing-state guard gates it):**
+- On the default branch already → nothing to merge.
+- On a feature branch AND closing clean (work committed, verifier run and green): merge into the default branch, push it, delete the feature branch (local + remote). Small logical chunks land on main at close — that's the convention.
+- Closing from `building` (uncommitted work, verifier not run or not green): do **not** merge. Push the feature branch as-is and name it in the handoff ("on branch `x`, unmerged: <why>"). A windup never launders unverified work onto main.
+
+**Stray-worktree sweep:**
+- Run `git worktree list`. For each linked worktree beyond the main checkout (autopilot/agent leftovers):
+  - Clean (no uncommitted changes) and its branch fully merged into the default branch → `git worktree remove <path>` and delete the branch.
+  - Dirty, or holding unmerged commits → leave it untouched and list it in the handoff with what it's holding. Never delete work to tidy up.
+- Finish with `git worktree prune` to clear stale registrations.
 
 ## 6. Resume handoff (the final message)
 
@@ -103,6 +115,8 @@ Print a clear, tight handoff message in this exact shape:
 ```
 Wound up <project-name> for today.
 [if Step 0 fired:] Replanned first: <N> files folded · Replay: <clean | N orphans / M ghosts>
+[if unmerged:] Branch `<name>` pushed but NOT merged — <why>
+[if worktrees kept:] Worktrees kept: <path> — <what it holds>
 
 Folder: <absolute path>
 Resume next session: cd <absolute path> and run /resume-nt

@@ -40,10 +40,10 @@ whatever state the repo is in. The state survives the session; that's the point.
 | State | Legal | Illegal (refuse or warn) |
 | --- | --- | --- |
 | `fresh` | `/scaffold-nt` | Everything that reads `plan/` |
-| `briefed` | audits, `/autopilot-nt` (if a report is open), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
+| `briefed` | audits, `/autopilot-nt` (if a report is open), `/lab-nt` (new or resumed campaign), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
 | `building` | `/decide-nt`, `/soc-nt`, `/windup-nt` (warns), `/autopilot-nt` | `/release-nt`, `/package-nt` |
 | `verifying` | `/autopilot-nt`, `/walkthrough-nt`, `/forward-pass-nt` | `/release-nt` with open items |
-| `blocked` | `/resume-nt`, `/decide-nt` (unblock), `/replan-nt` | `/autopilot-nt` at the same wall |
+| `blocked` | `/resume-nt`, `/decide-nt` (unblock), `/replan-nt` | `/autopilot-nt` at the same wall; `/lab-nt resume` at an unchanged wall |
 | `shipped` | `/package-nt`, `/release-nt` (next), `/maintain-nt` | — |
 
 Always legal, any state: `/standup-nt`, `/resume-nt`, `/decide-nt`, `/soc-nt`,
@@ -86,10 +86,11 @@ doctrine: durability and reach, not ceremony.
 
 ## The actor rule (parallel runs)
 
-Concurrent `/autopilot-nt` runs are actors: each in its own worktree, private
-state, **no reading another run's worktree or plan scratch**. The only
-communication is the mailbox — the morning report `plan/<date>-autopilot.md`, one
-format, one location. `/standup-nt` is the sole cross-actor reader;
+Concurrent `/autopilot-nt` runs (and `/lab-nt` campaigns) are actors: each in its
+own worktree, private state, **no reading another run's worktree or plan
+scratch**. The only communication is the mailbox — the morning report
+`plan/<date>-autopilot.md` (or the leg report `plan/lab/<slug>/<date>-leg.md`),
+one format, one location. `/standup-nt` is the sole cross-actor reader;
 `/resume-nt` reads only its own repo's mailbox. Message-passing, no shared
 memory — that's what makes parallel runs safe to leave alone.
 

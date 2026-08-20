@@ -1,5 +1,5 @@
 ---
-description: Generate a searchable HTML guide — identify each role, walk the running app through their features in a real browser capturing screenshots, and build a single-file guide (role + feature sections, captions, inline search). Regenerates from a committed generator; never hand-edits the output.
+description: Generate a searchable HTML guide — identify each role, walk the running app through their features in a real browser capturing screenshots, and build a single-file guide (role + feature sections, captions, inline search, lightbox image viewer, mobile-friendly). Regenerates from a committed generator; never hand-edits the output.
 argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "app boots; guide generator committed (or created this run)"
@@ -65,6 +65,11 @@ The builder reads the screenshots + caption data and emits one self-contained `g
   - Give each card a `data-search` attribute = lowercased `role + feature title + caption + slug`.
   - On input: lowercase the query, toggle a `.hidden` class per card by `data-search.includes(query)`, hide sections left empty, show a "no matches" note when nothing matches.
   - `/` focuses the box, `Esc` clears it. Pure vanilla JS, no dependencies, inlined in the page.
+- **Lightbox viewer.** Every screenshot opens full-size in an in-page lightbox — a dimmed overlay showing the image at max size with its caption below; never a bare `<a href="img">` that navigates away. Vanilla JS, inlined, no dependencies:
+  - **Open/close** — click/tap a screenshot opens it; `Esc`, a visible `×` button, and a click/tap on the backdrop all close it. Closing restores scroll position.
+  - **Navigation** — `←`/`→` step to the previous/next screenshot in guide order (skipping search-hidden cards); `↑`/`↓` jump to the first screenshot of the previous/next feature section, so a reader can flip through the whole app from inside the lightbox. On-screen prev/next arrows mirror the keys, with a `role · feature — N/M` position line so the reader knows where they are.
+  - **Mobile** — the lightbox (and the guide as a whole) must work on a phone: **swipe left/right** = prev/next, **swipe down** (or tap backdrop) = close, native pinch-zoom on the image not blocked, on-screen controls at comfortable tap size (≥44px), image letterboxed to fit the viewport (`max-width/max-height: 100%`, `object-fit: contain`).
+- **Responsive layout.** The guide itself must read well on a phone, not just a desktop: `<meta name="viewport">`, cards/screenshots at `max-width: 100%`, the sticky search usable at small widths, TOC collapsing to a simple list. Desktop-viewport screenshots on a phone are exactly what the lightbox's pinch-zoom is for.
 
 Keep CSS inlined; the guide must be a single portable file plus its `screenshots/` folder.
 
@@ -72,6 +77,8 @@ Keep CSS inlined; the guide must be a single portable file plus its `screenshots
 
 Don't ship a guide you haven't looked at:
 - **Serve `guide/` and open it.** Confirm screenshots load (not blank), the **inline search** filters correctly (type a feature name → only matching cards remain; `Esc` restores), and TOC anchors jump.
+- **Exercise the lightbox** — open a screenshot, arrow through prev/next (`←`/`→`) and section jumps (`↑`/`↓`), confirm the position line updates and `Esc`/backdrop close it. With a search filter active, confirm navigation skips hidden cards.
+- **Check it on a phone viewport** — mobile emulation (~375px): guide readable, search usable, lightbox opens, swipe left/right navigates, swipe down closes, pinch-zoom works on the image.
 - **Print:** roles × features covered, total screenshots, any `empty`/`fail`/console-error routes (the blind spots), and the path to the guide.
 - **Shipping:** unlike `plan/`, the guide is meant to be committed. Screenshots can be large — respect `.gitignore`/`.assetsignore` and let the user decide whether to commit images or host them. Don't push; `/windup-nt` ships it.
 

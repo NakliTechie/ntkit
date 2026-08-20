@@ -1,15 +1,25 @@
 ---
-description: End-of-day windup — write day summary in plan/, update plan/pending.md, ensure plan/ is gitignored, commit/push non-plan changes, print resume handoff
+description: End-of-day windup — implicit /replan-nt first when plan/ has accumulated, then day summary in plan/, update plan/pending.md, ensure plan/ is gitignored, commit/push non-plan changes, print resume handoff
 entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
-exit: "summary + pending + workplan updated, non-plan work pushed, resume handoff printed"
-writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md"
+exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, resume handoff printed"
+writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/_archive/"
 ---
 
-Wind up the current project for today. Execute these 6 steps in order, working in the current project's repo root.
+Wind up the current project for today. Execute these steps in order (0–6), working in the current project's repo root.
 
 If the current directory is not inside a git repo, stop and ask the user which project to wind up — do not guess.
 
 **Closing-state guard.** Windup persists whatever state the repo is in (per ntkit's `STATES.md` — kit doctrine, not a file in this project) — it never blocks — but it must be honest about which state that is. If closing from `building` (uncommitted work, a half-done chunk, a verifier not run or not green), say so out loud before writing anything — "Closing from `building`, not `verifying`: <what's unfinished>" — and record that state and the unfinished item explicitly in both the day summary and the resume handoff, so tomorrow's `/resume-nt` reopens on the truth, not on an implied clean close. A windup that papers over a mid-chunk state is the one bug this command can have.
+
+## 0. Implicit replan (conditional — fires on evidence, not ceremony)
+
+Before writing anything, count what `plan/` has accumulated from **before today**: dated summaries, autopilot/audit reports (forward-pass, walkthrough, ux-review, maintenance), unnamed scratch, and a `soc.md` carrying pre-today entries. **3 or more such foldable files → run the full `/replan-nt` consolidation first** — classify, fold into the three canonical files, replay-check, archive — then proceed below on the freshly consolidated base. Fewer → skip silently; a light project's windup looks exactly as it always did (the STATES.md scaling rule: an artifact that doesn't exist can't trigger a step).
+
+Announce, don't ask: "plan/ has accumulated N files — replanning first." Two mechanics matter:
+- **Order.** The fold runs *before* Step 1, so today's summary is written after it and survives un-archived for `/resume-nt` to read tomorrow.
+- **The replay check's verdict travels.** Carry `Replay: clean` — or the orphan/ghost list — into the final handoff (Step 6), so drift caught during the fold is seen at close, not buried in an archived file.
+
+This makes consolidation ambient: `/replan-nt` stays invocable on its own, but nobody has to *remember* it — a windup on an accumulated plan/ folds as it closes.
 
 ## 1. Day summary
 
@@ -92,6 +102,7 @@ Print a clear, tight handoff message in this exact shape:
 
 ```
 Wound up <project-name> for today.
+[if Step 0 fired:] Replanned first: <N> files folded · Replay: <clean | N orphans / M ghosts>
 
 Folder: <absolute path>
 Resume next session: cd <absolute path> and run /resume-nt

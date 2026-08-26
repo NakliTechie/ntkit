@@ -70,7 +70,11 @@ Four rules make the table enforceable, not decorative:
    credentials, no repo) or the action is outward-facing (publish, post,
    release, push to the world). Everything else takes the safe default,
    announces it, and logs it — the user steers by interrupting, not by being
-   polled.
+   polled. And the safe default for outward-facing *power* is **off**:
+   authority to act irreversibly on the world — push, merge, release, deploy,
+   delete, send, spend — is opt-in per run and **defaults to denied when
+   unstated**; reversible in-repo work (edit, branch commit, `plan/` write)
+   needs no grant. (Authoring face: [`commands/AUTHORING.md`](commands/AUTHORING.md) §3.)
 
 ## Scaling — guards fire on evidence, not on ceremony
 

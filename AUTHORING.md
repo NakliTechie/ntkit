@@ -8,8 +8,8 @@ built-in-skill standards in [osolmaz/pi-workflows](https://github.com/osolmaz/pi
 folded into ntkit's own doctrine.)
 
 The three pillars bind what a command *does*: it transitions state per
-[`STATES.md`](../STATES.md), reports per [`ATTEST.md`](../ATTEST.md), and delivers
-per [`SUBSTANCE.md`](../SUBSTANCE.md). This file binds how a command is *written*.
+[`STATES.md`](STATES.md), reports per [`ATTEST.md`](ATTEST.md), and delivers
+per [`SUBSTANCE.md`](SUBSTANCE.md). This file binds how a command is *written*.
 
 ## 1. Declare the contract in frontmatter
 

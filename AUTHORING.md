@@ -2,7 +2,7 @@
 
 Every `-nt` command is a prompt with a contract. This file is the standard for
 writing a new one — and the checklist for reviewing a change to an existing one.
-It exists because twenty commands drifting apart in shape is how a kit rots; one
+It exists because twenty-one commands drifting apart in shape is how a kit rots; one
 shape is how they stay composable. (The six-point idea is ported from the
 built-in-skill standards in [osolmaz/pi-workflows](https://github.com/osolmaz/pi-workflows),
 folded into ntkit's own doctrine.)
@@ -66,7 +66,7 @@ outward-facing — guard #4.
 
 The smallest command that fully meets the need, no speculative flags. `/notify-nt`
 is the floor — one job, best-effort, never blocks. If a new capability is a
-variant of an existing command, **extend it**; a twenty-first command must earn
+variant of an existing command, **extend it**; a twenty-second command must earn
 its slot against the minimal-tooling rule.
 
 ## Checklist

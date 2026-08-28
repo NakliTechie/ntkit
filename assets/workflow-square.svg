@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img">
 <title>ntkit — when to use what</title>
-<desc>A square light-mode workflow map of ntkit's 19 Claude Code commands across six phases plus a daily session loop and a knowledge-vault pair.</desc>
+<desc>A square light-mode workflow map of ntkit's 21 Claude Code commands across six phases plus a daily session loop and a knowledge-vault pair.</desc>
 <style>
 text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 .h1{fill:#1f2328;font-size:52px;font-weight:800}
@@ -28,7 +28,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <rect x="196" y="52" width="13" height="37" rx="2" fill="#0891b2"/>
 <text x="54" y="120" class="tag">when to use what  ·  the rigor layer for AI-assisted dev</text>
 <rect x="996" y="50" width="152" height="36" rx="18" class="pill"/>
-<text x="1072" y="73" class="pilltxt" text-anchor="middle">19 commands</text>
+<text x="1072" y="73" class="pilltxt" text-anchor="middle">21 commands</text>
 <rect x="52" y="146" width="1096" height="40" rx="10" class="loopbox"/>
 <text x="72" y="172" class="loop"><tspan class="loopb">↻  The daily loop:</tspan>  /resume picks up exactly where /windup left off — every session.</text>
 <g transform="translate(52,212)">
@@ -54,6 +54,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <text x="28" y="130" class="cmd"><tspan class="sl">/</tspan>decide<tspan class="suf">-nt</tspan></text>
 <text x="28" y="158" class="cmd"><tspan class="sl">/</tspan>soc<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="14">— stream-of-consciousness</tspan></text>
 <text x="28" y="186" class="cmd"><tspan class="sl">/</tspan>autopilot<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="14">— attended or away</tspan></text>
+<text x="28" y="214" class="cmd"><tspan class="sl">/</tspan>lab<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="14">— research legs</tspan></text>
 </g>
 <g transform="translate(613,496)">
 <rect width="535" height="262" rx="16" class="card"/>
@@ -64,6 +65,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <text x="28" y="158" class="cmd"><tspan class="sl">/</tspan>walkthrough<tspan class="suf">-nt</tspan></text>
 <text x="28" y="186" class="cmd"><tspan class="sl">/</tspan>ux-review<tspan class="suf">-nt</tspan></text>
 <text x="28" y="214" class="cmd"><tspan class="sl">/</tspan>maintain<tspan class="suf">-nt</tspan></text>
+<text x="28" y="242" class="cmd"><tspan class="sl">/</tspan>live-check<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="14">— the replay gate</tspan></text>
 </g>
 <g transform="translate(52,780)">
 <rect width="535" height="262" rx="16" class="card"/>

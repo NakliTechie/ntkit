@@ -2,10 +2,10 @@
 
 **The rigor layer for AI-assisted development.**
 
-Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, reporting *done* when nothing verified it, shipping without leaking a secret. `ntkit` is twenty [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
+Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, reporting *done* when nothing verified it, shipping without leaking a secret. `ntkit` is twenty-one [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
 
 <p align="center">
-  <img src="assets/workflow.png" alt="ntkit workflow map — 19 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
+  <img src="assets/workflow.png" alt="ntkit workflow map — 21 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
 </p>
 
 Most share one idea: a **gitignored `plan/` folder** in each repo holding three files —
@@ -46,7 +46,7 @@ They speak one vocabulary, so each hands off to the next: `/windup-nt` writes wh
 
 That vocabulary was always secretly a state machine — `plan/` is the external state, the commands are events, windup→resume is a transition. [`STATES.md`](STATES.md) makes it explicit: six session states (`fresh → briefed → building → verifying → blocked / shipped`), which commands are legal from which, and the guards that enforce it. Four rules do the enforcing:
 
-- **Every command declares its contract in frontmatter** — `entry` (what it requires), `exit` (the machine-checkable condition that means it finished), `writes` (which plan files it touches). A command whose entry fails refuses; it doesn't proceed politely. `/release-nt` won't tag over a failing verifier or an open fix-workplan; `/autopilot-nt` won't invent a plan when neither an open report/workplan nor a goal exists. Writing or changing a command follows [`AUTHORING.md`](AUTHORING.md) — the one shape all twenty share, including the rule that outward-facing authority (push / merge / release / delete / send) is opt-in and defaults to denied.
+- **Every command declares its contract in frontmatter** — `entry` (what it requires), `exit` (the machine-checkable condition that means it finished), `writes` (which plan files it touches). A command whose entry fails refuses; it doesn't proceed politely. `/release-nt` won't tag over a failing verifier or an open fix-workplan; `/autopilot-nt` won't invent a plan when neither an open report/workplan nor a goal exists. Writing or changing a command follows [`AUTHORING.md`](AUTHORING.md) — the one shape all twenty-one share, including the rule that outward-facing authority (push / merge / release / delete / send) is opt-in and defaults to denied.
 - **"Done" is the verifier's word**, never the agent's — no state advances on a self-report.
 - **Overrides are deliberate and logged** — any guard yields to an explicit `/decide-nt` entry stating why. Bypassed on purpose with a reason is a decision; bypassed by drift is a bug.
 - **Asks are reserved for the unanswerable and the outward-facing** — missing input, unknown credentials, publish/post/release. Everything else takes the safe default, announces it, and logs it; you steer by interrupting, not by being polled.

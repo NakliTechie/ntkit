@@ -91,6 +91,7 @@ If `gh` isn't authed or lacks permission, continue local-only and note the owed 
    - If the handoff has phases/milestones, one Batch per phase, first one tagged `(keystone)`.
    - Else, one Batch A with the top 3–5 Now items.
    - Tri-state checkboxes throughout. `[test]` markers where runtime verification is owed.
+   - **Seed the DRIVER pass** (skip for Throwaway-tier): add to the keystone batch, after the spec-drafting item — `[ ] Agent-first pass (ntkit DRIVER.md): run the driver's-seat meditation over the spec; write the project's agent contract as its §0`. The pass runs once a first spec draft exists, never at scaffold time — scaffold only schedules it so nobody has to remember.
 
 ## Phase 7 — Brief + get started
 

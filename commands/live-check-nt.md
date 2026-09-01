@@ -48,6 +48,7 @@ Pick the surface that actually exercises the path:
 - **A real GPU browser where the model/state is cached** — drive it with the Chrome MCP (claude-in-chrome), not the in-app preview pane. Headless / preview Chromium has **no WebGPU** and an empty cache; the real browser has the ~GB model already on disk.
 
 Then confirm the **prerequisites are actually present** before you test behaviour — don't assume:
+- the project's verification harness, if it has a `doctor` (left by `/walkthrough-nt`), reports green — run it before hand-checking the items below,
 - the model is cached (enumerate Cache Storage / IDB for its files),
 - the capability exists (`navigator.gpu`, `getUserMedia`, the picker API),
 - **the tab is FOREGROUND.** WebGPU (and rAF-driven loops) **throttle or stall in a hidden/backgrounded tab** — a load that hangs at "100%" is almost always this. Check `document.visibilityState`; if `hidden`, ask the user to front the tab and wait, don't diagnose a bug.

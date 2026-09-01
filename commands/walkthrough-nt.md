@@ -3,8 +3,8 @@ description: Role-driven browser walkthrough — identify each user role, drive 
 argument-hint: "[role or flow to focus, e.g. admin | checkout]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "app boots with the shared demo seed"
-exit: "every role walked in a real browser; fixes committed; verification harness created or extended; report written"
-writes: "code, the committed verification harness, plan/walkthrough-<date>.md"
+exit: "every role walked in a real browser; fixes committed; verification harness + feature map created or extended; report written"
+writes: "code, the committed verification harness + feature map, plan/walkthrough-<date>.md"
 ---
 
 Drive the **running app through a real browser, one user role at a time** — walking each role's journeys exactly as that user would — and **fix the logical errors you hit along the way**. This is a *live runtime* audit: the inverse of `/forward-pass-nt`, which reads the code cold and never runs or touches anything. Walkthrough boots the app, clicks through it as each role, watches what actually happens, and repairs what's broken.
@@ -18,6 +18,8 @@ If the project has no browser surface (pure CLI, library, backend-only), say so 
 `$ARGUMENTS` (optional): a role (`admin`) or a flow (`checkout`) to scope to. If empty, cover every role and their primary journeys.
 
 ## Phase 1 — Identify the roles
+
+**Read the feature map first, if one exists.** A prior walkthrough leaves `verify/features/` next to the harness (Phase 4.5) — an index plus one file per feature area: what exists, how a user reaches it, how to drive it, what usually lies. Start from it and verify it against the code, instead of re-deriving the whole cast; where the map and the code disagree, that drift is a finding to fix in the map, never silently absorbed.
 
 Derive the cast of users from the **code**, not from guesses. Look for:
 - **Auth / RBAC** — role enums, permission/policy tables, route guards and middleware, `if (user.role === …)` / `can?()` / `@requires_role`, plan/tier feature flags.
@@ -43,6 +45,7 @@ Mark the **first-run / empty-state** journeys explicitly — they get tested del
 ## Phase 3 — Boot the app, the browser, and a session per role
 
 Get a running app and a browser driving it:
+- **If a harness already exists, run its `doctor` first** — it encodes this repo's specific freshness traps. The bullets below are the fallback for a repo that doesn't have one yet.
 - **Start the app — prefer a production build over dev mode.** Dev mode recompiles each route on first hit (slow, times out the driver) and isn't the bundle users actually run; a `build` + `start` is pre-compiled and fast. Dev is a fallback.
 - **Drive it with the browser tooling available** (the `preview_*` tools if present; otherwise Playwright or a browser MCP). Use explicit `127.0.0.1` and a known-free port — "localhost" can resolve to a different listener than the one you started.
 - **WebGPU can't be tested headless.** Headless Chromium has **no WebGPU** — any flow that loads or runs a model in-browser via WebGPU (and other GPU-gated features) errors out headless. Drive those flows with the **Chrome MCP** (a real, GPU-backed Chrome), not headless Playwright; otherwise mark them untested.
@@ -82,7 +85,17 @@ For surfaces the browser can't drive — payments, outbound email, native file p
 
 ## Phase 4.5 — Leave the lever
 
-A walkthrough that only fixes what it found re-derives everything next time. Before reporting, **distill the journeys just walked into a committed, rerunnable verification harness** — a script (`scripts/verify.*` or whatever the repo's convention is) that drives the app through each role's core journeys and exits non-zero on failure. Committed to the repo, not `plan/` — the point is that anyone (or any later run) can rerun the evidence.
+A walkthrough that only fixes what it found re-derives everything next time. Before reporting, **distill the journeys just walked into a committed, rerunnable verification harness** — a small CLI (`scripts/verify.*` or the repo's convention) with **three entry points**, not a monolith:
+
+- **`doctor`** — the freshness preflight: right build actually running, port owned by this checkout, seed loaded, hydration settled. Reports what's wrong and what to do about it; never fixes silently.
+- **`verify <feature>`** — drive one feature area's journeys, named as in the feature map.
+- **`verify`** — the full sweep, exit non-zero on failure.
+
+Agent-friendly throughout: error messages that say what to do instead, a real `--help`, one machine-readable summary line per run. The full `verify` is what the `/release-nt` and `/autopilot-nt` gates run — that contract is unchanged; `doctor` and `verify <feature>` are what a mid-task agent reaches for without paying for the whole sweep. Committed to the repo, not `plan/` — the point is that anyone (or any later run) can rerun the evidence.
+
+**Worktree-safe by construction.** The harness must run correctly from an isolated worktree: `test -f .git` distinguishes a worktree (`.git` is a file) from the main checkout (a directory). From a worktree, derive the app port and any browser profile / user-data paths from the checkout path, so parallel runs — an `/autopilot-nt` branch, a second walkthrough — never fight the main workspace's instance or each other. Refuse to attach to the main workspace's port from a worktree unless an explicit flag says that's intended. This is the browser-harness face of the actor rule: one run per worktree, no shared state.
+
+**Leave the map with the lever.** Alongside the harness, write (or update) a committed **feature map** — `verify/features/README.md` (the index, in top-to-bottom sweep order) plus one short file per feature area answering four questions: *what exists · how a user reaches it · how to drive it with the harness · what usually lies* (flaky waits, gated variants, signals that look like failures but aren't). Behavior-level, short enough to act on without reading source. This is what the next walkthrough's Phase 1 reads instead of re-deriving the app, what `/autopilot-nt` reads to verify the one feature it just touched, and what `/guide-nt`'s route-plans derive from — the same shared-asset pattern as `demo/seed/`. A fix that changes behavior updates the map in the same commit.
 
 - **First walkthrough:** create it from the journeys walked — the smallest script that proves each role's happy path.
 - **Later walkthroughs:** run it first (regressions surface for free), then walk what it can't reach, then extend it with anything new.

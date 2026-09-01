@@ -19,7 +19,7 @@ If the project has no browser surface (pure CLI, library, backend-only), say so 
 
 Derive the cast and the screens, the same way `/walkthrough-nt` does:
 - **Roles** — from RBAC enums, route guards, role-forked UI, seed personas, docs. Always include the **anonymous visitor** and the **brand-new zero-data user** (first-run) — a guide that only shows a full-of-data app misleads new users.
-- **Features per role** — entry-points-first, the screens/flows each role actually uses. This list **becomes the capture script's route-plan**: an ordered set of `(NN, slug, route, wait_ms)` per role, exactly like Bahi's `PHARMA_ROUTES` / `CONSULTING_ROUTES`.
+- **Features per role** — entry-points-first, the screens/flows each role actually uses. This list **becomes the capture script's route-plan**: an ordered set of `(NN, slug, route, wait_ms)` per role, exactly like Bahi's `PHARMA_ROUTES` / `CONSULTING_ROUTES`. If the repo has a feature map (`verify/features/`, left by `/walkthrough-nt`), derive the route-plan from it rather than from code — and write any drift you notice back to the map, not just the route-plan.
 
 Roles are the guide's top-level sections; features are the subsections. `$ARGUMENTS` narrows the map to one role or feature.
 

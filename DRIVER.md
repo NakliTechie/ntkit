@@ -6,7 +6,7 @@ Distilled from one full application (vise, 2026-09-01) and convergent with indep
 
 ## The invocation
 
-Run this pass **once the first spec draft exists and before code** — at scaffold time there is nothing to reshape; after the build it is a retrofit. Run it again before public release. The prompt, verbatim:
+Run this pass **once the first spec draft exists and before code** — at scaffold time there is nothing to reshape; after the build it is a retrofit. Run it again before public release. The prompt — [@doodlestein](https://x.com/doodlestein)'s, used in toto — verbatim:
 
 > OK, now I want you to think deeply about how to make this entire system as agent-intuitive, agent-ergonomic, and agent-accretive as you can possibly imagine. Put yourself in the driver's seat and imagine that YOU are the one using this system and driving it. What would most enable you to do an awesome job understanding the situation accurately and optimally controlling everything to drive the best and most accurate results possible, with the least expenditure of resources?
 >

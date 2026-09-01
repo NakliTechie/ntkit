@@ -59,7 +59,7 @@ The rule the state machine runs on — **"done" is the verifier's word** — als
 
 ## Built for the driver
 
-The fourth doctrine, [`DRIVER.md`](DRIVER.md), governs the *products* these commands build: everything ships **agent-ready**. It carries a driver's-seat design meditation (run once the first spec draft exists — `/scaffold-nt` seeds it into every new workplan) and ten principles for the agent as primary user: one perception act, machine-decidable outputs, one verdict per next action, bounded output, failures that name their remedy, crash-safety, the tool holding the memory, accretion by mechanism, a tower of abstractions, and a fail-closed evaluator outside the loop.
+The fourth doctrine, [`DRIVER.md`](DRIVER.md), governs the *products* these commands build: everything ships **agent-ready**. It carries a driver's-seat design meditation — [@doodlestein](https://x.com/doodlestein)'s prompt, used in toto — (run once the first spec draft exists; `/scaffold-nt` seeds it into every new workplan) and ten principles for the agent as primary user: one perception act, machine-decidable outputs, one verdict per next action, bounded output, failures that name their remedy, crash-safety, the tool holding the memory, accretion by mechanism, a tower of abstractions, and a fail-closed evaluator outside the loop.
 
 ## What counts as progress
 

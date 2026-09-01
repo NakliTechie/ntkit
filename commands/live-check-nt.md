@@ -55,7 +55,7 @@ Then confirm the **prerequisites are actually present** before you test behaviou
 
 ## Phase 2 — Exercise the real user path with a real gesture
 
-Walk the genuine sequence a user takes, through the **actual UI**:
+Walk the genuine sequence a user takes, through the **actual UI**. Read the flow's file in the feature map first (`verify/features/`, left by `/walkthrough-nt`) when one exists — it names the entry points, the gated variants, and what usually lies, so you drive the real path instead of rediscovering it:
 - For anything **gesture-gated**, use a **trusted input** — a real click/keypress via the browser MCP, not `element.click()` in JS. A programmatic click doesn't carry user activation, so audio stays suspended and focus doesn't move — you'll mis-read a working feature as broken.
 - Feed **real input**. If the path needs a real-world asset (a voice sample, a document, an image), use a genuine one. When a **real person's likeness/voice** would be the input, prefer a **public-domain / properly-licensed** source, keep the output **on-device**, and keep any generated content an obvious **test artifact** — never a distributable impersonation. (Functional QA of your own tool is fine; producing deceptive content is not, even for "testing".)
 - Follow the true order — upload/record → process → act → persist — not a shortcut that skips the step under test.

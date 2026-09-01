@@ -25,6 +25,8 @@ Before reading line-by-line, build a map:
 
 This map drives traversal order and becomes the coverage map in the report. Use Glob/Grep/Bash here; don't read every file yet.
 
+If the repo has a feature map (`verify/features/`, left by `/walkthrough-nt`), read its index as a second input: a feature-level inventory to cross-check the coverage map against — a feature area in the map with no code path in your traversal is a blind spot to close, and vice versa is map drift worth a Stray finding. It orients the pass; it never substitutes for reading the code cold.
+
 ## Phase 2 — Forward traversal with three lenses
 
 Walk the code **start → finish following the real flow** from entry points outward — not alphabetically. For a large app, fan out parallel subagents (Task) by module or flow-segment so coverage is thorough; for a small app, read directly.

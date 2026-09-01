@@ -11,15 +11,9 @@ Prove the **deployed thing actually runs** — load the real model, drive the re
 
 It is the **operational discharge of hard rule ⑤** — *"done is the verifier's word (fresh-context tests / lint / schema / **replay / timing**)."* `node --check` passed, the bundle built, the diff reads correct — all of that is `inferred` or `observed`. For a heavy-model / device-API / gesture-gated / cached-state / timing-dependent path, **behaviour is only `verified` by a live replay.** Until this run passes, the honest state is *"implemented, not yet verified"* (ATTEST §3), never `shipped`.
 
-**The cautionary tale it exists to prevent:** a change that "built fine" was merged to a working feature, silently broke the runtime path (audio went silent), and shipped — because the only proof anyone had was a static check. A live-check would have caught it in one replay. Skipping this gate is how a green static check launders a broken feature.
+Skipping this gate is how a green static check launders a broken feature — the failure class it exists to prevent is "built fine, merged, silently broke the runtime path, shipped."
 
-**Where it sits among the checker siblings:**
-- `/forward-pass-nt` — cold **code** audit (bugs/stubs). Read-only, on the codebase.
-- `/ux-review-nt` — cold **newcomer experience** (is it good to use?). Read-only, wipes state.
-- `/walkthrough-nt` — find **bugs** and fix them (seeds data).
-- `/live-check-nt` — does the **deployed artifact functionally run?** (is it true?). Read-only on code; runs **last**, after merge/deploy, on the real runtime.
-
-ux-review and live-check are the pair most often confused. ux-review asks *"is this good?"* and can run against a mockup. live-check asks *"does this actually work on the real thing?"* and **cannot** run without the real runtime. Different question, different evidence, different failure mode — keep them separate.
+Among the checker siblings it runs **last**, after merge/deploy, on the real runtime, and asks *"does the deployed artifact functionally run?"* — not `/forward-pass-nt`'s code audit, not `/walkthrough-nt`'s find-and-fix, and not `/ux-review-nt`'s *"is it good to use?"* (which can run against a mockup; live-check cannot run without the real runtime).
 
 **READ-ONLY on source.** live-check drives the app and reads evidence; it never edits code. A failure hands out: a bug → `/walkthrough-nt`; a design/UX gap → `/ux-review-nt` or `/decide-nt`; a code defect → a fix pass (its own verification). The maker–checker split holds.
 
@@ -78,7 +72,6 @@ Write `plan/live-check-<date>.md` in ATTEST form:
 
 **The gate:** a clean live-check is what moves the feature's honest state to `shipped`. A fail (or an unreachable runtime) caps it at *"implemented, not yet verified"* and hands the defect to the right sibling. Report worst-news-first; do not launder a partial run into a full pass.
 
-## Project bindings
+## Playbook hook
 
-- **LocalMind** (and any single-file WebGPU local-AI app) → the concrete harness — driving real Chrome via claude-in-chrome, the foreground-tab requirement, the `createBuffer`/IDB probes, sourcing a public-domain reference asset, the stale-edge-vs-browser truth — lives in **`~/.claude/playbooks/live-check.md`**. Read it before the run.
-- Composes with **`~/.claude/playbooks/silent-failures-audit.md`** (global error net + forensics — a live-check that surfaces nothing is only trustworthy if failures would have surfaced) and **`~/.claude/playbooks/screenshot-capture.md`** (prod-build harness).
+If the user's config (CLAUDE.md / memory) or the project itself names a live-check or replay playbook for this kind of surface, read it before Phase 1 — it carries the concrete probes and gotchas this generic spec can't.

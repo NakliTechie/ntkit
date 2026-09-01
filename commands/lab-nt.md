@@ -45,6 +45,8 @@ For each iteration:
 5. **Keep or revert** — improvement commits (`lab <id>: <what> — <metric old → new>`), regression or no-change reverts clean (`git restore` / reset). The branch tip is always the best-known state — that invariant is what makes any stop point safe and any interruption lossless.
 6. **Journal** the row; next iteration. No pause between experiments — the budgets and thresholds are the exits, not the user's attention.
 
+**Fold, don't be compacted.** Once an experiment is journaled and committed/reverted, its working detail lives in the journal row + git — reference it, don't carry it. The loop runs from contract + journal + branch tip (that's why step 1 re-reads them), never from conversational recall of earlier experiments. At each **critic-cadence point**, fold deliberately: confirm the journal is current enough that the leg could resume from files alone, then drop finished-experiment detail from working context. Context management at chosen seams beats the harness's automatic compaction firing mid-experiment; discard only what a journal or git re-read can recover.
+
 **Critic on cadence, not inline.** Every N experiments (contract cadence), spawn a fresh-eyes subagent (Task) whose context is *only* the contract and the journal — not the loop's reasoning — to answer four questions: circling? drifting off-contract? gaming the metric? diminishing returns? Its verdict is a journal row. Two consecutive "diminishing" verdicts end the leg early (honest STAGNANT beats a ground-out BUDGET). One critic pass per cadence point — iterated self-critique without new information degrades; the cap is structural.
 
 ## Phase 2 — How a leg ends (never silently)

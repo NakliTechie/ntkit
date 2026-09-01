@@ -61,6 +61,8 @@ For each item, in order:
 
 Then take the next item. No pause between items, no pause between batches — that's the whole point. Between items, glance at the launch-contract budget: the clock and the item cap are exits, not suggestions.
 
+**Fold, don't be compacted.** A completed item's working detail — the files read, the dead ends, the verifier's transcript — is already offloaded by step 5: the progress-log row and the commit *are* its record. From then on, reference the record, don't carry the memory: the loop continues from the queue + the report + git, never from conversational recall of earlier items, and re-reads the file when an earlier item matters again. At each **batch boundary**, fold deliberately — confirm the report and queue state are current enough that the next batch could start from files alone, then drop the finished batch from working context. This puts context management at clean seams under the loop's control, instead of leaving it to the harness's automatic compaction (lossy, one-way, and liable to fire mid-item). Rule of thumb: discard from working context only what a file re-read can recover.
+
 ## Phase 3 — When you hit a wall, don't wait — route around it
 
 You're away; blocking is failing. So instead of stopping:

@@ -62,7 +62,30 @@ outward-facing — guard #4.
 - Do not launch a second long-running actor (`/autopilot-nt`, `/lab-nt`) inside the same worktree — the actor rule is one run per worktree, mailbox-only. Compose by **handoff artifact**, not by nesting.
 - A guard yields only to a logged `/decide-nt` override — bypassed on purpose with a reason, never by drift.
 
-## 7. Keep it lean
+## 7. Brief by state, not by playbook
+
+A subagent's brief carries only what its current state can act on — the item's
+spec and how to check it, not the maker's reasoning; the contract and journal,
+not the loop's opinions (the autopilot verifier and the lab critic are the house
+examples). Gate instructions on their preconditions instead of front-loading the
+full playbook, and when the subagent errs, answer with a targeted hint for a
+retry — scaffolding that never enters the record. A brief the actor can't yet
+use is noise now and contamination later.
+
+## 8. Working memory: fold, don't discard
+
+Long-running commands manage their own context at chosen seams (batch
+boundaries, cadence points) instead of drifting into the harness's automatic
+compaction — lossy, one-way, and timed by nobody. The fold is always
+*recoverable*: offload detail to the run's files (report, journal, plan/),
+keep the pointer, re-read on demand — discard from working context only what a
+file re-read can recover. Same rule for commands that rewrite their own record
+(`/replan-nt`, `/windup-nt`): fold to something searchable (archive, history),
+never delete outright. Rewrites of working memory are rare, deliberate, and
+reversible — they have outsized impact on everything downstream, so they happen
+at seams, on purpose, not continuously by drift.
+
+## 9. Keep it lean
 
 The smallest command that fully meets the need, no speculative flags. `/notify-nt`
 is the floor — one job, best-effort, never blocks. If a new capability is a
@@ -77,5 +100,7 @@ its slot against the minimal-tooling rule.
 - [ ] One complete, copyable example with obvious placeholders
 - [ ] Required input assembled up front; asks only at the unanswerable or outward-facing
 - [ ] Legal states declared; entry-fail refuses; no nested actors
+- [ ] Subagent briefs are state-gated and reasoning-free; scaffolding hints stay out of the record
+- [ ] Long runs fold at seams to recoverable files; record rewrites archive, never delete
 - [ ] Reports in ATTEST, delivers per SUBSTANCE, transitions per STATES
 - [ ] Earns its place against minimal-tooling — extend before you add

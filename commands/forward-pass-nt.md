@@ -9,7 +9,13 @@ writes: "plan/forward-pass-<date>.md"
 
 Do a **fresh-eyes forward pass** over the project's code — a cold read of the whole app as if you've never seen it — hunting four things: **bugs**, **security issues**, **stray code**, and **stubs masquerading as done**. This is an AUDIT of the entire codebase, not a review of recent changes (that's what `/code-review`, `/review`, and `/security-review` are for — they're all diff-scoped).
 
-**Stronger with different eyes.** This is a checker command — its whole value is that it doesn't share the maker's blind spots. Fresh context is the floor; running it from a **different model family** than the one that built the code is the stronger posture, since two contexts of the same model still misjudge the same things identically. If you *are* the family that built most of this code, say so in the report header — the reader should know which grade of eyes graded it.
+**Stronger with different eyes — rotate them across runs.** This is a checker command — its whole value is that it doesn't share the maker's blind spots, and two runs of the same model misjudge the same things identically. Fresh context is the floor; a different **model family** is the stronger posture. Before starting, find this command's most recent prior report in `plan/` and read its `Reviewer:` header line — **that line only, never the prior findings**, which would anchor the cold read this command exists for — then pick this run's eyes:
+
+- **First run** (no prior report): proceed as the current agent.
+- **Repeat run:** prefer a reviewer from a **different family** than the prior run — an agent CLI on the PATH (`codex`, `gemini`, …; check with `which`) driven through this same brief via Bash. None reachable → use a **different model** of the current family (subagent with a model override). Even that unavailable → run as-is and say so in the report, never silently.
+- **Never rotate below the floor:** fresh-but-weak eyes find less than strong eyes looking twice. If every alternative is materially weaker than the current agent, keep the current agent and log the rotation as unavailable.
+
+Whichever ran, the report header carries one line — `Reviewer: <model> · prior: <model> (<date>)` or `prior: none` — that line is the whole log; the next run reads it to rotate. If you are the family that built most of this code, say that there too — the reader should know which grade of eyes graded it.
 
 **READ-ONLY.** Report, rank, and plan — never edit code, never auto-fix.
 
@@ -81,7 +87,7 @@ Turn the actionable findings (everything except false-positives/non-issues) into
 
 > Plain teammate language throughout — concrete actions, no AI-speak, no filler; a line nobody would audit doesn't earn its place.
 
-1. **Header** — date, scope, one-line summary counts (e.g. "2 Critical · 9 High · 7 Medium · 8 Low · 9 Stray · 4 Stub").
+1. **Header** — date, scope, the `Reviewer:` line (this run's model · prior run's model + date, per the rotation rule above), one-line summary counts (e.g. "2 Critical · 9 High · 7 Medium · 8 Low · 9 Stray · 4 Stub").
 2. **Verification reality** — a short note on how this app can/can't be tested (browser runtime needed? no headless path? pure-logic harness available?), so the `[test]` markers have context.
 3. **Findings** — by ID, grouped Critical → High → Medium → Low → Stray → Stub. Give **Stubs their own dedicated section** (`### Stubs masquerading as done`), even when a stub is also listed under its severity — this is the section Chirag wants to scan first, so make it impossible to miss, and for each entry show the claimed-done source next to the actual stubbed code.
 4. **False positives / non-issues (verified)** — preserved with reasoning.

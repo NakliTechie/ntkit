@@ -13,7 +13,13 @@ Review the app **as a cold first-time user** — the person who wasn't there whe
 
 It's the third browser-walkthrough sibling: `/walkthrough-nt` finds bugs and fixes them, `/guide-nt` captures screenshots and documents — both **seed data so screens aren't empty**. `/ux-review-nt` does the **opposite**: it wipes all state, because the whole point is to experience exactly what a newcomer experiences — the empty state, the first-run asks, the "what is this and what do I do" moment.
 
-**Stronger with different eyes.** This is a checker command — its whole value is that it doesn't share the maker's blind spots. Fresh context is the floor; running it from a **different model family** than the one that built the code is the stronger posture, since two contexts of the same model still misjudge the same things identically. If you *are* the family that built most of this code, say so in the report header — the reader should know which grade of eyes graded it.
+**Stronger with different eyes — rotate them across runs.** This is a checker command — its whole value is that it doesn't share the maker's blind spots, and two runs of the same model misjudge the same things identically. Fresh context is the floor; a different **model family** is the stronger posture. Before starting, find this command's most recent prior report in `plan/` and read its `Reviewer:` header line — **that line only, never the prior findings**, which would contaminate the cold-newcomer posture this command exists to manufacture — then pick this run's eyes:
+
+- **First run** (no prior report): proceed as the current agent.
+- **Repeat run:** prefer a reviewer from a **different family** than the prior run — an agent CLI on the PATH (`codex`, `gemini`, …; check with `which`) driven through this same brief via Bash. None reachable → use a **different model** of the current family (subagent with a model override). Even that unavailable → run as-is and say so in the report, never silently.
+- **Never rotate below the floor:** fresh-but-weak eyes find less than strong eyes looking twice. If every alternative is materially weaker than the current agent, keep the current agent and log the rotation as unavailable.
+
+Whichever ran, the report header carries one line — `Reviewer: <model> · prior: <model> (<date>)` or `prior: none` — that line is the whole log; the next run reads it to rotate. If you are the family that built most of this code, say that there too — the reader should know which grade of eyes graded it.
 
 If the project has no browser surface, say so. If the current directory isn't a git repo, ask which project — don't guess.
 
@@ -68,7 +74,7 @@ Across the journey and the whole surface, score these:
 **Write `plan/ux-review-YYYY-MM-DD.md`**, in this order:
 
 > Plain teammate language throughout — concrete actions, no AI-speak, no filler; a line nobody would audit doesn't earn its place.
-1. **Header** — date, scope, the cold-start state used, the newcomer persona walked.
+1. **Header** — date, scope, the cold-start state used, the newcomer persona walked, the `Reviewer:` line (this run's model · prior run's model + date, per the rotation rule above).
 2. **The newcomer journey** — the numbered step narrative from Phase 2, friction flagged inline.
 3. **Findings** — ranked `C/H/M/L`, each tied to a step, with fix + quick-win/structural tag.
 4. **IA map + proposed re-grouping** — current tree vs the task-grouped version.

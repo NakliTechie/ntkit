@@ -2,131 +2,129 @@
 
 **The rigor layer for AI-assisted development.**
 
-Coding agents are great at writing code and bad at everything around it — remembering what you decided last week, picking a project back up mid-thought, auditing the *whole* app instead of just the diff, reporting *done* when nothing verified it, shipping without leaking a secret. `ntkit` is twenty-one [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that operational discipline — the opposite of vibe coding — across as many repos as you run at once.
+Coding agents write code well. They're bad at everything around it: remembering decisions, picking up mid-thought, auditing the whole app instead of just the diff, reporting "done" when nothing verified it.
+
+`ntkit` is twenty-one [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that discipline, across every repo you run.
 
 <p align="center">
   <img src="assets/workflow.png" alt="ntkit workflow map — 21 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
 </p>
 
-Most share one idea: a **gitignored `plan/` folder** in each repo holding three files —
+## The convention
+
+Most commands share one idea: a gitignored `plan/` folder per repo, three files.
 
 - `history.md` — Decisions · Log · Dead ends
 - `pending.md` — Now · Parked · Open questions
-- `workplan.md` — chunked, checkboxed play
+- `workplan.md` — chunked, checkboxed work
 
-The commands read and write those files, so every session picks up exactly where the last one left off. A separate pair — `/capture-nt` and `/ask-nt` — works the other side of the desk: a personal **knowledge vault** you capture into and ask questions of (see [below](#knowledge-vault)).
+Commands read and write those files. Every session picks up where the last one left off.
 
-> The `-nt` suffix is just the namespace (NakliTechie) — it keeps these from colliding with your own commands. Rename freely.
+> `-nt` is just the namespace (NakliTechie), so these don't collide with your own commands. Rename freely.
+
+## Commands
 
 | Command | When | What it does |
 |---------|------|--------------|
-| `/scaffold-nt` | new project | Bootstrap from attached handoff materials (md/zip): local folder + git + remote repo + seeded `plan/` + a brief on the first move. |
-| `/standup-nt` | start of day | Scan every repo with a `plan/` folder → active / idle / stale, each with its **state** + next move; flags inconsistent repos and unreviewed autopilot runs. Pick one. |
-| `/resume-nt` | start of session | Read the handoff (workplan + pending + history + latest summary + git state), name the repo's **state** and its legal next moves, flag anything that doesn't add up, and wait — or `/resume-nt go` to start the top chunk straight off a clean brief. Read-only. |
-| `/decide-nt "<why>"` | mid-session | Append a dated one-line decision to `history.md`. Captures the *why* before it evaporates. |
-| `/soc-nt "<thought>"` | mid-build | Stream-of-consciousness capture — timestamped, near-verbatim commentary into `plan/soc.md`, zero processing, the build keeps the floor. Catches future-work ideas too. `/replan-nt` triages it later (decisions → history, ideas → backlog, questions → pending). |
-| `/forward-pass-nt` | anytime | Fresh-eyes whole-app audit — bugs / security / stray code — that outputs a **batched workplan**, not a findings dump; `fix` flows straight into executing the keystone batch. Writes `plan/forward-pass-<date>.md`. |
-| `/walkthrough-nt` | anytime | Live counterpart to `/forward-pass-nt`: drive each role's journeys **in a real browser**, catch and **fix** logical errors — then leave a committed, rerunnable **verification harness** (`doctor` · `verify <feature>` · full sweep) that becomes the project's verifier, plus a **feature map** (`verify/features/`) later runs read. Writes `plan/walkthrough-<date>.md`. |
-| `/guide-nt` | anytime | Documentation sibling of `/walkthrough-nt`: walk each role's features **in a browser capturing screenshots**, then build a single-file **searchable HTML guide**. Regenerates from a committed generator — never hand-edits the output. |
-| `/demo-nt` | live demo | Presenter mode for showing WIP to customers/execs — boot the app with the **shared demo seed** (the same asset `/walkthrough-nt` + `/guide-nt` use) and open an interactive **explorer** (features · connections · deps, drill-down + inline search), then hand you clickable links to both the live app and the explorer. |
-| `/ux-review-nt` | anytime | Cold-first-timer UX review: wipe all state, walk the app **as a brand-new user**, and report where build-order accretion fails the newcomer (arrival, onboarding, nav/IA) — plus a Lighthouse a11y + perf pass. Read-only; proposes an ideal first-run + IA. Writes `plan/ux-review-<date>.md`. |
-| `/live-check-nt` | verifying → shipped | The **replay gate** — drive the **real deployed runtime** with a real user gesture, **instrument the actual output**, and read machine evidence that the shipped thing runs — for changes the dev preview structurally can't exercise (heavy model, device API, gesture-gated, timing). Asks *"does it actually run?"*, not `/ux-review-nt`'s *"is it good to use?"*. Read-only on code. Writes `plan/live-check-<date>.md`. |
-| `/autopilot-nt` | anytime | **The executor** — works a batched fix-workplan or prose goal to completion, attended or fully away, **in its own git worktree**: fix + **fresh-eyes verify** + commit each item with a **what · evidence · result** row, **park** stop-lines (no publish / send / delete / money), run a **final whole-project gate** — then **ship green** (merge + push) or **hold red** for review, leaving a report `/resume-nt` reads. Refuses to run without an open plan or a goal. |
-| `/lab-nt` | research | **The discoverer** — iterate an idea into a **research contract** (question · harness-read falsifiable metric · scope fence · budget ladder), then run bounded **experiment legs** in a worktree: smallest experiment → measure → **keep/revert via git** → append-only journal, fresh-eyes critic on cadence. A leg ends **named** — GOAL-MET / BUDGET / STAGNANT / DRY-WELL / PARKED — best-so-far already committed; continuation **human-armed per leg** under a campaign odometer. Refuses unfalsifiable goals. |
-| `/notify-nt` | after a run | Completion ping — desktop notification + optional phone push (ntfy.sh topic). `/autopilot-nt` fires it when a run finishes; degrades silently if unconfigured. |
-| `/maintain-nt` | upkeep | Maintenance sweep — outdated/deprecated deps, stale GitHub Actions, security advisories, dead links, lockfile drift, and **CWV/third-party drift** on web projects → a ranked fix-workplan. **Applies safe quick-fixes automatically** (verified, reverted on failure); majors defer to `/autopilot-nt`. Writes `plan/maintenance-<date>.md`. |
-| `/release-nt` | launch | Cut a release — suggest a semver bump from the commits, write `CHANGELOG.md`, draft notes, then on confirm tag + push + GitHub release + deploy, and **verify the deploy landed** against the live URL (host-only failures — `robots.txt`, headers, 404 routing — are untestable locally). **Guarded:** refuses over a red verifier, an open fix-workplan, or a HELD autopilot branch (override only via a logged `/decide-nt`). The mechanics, where `/package-nt` is the marketing. |
-| `/package-nt` | launch | Ship a project to the world — the bookend to `/scaffold-nt`: a deep readiness gate (`/security-review` + `/forward-pass-nt` + a secrets + essentials check + a **deployed-site SEO / agentic-browsing** pass), social-framed screenshots (committed to `marketing/`), and drafted X / LinkedIn / Show HN / subreddit collateral (local). **Drafts, never posts.** |
-| `/windup-nt` | end of session | Day summary + pending + workplan + commit/push + tomorrow's handoff. Clean closes **merge to main**; stray worktrees get **swept** (clean+merged removed, dirty ones kept and named). Honest about the closing state — a mid-chunk close gets named, never papered over, and never merged. Runs an **implicit `/replan-nt`** first when `plan/` has accumulated 3+ foldable files, so consolidation is ambient, not a chore to remember. |
-| `/replan-nt` | occasionally | Fold accumulated summaries + scratch back into the three files; archive the rest. Runs the **replay check** first — history replayed against pending, orphans and ghosts reported before anything is archived. |
+| `/scaffold-nt` | new project | Bootstrap from a handoff: folder + git + remote + seeded `plan/` + first-move brief. |
+| `/standup-nt` | start of day | Scan every repo with `plan/` — active / idle / stale, next move for each. |
+| `/resume-nt` | start of session | Read the handoff, name the repo's state, wait — or `go` to start the top chunk. Read-only. |
+| `/decide-nt "<why>"` | mid-session | Append a dated one-line decision to `history.md`. |
+| `/soc-nt "<thought>"` | mid-build | Raw stream-of-consciousness into `plan/soc.md`. `/replan-nt` triages it later. |
+| `/forward-pass-nt` | anytime | Fresh-eyes whole-app audit → a batched, checkboxed fix-workplan. |
+| `/walkthrough-nt` | anytime | Drive each role's journeys in a real browser, fix bugs as found, leave a rerunnable verification harness. |
+| `/guide-nt` | anytime | Walk each role's features in a browser, build a single-file searchable HTML guide. |
+| `/demo-nt` | live demo | Boot the app on the shared demo seed, open an interactive feature explorer. |
+| `/ux-review-nt` | anytime | Cold-first-timer review: wipe state, walk it as a new user, rank onboarding/nav failures + a11y/perf. |
+| `/live-check-nt` | verifying → shipped | Drive the real deployed runtime with a real gesture; machine evidence it actually works. |
+| `/autopilot-nt` | anytime | The executor — works a fix-workplan or goal to completion, unattended, in its own worktree. Ships green, holds red. |
+| `/lab-nt` | research | The discoverer — shapes an idea into a falsifiable contract, runs bounded experiment legs, journals every attempt. |
+| `/notify-nt` | after a run | Desktop notification + optional phone push. |
+| `/maintain-nt` | upkeep | Stale deps / Actions / advisories / dead links → a ranked fix-workplan; safe fixes applied automatically. |
+| `/release-nt` | launch | Semver bump, CHANGELOG, tag, push, GitHub release, verify the deploy landed live. |
+| `/package-nt` | launch | Ship-readiness gate, marketing screenshots, drafted launch posts. Drafts, never posts. |
+| `/windup-nt` | end of session | Day summary, pending, commit/push, tomorrow's handoff. |
+| `/replan-nt` | occasionally | Fold accumulated files back into the three canonical ones; archive the rest. |
 
-They speak one vocabulary, so each hands off to the next: `/windup-nt` writes what `/resume-nt` reads, `/forward-pass-nt` and `/walkthrough-nt` feed `/replan-nt`, `/decide-nt` feeds `history.md`, `/soc-nt` feeds `/replan-nt`'s triage.
+They hand off in sequence: `/windup-nt` writes what `/resume-nt` reads; `/forward-pass-nt` and `/walkthrough-nt` feed `/replan-nt`; `/soc-nt` feeds `/replan-nt`'s triage.
 
 ## The state machine
 
-That vocabulary was always secretly a state machine — `plan/` is the external state, the commands are events, windup→resume is a transition. [`STATES.md`](STATES.md) makes it explicit: six session states (`fresh → briefed → building → verifying → blocked / shipped`), which commands are legal from which, and the guards that enforce it. Four rules do the enforcing:
+`plan/` is state. Commands are events. [`STATES.md`](STATES.md) names six session states (`fresh → briefed → building → verifying → blocked / shipped`) and which commands are legal from which.
 
-- **Every command declares its contract in frontmatter** — `entry` (what it requires), `exit` (the machine-checkable condition that means it finished), `writes` (which plan files it touches). A command whose entry fails refuses; it doesn't proceed politely. `/release-nt` won't tag over a failing verifier or an open fix-workplan; `/autopilot-nt` won't invent a plan when neither an open report/workplan nor a goal exists. Writing or changing a command follows [`AUTHORING.md`](AUTHORING.md) — the one shape all twenty-one share, including the rule that outward-facing authority (push / merge / release / delete / send) is opt-in and defaults to denied.
-- **"Done" is the verifier's word**, never the agent's — no state advances on a self-report.
-- **Overrides are deliberate and logged** — any guard yields to an explicit `/decide-nt` entry stating why. Bypassed on purpose with a reason is a decision; bypassed by drift is a bug.
-- **Asks are reserved for the unanswerable and the outward-facing** — missing input, unknown credentials, publish/post/release. Everything else takes the safe default, announces it, and logs it; you steer by interrupting, not by being polled.
+Four rules enforce it:
 
-Parallel `/autopilot-nt` runs follow the actor rule: each in its own worktree, no shared state, the morning report as the only mailbox, `/standup-nt` the sole cross-repo reader. And `history.md` is an event log — `/replan-nt` replays it against `pending.md` and reports drift before archiving anything. No framework, no dependency: the formalism is a markdown table and three frontmatter lines.
+- **Every command declares its contract** — `entry`, `exit`, `writes` in frontmatter. A failed entry refuses, it doesn't proceed politely. See [`AUTHORING.md`](AUTHORING.md).
+- **"Done" is the verifier's word**, never the agent's.
+- **Overrides are logged**, via `/decide-nt`. Bypassed on purpose is a decision; bypassed by drift is a bug.
+- **Asks are reserved for the unanswerable.** Everything else takes the safe default and logs it.
 
 ## The report format
 
-The rule the state machine runs on — **"done" is the verifier's word** — also governs how the agent *talks to you*. [`ATTEST.md`](ATTEST.md) makes that checkable. Every status report, blocker, and handback is typed blocks — RESULT / STATUS / BLOCKER / QUESTION / RISK / DIFF / PLAN / ESCALATION, worst news first — and every factual claim carries an evidence class: `verified` (a check ran and passed, cited with the command and its exit code), down through `observed`, `inferred`, `assumed`, to `reported`. The success words — *done, fixed, passing, works, no regressions* — are locked to `verified` claims with a resolving pointer; anywhere else the agent writes the honest downgrade ("implemented, not yet verified"). Banned outright: hedges (*should work*, *probably*), minimizers (*just*, *trivial*), and success theater (*perfect*, *all set*, exclamation marks). Drop it in a `CLAUDE.md` and reference it; a linter judges conformance, not vibes. It governs communication, not code.
+[`ATTEST.md`](ATTEST.md) governs how agents talk to you. Typed blocks — RESULT / STATUS / BLOCKER / QUESTION / RISK / DIFF / PLAN / ESCALATION — worst news first. Every claim carries an evidence class: `verified`, `observed`, `inferred`, `assumed`, `reported`. Words like *done* or *works* are locked to `verified` claims with a resolving pointer. No hedges, no minimizers, no success theater.
 
 ## Built for the driver
 
-The fourth doctrine, [`DRIVER.md`](DRIVER.md), governs the *products* these commands build: everything ships **agent-ready**. It carries a driver's-seat design meditation — [@doodlestein](https://x.com/doodlestein)'s [prompt](https://x.com/doodlestein/status/2094288037458882668), used in toto; do check out his extensive work on agentic development at [github.com/Dicklesworthstone](https://github.com/Dicklesworthstone) — run once the first spec draft exists (`/scaffold-nt` seeds it into every new workplan), plus ten principles for the agent as primary user: one perception act, machine-decidable outputs, one verdict per next action, bounded output, failures that name their remedy, crash-safety, the tool holding the memory, accretion by mechanism, a tower of abstractions, and a fail-closed evaluator outside the loop.
+[`DRIVER.md`](DRIVER.md) governs what these commands *build*: everything ships agent-ready. A design pass — [@doodlestein](https://x.com/doodlestein)'s [prompt](https://x.com/doodlestein/status/2094288037458882668), used in toto (his agentic-development work: [github.com/Dicklesworthstone](https://github.com/Dicklesworthstone)) — run once a first spec exists; `/scaffold-nt` seeds it into every new workplan.
+
+Ten principles: one perception act, machine-decidable outputs, one verdict per next action, bounded output, failures that name their remedy, crash-safety, the tool holding the memory, accretion by mechanism, a tower of abstractions, a fail-closed evaluator outside the loop.
 
 ## What counts as progress
 
-`STATES.md` says when work advances and `ATTEST.md` says how it's reported; [`SUBSTANCE.md`](SUBSTANCE.md) says **what actually counts as delivered.** The purpose is working software shipped accretively — process serves that, never becomes it. Four rules: **no process theater** (an artifact earns its place only as a hard gate for a named capability — the `/walkthrough-nt` verifier qualifies, self-referential paperwork doesn't); **feature-first ratio** (the overwhelming majority of open items deliver runnable behavior; process items are capped and must name what they gate); **honesty is absolute** (never fake a test, pass a mock as live proof, or close undone work — a false close is reopened on the record); and **refusal is not delivery** (a typed refusal beats a fabricated result but never closes a feature — full credit needs the real capability, tested and verified; mark `refusal-only` states as unfinished). Binds human sessions and `/autopilot-nt` swarms alike, encoded into the work items' own acceptance criteria.
+[`SUBSTANCE.md`](SUBSTANCE.md) says what counts as delivered. No process theater — an artifact earns its place only as a real gate. Most open items must deliver runnable behavior. Never fake a test or close undone work. A refusal is honest but never counts as delivery.
 
 ## Knowledge vault
 
-Two commands operate on a single Obsidian-compatible **knowledge vault** (plain-markdown, git-backed) instead of a repo's `plan/` folder — the write and read halves of a second brain. They keep one rule: **sources** (what *they* said) stay separate from **notes** (what *you* concluded).
+Two commands work a personal knowledge vault instead of a repo's `plan/` — plain-markdown, git-backed. One rule: sources (what *they* said) stay separate from notes (what *you* concluded).
 
 | Command | When | What it does |
 |---------|------|--------------|
-| `/capture-nt <url\|file>` | save something | Fetch + extract a URL / file / PDF (full text, OCR for scans), **follow & fully index any referenced repo or arXiv paper**, write a schema'd **source note**, tag its realm (knowledge / personal / work), link it into the right topic map with backlinks, and optionally promote a distilled **note** — then commit + push. Idempotent on re-run. Also captures **claude.ai chat sessions** (share URLs or downloaded capture files) as `chat-session` sources with the turn structure preserved. |
-| `/ask-nt <question>` | recall something | Search + read the vault and answer **grounded only in your own notes**, with citations to the notes used. The read-side sibling of `/capture-nt` — the "search" half of your personal Google. Read-only. |
+| `/capture-nt <url\|file>` | save something | Fetch, extract, write a schema'd source note, link it into a topic map, commit + push. |
+| `/ask-nt <question>` | recall something | Search the vault, answer grounded only in your notes, with citations. Read-only. |
 
-Both expect a vault at `~/Code/knowledge` (edit that path at the top of `commands/capture-nt.md` and `commands/ask-nt.md` if yours lives elsewhere).
+Both expect a vault at `~/Code/knowledge` — edit the path in `commands/capture-nt.md` and `ask-nt.md` if yours differs.
 
 ## Install
 
 ```bash
 git clone https://github.com/NakliTechie/ntkit
-cp ntkit/commands/*.md ~/.claude/commands/                 # available in all projects
-# or:  cp ntkit/commands/*.md <project>/.claude/commands/  # just one project
+cp ntkit/commands/*.md ~/.claude/commands/                 # all projects
+# or:  cp ntkit/commands/*.md <project>/.claude/commands/  # one project
 ```
 
-The command name is the filename without `.md` (`windup-nt.md` → `/windup-nt`). First run will offer to add `plan/` to your `.gitignore`. If you don't keep repos under `~/Code`, set your scan root at the top of `commands/standup-nt.md`.
+Command name = filename without `.md` (`windup-nt.md` → `/windup-nt`). First run offers to gitignore `plan/`. Set your scan root at the top of `commands/standup-nt.md` if you don't keep repos under `~/Code`.
 
-## Scheduling — the heartbeat
+## Scheduling
 
-Every command above waits for you to type it. Two are built to run without you — the loop-engineering half of the kit: stop being the person who prompts the agent, design the system that does.
+Two commands run without you.
 
-- **`/maintain-nt` weekly** — rot detection is recurring and deterministically checkable: ideal cron work. Findings land in `plan/`; `/standup-nt` surfaces them.
-- **`/autopilot-nt` nightly** — it already handles the no-human case (skips the launch contract, takes the safest scope: top batch, default budget, nothing destructive), and the worktree isolation + stop-lines + final gate are precisely what make an unattended run safe. A green gate ships itself to the default branch; a red one waits on its branch — so a scheduled run lands passing work by morning and never merges a failure.
-
-Claude Code runs headless with `-p` — custom slash commands expand inside the prompt string — and an unattended run needs a permission mode, or it hangs waiting for an approval nobody is there to give:
+- **`/maintain-nt` weekly** — read-only rot detection, ideal cron work.
+- **`/autopilot-nt` nightly** — worktree-isolated, ships a green gate to main, holds a red one on its branch.
 
 ```cron
-# Monday 07:00 — maintenance sweep; findings land in plan/
 0 7 * * 1  cd ~/code/myproject && timeout 30m claude -p "/maintain-nt" --dangerously-skip-permissions >> ~/.ntkit-cron.log 2>&1
-
-# Nightly 02:00 — work the top batch on an autopilot branch
 0 2 * * *  cd ~/code/myproject && timeout 6h claude -p "/autopilot-nt" --dangerously-skip-permissions >> ~/.ntkit-cron.log 2>&1
 ```
 
-(macOS: `launchd` if you prefer; cron works. Cron doesn't load your shell profile — make sure `claude` is on cron's `PATH` and auth is available non-interactively, e.g. via `claude setup-token`.)
-
-Three honest notes. **`--dangerously-skip-permissions` is exactly what it says** — the command's own guardrails replace the prompts, so schedule only commands that carry their own: `/maintain-nt` is read-only by contract; `/autopilot-nt` parks anything irreversible, and the only outward action it will take is merging a **gate-green** run to the default branch and pushing it — a red run never merges. Tighter fences exist (`--allowedTools`, `--max-turns`, `--max-budget-usd`) — use them where they fit. **The `timeout` wrapper is the outer budget** — a stuck agent runs until something kills it. And **a scheduled run still ends at a human**: the morning report says what shipped and what's held, and `/resume-nt` reads it straight into your next session. **A watch declares its stop condition up front** — a recurring loop reports only *deltas* and halts on an explicit end-state (merged/closed, gate-green, or the same failure recurring without progress), never nudging forever; ntkit's long-runners already name that exit — `/autopilot-nt` parks at a wall, `/lab-nt` ends `STAGNANT` / `DRY-WELL`, and ATTEST escalates on `no-progress`. The loop finds, does, and lands the safe work; you review what it couldn't.
+`--dangerously-skip-permissions` is exactly what it says — only schedule commands with their own guardrails. `timeout` is the outer budget. A scheduled run still ends at a human: the morning report is what `/resume-nt` reads next.
 
 ## The one to try first
 
-`/forward-pass-nt`. Every other review tool looks at your diff; this one reads the whole app cold and hands back an ordered, checkboxed fix-plan with stable finding IDs — the kind of thing you actually work through instead of skim once.
+`/forward-pass-nt`. Reads the whole app cold, hands back an ordered fix-plan with stable finding IDs — the kind of thing you actually work through.
 
 ## The name
 
-`nt` is the namespace every command carries — that `-nt` suffix — short for **NakliTechie**. `kit` is what it is. It started life as a pile of one-off prompts in [NakliTechie/prompts](https://github.com/NakliTechie/prompts), grew into a `claude-code-commands/` folder, and spun out into its own repo in June 2026.
+`nt` = NakliTechie, `kit` = what it is. Started as one-off prompts in [NakliTechie/prompts](https://github.com/NakliTechie/prompts), spun out into its own repo in June 2026.
 
 ## NakliTechie
 
-*Nakli* (नकली) is Hindi for "fake" or "imitation" — so **NakliTechie**, the cheerfully self-appointed *fake techie*, is the maker handle of **[Chirag Patnaik](http://www.chiragpatnaik.com)** (Bombay — two decades across media, technology, marketing and politics, none of it formally "engineering"). The 80-plus public repos rather give the game away: mostly **single-file web apps that run entirely in your browser — no accounts, no servers, no data leaving your device** (house tagline: *"all these tools, none of your data"*). The current research focus is newer and heavier: **small-language-model training and distributed inference** — getting capable models to fine-tune and serve on the hardware you actually have.
+*Nakli* (नकली) is Hindi for "fake" — **NakliTechie** is the maker handle of **[Chirag Patnaik](http://www.chiragpatnaik.com)**. Mostly single-file browser apps, no accounts, no servers, no data leaving your device. Current focus: small-language-model training and distributed inference.
 
-ntkit sits closer to that second thread than the first — a coding-agent toolkit, not a browser app — but it keeps the same ethos: local-first, sovereign, no lock-in.
+- 🖥️ **[NakliOS](https://naklios.dev/)** — a whole desktop in your browser
+- 🗂️ **[All projects](https://naklitechie.github.io/)** · **[github.com/NakliTechie](https://github.com/NakliTechie)**
+- ✍️ **[chiragpatnaik.com](http://www.chiragpatnaik.com)** · **[naklitechie.com](https://naklitechie.com)** · **[Substack](https://naklitechie.substack.com/)**
 
-**Wander in:**
-- 🖥️ **[NakliOS](https://naklios.dev/)** — a whole desktop in your browser; the hub for 40+ of the apps
-- 🗂️ **[All projects](https://naklitechie.github.io/)**  ·  **[github.com/NakliTechie](https://github.com/NakliTechie)**
-- ✍️ **[chiragpatnaik.com](http://www.chiragpatnaik.com)**  ·  **[naklitechie.com](https://naklitechie.com)**  ·  **[Substack](https://naklitechie.substack.com/)**
-
-A few siblings an ntkit user might like: **[LocalMind](https://naklitechie.github.io/LocalMind/)** (private AI research agent), **[VaultMind](https://vaultmind.naklitechie.com/)** (an Obsidian-vault explorer — a natural front-end for what `/capture-nt` writes), and **[Private Mesh](https://github.com/NakliTechie/private-mesh)** (the sovereign capability fabric under NakliOS).
+Siblings worth a look: **[LocalMind](https://naklitechie.github.io/LocalMind/)**, **[VaultMind](https://vaultmind.naklitechie.com/)**, **[Private Mesh](https://github.com/NakliTechie/private-mesh)**.
 
 ## License
 

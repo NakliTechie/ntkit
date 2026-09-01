@@ -1,5 +1,5 @@
 ---
-description: Package a project for launch — a deep ship-readiness gate (/security-review + /forward-pass-nt + secrets + a launch-essentials checklist), social-framed marketing screenshots (committed), and drafted distribution collateral for X / LinkedIn / Show HN / tailored subreddits (local). Drafts, never posts.
+description: Package for launch — ship-readiness gate, committed marketing screenshots, drafted X / LinkedIn / Show HN / reddit collateral. Drafts, never posts.
 argument-hint: "[focus: gate | assets | drafts]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 entry: "shipped or gate-green verifying; the readiness gate must pass — a red gate stops the run"

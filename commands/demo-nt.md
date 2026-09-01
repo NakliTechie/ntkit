@@ -1,5 +1,5 @@
 ---
-description: Launch the project for a live demo — boot it with the shared demo-seed data (the same asset /walkthrough-nt and /guide-nt use), and generate + open an interactive HTML explorer (features · connections · dependencies, high-level → drill-down, with inline search), then hand you clickable links to both the live app and the explorer. For demoing work-in-progress to customers or execs.
+description: Launch the app with the shared demo seed and generate + open an interactive HTML feature explorer; hands the presenter clickable links to both. For demoing work-in-progress.
 argument-hint: "[focus: seed | explorer | launch]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "app boots with the shared demo seed"

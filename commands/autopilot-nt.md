@@ -1,5 +1,5 @@
 ---
-description: The executor — work a batched fix-workplan (from /forward-pass-nt, /ux-review-nt, /maintain-nt, or plan/workplan.md) or a prose goal to completion, attended or fully away (a meeting, overnight), always in an isolated git worktree. Keeps going instead of pausing: does every reversible item, verifies each with fresh eyes, commits continuously, parks anything that needs a human decision or crosses a stop-line, runs a final whole-project gate, then ships a green run — merge to the default branch and push — or holds a red one back, and leaves a report /resume-nt can read.
+description: The executor — work a fix-workplan or prose goal to completion unattended in an isolated worktree; verify fresh-eyes, park stop-lines, ship green or hold red, leave a report.
 argument-hint: "[goal, report, or batch, e.g. \"finish the auth refactor\" | forward-pass | B]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "briefed or building with an open report/workplan or explicit goal; clean base branch — never launched from blocked at the same wall"

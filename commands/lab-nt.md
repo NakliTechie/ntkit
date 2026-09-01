@@ -1,5 +1,5 @@
 ---
-description: The discoverer — iterate a research idea into a research contract (question · falsifiable metric · scope fence · budget ladder), then run bounded experiment legs toward it — smallest experiment, measure, keep/revert via git, journal every attempt, fresh-eyes critic on cadence. Every leg ends in a named state (GOAL-MET verified | BUDGET | STAGNANT | DRY-WELL | PARKED) with the best-so-far already committed; a campaign of human-armed legs under a hard odometer, never an infinite run.
+description: The discoverer — shape a research idea into a contract (question · falsifiable metric · fence · budget), then run bounded experiment legs; every leg ends in a named state with best-so-far committed.
 argument-hint: "[idea/question, e.g. \"can QAT recover fp16 quality at int4 in-browser\" | resume | status]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task", "WebSearch", "WebFetch"]
 entry: "an idea in $ARGUMENTS or the conversation, or an open campaign in plan/lab/ to resume; never re-armed at an unchanged wall"
@@ -11,7 +11,7 @@ writes: "its own worktree, plan/lab/<slug>/ (contract.md, journal.md, <date>-leg
 
 **Research is an anytime algorithm.** No working system — Karpathy's autoresearch, Google's co-scientist, the Deep Research products — stops on "convergence"; they stop on budget, sufficiency, or a human, with the best-known result always already persisted. `/lab-nt` adopts that posture wholesale: the campaign may be unbounded, but every *leg* is bounded, every stop point is cheap (the journal and the best-so-far commit are always current), and continuation is earned, never assumed.
 
-**v1 scope: experiment mode.** The goal must reduce to a scalar a harness can read. Question-shaped research with no metric (inquiry mode — a sufficiency rubric judged instead of measured) is a planned second layer; until then, work with the user to find a real proxy metric, and if none exists, decline the launch and say so — that research belongs in a live session, not an unattended loop.
+**Scope: experiment mode only.** The goal must reduce to a scalar a harness can read. Work with the user to find a real proxy metric; if none exists, decline the launch and say so — metric-less research belongs in a live session, not an unattended loop.
 
 `$ARGUMENTS`: an **idea/question** in prose (starts Phase 0), **resume** (continue the newest open campaign in `plan/lab/` — or the named one, `resume <slug>` — skipping Phase 0), or **status** (read-only: list campaigns with leg count, best-so-far, and end-state — the standup view).
 
@@ -71,7 +71,7 @@ The campaign continues leg-to-leg under one rule — **progress or a human, neve
 - Every next leg is launched by the user — `/lab-nt resume` after reading the leg report. The report's `Re-arm` line states the recommendation (CONTINUE with what to try next / STOP with why), but the arming hand is human.
 - Resuming at an **unchanged wall** is illegal, same as autopilot: a STAGNANT or DRY-WELL campaign resumed with no change to the contract (new fence, new budget, new hypothesis from the human) will grind the same ground — refuse, and say what would have to change.
 - **Odometer exhausted ⇒ RETIRED** regardless of trend. Reversible — extend it — but only deliberately, on the record, via `/decide-nt`.
-- Scheduled unattended legs (the cron pattern autopilot uses) are the planned upgrade once the loop has earned trust on real campaigns; when they arrive, the gate is **auto re-arm only after a leg that improved the metric** — an unattended campaign that stops progressing stops running. Until then: human-armed, every leg.
+- Every leg is **human-armed** — the loop never schedules or re-arms its own next leg.
 
 ## Phase 5 — The leg report
 

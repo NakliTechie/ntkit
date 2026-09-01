@@ -1,5 +1,5 @@
 ---
-description: "Live acceptance replay — drive the REAL deployed surface with the real model/data and a real user gesture, instrument the actual output, and produce machine evidence that the shipped thing works. The operational discharge of hard rule ⑤ (replay/timing) for changes the dev preview structurally can't exercise; it's what turns 'implemented' into 'shipped'. Read-only on code."
+description: "Live acceptance replay — drive the real deployed surface with a real user gesture and produce machine evidence it works. Read-only on code; writes plan/live-check-<date>.md."
 argument-hint: "[flow to verify, e.g. voice-clone | ocr | the feature just changed]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 entry: "a change deployed or runnable on the real surface; the real runtime reachable (prod URL, or a real browser with the model/state cached)"

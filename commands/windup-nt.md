@@ -13,7 +13,7 @@ If the current directory is not inside a git repo, stop and ask the user which p
 
 ## 0. Implicit replan (conditional — fires on evidence, not ceremony)
 
-Before writing anything, count what `plan/` has accumulated from **before today**: dated summaries, autopilot/audit reports (forward-pass, walkthrough, ux-review, maintenance), unnamed scratch, and a `soc.md` carrying pre-today entries. **3 or more such foldable files → run the full `/replan-nt` consolidation first** — classify, fold into the three canonical files, replay-check, archive — then proceed below on the freshly consolidated base. Fewer → skip silently; a light project's windup looks exactly as it always did (the STATES.md scaling rule: an artifact that doesn't exist can't trigger a step).
+Before writing anything, count what `plan/` has accumulated from **before today**: dated summaries, autopilot reports, any dated audit report (`plan/<type>-YYYY-MM-DD.md` — forward-pass, walkthrough, ux-review, maintenance, live-check, …), unnamed scratch, and a `soc.md` carrying pre-today entries. **3 or more such foldable files → run the full `/replan-nt` consolidation first** — classify, fold into the three canonical files, replay-check, archive — then proceed below on the freshly consolidated base. Fewer → skip silently; a light project's windup looks exactly as it always did (the STATES.md scaling rule: an artifact that doesn't exist can't trigger a step).
 
 Announce, don't ask: "plan/ has accumulated N files — replanning first." Two mechanics matter:
 - **Order.** The fold runs *before* Step 1, so today's summary is written after it and survives un-archived for `/resume-nt` to read tomorrow.

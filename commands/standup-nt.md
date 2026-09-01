@@ -37,6 +37,7 @@ For each project with plan/, gather:
 - **Pending counts** — count `- ` items under `## Now` and `## Open questions` in `plan/pending.md`. If file missing → `0 / 0`.
 - **Git dirty** — `git -C <root> status --porcelain 2>/dev/null | wc -l`. If non-zero, flag.
 - **Recent autopilot run** — newest `plan/YYYY-MM-DD-autopilot.md` is newer than the newest summary → read its `Shipped:` line and flag accordingly: `[autopilot: held]` (red gate / conflict — an unmerged `autopilot/<date>` branch is waiting on a human) or `[autopilot: shipped]` (a green run already merged to the default branch — pull it).
+- **Open lab campaigns** — `plan/lab/*/` exists with no RETIRED/GOAL-MET end-state in its newest leg report → flag `[lab: <slug>, leg <n>]`; a campaign waiting on human re-arm is a next move.
 
 Many small reads is fine — plan/ files are short. Use Bash + Read efficiently.
 

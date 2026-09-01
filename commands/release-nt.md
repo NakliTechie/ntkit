@@ -1,5 +1,5 @@
 ---
-description: Cut a release — suggest a semver bump from the commits since the last tag, generate/update CHANGELOG.md, draft release notes, then (only on confirmation) commit the bump, tag, push, create the GitHub release, then verify the deploy actually landed against the live URL. The mechanics, where /package-nt is the marketing.
+description: Cut a release — semver suggestion + CHANGELOG, then on confirmation tag, push, GitHub release, and verify the deploy landed live.
 argument-hint: "[major | minor | patch | x.y.z]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "verifying with gate green — no failing verifier, no open fix-workplan items; refuse otherwise (override via /decide-nt)"

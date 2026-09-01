@@ -1,5 +1,5 @@
 ---
-description: "Capture a URL / file / PDF / claude.ai chat session into your knowledge vault (~/Code/knowledge) — fetch + extract (full text, OCR scanned PDFs), follow & summarise embedded links (esp. listicles), write a schema'd source note in sources/, tag its realm (knowledge|personal|work), link it into the right topics/ MOC with backlinks, and optionally promote a distilled insight to notes/, then commit + push automatically. Idempotent on re-run."
+description: "Capture a URL / file / PDF / chat share into the knowledge vault (~/Code/knowledge) as a schema'd source note linked into topics; commits + pushes. Idempotent."
 argument-hint: "<url | file path>  [realm: knowledge|personal|work]"
 entry: "knowledge vault present at the configured path"
 exit: "schema'd source note written, linked, committed + pushed; idempotent on re-run"

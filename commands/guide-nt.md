@@ -1,5 +1,5 @@
 ---
-description: Generate a searchable HTML guide — identify each role, walk the running app through their features in a real browser capturing screenshots, and build a single-file guide (role + feature sections, captions, inline search, lightbox image viewer, mobile-friendly). Regenerates from a committed generator; never hand-edits the output.
+description: Generate a searchable single-file HTML guide — walk each role's features in a real browser capturing screenshots. Regenerates from a committed generator; never hand-edits output.
 argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "app boots; guide generator committed (or created this run)"

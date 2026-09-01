@@ -1,5 +1,5 @@
 ---
-description: Maintenance sweep — find outdated/deprecated dependencies, stale GitHub Actions versions, security advisories, dead links, lockfile drift, and (web projects) Core Web Vitals drift plus new third-party requests; rank them and batch into a fix-workplan. Applies safe quick-fixes automatically (verified, reverted on failure); majors defer to /autopilot-nt. Writes plan/maintenance-<date>.md.
+description: Maintenance sweep — stale deps / Actions / advisories / dead links / CWV drift, ranked into a fix-workplan; applies verified safe quick-fixes. Writes plan/maintenance-<date>.md.
 argument-hint: "[focus: deps | actions | security | links | perf]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "a repo with dependencies or workflows"

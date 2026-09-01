@@ -1,5 +1,5 @@
 ---
-description: Completion ping — send yourself a desktop notification and (optionally) a phone push via an ntfy.sh topic. The finish-line half of unattended runs — /autopilot-nt fires it automatically; call it yourself after any long manual session too. Degrades silently; a failed ping never fails the run that sent it.
+description: Completion ping — desktop notification + optional ntfy.sh phone push. Best-effort; a failed ping never fails the caller.
 argument-hint: "<message, e.g. \"myapp: autopilot done — gate GREEN, 7 landed\">"
 allowed-tools: ["Bash"]
 entry: "any state"

@@ -4,7 +4,7 @@
 
 Coding agents write code well. They're bad at everything around it: remembering decisions, picking up mid-thought, auditing the whole app instead of just the diff, reporting "done" when nothing verified it.
 
-`ntkit` is twenty-one [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that discipline, across every repo you run.
+`ntkit` is twenty-two [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that discipline, across every repo you run.
 
 <p align="center">
   <img src="assets/workflow.png" alt="ntkit workflow map — 21 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
@@ -37,6 +37,7 @@ Commands read and write those files. Every session picks up where the last one l
 | `/demo-nt` | live demo | Boot the app on the shared demo seed, open an interactive feature explorer. |
 | `/ux-review-nt` | anytime | Cold-first-timer review: wipe state, walk it as a new user, rank onboarding/nav failures + a11y/perf. |
 | `/live-check-nt` | verifying → shipped | Drive the real deployed runtime with a real gesture; machine evidence it actually works. |
+| `/siege-nt` | before "ready" | The adversary — cold, isolated verifiers attack the live surface in rounds; a check must prove it can fail before a clean round is trusted. Fixes, re-attacks, until converged. |
 | `/autopilot-nt` | anytime | The executor — works a fix-workplan or goal to completion, unattended, in its own worktree. Ships green, holds red. |
 | `/lab-nt` | research | The discoverer — shapes an idea into a falsifiable contract, runs bounded experiment legs, journals every attempt. |
 | `/notify-nt` | after a run | Desktop notification + optional phone push. |

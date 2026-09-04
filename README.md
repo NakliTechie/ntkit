@@ -70,6 +70,8 @@ Four rules enforce it:
 
 Ten principles: one perception act, machine-decidable outputs, one verdict per next action, bounded output, failures that name their remedy, crash-safety, the tool holding the memory, accretion by mechanism, a tower of abstractions, a fail-closed evaluator outside the loop.
 
+[`DRIVER-HARNESS.md`](DRIVER-HARNESS.md) is the operational companion: the loop that *builds* an agent surface (DRIVER) then *attacks* it (`/spar-nt`), plus the cold-runner harness neither owns on its own — heterogeneous isolated verifiers, kill-by-port + liveness canary, explore-vs-verify rounds, a mission-brief template — and a paste-in prompt to run the whole thing in a fresh project. Distilled from one full retrofit (eighteen cold rounds).
+
 ## What counts as progress
 
 [`SUBSTANCE.md`](SUBSTANCE.md) says what counts as delivered. No process theater — an artifact earns its place only as a real gate. Most open items must deliver runnable behavior. Never fake a test or close undone work. A refusal is honest but never counts as delivery.

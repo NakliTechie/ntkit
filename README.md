@@ -37,7 +37,7 @@ Commands read and write those files. Every session picks up where the last one l
 | `/demo-nt` | live demo | Boot the app on the shared demo seed, open an interactive feature explorer. |
 | `/ux-review-nt` | anytime | Cold-first-timer review: wipe state, walk it as a new user, rank onboarding/nav failures + a11y/perf. |
 | `/live-check-nt` | verifying → shipped | Drive the real deployed runtime with a real gesture; machine evidence it actually works. |
-| `/spar-nt` | before "ready" | The adversary — cold, isolated verifiers attack the live surface in rounds; a check must prove it can fail before a clean round is trusted. Fixes, re-attacks, until converged. |
+| `/harden-nt` | before "ready" | Map the paths a surface claims to support, then work the map in rounds with independent agents from different model families — constructive rounds prove a path holds, adversarial rounds find the paths the map missed. Every failure is fixed and left behind a check proven able to go red. |
 | `/autopilot-nt` | anytime | The executor — works a fix-workplan or goal to completion, unattended, in its own worktree. Ships green, holds red. |
 | `/lab-nt` | research | The discoverer — shapes an idea into a falsifiable contract, runs bounded experiment legs, journals every attempt. |
 | `/notify-nt` | after a run | Desktop notification + optional phone push. |
@@ -48,6 +48,8 @@ Commands read and write those files. Every session picks up where the last one l
 | `/replan-nt` | occasionally | Fold accumulated files back into the three canonical ones; archive the rest. |
 
 They hand off in sequence: `/windup-nt` writes what `/resume-nt` reads; `/forward-pass-nt` and `/walkthrough-nt` feed `/replan-nt`; `/soc-nt` feeds `/replan-nt`'s triage.
+
+> `/spar-nt` was renamed to `/harden-nt` in v1.3 and stays as a deprecated alias for one release.
 
 ## The state machine
 
@@ -70,7 +72,7 @@ Four rules enforce it:
 
 Ten principles: one perception act, machine-decidable outputs, one verdict per next action, bounded output, failures that name their remedy, crash-safety, the tool holding the memory, accretion by mechanism, a tower of abstractions, a fail-closed evaluator outside the loop.
 
-[`DRIVER-HARNESS.md`](DRIVER-HARNESS.md) is the operational companion: the loop that *builds* an agent surface (DRIVER) then *attacks* it (`/spar-nt`), plus the cold-runner harness neither owns on its own — heterogeneous isolated verifiers, kill-by-port + liveness canary, explore-vs-verify rounds, a mission-brief template — and a paste-in prompt to run the whole thing in a fresh project. Distilled from one full retrofit (eighteen cold rounds).
+[`DRIVER-HARNESS.md`](DRIVER-HARNESS.md) is the operational companion: the loop that *builds* an agent surface (DRIVER) then *hardens* it (`/harden-nt`), plus the cold-runner harness neither owns on its own — heterogeneous isolated verifiers, kill-by-port + liveness canary, explore-vs-verify rounds, a mission-brief template — and a paste-in prompt to run the whole thing in a fresh project. Distilled from one full retrofit (eighteen cold rounds).
 
 ## What counts as progress
 

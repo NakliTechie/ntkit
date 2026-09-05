@@ -1,6 +1,6 @@
 # DRIVER-HARNESS.md — Building and Attacking an Agent Surface (v0.1)
 
-DRIVER's operational companion. `DRIVER.md` says *what* an agent surface must be; `/spar-nt`
+DRIVER's operational companion. `DRIVER.md` says *what* an agent surface must be; `/harden-nt`
 says *how* to attack one that's already live. This doc is the connective tissue: the loop that
 sequences the two passes, and the one piece neither owns portably — the **cold-runner harness**
 that makes the attack rounds real instead of imagined.
@@ -22,11 +22,11 @@ Four passes, in order. Each has a home; this doc supplies only pass 2 and the gl
    every spend, the trajectory store, parity ratchets, evaluator-outside-the-loop. Do not attack
    a surface that has no contract; there is nothing to hold the findings against.
 
-2. **STAND UP the cold-runner fleet — this doc, §"The harness".** The infrastructure `/spar-nt`
+2. **STAND UP the cold-runner fleet — this doc, §"The harness".** The infrastructure `/harden-nt`
    assumes but does not ship: heterogeneous isolated verifiers, per-runner tenants, a liveness
    canary, a mission-brief template.
 
-3. **ATTACK and iterate — `/spar-nt`.** Round-based, cold, heterogeneous. Explore rounds grow the
+3. **HARDEN and iterate — `/harden-nt`.** Round-based, cold, heterogeneous. Explore rounds grow the
    backlog; verify rounds close it with a canary. Converges when a full explore round finds
    nothing and every closed finding's canary still bites.
 
@@ -36,13 +36,13 @@ Four passes, in order. Each has a home; this doc supplies only pass 2 and the gl
 
 The build is a one-shot design pass; the attack is an iterated verification pass; they are
 **different questions** and neither substitutes for the other. "Make it agent-drivable" is
-DRIVER. "Prove it is" is spar. This doc keeps them from being confused for one another.
+DRIVER. "Prove it is" is harden. This doc keeps them from being confused for one another.
 
 ---
 
 ## The harness — the portable, missing piece
 
-Everything below is stack-agnostic. Ship it once per project as a `spar/` or scratchpad
+Everything below is stack-agnostic. Ship it once per project as a `harden/` or scratchpad
 launcher; the round scripts are throwaway but the contract is not.
 
 ### 1. Heterogeneous runners, not one model in three hats
@@ -182,8 +182,8 @@ the two doctrine passes and this harness; where a step maps to a command you hav
 > re-attack each fix with a control — the old bad input beside a good one. For every finding:
 > smallest fix, then prove the check can go RED before you trust it GREEN, then one commit,
 > then log it. Converge when a full explore round finds nothing and every canary still bites;
-> stop honestly with a backlog if the round/time budget runs out. (If you have `/spar-nt`, this
-> pass IS `/spar-nt` — run it.)
+> stop honestly with a backlog if the round/time budget runs out. (If you have `/harden-nt`, this
+> pass IS `/harden-nt` — run it.)
 >
 > **Pass 4 — Close the structural gap.** Add a small live-backed smoke covering the classes the
 > in-memory suite can't see — constraint violations, driver coercion, concurrency — seeded from

@@ -41,8 +41,8 @@ whatever state the repo is in. The state survives the session; that's the point.
 | --- | --- | --- |
 | `fresh` | `/scaffold-nt` | Everything that reads `plan/` |
 | `briefed` | audits, `/autopilot-nt` (if a report is open), `/lab-nt` (new or resumed campaign), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
-| `building` | `/decide-nt`, `/soc-nt`, `/windup-nt` (warns), `/autopilot-nt`, `/spar-nt` (if a live instance is reachable) | `/release-nt`, `/package-nt` |
-| `verifying` | `/live-check-nt` (the replay gate), `/spar-nt` (iterated, before a live-facing surface is called ready), `/autopilot-nt`, `/walkthrough-nt`, `/forward-pass-nt` | `/release-nt` with open items |
+| `building` | `/decide-nt`, `/soc-nt`, `/windup-nt` (warns), `/autopilot-nt`, `/harden-nt` (if the surface's paths are reachable) | `/release-nt`, `/package-nt` |
+| `verifying` | `/live-check-nt` (the replay gate), `/harden-nt` (iterated, before an agent surface is called ready), `/autopilot-nt`, `/walkthrough-nt`, `/forward-pass-nt` | `/release-nt` with open items |
 | `blocked` | `/resume-nt`, `/decide-nt` (unblock), `/replan-nt` | `/autopilot-nt` at the same wall; `/lab-nt resume` at an unchanged wall |
 | `shipped` | `/package-nt`, `/release-nt` (next), `/maintain-nt` | — |
 

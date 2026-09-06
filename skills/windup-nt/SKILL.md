@@ -13,7 +13,7 @@ If the current directory is not inside a git repo, stop and ask the user which p
 
 ## The run
 
-Read a reference when you reach its step, not before.
+On entering a step, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead.
 
 | Step | Outcome | Detail |
 |---|---|---|

@@ -19,7 +19,7 @@ If the project has no browser surface (pure CLI, library, backend-only), say so 
 
 ## The run
 
-Read a reference when you reach its phase, not before.
+On entering a phase, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead.
 
 | Phase | Outcome | Detail |
 |---|---|---|

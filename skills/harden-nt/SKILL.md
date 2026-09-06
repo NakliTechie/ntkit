@@ -26,7 +26,7 @@ State back, then go — a veto window, not a questionnaire, same as `/autopilot-
 
 ## The run
 
-Read a reference when you reach its phase, not before.
+On entering a phase, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead.
 
 | Phase | Outcome | Detail |
 |---|---|---|

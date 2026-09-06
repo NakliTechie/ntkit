@@ -26,7 +26,7 @@ Also try a normalized URL (strip `utm_*`, fragments, trailing slash). If a match
 
 ## Steps 3–8 — fetch, follow, file, link
 
-Read a reference when you reach its step, not before.
+On entering a step, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead.
 
 | Step | Outcome | Detail |
 |---|---|---|

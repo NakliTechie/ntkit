@@ -17,7 +17,7 @@ Do a **fresh-eyes forward pass** over the project's code — a cold read of the 
 
 ## The run
 
-Read a reference when you reach its phase, not before.
+On entering a phase, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead.
 
 | Phase | Outcome | Detail |
 |---|---|---|

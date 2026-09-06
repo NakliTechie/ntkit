@@ -32,6 +32,7 @@ Don't generate launch assets for an unshippable repo. Run the full gate:
 - **README** — exists with: one-line what-it-is, a hero screenshot/demo, install that actually works, usage, links (demo / source), license.
 - **LICENSE** — present and appropriate to intent.
 - **A `/guide-nt`** (or equivalent docs), a live/demo link, screenshots, a clear value prop.
+- **First-run onboarding** — a tool with a surface ships a first-run guided tour (the spotlight walkthrough per the Build Doctrine's *Surface conventions*): shows once, skippable, replayable from `?`, driven by the vendored `tour.js`. A surface with no first-contact affordance is a nice-to-have miss, not a hard blocker; note it if absent.
 - **An `llms.txt`** — the docs' agent face (the human-face/agent-face rule applied to documentation): a compact, LLM-ready summary of what the tool is, its API surface (`window.<app>` hooks, message channel, file formats), and how to drive it — so a coding agent pointed at the repo gets the surface without scraping. Offer to generate it from the README + code if missing. A large project may add `llms-full.txt` with the complete detail.
 - **Repo hygiene** — GitHub description + topics set; no debug/junk files; and a **clean install from a fresh clone** (the newcomer path — same cold-start ethos as `/ux-review-nt`).
 

@@ -1,5 +1,5 @@
 ---
-description: "Ask your knowledge vault (~/Code/knowledge) a question — search + read the notes, answer in plain language grounded ONLY in the vault, with citations to the notes used. The read-side sibling of /capture-nt; the \"search\" half of your personal Google. Read-only."
+description: "Answer a question from the knowledge vault only, with note citations. Read-only."
 argument-hint: "<your question>  [realm: knowledge|personal|work]"
 entry: "knowledge vault present"
 exit: "answer grounded only in the vault, with note citations (read-only)"

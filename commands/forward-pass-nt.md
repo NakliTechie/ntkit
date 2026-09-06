@@ -1,5 +1,5 @@
 ---
-description: Fresh-eyes whole-app audit — walk the codebase start to finish hunting bugs, security issues, stray code, and stubs masquerading as done; rank findings with stable IDs, batch them into a fix-workplan, save to plan/
+description: "Cold whole-codebase audit for bugs, security, stray code, stubs; writes a ranked fix-workplan. Read-only."
 argument-hint: "[path or focus, e.g. src/api | security]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Task", "Write"]
 entry: "briefed or later; a codebase to read"

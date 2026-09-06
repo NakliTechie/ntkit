@@ -1,5 +1,5 @@
 ---
-description: Maintenance sweep — stale deps / Actions / advisories / dead links / CWV drift, ranked into a fix-workplan; applies verified safe quick-fixes. Writes plan/maintenance-<date>.md.
+description: "Sweep stale deps, Actions, advisories, dead links into a fix-workplan; applies safe fixes."
 argument-hint: "[focus: deps | actions | security | links | perf]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "a repo with dependencies or workflows"

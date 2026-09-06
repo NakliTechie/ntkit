@@ -1,5 +1,5 @@
 ---
-description: Package for launch — ship-readiness gate, committed marketing screenshots, drafted X / LinkedIn / Show HN / reddit collateral. Drafts, never posts.
+description: "Launch readiness gate, marketing screenshots, drafted social posts. Drafts only, never posts."
 argument-hint: "[focus: gate | assets | drafts]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 entry: "shipped or gate-green verifying; the readiness gate must pass — a red gate stops the run"

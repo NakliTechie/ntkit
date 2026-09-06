@@ -1,5 +1,5 @@
 ---
-description: The executor — work a fix-workplan or prose goal to completion unattended in an isolated worktree; verify fresh-eyes, park stop-lines, ship green or hold red, leave a report.
+description: "Work a fix-workplan or goal unattended in a worktree; merges and pushes on green."
 argument-hint: "[goal, report, or batch, e.g. \"finish the auth refactor\" | forward-pass | B]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "briefed or building with an open report/workplan or explicit goal; clean base branch — never launched from blocked at the same wall"

@@ -1,5 +1,5 @@
 ---
-description: "Cold-first-timer UX review — wipe state, walk the app as a new user, rank where onboarding / nav / time-to-first-value fail; plus a Lighthouse pass. Read-only report."
+description: "Cold first-run UX walk as a new user plus Lighthouse; ranked report, read-only."
 argument-hint: "[area to focus, e.g. first-run | settings | nav]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 entry: "app boots; state wipeable to cold-start"

@@ -1,5 +1,5 @@
 ---
-description: Resume a project — read plan/workplan.md + pending.md + history.md + latest day summary, present a resumption brief, and pause for direction (or `go` to start the top chunk straight off a clean brief)
+description: "Read plan/ and brief the current state, then pause; `go` starts the top chunk."
 argument-hint: "[go — brief, then start the top chunk immediately]"
 entry: "any state; plan/ preferred, degrades to git-only"
 exit: "brief printed naming the current state and its legal next moves; paused for direction"

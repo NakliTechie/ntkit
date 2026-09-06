@@ -1,5 +1,5 @@
 ---
-description: "Live acceptance replay — drive the real deployed surface with a real user gesture and produce machine evidence it works. Read-only on code; writes plan/live-check-<date>.md."
+description: "Replay a flow on the real deployed surface for machine evidence; code stays read-only."
 argument-hint: "[flow to verify, e.g. voice-clone | ocr | the feature just changed]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 entry: "a change deployed or runnable on the real surface; the real runtime reachable (prod URL, or a real browser with the model/state cached)"

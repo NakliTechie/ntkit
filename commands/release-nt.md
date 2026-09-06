@@ -1,5 +1,5 @@
 ---
-description: Cut a release — semver suggestion + CHANGELOG, then on confirmation tag, push, GitHub release, and verify the deploy landed live.
+description: "Cut a release: semver, CHANGELOG, tag, push, GitHub release, verify the deploy live."
 argument-hint: "[major | minor | patch | x.y.z]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "verifying with gate green — no failing verifier, no open fix-workplan items; refuse otherwise (override via /decide-nt)"

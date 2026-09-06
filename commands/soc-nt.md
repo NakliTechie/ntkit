@@ -1,5 +1,5 @@
 ---
-description: "Stream-of-consciousness capture — append a timestamped raw thought to gitignored plan/soc.md and keep working; /replan-nt triages the stream later."
+description: "Append a timestamped raw thought to plan/soc.md and keep working."
 argument-hint: "<the thought, e.g. \"login feels slow — maybe preload the session\">"
 entry: "any state — especially mid-build"
 exit: "timestamped entry appended to plan/soc.md; the work continues"

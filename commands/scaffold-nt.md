@@ -1,5 +1,5 @@
 ---
-description: Scaffold a new project from attached handoff materials OR an inline description — create local folder, init git + remote repo, seed plan/, brief the first move
+description: "Bootstrap a new project: folder, git, remote repo, seeded plan/, first-move brief."
 argument-hint: "[name | parent/name]  (attach md/zip OR describe inline)"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
 entry: "fresh — no repo yet; handoff materials attached"

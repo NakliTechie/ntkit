@@ -1,5 +1,5 @@
 ---
-description: "Deprecated alias for /harden-nt — the same loop, reframed around a path map (constructive + adversarial discovery) instead of attack rounds. Runs /harden-nt unchanged."
+description: "Deprecated alias for /harden-nt; runs it unchanged."
 argument-hint: "[surface, e.g. \"the public API\" | budget, e.g. \"6 rounds\" | resume]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "same as /harden-nt"

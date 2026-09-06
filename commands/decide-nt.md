@@ -1,5 +1,5 @@
 ---
-description: Record a load-bearing decision into plan/history.md Decisions section — one-line surgical capture mid-session
+description: "Append one dated decision line to plan/history.md."
 argument-hint: <short rationale, e.g., "Chose JWT for stateless validation">
 entry: "any state"
 exit: "dated one-line decision appended"

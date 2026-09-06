@@ -1,5 +1,5 @@
 ---
-description: Generate a searchable single-file HTML guide — walk each role's features across whatever surfaces the app has (browser, CLI, native macOS) capturing screenshots or terminal transcripts. Regenerates from a committed generator; never hand-edits output.
+description: "Regenerate the single-file HTML feature guide from a committed generator, capturing each role's surfaces."
 argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task", "mcp__computer-use__*"]
 entry: "at least one surface is runnable (dev server, CLI binary, or built .app); guide generator committed (or created this run)"

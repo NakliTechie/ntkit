@@ -1,5 +1,5 @@
 ---
-description: Role-driven browser walkthrough — identify each user role, drive the running app through their journeys in a real browser, catch logical errors as they surface, and fix them. A live runtime audit, not a static read.
+description: "Drive each role through the running app in a real browser; fixes inline, commits locally."
 argument-hint: "[role or flow to focus, e.g. admin | checkout]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "app boots with the shared demo seed"

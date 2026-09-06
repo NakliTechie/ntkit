@@ -1,5 +1,5 @@
 ---
-description: Consolidate plan/ folder — fold daily summaries and scratch into history.md, restructure pending.md (Now/Parked/Open questions), refresh workplan.md, archive source files
+description: "Fold accumulated plan/ files into history, pending, workplan; archives the sources."
 entry: "plan/ accumulated beyond the three canonical files"
 exit: "three canonical files rebuilt; replay check reported; sources archived"
 writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/_archive/"

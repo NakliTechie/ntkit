@@ -1,5 +1,5 @@
 ---
-description: "Harden an agent surface — map the paths it claims to support, then work the map with independent agents from different model families: constructive rounds prove a path holds, adversarial rounds find paths the map missed. Every failure is fixed and left behind a check proven able to fail. Writes plan/harden-<date>.md."
+description: "Map an agent-facing surface's paths and harden each with independent multi-model agents; fixes code."
 argument-hint: "[surface, e.g. \"the public API\" | budget, e.g. \"6 rounds\" | resume]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "a surface whose contract can be stated — an agent-facing API, an MCP server, a CLI other tools depend on, a public app boundary. Paths that only exist at runtime need a real reachable instance (live-check-nt's trigger test decides); paths that don't, don't"

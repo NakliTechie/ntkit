@@ -1,5 +1,5 @@
 ---
-description: The discoverer — shape a research idea into a contract (question · falsifiable metric · fence · budget), then run bounded experiment legs; every leg ends in a named state with best-so-far committed.
+description: "Turn a research idea into a contract, then run bounded experiment legs in a worktree."
 argument-hint: "[idea/question, e.g. \"can QAT recover fp16 quality at int4 in-browser\" | resume | status]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task", "WebSearch", "WebFetch"]
 entry: "an idea in $ARGUMENTS or the conversation, or an open campaign in plan/lab/ to resume; never re-armed at an unchanged wall"

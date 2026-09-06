@@ -1,5 +1,5 @@
 ---
-description: Launch the app with the shared demo seed and generate + open an interactive HTML feature explorer; hands the presenter clickable links to both. For demoing work-in-progress.
+description: "Boot the app on the demo seed and open a feature explorer for presenting."
 argument-hint: "[focus: seed | explorer | launch]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "app boots with the shared demo seed"

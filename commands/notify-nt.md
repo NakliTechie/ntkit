@@ -1,5 +1,5 @@
 ---
-description: Completion ping — desktop notification + optional ntfy.sh phone push. Best-effort; a failed ping never fails the caller.
+description: "Desktop plus optional ntfy phone ping; best-effort, never fails the caller."
 argument-hint: "<message, e.g. \"myapp: autopilot done — gate GREEN, 7 landed\">"
 allowed-tools: ["Bash"]
 entry: "any state"

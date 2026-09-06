@@ -4,7 +4,7 @@
 
 Coding agents write code well. They're bad at everything around it: remembering decisions, picking up mid-thought, auditing the whole app instead of just the diff, reporting "done" when nothing verified it.
 
-`ntkit` is twenty-two [Claude Code](https://docs.claude.com/en/docs/claude-code) slash commands that add that discipline, across every repo you run.
+`ntkit` is twenty-two [Claude Code](https://docs.claude.com/en/docs/claude-code) skills — slash commands — that add that discipline, across every repo you run.
 
 <p align="center">
   <img src="assets/workflow.png" alt="ntkit workflow map — 21 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
@@ -87,17 +87,21 @@ Two commands work a personal knowledge vault instead of a repo's `plan/` — pla
 | `/capture-nt <url\|file>` | save something | Fetch, extract, write a schema'd source note, link it into a topic map, commit + push. |
 | `/ask-nt <question>` | recall something | Search the vault, answer grounded only in your notes, with citations. Read-only. |
 
-Both expect a vault at `~/Code/knowledge` — edit the path in `commands/capture-nt.md` and `ask-nt.md` if yours differs.
+Both expect a vault at `~/Code/knowledge` — edit the path in `skills/capture-nt/SKILL.md` and `skills/ask-nt/SKILL.md` if yours differs.
 
 ## Install
 
 ```bash
 git clone https://github.com/NakliTechie/ntkit
-cp ntkit/commands/*.md ~/.claude/commands/                 # all projects
-# or:  cp ntkit/commands/*.md <project>/.claude/commands/  # one project
+cp -r ntkit/skills/* ~/.claude/skills/                 # all projects
+# or:  cp -r ntkit/skills/* <project>/.claude/skills/  # one project
 ```
 
-Command name = filename without `.md` (`windup-nt.md` → `/windup-nt`). First run offers to gitignore `plan/`. Set your scan root at the top of `commands/standup-nt.md` if you don't keep repos under `~/Code`.
+Command name = the folder name (`skills/windup-nt/` → `/windup-nt`). First run offers to gitignore `plan/`. Set your scan root at the top of `skills/standup-nt/SKILL.md` if you don't keep repos under `~/Code`.
+
+Each skill is one `SKILL.md`. The five largest (`autopilot`, `walkthrough`, `guide`, `forward-pass`, `capture`) are a short router plus a `references/` folder that Claude reads phase by phase, so a run only loads the part it is in. Descriptions are capped at 15 words: Claude Code lists every installed skill's description in context each session, and that listing has a budget.
+
+**Upgrading from v1.3 or earlier:** the files moved from `commands/` to `skills/`. Delete your old copies (`rm ~/.claude/commands/*-nt.md`) — a skill and a command with the same name would otherwise both be listed.
 
 ## Scheduling
 

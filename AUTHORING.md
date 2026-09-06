@@ -1,6 +1,6 @@
 # Authoring a command
 
-Every `-nt` command is a prompt with a contract. This file is the standard for
+Every `-nt` skill (`skills/<name>/SKILL.md`) is a prompt with a contract. This file is the standard for
 writing a new one — and the checklist for reviewing a change to an existing one.
 It exists because twenty-one commands drifting apart in shape is how a kit rots; one
 shape is how they stay composable. (The six-point idea is ported from the
@@ -15,7 +15,7 @@ per [`SUBSTANCE.md`](SUBSTANCE.md). This file binds how a command is *written*.
 
 Non-negotiable — it is STATES guard #1. Every command's frontmatter carries:
 
-- `description` — one line: what it does **and its side effects** (auto-applies? drafts only? pushes?).
+- `description` — **15 words or fewer**: the trigger (when to reach for it) and its side effect (read-only? drafts only? pushes?). Every installed skill's description sits in context every session under a shared budget; a long one crowds the others.
 - `argument-hint` — the shape of `$ARGUMENTS`, with an example.
 - `allowed-tools` — the smallest set the command actually uses. A read-only command lists no `Write`.
 - `entry` — the state + artifacts it requires. If they are absent the command says so and stops; it never proceeds politely.
@@ -85,7 +85,20 @@ never delete outright. Rewrites of working memory are rare, deliberate, and
 reversible — they have outsized impact on everything downstream, so they happen
 at seams, on purpose, not continuously by drift.
 
-## 9. Keep it lean
+## 9. Route, don't recite
+
+A body over ~1,000 words is a router: `SKILL.md` carries the contract, the
+inputs and their defaults, the guards and stop-lines, and a phase table whose
+rows name the *outcome* of each phase and the `references/<phase>.md` file to
+read when — and only when — the run reaches it. The detail (procedures,
+gotchas, templates) lives in those references. Invoking the skill then loads
+the part of the playbook the run is in, not the whole thing; the phases the
+run never reaches never enter context. Safety text stays in the root — a
+stop-line that lives in an unread reference is not a stop-line. Prefer stating
+what a phase must produce over enumerating how; the model reads the reference
+for the how when it needs it.
+
+## 10. Keep it lean
 
 The smallest command that fully meets the need, no speculative flags. `/notify-nt`
 is the floor — one job, best-effort, never blocks. If a new capability is a
@@ -103,4 +116,5 @@ its slot against the minimal-tooling rule.
 - [ ] Subagent briefs are state-gated and reasoning-free; scaffolding hints stay out of the record
 - [ ] Long runs fold at seams to recoverable files; record rewrites archive, never delete
 - [ ] Reports in ATTEST, delivers per SUBSTANCE, transitions per STATES
+- [ ] Description is 15 words or fewer, trigger first; a body over ~1,000 words is a router over `references/`
 - [ ] Earns its place against minimal-tooling — extend before you add

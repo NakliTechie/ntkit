@@ -1,0 +1,19 @@
+## Phase 5 — Build the single-file guide
+
+The builder reads the captures + caption data and emits one self-contained `guide/index.html`:
+- **Structure** — header/intro · a **TOC** · one section per surface (only if `mixed`) · one **role section** per role · **feature subsections** inside each, every feature = `capture + caption (title + one-line "what this is")`. (Single-role app? Drop the role wrapper and organize straight by feature.)
+- **Card type follows the capture, not the backend** — a route that produced a PNG (`browser`, `native-macos`) renders as an **image card** with the lightbox (below); a route that produced a transcript (`cli`) renders as a **terminal card**: `<pre>` with ANSI SGR codes converted to inline spans (a small vanilla-JS parser, no dependency), styled as a terminal window (traffic-light dots, monospace, dark theme by default — since there are no CSS tokens to read from a CLI). A `mixed` guide has both card types side by side without incident, since the builder branches per capture.
+- **Theme from the app's own design tokens, where they exist** — for a `browser` (or web-dashboard half of a `mixed` app) surface, read the app's `:root` CSS custom properties and font stack, and build the guide's chrome from *those*, so it reads as part of the product, not a generic gallery. This is the biggest visual-quality lever for surfaces that have tokens to steal; a pure-CLI guide has none, so its chrome is the terminal theme instead.
+- **Relative asset paths** — reference `screenshots/<role>/…` / `transcripts/<role>/…` and, for a `browser` surface, link back into the app via a `../`-style base, so the guide works opened as a file or served from any host.
+- **Captions are authored content** — keep them in the builder's `CAPTIONS`/`SECTIONS` data so regeneration never loses them. Write a real one-line explanation per screen or command, not the slug.
+- **Inline search (the addition over Bahi).** A sticky search box that filters live:
+  - Give each card a `data-search` attribute = lowercased `role + feature title + caption + slug` — for a terminal card, also fold in the command text itself, so a reader can search by command name.
+  - On input: lowercase the query, toggle a `.hidden` class per card by `data-search.includes(query)`, hide sections left empty, show a "no matches" note when nothing matches.
+  - `/` focuses the box, `Esc` clears it. Pure vanilla JS, no dependencies, inlined in the page.
+- **Lightbox viewer — image cards only.** Every screenshot opens full-size in an in-page lightbox — a dimmed overlay showing the image at max size with its caption below; never a bare `<a href="img">` that navigates away. Terminal cards skip the lightbox entirely — the `<pre>` is already legible at card width, so "opening" one is just letting it expand to full width in place. Vanilla JS, inlined, no dependencies:
+  - **Open/close** — click/tap a screenshot opens it; `Esc`, a visible `×` button, and a click/tap on the backdrop all close it. Closing restores scroll position.
+  - **Navigation** — `←`/`→` step to the previous/next screenshot in guide order (skipping search-hidden and non-image cards); `↑`/`↓` jump to the first screenshot of the previous/next feature section. On-screen prev/next arrows mirror the keys, with a `role · feature — N/M` position line.
+  - **Mobile** — swipe left/right = prev/next, swipe down (or tap backdrop) = close, native pinch-zoom on the image not blocked, on-screen controls ≥44px, image letterboxed to fit the viewport (`max-width/max-height: 100%`, `object-fit: contain`).
+- **Responsive layout.** The guide itself must read well on a phone: `<meta name="viewport">`, cards/screenshots at `max-width: 100%`, terminal cards horizontally scrollable rather than overflowing, the sticky search usable at small widths, TOC collapsing to a simple list.
+
+Keep CSS inlined; the guide must be a single portable file plus its `screenshots/`/`transcripts/` folders.

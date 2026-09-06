@@ -38,13 +38,17 @@ On entering a step, read its Detail file first, then act; the Outcome column is 
 | 8 Promote | An evergreen note in `notes/` only when the source shifts the user's thinking, offered by default for a chat capture file. Ask before creating unless already told to. | `references/note-schema.md` |
 
 ## Step 9 — Commit & push (automatic)
-Capture isn't done until it's saved. Stage exactly what this capture wrote — the source note, any new / updated topic MOC, a promoted note, any saved `assets/` file — then commit and push, no prompt:
+Capture isn't done until it's saved. Keep an explicit list of the repo-relative file paths changed by this capture — the source note, any new / updated topic MOC, a promoted note, any saved `assets/` file. List individual files, never whole directories or globs. Preserve unrelated worktree and index changes.
+
+Stage and commit only those paths, then push, no prompt. Populate `capture_paths` from the files actually changed; the two paths below are examples:
 ```bash
-git -C "$VAULT" add sources notes topics assets
-git -C "$VAULT" commit -m "Capture: <title>"
+capture_paths=("sources/<date>-<slug>.md" "topics/<theme>.md")
+git -C "$VAULT" --literal-pathspecs add -- "${capture_paths[@]}"
+git -C "$VAULT" --literal-pathspecs commit --only -m "Capture: <title>" -- "${capture_paths[@]}"
 git -C "$VAULT" push
 ```
-- Add **only the content dirs** — `plan/` is gitignored and stays local.
+- `--only` keeps unrelated files already staged in the index out of this commit; leave those staged changes intact.
+- Include only capture-owned files under `sources/`, `notes/`, `topics/`, or `assets/` — `plan/` is gitignored and stays local.
 - If there's **no `origin`** or the **push fails** (offline / auth), keep the local commit and say so — never lose the capture.
 - Pushes to the **private** remote regardless of realm — by design, no waiting. To keep a realm **off** the remote, exclude it structurally (gitignore a path, or a separate local-only repo — the realm-privacy item in `plan/workplan.md`); then it's skipped automatically without a prompt.
 

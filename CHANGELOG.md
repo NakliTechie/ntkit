@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Fix:** `capture-nt` stages explicit capture-owned file paths and commits only those paths, preserving unrelated staged changes.
+- **Added:** `package-nt` launch gate checks for a first-run guided tour (the spotlight walkthrough per the Build Doctrine's Surface conventions, driven by the vendored `tour.js`) — a nice-to-have, not a hard blocker.
+
 ## v1.5.0 — 2026-09-06
 
 - **Removed** `/spar-nt`, the deprecated alias for `/harden-nt` carried since v1.3. Delete `~/.claude/skills/spar-nt/` after upgrading. The kit is 22 skills.

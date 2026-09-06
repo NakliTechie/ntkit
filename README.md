@@ -7,7 +7,7 @@ Coding agents write code well. They're bad at everything around it: remembering 
 `ntkit` is twenty-two [Claude Code](https://docs.claude.com/en/docs/claude-code) skills — slash commands — that add that discipline, across every repo you run.
 
 <p align="center">
-  <img src="assets/workflow.png" alt="ntkit workflow map — 21 Claude Code commands across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
+  <img src="assets/workflow.png" alt="ntkit workflow map — 22 Claude Code skills across six phases: start, open, build, review, ship, close, plus a daily session loop and a knowledge-vault pair" width="840">
 </p>
 
 ## The convention
@@ -84,8 +84,12 @@ Two commands work a personal knowledge vault instead of a repo's `plan/` — pla
 
 | Command | When | What it does |
 |---------|------|--------------|
-| `/capture-nt <url\|file>` | save something | Fetch, extract, write a schema'd source note, link it into a topic map, commit + push. |
-| `/ask-nt <question>` | recall something | Search the vault, answer grounded only in your notes, with citations. Read-only. |
+| `/capture-nt <url\|file>` | save something | Orient first — already captured? what's it near? which tags exist? — then fetch, extract, write a schema'd source note, link it into a topic map, commit + push. |
+| `/ask-nt <question>` | recall something | Ranked search across the vault, answer grounded only in your notes, with citations. Read-only. |
+
+`/capture-nt` checks **before** it fetches. That ordering is the whole point: it catches the source you already have (the capture becomes an update, not a duplicate note) and offers the tags its neighbours already carry, so tag cardinality stops drifting up one novel label at a time.
+
+Both work with nothing but `rg`. If your vault ships an optional index at `bin/vaultdb.py`, they use it instead — ranked relevance rather than an unordered file list, plus the neighbour and tag suggestions above — and fall back cleanly when it is absent. Such an index should be **derived and gitignored**, rebuilt from the markdown on every run: the notes stay canonical, and a stale index that looks authoritative is worse than no index.
 
 Both expect a vault at `~/Code/knowledge` — edit the path in `skills/capture-nt/SKILL.md` and `skills/ask-nt/SKILL.md` if yours differs.
 

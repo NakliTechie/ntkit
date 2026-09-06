@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 930" role="img">
 <title>ntkit — when to use what</title>
-<desc>A light-mode workflow map of ntkit's 21 Claude Code commands across six phases plus a daily session loop and a knowledge-vault pair.</desc>
+<desc>A light-mode workflow map of ntkit's 22 Claude Code skills across six phases plus a daily session loop and a knowledge-vault pair.</desc>
 <style>
 text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 .h1{fill:#1f2328;font-size:58px;font-weight:800}
@@ -28,7 +28,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <rect x="214" y="56" width="15" height="40" rx="2" fill="#0891b2"/>
 <text x="58" y="128" class="tag">when to use what  ·  the rigor layer for AI-assisted development</text>
 <rect x="1368" y="52" width="176" height="38" rx="19" class="pill"/>
-<text x="1456" y="77" class="pilltxt" text-anchor="middle">21 slash commands</text>
+<text x="1456" y="77" class="pilltxt" text-anchor="middle">22 slash commands</text>
 <rect x="56" y="150" width="1488" height="40" rx="10" class="loopbox"/>
 <text x="80" y="176" class="loop"><tspan class="loopb">↻  The daily loop —</tspan>  /standup → /resume → …work… → /windup,  so every session resumes exactly where the last one left off.</text>
 <g transform="translate(56,210)">
@@ -58,7 +58,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 </g>
 <text x="547" y="370" class="chev">›</text><text x="1052" y="370" class="chev">›</text>
 <g transform="translate(56,528)">
-<rect width="477" height="296" rx="16" class="card"/>
+<rect width="477" height="326" rx="16" class="card"/>
 <circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">4</text>
 <text x="74" y="50" class="pname">REVIEW</text><text x="74" y="75" class="pwhen">audit cold, plan the fixes</text>
 <line x1="24" y1="98" x2="453" y2="98" class="div"/>
@@ -67,9 +67,10 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <text x="28" y="195" class="cmd"><tspan class="sl">/</tspan>ux-review<tspan class="suf">-nt</tspan></text>
 <text x="28" y="225" class="cmd"><tspan class="sl">/</tspan>maintain<tspan class="suf">-nt</tspan></text>
 <text x="28" y="255" class="cmd"><tspan class="sl">/</tspan>live-check<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— the replay gate, on the real runtime</tspan></text>
+<text x="28" y="285" class="cmd"><tspan class="sl">/</tspan>harden<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— adversarial rounds against the path map</tspan></text>
 </g>
 <g transform="translate(561,528)">
-<rect width="477" height="296" rx="16" class="card"/>
+<rect width="477" height="326" rx="16" class="card"/>
 <circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">5</text>
 <text x="74" y="50" class="pname">SHIP</text><text x="74" y="75" class="pwhen">demo, document, release</text>
 <line x1="24" y1="98" x2="453" y2="98" class="div"/>
@@ -79,7 +80,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <text x="28" y="225" class="cmd"><tspan class="sl">/</tspan>release<tspan class="suf">-nt</tspan></text>
 </g>
 <g transform="translate(1066,528)">
-<rect width="477" height="296" rx="16" class="card"/>
+<rect width="477" height="326" rx="16" class="card"/>
 <circle cx="42" cy="42" r="18" class="num"/><text x="42" y="49" class="numt" text-anchor="middle">6</text>
 <text x="74" y="50" class="pname">CLOSE</text><text x="74" y="75" class="pwhen">save state, hand off</text>
 <line x1="24" y1="98" x2="453" y2="98" class="div"/>
@@ -87,7 +88,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <text x="28" y="165" class="cmd"><tspan class="sl">/</tspan>replan<tspan class="suf">-nt</tspan></text>
 <text x="28" y="195" class="cmd"><tspan class="sl">/</tspan>notify<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— ping when a run finishes</tspan></text>
 </g>
-<rect x="56" y="852" width="14" height="14" rx="3" fill="#0891b2"/>
-<text x="82" y="864" class="foot"><tspan class="fb">Knowledge vault</tspan> — from any repo:  <tspan class="sl">/</tspan><tspan class="fb">capture-nt</tspan> save  ·  <tspan class="sl">/</tspan><tspan class="fb">ask-nt</tspan> recall</text>
-<text x="1544" y="864" class="foot" text-anchor="end">github.com/NakliTechie/ntkit  ·  MIT</text>
+<rect x="56" y="882" width="14" height="14" rx="3" fill="#0891b2"/>
+<text x="82" y="894" class="foot"><tspan class="fb">Knowledge vault</tspan> — from any repo:  <tspan class="sl">/</tspan><tspan class="fb">capture-nt</tspan> save  ·  <tspan class="sl">/</tspan><tspan class="fb">ask-nt</tspan> recall</text>
+<text x="1544" y="894" class="foot" text-anchor="end">github.com/NakliTechie/ntkit  ·  MIT</text>
 </svg>

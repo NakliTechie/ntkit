@@ -17,12 +17,27 @@ Capture something into the **knowledge vault** and wire it into the web of notes
 
 If `$VAULT` doesn't exist, stop and say so — this command captures _into_ an existing vault, it doesn't create one.
 
-## Step 2 — Idempotency check (before fetching)
-Don't duplicate. Search existing source notes for this input:
+## Step 2 — Orient (before fetching — this is the cheap step that saves the expensive one)
+**Run this before you fetch anything.** Its job is to answer three questions in one shot: do we already have this, what is it near, and what should it be labelled. Skipping it is how the same source gets fetched twice and filed under a fresh tag nobody else uses.
+
+If `$VAULT/bin/vaultdb.py` exists, use it — it rebuilds its index from the markdown on every run, so it is never stale:
+```bash
+"$VAULT/bin/vaultdb.py" orient "<the url, path, or title>"
+```
+It prints three blocks, and you act on each:
+
+1. **`== idempotency ==`** — if it says **ALREADY CAPTURED**, this is an **update**, not a new capture. Read the named note first and refresh it in place: keep its filename, its `captured` date, its `domain`, and every hand-written line of synthesis. Never write a second note for a source the vault already holds. If it reports no match, it is a new capture.
+2. **`== nearby in the vault ==`** — the notes this one will sit beside. Read the top 2–3 before writing; they tell you what the vault already knows, so the new note can link to them (Step 7) and say what is genuinely *new* rather than restating a neighbour. Neighbours also catch the subtler duplicate: the same paper captured earlier under a different URL.
+3. **`reuse these tags`** — the tags the neighbours already carry. **Reuse from this list before coining anything new.** A tag used once is nearly useless for retrieval; the whole point of the list is to stop tag cardinality drifting up. Coin a new tag only when nothing offered fits, and prefer an existing broader tag over a novel narrow one.
+
+It also names **candidate topic MOCs** — that is your Step 7 target, decided before you write rather than after.
+
+**Fallback when the index isn't installed** (no `bin/vaultdb.py`), do it by hand:
 ```bash
 rg -l -F "<the url or filename>" "$VAULT/sources/" 2>/dev/null
+rg -il -e "<key term 1>" -e "<key term 2>" "$VAULT"/sources "$VAULT"/notes "$VAULT"/topics
 ```
-Also try a normalized URL (strip `utm_*`, fragments, trailing slash). If a matching note exists → this is an **update**: read it and refresh in place (keep its filename, `captured` date, `domain`, and any hand-written synthesis). If none → it's a **new** capture.
+Also try a normalized URL (strip `utm_*`, fragments, trailing slash). A match ⇒ update in place; none ⇒ new capture.
 
 ## Steps 3–8 — fetch, follow, file, link
 
@@ -34,7 +49,7 @@ On entering a step, read its Detail file first, then act; the Outcome column is 
 | 4 Follow | Every item of a listicle gets a verified one-liner (real stars and license for a repo); an article's load-bearing links only; a repo or arXiv paper the content rests on gets its **own full source note**, wikilinked. Cap at ~15 followed; log what you skipped. A chat session lists its URLs under `## References mentioned` instead. | `references/fetch.md` |
 | 5 Metadata | slug · publish-date prefix · `source_type` · `domain` (`knowledge` unless clearly personal or work; ask when sensitive) · tags reused from the vault first · author · published. Chat sessions add `platform`, `session_date`, `capture_mode`. | `references/note-schema.md` |
 | 6 Source note | `sources/<date>-<slug>.md` with the vault frontmatter and, in order: TL;DR · Key claims & data · Quotes · Why it matters / connections · Open questions · raw link. What they said, not your opinion. | `references/note-schema.md` |
-| 7 Link | One annotated line under the right topic MOC's `## Sources` (reuse a MOC before creating one); a backlink from the note; the MOC's `updated:` bumped. | `references/note-schema.md` |
+| 7 Link | One annotated line under the right topic MOC's `## Sources` — normally the MOC Step 2 already named (reuse a MOC before creating one); a backlink from the note; the MOC's `updated:` bumped. | `references/note-schema.md` |
 | 8 Promote | An evergreen note in `notes/` only when the source shifts the user's thinking, offered by default for a chat capture file. Ask before creating unless already told to. | `references/note-schema.md` |
 
 ## Step 9 — Commit & push (automatic)
@@ -57,6 +72,7 @@ Short echo:
 ```
 Captured → sources/<date>-<slug>.md  (<new|updated>)
   realm:  <knowledge|personal|work>
+  tags:   <N reused / M newly coined>
   topic:  topics/<theme>.md
   links:  <N followed / M flagged>     (for listicles)
   note:   notes/<slug>.md              (if promoted)

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.0 — 2026-09-06
+
+- **Removed** `/spar-nt`, the deprecated alias for `/harden-nt` carried since v1.3. Delete `~/.claude/skills/spar-nt/` after upgrading. The kit is 22 skills.
+
 ## v1.4.0 — 2026-09-06
 
 Driven by Eric Provencher's "Rethinking skills and prompts for GPT-6 Astra" (2026-09-05) and the Claude Code skills docs, which cap each listed description at 1,536 characters and budget the whole listing.

@@ -49,7 +49,7 @@ Commands read and write those files. Every session picks up where the last one l
 
 They hand off in sequence: `/windup-nt` writes what `/resume-nt` reads; `/forward-pass-nt` and `/walkthrough-nt` feed `/replan-nt`; `/soc-nt` feeds `/replan-nt`'s triage.
 
-> `/spar-nt` was renamed to `/harden-nt` in v1.3 and stays as a deprecated alias for one release.
+> `/spar-nt` was renamed to `/harden-nt` in v1.3; the alias was removed in v1.5.
 
 ## The state machine
 

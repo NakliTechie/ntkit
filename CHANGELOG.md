@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Changed:** ATTEST formatting applies only to designated formal outputs exceeding approximately 200 unformatted characters. Ordinary conversation and shorter outputs use natural prose; evidence standards and execution permissions remain unchanged.
 - **Fix:** `capture-nt` stages explicit capture-owned file paths and commits only those paths, preserving unrelated staged changes.
 - **Added:** `package-nt` launch gate checks for a first-run guided tour (the spotlight walkthrough per the Build Doctrine's Surface conventions, driven by the vendored `tour.js`) — a nice-to-have, not a hard blocker.
 

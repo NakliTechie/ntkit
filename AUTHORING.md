@@ -8,7 +8,7 @@ built-in-skill standards in [osolmaz/pi-workflows](https://github.com/osolmaz/pi
 folded into ntkit's own doctrine.)
 
 The three pillars bind what a command *does*: it transitions state per
-[`STATES.md`](STATES.md), reports per [`ATTEST.md`](ATTEST.md), and delivers
+[`STATES.md`](STATES.md), reports per [`ATTEST.md`](ATTEST.md) section 0's selective scope, and delivers
 per [`SUBSTANCE.md`](SUBSTANCE.md). This file binds how a command is *written*.
 
 ## 1. Declare the contract in frontmatter
@@ -115,6 +115,6 @@ its slot against the minimal-tooling rule.
 - [ ] Legal states declared; entry-fail refuses; no nested actors
 - [ ] Subagent briefs are state-gated and reasoning-free; scaffolding hints stay out of the record
 - [ ] Long runs fold at seams to recoverable files; record rewrites archive, never delete
-- [ ] Reports in ATTEST, delivers per SUBSTANCE, transitions per STATES
+- [ ] Evidence standards at every length; full ATTEST only for designated formal outputs over approximately 200 unformatted characters; delivers per SUBSTANCE, transitions per STATES
 - [ ] Description is 15 words or fewer, trigger first; a body over ~1,000 words is a router over `references/`
 - [ ] Earns its place against minimal-tooling — extend before you add

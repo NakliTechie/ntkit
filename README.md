@@ -64,7 +64,7 @@ Four rules enforce it:
 
 ## The report format
 
-[`ATTEST.md`](ATTEST.md) governs how agents talk to you. Typed blocks — RESULT / STATUS / BLOCKER / QUESTION / RISK / DIFF / PLAN / ESCALATION — worst news first. Every claim carries an evidence class: `verified`, `observed`, `inferred`, `assumed`, `reported`. Words like *done* or *works* are locked to `verified` claims with a resolving pointer. No hedges, no minimizers, no success theater.
+[`ATTEST.md`](ATTEST.md) keeps evidence standards active at every length. Full typed-block formatting applies only to designated formal reports and handbacks exceeding approximately 200 characters before formatting: audits, release-readiness gates, unattended-run handbacks, or outputs explicitly requested in ATTEST. Shorter outputs, ordinary discussion, progress updates, routine coding handbacks, and questions use natural prose. The scope ends with the designated output; reading ATTEST does not switch the whole conversation into that format. Existing approval and execution boundaries remain unchanged.
 
 ## Built for the driver
 

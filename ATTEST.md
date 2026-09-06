@@ -1,13 +1,42 @@
 # ATTEST.md — Communication Standard for This Repository
 
-You are a coding agent. All status reports, handbacks, summaries, blockers,
-questions, and escalations you write to the human MUST conform to ATTEST-100.
-This file is the complete operative subset. It governs how you *communicate*,
-not how you code. Code, comments, and commit messages are out of scope.
+This standard governs communication. Code, comments, commit messages, and
+execution permissions are out of scope.
 
-Core principle: **"done" is the verifier's word, never yours.** Every factual
-claim you make carries an evidence class, and the success vocabulary is locked
-to machine-verified claims only.
+## 0. Apply selectively
+
+Use full ATTEST-100 formatting only for designated formal reports and handbacks
+exceeding approximately 200 characters before ATTEST formatting is added.
+Designated outputs are formal audit reports, release-readiness gate summaries,
+unattended-run handbacks, and outputs explicitly requested in ATTEST.
+
+Use concise natural prose for shorter outputs, ordinary discussion, explanations,
+planning, progress updates, routine coding handbacks, and questions, even during
+a workflow that produces a formal report. A workflow's reference to ATTEST
+designates its report; it does not switch the whole conversation into ATTEST.
+Apply the threshold to the intended output, not the conversation. Treat 200
+characters as a presentation guideline; do not add counting machinery or pad
+responses. Explicit user instructions about a particular output take precedence.
+
+The formatting scope ends with the designated output. This section governs
+activation of sections 1–7, including their references to every message, claim,
+question, or handback. Those formatting and vocabulary rules apply within a
+qualifying formal output, not to subsequent conversation.
+
+### Evidence standards at every length
+
+- Distinguish executed checks and direct observations from inference, assumptions, and external reports.
+- Support success claims with relevant command results or artifacts. Do not equate implementation or a refusal with validated delivery.
+- State checks that did not run, remaining limitations, and blockers. Flag assumptions that gate further work and explain what would establish them.
+- Use real, resolving evidence pointers. Do not invent results or imply broader coverage than the checks support.
+
+Core principle: **"done" is the verifier's word, never yours.** In formal ATTEST
+reports, label every factual claim with its evidence class and apply the success
+vocabulary rules below. In natural prose, express the same evidentiary limits
+without mandatory labels or typed blocks.
+
+All existing authorization, approval, spending, privacy, security, and workflow
+execution boundaries remain in force regardless of response length or format.
 
 ---
 
@@ -45,38 +74,25 @@ Rules:
 - A QUESTION always states its default action; never silently halt waiting for
   an answer.
 
-## 1a. Two registers — compact by default, full for the big moments
+## 1a. Rendering within a qualifying formal output
 
-The blocks are the packaging; sections 2–5 are the substance and bind in both
-registers. Pick the register by what a block carries, not by length of the news:
+Apply section 0 before choosing a register. A short standalone output uses
+natural prose; it does not need a compact ATTEST wrapper.
 
-- **Compact register (the default).** A block whose full rendering would run
-  under ~200 characters collapses to one line — type, class, and pointer inline:
+Within a qualifying formal report:
 
-  ```
-  RESULT (verified): grant-scope check passes for all 3 roles — `npm test -- grant.spec.js` exit 0, 17/17.
-  ```
+- **Compact register:** a brief concern can use one line with type, evidence
+  class, and pointer inline. Adjacent claims of the same type can share a block
+  when their evidence classes and pointers remain clear.
+- **Full register:** use multiline blocks for BLOCKER, QUESTION, ESCALATION,
+  BLOCKS-severity RISK, and formal end-of-run handbacks. Include their applicable
+  structured fields: tried-trail, options and default, or severity and mitigation.
+- Choose the register by the information needed within the report. The
+  approximately 200-character guideline applies to activation of the intended
+  output, not separately to each block inside an already qualifying report.
 
-  Adjacent claims of the same type merge into one compact block, classes inline
-  per claim. No standalone `evidence:` line when the pointer fits inline.
-- **Full register (mandatory, length-irrelevant).** BLOCKER, QUESTION,
-  ESCALATION, BLOCKS-severity RISK, and end-of-run handbacks (morning reports,
-  final summaries) always render as full blocks — their structured fields
-  (tried-trail, options + default, severity + mitigation) *are* the content;
-  collapsing loses them.
-- **The threshold collapses formatting; it never exempts the standard.** A claim
-  under 200 characters still carries its class, its resolving pointer, and the
-  reserved-word lock. The shortest claims ("pushed", "tests pass") are the most
-  load-bearing ones — they get the compact form, never a pass.
-
-The failure mode this section prevents — ceremony outweighing content:
-
-```
-# heavy (never do this for one-line claims)     # compact (do this)
-[RESULT verified]                               RESULT (verified): 6 scripts passed
-Six scripts passed `node --check`.                `node --check` — both renders, exit 0.
-evidence: both renders, exit 0
-```
+Sections 2–5 apply in both formal registers. The evidence standards in section 0
+also apply to natural prose outside formal reports.
 
 ## 2. Mark every factual claim with an evidence class
 
@@ -179,9 +195,11 @@ claim, no evidence pointers, no counts.
 
 ## 7. Self-check before you send
 
-- [ ] Every line is inside one of the 8 block types
-- [ ] Collapsible blocks (<~200 chars rendered) are compact one-liners;
-      BLOCKER / QUESTION / ESCALATION / BLOCKS-RISK / handbacks are full blocks
+- [ ] Section 0 designates this output for formal ATTEST and its unformatted
+      length exceeds approximately 200 characters, unless the user specifies otherwise
+- [ ] Every line of this formal output is inside one of the 8 block types
+- [ ] Brief concerns use compact blocks; BLOCKER / QUESTION / ESCALATION /
+      BLOCKS-RISK / formal handbacks use full blocks with their required fields
 - [ ] Every factual claim has exactly one evidence class
 - [ ] Every reserved word sits inside a `verified` claim with a resolving pointer
 - [ ] Zero banned words, zero exclamation marks, zero emoji
@@ -190,8 +208,10 @@ claim, no evidence pointers, no counts.
       marked not-run
 - [ ] Worst news is first
 
-Conformance is judged by a linter and a separate checker, not by you. If any
-box fails, rewrite before sending.
+Use this checklist only for outputs selected by section 0. For a qualifying
+formal output, conformance is judged by a linter and a separate checker, not by
+you. If any box fails, rewrite before sending. For other outputs, apply section
+0's evidence standards in natural prose.
 
 ---
 ATTEST-100 Issue 0.1 · operative subset · full spec: attest-100-spec-001.md

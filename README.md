@@ -99,7 +99,7 @@ cp -r ntkit/skills/* ~/.claude/skills/                 # all projects
 
 Command name = the folder name (`skills/windup-nt/` → `/windup-nt`). First run offers to gitignore `plan/`. Set your scan root at the top of `skills/standup-nt/SKILL.md` if you don't keep repos under `~/Code`.
 
-Each skill is one `SKILL.md`. The five largest (`autopilot`, `walkthrough`, `guide`, `forward-pass`, `capture`) are a short router plus a `references/` folder that Claude reads phase by phase, so a run only loads the part it is in. Descriptions are capped at 15 words: Claude Code lists every installed skill's description in context each session, and that listing has a budget.
+Each skill is one `SKILL.md`. The seven largest (`autopilot`, `walkthrough`, `guide`, `forward-pass`, `capture`, `windup`, `harden`) are a short router plus a `references/` folder that Claude reads phase by phase, so a run only loads the part it is in. Descriptions are capped at 15 words: Claude Code lists every installed skill's description in context each session, and that listing has a budget.
 
 **Upgrading from v1.3 or earlier:** the files moved from `commands/` to `skills/`. Delete your old copies (`rm ~/.claude/commands/*-nt.md`) — a skill and a command with the same name would otherwise both be listed.
 

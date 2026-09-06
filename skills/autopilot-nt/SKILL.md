@@ -19,7 +19,7 @@ If the current directory isn't a git repo, ask which project. This command commi
 
 ## The run
 
-Read a reference when you reach its phase, not before. Phase 0 is the only pause-shaped moment; everything after it runs to completion.
+On entering a phase, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead. Phase 0 is the only pause-shaped moment; everything after it runs to completion.
 
 | Phase | Outcome | Detail |
 |---|---|---|

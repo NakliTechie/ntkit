@@ -1,0 +1,31 @@
+---
+description: "Drive each role through the running app in a real browser; fixes inline, commits locally."
+argument-hint: "[role or flow to focus, e.g. admin | checkout]"
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+entry: "app boots with the shared demo seed"
+exit: "every role walked in a real browser; fixes committed; verification harness + feature map created or extended; report written"
+writes: "code, the committed verification harness + feature map, plan/walkthrough-<date>.md"
+---
+
+Drive the **running app through a real browser, one user role at a time**, walking each role's journeys as that user would, and **fix the logical errors you hit along the way**. This is a *live runtime* audit: the inverse of `/forward-pass-nt`, which reads the code cold and touches nothing.
+
+**This command edits code, iteratively.** A clear logical error is fixed in place — reproduce, root-cause, fix, re-verify in the browser — then committed locally, one focused commit by path, and the walk continues. Anything that changes product behaviour, needs a design call, or is a large refactor is **deferred** to the workplan with a pointer at `/decide-nt`, never force-applied. Nothing is pushed; `/windup-nt` ships.
+
+If the project has no browser surface (pure CLI, library, backend-only), say so and suggest `/forward-pass-nt`. If the current directory isn't a git repo, ask which project.
+
+**Rotate the eyes.** This is a checker command; two runs of the same model misjudge the same things identically. Before starting, read only the `Reviewer:` header line of this command's most recent report in `plan/`. Repeat run → prefer a different **model family** (an agent CLI on the PATH such as `codex` or `gemini`, checked with `which`, driven through this same brief via Bash); none reachable → a different model of the current family (subagent with a model override); neither → run as-is and say so in the report. Never rotate to materially weaker eyes; log the rotation as unavailable instead. The report header carries `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and names it if you are the family that built most of this code.
+
+`$ARGUMENTS` (optional): a role (`admin`) or a flow (`checkout`) to scope to. If empty, cover every role and their primary journeys.
+
+## The run
+
+Read a reference when you reach its phase, not before.
+
+| Phase | Outcome | Detail |
+|---|---|---|
+| 1 Roles | A role inventory derived from the code (RBAC, route guards, role-forked UI, seeds, docs) — always including the **anonymous visitor** and the **brand-new zero-data user**. Start from `verify/features/` when a prior run left it; drift between map and code is a finding. Missing credentials are the one thing to ask for; never invent auth. | `references/roles-and-journeys.md` |
+| 2 Journeys | A per-role checklist of flows, entry points first, first-run and empty-state journeys marked so they are tested on purpose. | `references/roles-and-journeys.md` |
+| 3 Boot | Harness `doctor` first when one exists. Production build on `127.0.0.1` and a known-free port; readiness waits past hydration; a session per role from the shared demo seed (`demo/seed/`); an error surface (console, page errors, rejections, 4xx/5xx) on before the first click. WebGPU flows run in real Chrome, never headless. | `references/boot.md` |
+| 4 Walk and fix | Act → observe → fix now → continue, one fix at a time, each re-verified in the browser and committed. Findings get stable IDs `C/H/M/L` with evidence. A fix that grows into a refactor or a product call is deferred, not forced. Includes a cross-role authorization probe and stubbed seams for what the browser cannot drive. | `references/walk-and-fix.md` |
+| 4.5 Lever | A committed, rerunnable harness with three entry points — `doctor`, `verify <feature>`, `verify` — worktree-safe by construction, plus the feature map at `verify/features/`. This harness becomes the project's verifier for `/release-nt` and `/autopilot-nt`. | `references/harness-and-feature-map.md` |
+| 5 Report | `plan/walkthrough-<date>.md`: header with counts and the `Reviewer:` line, coverage map with blind spots, issues by ID (FIXED with `path:line` and evidence, or DEFERRED with what unblocks), authz findings, verification reality, progress log. Print counts, fixed vs deferred, blind spots. Name the SHAs; `/windup-nt` pushes. | `references/report.md` |

@@ -26,7 +26,9 @@ HISTORY_DERIVED_SECTIONS = ("Decisions", "Dead ends")
 # A record file is anything else that carries dated or streamed entries.
 RECORD_GLOBS = ("*.md", "_archive/*.md", "lab/*/journal.md", "lab/*/*-leg.md")
 
-ITEM = re.compile(r"^\s*[-*]\s+(?:\[(?P<box>[ x~])\]\s*)?(?P<text>.+?)\s*$")
+# Bulleted or numbered: pending.md's Now section is commonly an ordered list,
+# and an item that does not parse is an item whose provenance is never checked.
+ITEM = re.compile(r"^\s*(?:[-*]|\d+[.)])\s+(?:\[(?P<box>[ x~])\]\s*)?(?P<text>.+?)\s*$")
 FROM = re.compile(r"\[from:\s*(?P<src>[^\]]+?)\s*\]")
 HEADING = re.compile(r"^##\s+(?P<name>.+?)\s*$")
 SOC_ENTRY = re.compile(r"^\s*[-*]\s+(?P<ts>\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2})")

@@ -87,7 +87,7 @@ If `gh` isn't authed or lacks permission, continue local-only and note the owed 
    - "Next steps" / "Todo" lines → Now (in stated order)
    - "Future" / "Later" / "Out of scope" → Parked
    - Anything with "?" / "TBD" / explicit Open Questions → Open questions
-4.5. **Tag what you seed.** Every item written into `pending.md` and `workplan.md` this run traces to the handoff, so tag it `[from: <handoff-filename-stem>]` — or `[from: hand]` for anything the user said inline rather than in a file ([`MEMORY.md`](MEMORY.md) §4). `/scaffold-nt` is one of the three sanctioned reconcile writers, so seeding these files is legal; tagging is what keeps the first replay check meaningful.
+4.5. **Tag what you seed.** Every item written into `pending.md` and `workplan.md` this run traces to the handoff, so tag it `[from: <handoff-filename-stem>]` — or `[from: hand]` for anything the user said inline rather than in a file. Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, `[from: hand]`; an untagged item means hand-written. `/scaffold-nt` is one of the three sanctioned reconcile writers, so seeding these files is legal; tagging is what keeps the first replay check meaningful.
 
 5. Write `plan/workplan.md`:
    - If the handoff has phases/milestones, one Batch per phase, first one tagged `(keystone)`.

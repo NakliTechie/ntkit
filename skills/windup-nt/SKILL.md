@@ -46,7 +46,7 @@ This is the bridge to the next conversation — the folder path must be absolute
 
 ## Impact declaration
 
-`plan/<date>-summary.md` is a **record**: append-only, never rewritten ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). End it with an `## Impact` section naming what changed in the derived files this run:
+`plan/<date>-summary.md` is a **record**: append-only, never rewritten. The derived files (`pending.md`, `workplan.md`, `history.md`'s `## Decisions` and `## Dead ends`) are a projection over the records, rewritten only by `/replan-nt`, `/windup-nt` and `/scaffold-nt`. (Full contract: [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) in the ntkit repo.) End it with an `## Impact` section naming what changed in the derived files this run:
 
 ```markdown
 ## Impact

@@ -35,7 +35,7 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 
 ## Phase 1 — Order the work
 
-If the repo carries a Vision-and-Roadmap (or vision doc), skim its top section first — three lines of strategy in context is what lets default decisions (Phase 0's policy) land on the product's side of a fork rather than the generic side. Then resolve scope into an ordered queue. From a workplan/report, respect sequencing — keystone and depended-on batches first. From a prose goal, write the goal **verbatim** into this run's record (`plan/<date>-autopilot.md`) as a `## Goal` section, then decompose it into a checkboxed queue **in that same record** — not into `plan/workplan.md`. Progress still survives a crash (the record is on disk from the first item), and `/replan-nt` folds the finished run into the shared plan afterwards. The queue you author is yours to work; the shared plan is not yours to write. **Never edit the goal once the run starts** — an agent that can reword the criteria can meet them by rewording ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) W4/W5). Front-load the items most likely to unblock others; defer the ones most likely to hit a stop-line.
+If the repo carries a Vision-and-Roadmap (or vision doc), skim its top section first — three lines of strategy in context is what lets default decisions (Phase 0's policy) land on the product's side of a fork rather than the generic side. Then resolve scope into an ordered queue. From a workplan/report, respect sequencing — keystone and depended-on batches first. From a prose goal, write the goal **verbatim** into this run's record (`plan/<date>-autopilot.md`) as a `## Goal` section, then decompose it into a checkboxed queue **in that same record** — not into `plan/workplan.md`. Progress still survives a crash (the record is on disk from the first item), and `/replan-nt` folds the finished run into the shared plan afterwards. The queue you author is yours to work; the shared plan is not yours to write. **Never edit the goal once the run starts** — an agent that can reword the criteria can meet them by rewording. (Rationale: the [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) writer rules.) Front-load the items most likely to unblock others; defer the ones most likely to hit a stop-line.
 
 ## Phase 4 — The stop-lines (never cross these unattended)
 
@@ -50,7 +50,7 @@ Anything genuinely ambiguous about reversibility → treat as a stop-line and pa
 
 ## Impact declaration
 
-`plan/<date>-autopilot.md` is a **record**: append-only, never rewritten ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). End it with an `## Impact` section before the handoff block:
+`plan/<date>-autopilot.md` is a **record**: append-only, never rewritten. The derived files (`pending.md`, `workplan.md`, `history.md`'s `## Decisions` and `## Dead ends`) are a projection over the records, rewritten only by `/replan-nt`, `/windup-nt` and `/scaffold-nt`. (Full contract: [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) in the ntkit repo.) End it with an `## Impact` section before the handoff block:
 
 ```markdown
 ## Impact

@@ -132,6 +132,10 @@ def scan_derived(plan: Plan) -> None:
             plan.counts["items"] += 1
             where = f"{path.name}:{lineno}"
             tag = FROM.search(line)
+            # A placeholder in prose (`[from: <record>]`) documents the format; it is not a
+            # tag. Angle brackets never appear in a real slug, so treat it as untagged.
+            if tag and ("<" in tag.group("src") or ">" in tag.group("src")):
+                tag = None
             if not tag:
                 plan.findings.append(
                     Finding("untagged", where, m.group("text")[:80])

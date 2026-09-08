@@ -75,3 +75,16 @@ Write `plan/live-check-<date>.md` in ATTEST form:
 ## Playbook hook
 
 If the user's config (CLAUDE.md / memory) or the project itself names a live-check or replay playbook for this kind of surface, read it before Phase 1 — it carries the concrete probes and gotchas this generic spec can't.
+
+## Impact declaration
+
+`plan/live-check-<date>.md` is a **record**: append-only, never rewritten ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
+
+```markdown
+## Impact
+- pending.md/Now — add: <item this run says belongs on the list>
+- workplan.md/B2#3 — status: [ ] → [x], verified by <the check that proves it>
+- none — <reason nothing changes>
+```
+
+Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. Do not write the item into `pending.md` or `workplan.md` yourself — a record that declares its impact and a reconcile pass that folds it are what keep the plan rebuildable from the log. An `add` line with nothing later citing this record is a **ghost**, and `plancheck` reports it.

@@ -85,6 +85,17 @@ never delete outright. Rewrites of working memory are rare, deliberate, and
 reversible — they have outsized impact on everything downstream, so they happen
 at seams, on purpose, not continuously by drift.
 
+## 8.5 Write records, declare impact
+
+`plan/` splits in two ([`MEMORY.md`](MEMORY.md)): **records** are append-only, **derived** files (`pending.md`, `workplan.md`, `history.md`'s indexes) are a projection over them. Which one your command writes decides what it may do.
+
+- Writing a **record** (a report, a summary, a journal): append only, never edit a past entry, and end the file with an `## Impact` section saying what should change in the derived files — or `- none — <reason>`.
+- Touching a **derived** file: you may flip the status of an item that already exists and append its evidence. You may not add, remove, re-rank, or re-word one. Only `/replan-nt`, `/windup-nt`, and `/scaffold-nt` hold that authority.
+- Handed a goal in prose: record it verbatim and queue it **in your own record**. A command that writes its own criteria into the shared plan and then ticks them off has graded its own exam.
+- Adding an item during a reconcile pass: tag it `[from: <record-slug>]` so the replay check stays a set comparison instead of a re-read.
+
+State it in `writes:` precisely — "status flips on existing items in `plan/workplan.md`" is a different contract from "`plan/workplan.md`", and the difference is the whole rule.
+
 ## 9. Route, don't recite
 
 A body over ~1,000 words is a router: `SKILL.md` carries the contract, the

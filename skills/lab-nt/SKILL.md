@@ -96,3 +96,16 @@ Resume: /lab-nt resume <slug>   ·   Promote a finding: /capture-nt plan/lab/<sl
 ```
 
 Finish with `/notify-nt "<slug>: lab leg <n> — <state>, best <delta>"` — degrades silently if unconfigured. `/resume-nt` reads leg reports like it reads autopilot reports; `/standup-nt` surfaces open campaigns; a GOAL-MET (or an interestingly-STAGNANT) finding promotes to the knowledge vault via `/capture-nt` — the lab's output feeds the second brain, and the vault's prior art feeds the next Phase 0.
+
+## Impact declaration
+
+`plan/lab/<slug>/<date>-leg.md` is a **record**: append-only, never rewritten ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
+
+```markdown
+## Impact
+- pending.md/Now — add: <item this run says belongs on the list>
+- workplan.md/B2#3 — status: [ ] → [x], verified by <the check that proves it>
+- none — <reason nothing changes>
+```
+
+Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. Do not write the item into `pending.md` or `workplan.md` yourself — a record that declares its impact and a reconcile pass that folds it are what keep the plan rebuildable from the log. An `add` line with nothing later citing this record is a **ghost**, and `plancheck` reports it.

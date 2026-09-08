@@ -4,7 +4,7 @@ argument-hint: "[surface, e.g. \"the public API\" | budget, e.g. \"6 rounds\" | 
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 entry: "a surface whose contract can be stated — an agent-facing API, an MCP server, a CLI other tools depend on, a public app boundary. Paths that only exist at runtime need a real reachable instance (live-check-nt's trigger test decides); paths that don't, don't"
 exit: "every path in the map is hardened — carries a check that has been shown to go red against the defect it guards — OR the budget is exhausted with an honest uncovered list"
-writes: "plan/harden-<date>.md; workplan checkboxes for anything deferred to /autopilot-nt"
+writes: "plan/harden-<date>.md; status flips on existing workplan items it completes"
 ---
 
 `/harden-nt` makes a surface harder than it was, and produces the evidence. It works from a **path map** — what the surface claims to support — and drives that map with independent agents from **different model families**, two ways at once: **constructively**, showing a claimed path holds, and **adversarially**, finding the paths the map forgot. Nothing counts as covered until the check guarding it has been **proven able to fail** — a check that stays green with or without the defect is not a check, and catching that is why this command exists.
@@ -37,3 +37,16 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 | 5 Carry forward | One running map across rounds: uncovered (oldest first) · exercised (honest middle, not done) · hardened. A path that breaks again is reopened with its history, never filed as new. | `references/path-map.md` |
 | 6 Verdict | **Covered** when every path is hardened, every check still goes red on its defect, and the last adversarial round added nothing — stated as "this map, as of this run". Otherwise **stopped** (budget, or three rounds hardening nothing) with the uncovered list. | `references/report.md` |
 | 7 Report | `plan/harden-<date>.md` in ATTEST form with the fixed summary block: rounds and families, map counts, verdict, hardened / added / reopened / uncovered lists, Needs you. End by naming whether the surface is ready for `/live-check-nt` or `/release-nt`; the uncovered list feeds `/autopilot-nt`. | `references/report.md` |
+
+## Impact declaration
+
+`plan/harden-<date>.md` is a **record**: append-only, never rewritten ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
+
+```markdown
+## Impact
+- pending.md/Now — add: <item this run says belongs on the list>
+- workplan.md/B2#3 — status: [ ] → [x], verified by <the check that proves it>
+- none — <reason nothing changes>
+```
+
+Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. Anything this run defers to `/autopilot-nt` is an `add` impact line here, not an item written straight into `workplan.md`. Do not write the item into `pending.md` or `workplan.md` yourself — a record that declares its impact and a reconcile pass that folds it are what keep the plan rebuildable from the log. An `add` line with nothing later citing this record is a **ghost**, and `plancheck` reports it.

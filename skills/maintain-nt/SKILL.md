@@ -38,3 +38,16 @@ Assign stable IDs and rank by **risk**: a security advisory or a deprecated-and-
 **Write `plan/maintenance-YYYY-MM-DD.md`** in the `/forward-pass-nt` report shape: findings by ID, a batched Workplan, and a coverage note (what was checked, what wasn't) — plain teammate language throughout, no AI-speak or filler. Then **apply the safe quick-fixes now, no confirmation** — SHA-pin actions, patch-level bumps, fix dead links — verifying each (install/build still green) and reverting any that fails its check; report what landed with evidence. **Defer major bumps to `/autopilot-nt`** (so each is fixed and verified individually); point breaking-change calls at `/decide-nt`.
 
 End by naming the highest-risk finding, and that `/autopilot-nt` works the workplan while `/replan-nt` folds it.
+
+## Impact declaration
+
+`plan/maintenance-<date>.md` is a **record**: append-only, never rewritten ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
+
+```markdown
+## Impact
+- pending.md/Now — add: <item this run says belongs on the list>
+- workplan.md/B2#3 — status: [ ] → [x], verified by <the check that proves it>
+- none — <reason nothing changes>
+```
+
+Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. Do not write the item into `pending.md` or `workplan.md` yourself — a record that declares its impact and a reconcile pass that folds it are what keep the plan rebuildable from the log. An `add` line with nothing later citing this record is a **ghost**, and `plancheck` reports it.

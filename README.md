@@ -58,6 +58,7 @@ They hand off in sequence: `/windup-nt` writes what `/resume-nt` reads; `/forwar
 Four rules enforce it:
 
 - **Every command declares its contract** — `entry`, `exit`, `writes` in frontmatter. A failed entry refuses, it doesn't proceed politely. See [`AUTHORING.md`](AUTHORING.md).
+- **Records append, only the reconcile pass rewrites** — [`MEMORY.md`](MEMORY.md) splits `plan/` into append-only records and derived files projected over them, so the plan can be rebuilt from the log. `plancheck` reports the drift between them.
 - **"Done" is the verifier's word**, never the agent's.
 - **Overrides are logged**, via `/decide-nt`. Bypassed on purpose is a decision; bypassed by drift is a bug.
 - **Asks are reserved for the unanswerable.** Everything else takes the safe default and logs it.
@@ -73,6 +74,10 @@ Four rules enforce it:
 Ten principles: one perception act, machine-decidable outputs, one verdict per next action, bounded output, failures that name their remedy, crash-safety, the tool holding the memory, accretion by mechanism, a tower of abstractions, a fail-closed evaluator outside the loop.
 
 [`DRIVER-HARNESS.md`](DRIVER-HARNESS.md) is the operational companion: the loop that *builds* an agent surface (DRIVER) then *hardens* it (`/harden-nt`), plus the cold-runner harness neither owns on its own — heterogeneous isolated verifiers, kill-by-port + liveness canary, explore-vs-verify rounds, a mission-brief template — and a paste-in prompt to run the whole thing in a fresh project. Distilled from one full retrofit (eighteen cold rounds).
+
+## What the plan is made of
+
+[`MEMORY.md`](MEMORY.md) is the memory contract for `plan/`. Records (reports, summaries, `soc.md`) are append-only; the derived files (`pending.md`, `workplan.md`) are a projection over them that only `/replan-nt`, `/windup-nt`, and `/scaffold-nt` may rewrite. Records declare an `## Impact`; derived items carry `[from: <record>]` provenance; `plancheck` compares the two and reports **orphans** (state from nowhere) and **ghosts** (work silently dropped). Untagged items mean hand-written, so every existing `plan/` folder is already valid — this is additive, not a migration.
 
 ## What counts as progress
 

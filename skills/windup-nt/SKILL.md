@@ -43,3 +43,16 @@ Next chunk — <title from top of workplan.md>:
 ```
 
 This is the bridge to the next conversation — the folder path must be absolute and copy-pasteable, and the named chunk is the one the next session grabs first. `/resume-nt` reads the workplan, pending, and latest summary and briefs the user from them.
+
+## Impact declaration
+
+`plan/<date>-summary.md` is a **record**: append-only, never rewritten. The derived files (`pending.md`, `workplan.md`, `history.md`'s `## Decisions` and `## Dead ends`) are a projection over the records, rewritten only by `/replan-nt`, `/windup-nt` and `/scaffold-nt`. (Full contract: [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) in the ntkit repo.) End it with an `## Impact` section naming what changed in the derived files this run:
+
+```markdown
+## Impact
+- pending.md/Now — add: review the auth refactor branch before it goes stale
+- workplan.md/B2 — reword: split the migration chunk, it was two jobs
+- none — nothing shipped today that changes the plan
+```
+
+`/windup-nt` is one of the **three sanctioned reconcile writers** (with `/replan-nt` and `/scaffold-nt`), so unlike the audit commands it both declares the impact *and* applies it in Steps 2–3. Declare it anyway: the summary is the record that explains why `pending.md` looks the way it does tomorrow, and it is what a replay check reads. Tag every item you add with `[from: <date>-summary]` so the provenance resolves.

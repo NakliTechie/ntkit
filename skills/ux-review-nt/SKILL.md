@@ -85,3 +85,16 @@ Across the journey and the whole surface, score these:
 Create `plan/` if missing and ensure it's gitignored; if today's report exists, suffix `-2`. **Don't edit the app** — this is read-only. **Print to chat:** the journey's worst friction beats, the ranked findings, the Lighthouse scores, and the headline of the ideal-sequence proposal (keep the full proposal in the file).
 
 End by pointing structural recommendations at `/decide-nt`, any genuine bugs at `/walkthrough-nt`, and noting that `/replan-nt` folds this report into `pending.md`/`workplan.md`.
+
+## Impact declaration
+
+`plan/ux-review-<date>.md` is a **record**: append-only, never rewritten. The derived files (`pending.md`, `workplan.md`, `history.md`'s `## Decisions` and `## Dead ends`) are a projection over the records, rewritten only by `/replan-nt`, `/windup-nt` and `/scaffold-nt`. (Full contract: [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) in the ntkit repo.) End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
+
+```markdown
+## Impact
+- pending.md/Now — add: <item this run says belongs on the list>
+- workplan.md/B2#3 — status: [ ] → [x], verified by <the check that proves it>
+- none — <reason nothing changes>
+```
+
+Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. Do not write the item into `pending.md` or `workplan.md` yourself — a record that declares its impact and a reconcile pass that folds it are what keep the plan rebuildable from the log. An `add` line with nothing later citing this record is a **ghost**, and `plancheck` reports it.

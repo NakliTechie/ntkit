@@ -85,12 +85,36 @@ Regenerate `plan/workplan.md` from the freshly restructured pending Now. Same sh
 
 ## Step 4.5: Replay check
 
-`history.md` is the event log; `pending.md` is derived state. Before archiving anything, replay the log — read the rebuilt `## Decisions` + `## Log` in order and ask of each item now in `pending.md`: does the log explain how it got there (opened, parked, resolved)? Two kinds of divergence to report:
+`history.md` is the event log; `pending.md` and `workplan.md` are derived state. Before archiving anything, run the mechanical check rather than judging by reading:
 
-- **Orphan** — a Now/Parked item no log entry accounts for (state drift: work happened off the record)
-- **Ghost** — a log/decision thread with no closure and no pending item (dropped silently, never parked)
+```bash
+python3 "$(dirname "$0")/bin/plancheck.py" .          # from the skill folder
+python3 ~/.claude/skills/replan-nt/bin/plancheck.py . # installed path
+```
 
-Don't fix silently: list divergences in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts — <one line each>`) and fold the obvious ones back (an orphan gets a dated log line; a ghost gets parked or explicitly closed). Divergence found here is drift caught before it's archived — the cheap structural check that keeps the three files honest with each other.
+Stdlib only — no install step, no dependencies.
+
+It compares provenance tags against the records that exist, and `## Impact` declarations against the items that cite them ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). Three findings:
+
+- **orphan** — a derived item whose `[from:]` names a record that does not exist. State arrived from nowhere.
+- **ghost** — a record declaring an `add` impact that no derived item cites. Work was done and silently dropped.
+- **untagged** — an item with no provenance. Info, never failure: this is the legacy case and the hand-written case.
+
+If the script is not available, fall back to reading: replay the rebuilt `## Decisions` + `## Log` in order and ask of each item now in `pending.md` whether the log explains how it got there. Say which mode you used.
+
+**Don't fix silently.** Report the count in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts — <one line each>`) and fold the obvious ones back: an orphan gets a dated log line, a ghost gets parked or explicitly closed. Divergence found here is drift caught before it is archived.
+
+## Step 4.6: Tag provenance
+
+Every item you wrote into `pending.md` or `workplan.md` this run carries a trailing tag naming the record it came from, so the next replay check is a set comparison instead of a re-read:
+
+```markdown
+- [ ] Fix the nil deref in parser  [from: forward-pass-2026-09-06#F3]
+- Preload the session on login  [from: soc:2026-09-08T14:32]
+- Ask legal about retention  [from: hand]
+```
+
+Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. Carry existing tags through untouched. **Leave pre-existing untagged items alone** — an untagged item means hand-written, so back-filling tags you cannot source would be inventing provenance. Tag what you fold this run; the folder converges over cycles.
 
 ## Step 5: Archive source files
 

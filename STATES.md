@@ -76,6 +76,14 @@ Four rules make the table enforceable, not decorative:
    unstated**; reversible in-repo work (edit, branch commit, `plan/` write)
    needs no grant. (Authoring face: [`AUTHORING.md`](AUTHORING.md) §3.)
 
+5. **Records append; only the reconcile pass rewrites.** `plan/` is not one
+   undifferentiated folder — [`MEMORY.md`](MEMORY.md) splits it into append-only
+   records and derived files projected over them. A command may flip the status of
+   an item it did the work for; adding, dropping, re-ranking or re-wording one
+   belongs to `/replan-nt`, `/windup-nt`, and `/scaffold-nt` alone. This is what
+   makes the state on disk explainable: every derived item traces to a record, and
+   `plancheck` says so mechanically.
+
 ## Scaling — guards fire on evidence, not on ceremony
 
 None of this adds steps to a simple project. Every guard checks for an artifact —

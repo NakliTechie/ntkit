@@ -27,3 +27,16 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 | 4 Workplan | Themed batches ordered for execution, keystone first; tri-state checkboxes; finding ID, location, and rationale per item; `[test: how]` markers; deferrals name what unblocks. | `references/ranking-and-workplan.md` |
 | 5 Report | `plan/forward-pass-<date>.md` in fixed order, with stubs in their own section and the `Reviewer:` line. Print counts, findings by severity, the stubs list, the coverage map. Never overwrite `workplan.md`. | `references/report.md` |
 | 6 Handoff | The keystone batch to start, decisions to record via `/decide-nt`, what `/replan-nt` folds later. Without `fix`: stop here. With `fix`: hand the keystone batch to `/autopilot-nt`. | `references/report.md` |
+
+## Impact declaration
+
+`plan/forward-pass-<date>.md` is a **record**: append-only, never rewritten. The derived files (`pending.md`, `workplan.md`, `history.md`'s `## Decisions` and `## Dead ends`) are a projection over the records, rewritten only by `/replan-nt`, `/windup-nt` and `/scaffold-nt`. (Full contract: [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) in the ntkit repo.) End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
+
+```markdown
+## Impact
+- pending.md/Now — add: <item this run says belongs on the list>
+- workplan.md/B2#3 — status: [ ] → [x], verified by <the check that proves it>
+- none — <reason nothing changes>
+```
+
+Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. Do not write the item into `pending.md` or `workplan.md` yourself — a record that declares its impact and a reconcile pass that folds it are what keep the plan rebuildable from the log. An `add` line with nothing later citing this record is a **ghost**, and `plancheck` reports it.

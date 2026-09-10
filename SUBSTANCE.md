@@ -66,6 +66,9 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
    `assumed` dressed up.
 3. **Tautological tests** — a test that asserts whatever the code already does, or skips the
    negative case. Each feature item pre-specifies one assertion a naive wrong build would fail.
+   The sharpest form is a test written *against a defect you just found*: if the assertion you were
+   about to add would go green on today's broken behaviour, you are pinning the bug as intended and
+   the next reader will treat it as a decision. Delete the test and record the gap instead.
 4. **Stub-as-done** — a placeholder that compiles (a TODO / `unimplemented` marker) counted as
    finished. It builds ≠ it works; committed code carries no scaffolds.
 5. **Spec-editing as progress** — weakening a plan, spec, or frozen decision instead of building

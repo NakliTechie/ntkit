@@ -59,6 +59,23 @@ app has irreversible side effects a random walk would actually trigger (sends re
 real card, writes to a shared upstream), say so in the report and skip. That is a legitimate outcome.
 Chaos against an app whose seams aren't stubbed is a way to page a stranger at 2am.
 
+### Amplify a timing bug instead of hunting it
+
+An intermittent failure that needs host load to appear is expensive to chase and impossible to
+verify a fix against — you cannot prove a fix when the bug shows up 3 times in 40 runs. So do not
+chase it. **Find the timing parameter the bug depends on and exaggerate it until the failure is
+deterministic.**
+
+A deferred re-focus running on `setTimeout(fn, 0)` loses the race only when the host is loaded.
+Change that one `0` to `300` and it loses every time: one run went from 85/86 to 49/86, and a
+focused repro from 3-in-40 to 6-in-6. Now the bug is a fixed point you can iterate against, and the
+fix is provable — same amplifier, 8-in-8 green. Then remove the amplifier and confirm at realistic
+timing.
+
+This works for anything with a tunable delay: a debounce, a poll interval, an animation duration, a
+retry backoff, a deferred callback. Change **one** constant, change nothing else, and keep the
+amplified build out of the commit.
+
 ### Replay before you believe it
 
 **A breach found here does not earn an ID until it replays.** A random walk produces sequences you did

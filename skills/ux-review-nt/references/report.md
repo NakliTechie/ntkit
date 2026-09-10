@@ -25,7 +25,7 @@ Create `plan/` if missing and ensure it's gitignored; if today's report exists, 
 
 ### Hand back the recording
 
-`plan/ux-review-<date>-run/` holds the recording and the beat log. **Send the recording with `SendUserFile`.** For a UX review this is not a nicety — the deliverable is a newcomer struggling, and watching thirty seconds of someone stuck on the credential modal lands what a paragraph describing it does not. Say plainly whether it is a real recording, an asciicast, or a screenshot contact sheet.
+`plan/ux-review-<date>-run/` holds the recording and the beat log. **Send the recording with `SendUserFile`** — or, when that tool is not available in the session (a subagent, a non-interactive run), print the absolute path to the run directory and name the video file explicitly, so the handback is one copy-paste from being watchable. For a UX review this is not a nicety — the deliverable is a newcomer struggling, and watching thirty seconds of someone stuck on the credential modal lands what a paragraph describing it does not. Say plainly whether it is a real recording, an asciicast, or a screenshot contact sheet.
 
 **Print to chat:** the journey's worst friction beats, the ranked findings, the flail's yield, the objective-audit results, and the headline of the ideal-sequence proposal (keep the full proposal in the file).
 

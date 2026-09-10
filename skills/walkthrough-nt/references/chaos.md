@@ -25,9 +25,15 @@ From each state the scripted walk reached, run a bounded random walk:
 Timings are part of the input space. Sometimes act immediately, before the previous action settles;
 sometimes wait. Double-submit. Navigate mid-request. Hit back after a mutation.
 
+**Values are a second axis, and a more productive one than the action sequence.** Wherever the app
+ingests data — a file picker, a paste target, an import dialog, a URL field — hand it the wrong type,
+an empty file, a binary, something enormous. An importer that accepts the wrong file, invents rows,
+and reports success is worse than one that crashes, and no scripted journey will ever hand it the
+wrong file.
+
 ### Budget it, and declare the budget
 
-Default: **~40 actions per role**, or 5 minutes per role, whichever comes first. Scale it with
+Default: **~40 actions per role**. Count actions, not minutes — the wall-clock runs well past a naive estimate because every candidate breach needs a clean-context reproduction before it earns an ID, and that verification is the phase's whole credibility. Scale it with
 `$ARGUMENTS` when a run is scoped to one flow. The budget goes in the report whether or not anything
 was found — "20 minutes of chaos across 3 roles, 2 findings" and "the leg was skipped" are different
 facts and the reader needs the right one.

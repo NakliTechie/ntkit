@@ -9,6 +9,7 @@ So after the scripted walk, from the states it reached, flail:
 3. **Interrupt things.** Navigate mid-load. Hit back after a submit. Double-click submit. Close the modal with Escape instead of the button, and with the button instead of Escape. Refresh mid-flow. Open a deep link in a fresh tab with no prior state.
 4. **Enter the wrong thing.** Empty required field, absurdly long string, wrong format, leading whitespace, the wrong file type — and read the error as a person who doesn't know the internals.
 5. **Deny every permission** the app asks for, then keep going.
+6. **Feed every ingest point the wrong artifact.** Wherever the app accepts data — a file picker, a paste target, an import dialog, a URL field — give it the wrong type, an empty file, a binary, something enormous. This is the *value*-shaped probe, and it is a different axis from the five action-shaped ones above: the app's most confident lies live here. An importer that accepts a PNG through "CSV file…", invents rows, and toasts *"Imported 3 rows"* is worse than a crash, and no scripted journey will ever hand it a PNG.
 
 ### What this phase is looking for — and what it isn't
 
@@ -20,7 +21,7 @@ So after the scripted walk, from the states it reached, flail:
 - **Traps** — a modal that Escape won't close, a focus trap, a flow with no cancel.
 - **Errors that don't tell you what to do** — the message names a symptom, an error code, or nothing at all, and the newcomer's next move is invisible.
 
-**Budget: ~15 minutes, or ~30 interactions.** Declare the budget in the report whether or not it yielded anything — "flail: 30 interactions across 2 entry points, 3 findings" and "flail: skipped" are different facts.
+**Budget: ~30 interactions; expect 20-30 minutes.** Interactions are the bound you actually control — the wall-clock is not 15 minutes, because each misclick needs a screenshot read plus a follow-up probe to tell a real defect from a harness artifact, and that verification is not optional (see *Your driver is a suspect too*). Declare the budget in the report whether or not it yielded anything — "flail: 30 interactions across 2 entry points, 3 findings" and "flail: skipped" are different facts.
 
 **Skip it deliberately, never silently.** If the cold app has irreversible side effects a random misclick would genuinely trigger — sends real mail, charges a card, writes upstream — say so and skip. That is a legitimate outcome, and it is also itself worth a line in the findings: an app where a newcomer's misclick is unrecoverable in the real world is a design problem, not just a testing obstacle.
 

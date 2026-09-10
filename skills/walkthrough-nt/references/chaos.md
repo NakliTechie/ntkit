@@ -13,6 +13,10 @@ journey reached. Spend it.
 
 **Before anything else: drive the walk from a seeded PRNG, and record the seed.** The phase's whole credibility rests on replaying the action-log prefix from a cold boot, and that is only tractable if the same seed reproduces the same sequence. Without one you cannot re-drive a prefix, every breach lands in the unreproduced list, and the phase collapses into "it broke somewhere in there" — precisely the failure this design exists to prevent.
 
+**What the seed does and does not buy you.** It reproduces the *branch choices* exactly. It does not reproduce the *alphabet*, because Phase 5 correctly enumerates what is actionable from the live page at each step — so once app state diverges (after a fix, say), the tail of the sequence diverges too: the same seed picked "json" where it had picked "docx". That is fine, and worth understanding rather than fighting: the log prefix reconstructs state **up to the breach**, which is all the gate needs. Do not expect a seed to give you a stable long sequence across code changes.
+
+Replay also assumes the app's state is reconstructible from a cold boot plus a keystroke sequence. That holds for a locally-persisted app; it breaks where state depends on wall-clock or server responses, and there the honest move is to say replay is unavailable for that flow rather than to fake a repro.
+
 Log the seed in the report header. `--seed=<n> --stop=<action-index>` is the shape you want: it makes replay a one-liner and lets a later run reproduce this one exactly.
 
 ### The loop

@@ -7,4 +7,21 @@ Get a running app and a browser driving it:
 - **WebGPU can't be tested headless.** Headless Chromium has **no WebGPU** — any flow that loads or runs a model in-browser via WebGPU (and other GPU-gated features) errors out headless. Drive those flows with the **Chrome MCP** (a real, GPU-backed Chrome), not headless Playwright; otherwise mark them untested.
 - **Wait for the app to actually be ready before asserting** — a React/Next page returns blank if you read before hydration. Wait for `load` + `document.fonts.ready` + a short settle, not just `domcontentloaded`.
 - **Enter as each role.** Prefer logging in *through the UI* (it exercises the real auth flow as that role); injecting a seeded session cookie is the fallback. Seed enough data that no page is a pure empty-state — **except** the first-run journeys, where empty *is* the thing under test. Draw from the **shared demo seed** (`demo/seed/` — the canonical asset `/demo-nt`, `/guide-nt`, and `/walkthrough-nt` all load); extend it when a feature lands, rather than inventing per-command seed data.
-- **Turn on an error surface before you start clicking.** Capture `console`, `pageerror`/uncaught exceptions, unhandled rejections, and failed/4xx/5xx network responses for the whole run. If the app has no global error net, that absence is itself a finding — an exception in an event handler otherwise produces *nothing* (no toast, no log), which is exactly how a dead button survives for months.
+- **Arm the invariant set before you start clicking.** Not "watch the console" — a **named list of conditions checked after every action**, each of which produces a finding with an ID when it breaks, exactly like a step that visibly failed. The floor set, borrowed from Bombadil's zero-spec browser defaults:
+
+  | ID | Invariant |
+  |---|---|
+  | `INV-EXC` | no uncaught exception / `pageerror` |
+  | `INV-REJ` | no unhandled promise rejection |
+  | `INV-ERR` | no `console.error` |
+  | `INV-HTTP` | no 4xx/5xx response, except ones the journey deliberately provokes |
+
+  Extend it with anything this repo protects — a sovereignty invariant (no outbound request to a third-party origin), a budget (no bundle over N), a domain rule that must hold on every screen. Write the list into the report header so a reader knows what was being watched, and **attribute each breach to the action that preceded it** — an exception that fires three steps after the click that caused it is the normal case, not the exception.
+
+  The point of naming them is that they catch what the scripted journey isn't looking at. A step can *look* correct — the right screen rendered, the right row appeared — while a handler threw on the way. Judgement checks the step; the invariants check everything the step didn't think to check.
+
+  **If the app has no global error net, that absence is itself a finding** — an exception in an event handler otherwise produces *nothing* (no toast, no log), which is exactly how a dead button survives for months.
+
+- **Record the run, and log every action.** Two artifacts, both into `plan/walkthrough-<date>-run/` (gitignored — a video is not a repo asset):
+  - **A recording.** With Playwright this is one context option, so there is no excuse to skip it: `browser.newContext({ recordVideo: { dir: "plan/walkthrough-<date>-run/", size: { width: 1280, height: 720 } } })`. The file is only written on `context.close()`, so close the context in a `finally` — a crashed run that never closes leaves no video. If the driver genuinely cannot record, fall back to a screenshot per beat and say in the report that the recording is a contact sheet, not a video.
+  - **An append-only action log** — one line per action: index, timestamp, role, journey step, the action, the selector or target, and any invariant that broke. This is what makes a finding *replayable* rather than described (Phase 5), and it is what the step narrative's timestamps point into, so a reader can jump to the moment in the recording instead of reading a repro paragraph.

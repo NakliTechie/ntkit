@@ -1,4 +1,4 @@
-## Phase 4.5 — Leave the lever
+## Phase 6 — Leave the lever
 
 A walkthrough that only fixes what it found re-derives everything next time. Before reporting, **distill the journeys just walked into a committed, rerunnable verification harness** — a small CLI (`scripts/verify.*` or the repo's convention) with **three entry points**, not a monolith:
 
@@ -14,6 +14,8 @@ Agent-friendly throughout: error messages that say what to do instead, a real `-
 
 - **First walkthrough:** create it from the journeys walked — the smallest script that proves each role's happy path.
 - **Later walkthroughs:** run it first (regressions surface for free), then walk what it can't reach, then extend it with anything new.
+- **Chaos findings get pinned here.** Every confirmed Phase 5 finding enters as a regression case under the feature area it hit — the replayed action prefix, asserting the invariant now holds. The random walk found the sequence once; the harness owns it from then on, so no later run has to get lucky again. Name them by finding ID so the report and the harness agree.
+- **The invariant set belongs in the harness too.** The Phase 3 floor set (`INV-EXC`, `INV-REJ`, `INV-ERR`, `INV-HTTP`) is armed for every harness run, not just the walkthrough — a `verify` that drives the happy path while an exception fires underneath is exactly the vacuous green this lever exists to end.
 - **What it can't drive** (payment, email, native dialogs) stays in the report's blind-spot list — the harness covers what's automatable, never pretends to more.
 
 This harness **is the project's verifier** from now on: `/release-nt`'s gate runs it, `/autopilot-nt`'s final gate runs it. A repo with one no longer passes the release guard vacuously — the lever is the definition of green.

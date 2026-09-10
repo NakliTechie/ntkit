@@ -1,6 +1,6 @@
 ## Phase 1 — Identify the roles
 
-**Read the feature map first, if one exists.** A prior walkthrough leaves `verify/features/` next to the harness (Phase 4.5) — an index plus one file per feature area: what exists, how a user reaches it, how to drive it, what usually lies. Start from it and verify it against the code, instead of re-deriving the whole cast; where the map and the code disagree, that drift is a finding to fix in the map, never silently absorbed.
+**Read the feature map first, if one exists.** A prior walkthrough leaves `verify/features/` next to the harness (Phase 6) — an index plus one file per feature area: what exists, how a user reaches it, how to drive it, what usually lies. Start from it and verify it against the code, instead of re-deriving the whole cast; where the map and the code disagree, that drift is a finding to fix in the map, never silently absorbed.
 
 Derive the cast of users from the **code**, not from guesses. Look for:
 - **Auth / RBAC** — role enums, permission/policy tables, route guards and middleware, `if (user.role === …)` / `can?()` / `@requires_role`, plan/tier feature flags.

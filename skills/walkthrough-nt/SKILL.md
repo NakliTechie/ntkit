@@ -1,10 +1,10 @@
 ---
 description: "Drive each role through the running app in a real browser; fixes inline, commits locally."
 argument-hint: "[role or flow to focus, e.g. admin | checkout]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task", "SendUserFile", "mcp__Claude_Browser__*", "mcp__claude-in-chrome__*"]
 entry: "app boots with the shared demo seed"
-exit: "every role walked in a real browser; fixes committed; verification harness + feature map created or extended; report written"
-writes: "code, the committed verification harness + feature map, plan/walkthrough-<date>.md"
+exit: "every role walked in a real browser; the invariant set armed before the first click and every breach logged; the chaos leg run to its budget or declared skipped with a reason; fixes committed; verification harness + feature map created or extended; report written"
+writes: "code, the committed verification harness + feature map, plan/walkthrough-<date>.md, plan/walkthrough-<date>-run/ (recording + action log)"
 ---
 
 Drive the **running app through a real browser, one user role at a time**, walking each role's journeys as that user would, and **fix the logical errors you hit along the way**. This is a *live runtime* audit: the inverse of `/forward-pass-nt`, which reads the code cold and touches nothing.
@@ -27,8 +27,9 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 | 2 Journeys | A per-role checklist of flows, entry points first, first-run and empty-state journeys marked so they are tested on purpose. | `references/roles-and-journeys.md` |
 | 3 Boot | Harness `doctor` first when one exists. Production build on `127.0.0.1` and a known-free port; readiness waits past hydration; a session per role from the shared demo seed (`demo/seed/`); an error surface (console, page errors, rejections, 4xx/5xx) on before the first click. WebGPU flows run in real Chrome, never headless. | `references/boot.md` |
 | 4 Walk and fix | Act → observe → fix now → continue, one fix at a time, each re-verified in the browser and committed. Findings get stable IDs `C/H/M/L` with evidence. A fix that grows into a refactor or a product call is deferred, not forced. Includes a cross-role authorization probe and stubbed seams for what the browser cannot drive. | `references/walk-and-fix.md` |
-| 4.5 Lever | A committed, rerunnable harness with three entry points — `doctor`, `verify <feature>`, `verify` — worktree-safe by construction, plus the feature map at `verify/features/`. This harness becomes the project's verifier for `/release-nt` and `/autopilot-nt`. | `references/harness-and-feature-map.md` |
-| 5 Report | `plan/walkthrough-<date>.md`: header with counts and the `Reviewer:` line, coverage map with blind spots, issues by ID (FIXED with `path:line` and evidence, or DEFERRED with what unblocks), authz findings, verification reality, progress log. Print counts, fixed vs deferred, blind spots. Name the SHAs; `/windup-nt` pushes. | `references/report.md` |
+| 5 Chaos leg | A bounded random walk from the states the scripted journey already reached, with the Phase 3 invariants as the oracle — the space a written journey cannot cover by construction. Every breach replayed from the action log before it earns an ID; confirmed ones fixed under Phase 4's rules and pinned as regression cases. Skippable, never silently. | `references/chaos.md` |
+| 6 Lever | A committed, rerunnable harness with three entry points — `doctor`, `verify <feature>`, `verify` — worktree-safe by construction, plus the feature map at `verify/features/`. This harness becomes the project's verifier for `/release-nt` and `/autopilot-nt`. | `references/harness-and-feature-map.md` |
+| 7 Report | `plan/walkthrough-<date>.md`: header with counts and the `Reviewer:` line, coverage map with blind spots, issues by ID (FIXED with `path:line` and evidence, or DEFERRED with what unblocks), authz findings, chaos-leg budget and yield, verification reality, progress log. Hand back the recording alongside it. Print counts, fixed vs deferred, blind spots. Name the SHAs; `/windup-nt` pushes. | `references/report.md` |
 
 ## Impact declaration
 

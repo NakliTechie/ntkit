@@ -32,10 +32,10 @@ Commands read and write those files. Every session picks up where the last one l
 | `/decide-nt "<why>"` | mid-session | Append a dated one-line decision to `history.md`. |
 | `/soc-nt "<thought>"` | mid-build | Raw stream-of-consciousness into `plan/soc.md`. `/replan-nt` triages it later. |
 | `/forward-pass-nt` | anytime | Fresh-eyes whole-app audit → a batched, checkboxed fix-workplan. |
-| `/walkthrough-nt` | anytime | Drive each role's journeys in a real browser, fix bugs as found, leave a rerunnable verification harness. |
+| `/walkthrough-nt` | anytime | Drive each role's journeys in a real browser, fuzz the gaps between them, fix bugs as found, leave a rerunnable verification harness. |
 | `/guide-nt` | anytime | Walk each role's features in a browser, build a single-file searchable HTML guide. |
 | `/demo-nt` | live demo | Boot the app on the shared demo seed, open an interactive feature explorer. |
-| `/ux-review-nt` | anytime | Cold-first-timer review: wipe state, walk it as a new user, rank onboarding/nav failures + a11y/perf. |
+| `/ux-review-nt` | anytime | Cold-first-timer review: wipe state, walk it as a new user, flail like one, rank onboarding/nav failures + a11y/perf. |
 | `/live-check-nt` | verifying → shipped | Drive the real deployed runtime with a real gesture; machine evidence it actually works. |
 | `/harden-nt` | before "ready" | Map the paths a surface claims to support, then work the map in rounds with independent agents from different model families — constructive rounds prove a path holds, adversarial rounds find the paths the map missed. Every failure is fixed and left behind a check proven able to go red. |
 | `/autopilot-nt` | anytime | The executor — works a fix-workplan or goal to completion, unattended, in its own worktree. Ships green, holds red. |

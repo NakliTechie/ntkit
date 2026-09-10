@@ -56,7 +56,7 @@ self-report.
 
 ## 6. Named reward-hacking patterns to refuse
 
-Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Six that
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Seven that
 agent-driven work invites most — refuse them; §1–5 cover the rest:
 
 1. **Gate self-weakening** — editing the verifier so a failing check passes. The committed
@@ -72,6 +72,15 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
    it. Plan edits never close a feature item; a frozen decision moves only through `/decide-nt`.
 6. **Demo-path hardcoding** — special-casing the demo inputs so the happy path passes. Verify on
    runtime-selected subjects that differ from the dev fixtures (`/walkthrough-nt`, `/demo-nt` seed).
+7. **Re-run-until-green** — treating an unexplained red as noise and running it again until it
+   passes, instead of reading the assertion. The green obtained that way is not evidence of
+   anything: if the check really is nondeterministic then *that* is the finding, and if it is not,
+   a true signal has just been discarded. The common cause is dull and worth knowing — a
+   single-test red off a half-saved tree, where a test landed a moment before the fix it asserts.
+   **Read the failing assertion before you re-run**, and never absorb an unread red with a retry,
+   a longer timeout, or a skip; that is gate self-weakening (#1) with extra steps. The same rule
+   covers any tool's silence: a search that returns nothing on a file it refused to read is not
+   evidence of absence. A signal nobody read is not a check.
 
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the

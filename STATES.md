@@ -60,7 +60,9 @@ Four rules make the table enforceable, not decorative:
    condition fails says so and stops; it does not proceed politely.
 2. **"Done" is the verifier's word.** No transition out of `verifying` on an
    agent's self-report. Tests green, lint clean, replay reconstructs — a
-   deterministic check, or the state doesn't advance.
+   deterministic check, or the state doesn't advance. A check that went green on
+   a re-run nobody read is not a deterministic check; it is an unread red
+   (`SUBSTANCE.md` §6.7).
 3. **Deliberate override, logged.** Any guard can be overridden — this is a kit,
    not a jail — but only through an explicit `/decide-nt` entry stating why. A
    guard bypassed by drift is a bug; bypassed on purpose with a reason is a

@@ -35,10 +35,13 @@ Both of these go on **before the first interaction**, on every surface. They are
 | `INV-HTTP` | no 4xx/5xx response, except ones the journey deliberately provokes |
 | `INV-SILENT` | every user-initiated action changed *something* observable — a toast, a dialog, a cell, a status line, a route |
 | `INV-DIALOG` | no native `alert` / `confirm` / `prompt` |
+| `INV-DURABLE` | after anything that should persist, a reload returns the same state |
 
 **`INV-DIALOG` is load-bearing twice over.** It is an invariant — the house convention is an in-app toast or modal, never a native dialog — and it is **hang prevention**: an unhandled `confirm()` blocks the driver and takes the whole run with it, so you get no findings and no video rather than one finding. Register an auto-dismissing handler (Playwright: `page.on("dialog", d => { log(d.type(), d.message()); d.dismiss(); })`) *before the first interaction*, so a native dialog produces a finding instead of a dead run.
 
 **`INV-SILENT` is the one that earns its keep.** The other four catch *noisy* failure, and a well-built app is quiet: its expensive failures are the ones where a control was clicked, a handler threw or bailed, and the UI simply did not respond. Nothing is logged, so nothing else on this list fires. After any beat that invoked a user action, diff the DOM (or a cheap proxy — a text digest of the main region plus any live-region content) against the state before it, and flag a null delta. Expect false positives on genuine no-ops (clicking an already-active tab) and whitelist those by beat rather than weakening the check.
+
+**On a canvas or WebGL surface, `INV-SILENT` needs a repo-specific oracle or it is worse than useless.** The DOM-diff formulation assumes the UI is the DOM; against a canvas-rendered grid or map every working control reads as a silent failure. Diff the app's own state instead, or disable the invariant and say so. `INV-DURABLE`'s oracle needs the same care — one that reads only the active tab or pane will report a UI-state reset as data loss.
 
 **Zero breaches is a normal and reportable outcome.** On a mature, well-tested app this whole set stays silent for an entire run, and that is a *result* — "the app threw nothing at a newcomer" becomes a verified claim rather than an assumption. Report the zero. Do not go hunting for something to put in the slot, and do not read a quiet invariant log as evidence the app is sound: this set catches noisy failure, and the expensive failures in a good app are quiet ones. Note also that it only sees what the driver actually does — a headless browser never requests a favicon, so an app's only 4xx can be invisible to `INV-HTTP` and turn up in Phase 4's audit instead.
 

@@ -9,6 +9,12 @@ actions, weird timings, and inputs nobody thought could be entered.**
 You already have the expensive thing — a booted, seeded, authenticated app sitting in a state the
 journey reached. Spend it.
 
+### Seed it, or the replay gate is unimplementable
+
+**Before anything else: drive the walk from a seeded PRNG, and record the seed.** The phase's whole credibility rests on replaying the action-log prefix from a cold boot, and that is only tractable if the same seed reproduces the same sequence. Without one you cannot re-drive a prefix, every breach lands in the unreproduced list, and the phase collapses into "it broke somewhere in there" — precisely the failure this design exists to prevent.
+
+Log the seed in the report header. `--seed=<n> --stop=<action-index>` is the shape you want: it makes replay a one-liner and lets a later run reproduce this one exactly.
+
 ### The loop
 
 From each state the scripted walk reached, run a bounded random walk:
@@ -25,9 +31,13 @@ From each state the scripted walk reached, run a bounded random walk:
 Timings are part of the input space. Sometimes act immediately, before the previous action settles;
 sometimes wait. Double-submit. Navigate mid-request. Hit back after a mutation.
 
-**Reload after anything that should be durable.** Act, refresh, check you are where you left off, with the state you left. It is one action and it finds the worst class of defect there is — an app that reopens on different data than the user was working in reads as data loss whether or not the bytes are technically recoverable.
+### Three axes, in order of yield
 
-**Values are a third axis, and a more productive one than the action sequence.** Wherever the app
+The action sequence is the axis this phase is named for and the *least* productive of the three. Against a mature app it exhausts quickly — a single-file tool has a few dozen controls, and a shipped product with a real test gate survives random clicking by design. One run spent **246 actions across five legs and found nothing on this axis at all.** That is not a malfunction; it is what a good app should do. Budget accordingly and spend the time where findings actually live:
+
+1. **Durability.** Act, reload, check you are where you left off with the state you left. `INV-DURABLE` from Phase 3 already watches this; the chaos leg's job is to reach states the scripted journey never did and *then* reload. Highest yield per action of anything here.
+2. **Values.** Wherever the app ingests data — a file picker, a paste target, an import dialog, a URL field — hand it the wrong type, an empty file, a binary, something enormous, a hostile string. An importer that accepts the wrong file, invents rows and reports success is worse than one that crashes, and no scripted journey will ever hand it the wrong file.
+3. **Action sequences and timings.** The random walk proper, below. Wherever the app
 ingests data — a file picker, a paste target, an import dialog, a URL field — hand it the wrong type,
 an empty file, a binary, something enormous. An importer that accepts the wrong file, invents rows,
 and reports success is worse than one that crashes, and no scripted journey will ever hand it the
@@ -35,7 +45,7 @@ wrong file.
 
 ### Budget it, and declare the budget
 
-Default: **~40 actions per role**. Count actions, not minutes — the wall-clock runs well past a naive estimate because every candidate breach needs a clean-context reproduction before it earns an ID, and that verification is the phase's whole credibility. Scale it with
+Default: **~40 actions per role on the sequence axis**, and do not treat that as the phase's centre of gravity — spend at least as much effort on durability and values, which is where a mature app actually breaks. Count actions, not minutes — the wall-clock runs well past a naive estimate because every candidate breach needs a clean-context reproduction before it earns an ID, and that verification is the phase's whole credibility. Scale it with
 `$ARGUMENTS` when a run is scoped to one flow. The budget goes in the report whether or not anything
 was found — "20 minutes of chaos across 3 roles, 2 findings" and "the leg was skipped" are different
 facts and the reader needs the right one.

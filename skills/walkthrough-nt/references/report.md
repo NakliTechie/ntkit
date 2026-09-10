@@ -1,4 +1,4 @@
-## Phase 5 — Report + handoff
+## Phase 7 — Report + handoff
 
 **Write `plan/walkthrough-YYYY-MM-DD.md`** — a self-contained record, in this order:
 
@@ -14,6 +14,8 @@
 Create `plan/` if missing and ensure it's gitignored. If today's report already exists, suffix `-2`. **Don't overwrite the canonical `workplan.md`** — this report carries its own deferred items; `/replan-nt` folds them into `pending.md` / `workplan.md`.
 
 **Hand back the recording, not just the report.** `plan/walkthrough-<date>-run/` holds the video and the action log. Send the recording to the user with `SendUserFile` — for a reader who doesn't read diffs, watching the walk is a strictly better artifact than a markdown summary of it, and the step narrative's timestamps are what make it navigable. Say plainly whether it is a real recording or a screenshot contact sheet.
+
+**When `SendUserFile` is unavailable** (a subagent, a non-interactive run), print the absolute path to the run directory and to the mapping artifact instead, so the handback is one copy-paste from being watchable. The exit condition is the handback, not the tool.
 
 **Print to chat:** the counts, the issues grouped *fixed* vs. *deferred* (with one-line evidence each), the chaos budget and yield, and the coverage map's blind spots. Keep the full detail in the file.
 

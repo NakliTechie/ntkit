@@ -42,7 +42,9 @@ From the commits, suggest **major / minor / patch** — a breaking change → ma
 ## Phase 4 — Confirm, then publish
 
 Show the planned **version**, the **CHANGELOG diff**, the **release notes**, and the exact `git` / `gh` commands. **Pause for confirmation.**
-- On **yes**: commit the bump + CHANGELOG, `git tag vX.Y.Z`, push commits + tag, `gh release create vX.Y.Z` with the notes, and note (or trigger) the deploy. Never force-push.
+- On **yes**: commit the bump + CHANGELOG, then **`git tag -a vX.Y.Z -m "<name> vX.Y.Z"`** — annotated, not lightweight — then `git push origin main --follow-tags`, then `gh release create vX.Y.Z` with the notes, and note (or trigger) the deploy. Never force-push.
+  - **`--follow-tags` pushes annotated tags only.** Paired with a plain `git tag`, which creates a *lightweight* tag, the push reports success and silently leaves the tag local; `gh release create` then refuses with "tag exists locally but has not been pushed". Either tag with `-a` as above, or push the tag by name (`git push origin vX.Y.Z`). An annotated tag also carries a tagger, a date and a message, which is what `git describe` and the next release's Phase 1 read.
+  - **Confirm the tag is on the remote before creating the release** — `git ls-remote --tags origin vX.Y.Z` — rather than inferring it from the push's exit code.
 - On **no**: leave the bump + CHANGELOG staged for you to edit.
 
 ## Phase 4.5 — Verify the deploy actually landed

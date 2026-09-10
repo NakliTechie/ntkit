@@ -13,6 +13,10 @@
 
 Create `plan/` if missing and ensure it's gitignored. If today's report already exists, suffix `-2`. **Don't overwrite the canonical `workplan.md`** — this report carries its own deferred items; `/replan-nt` folds them into `pending.md` / `workplan.md`.
 
+**A fix that changes what a surface looks like stales the committed captures.** Screenshots and generated guides are build artifacts of a UI that no longer exists the moment you change a layout, add a control, or move a menu. Before reporting: name the repo's regenerator (`make screens`, `make guide`, a capture script), run it, and commit the result — or, if you are deliberately not running it, say in the report which captures are now stale and what regenerates them. A guide showing a toolbar the product no longer has is a documentation defect this run introduced.
+
+Read the result rather than assuming it. **Zero changed files is a legitimate outcome** — a project whose captures are gitignored, or whose guide is text-derived rather than image-embedding, regenerates identically and correctly. Confirm which case you are in before treating an empty diff as either a success or a failure.
+
 **Hand back the recording, not just the report.** `plan/walkthrough-<date>-run/` holds the video and the action log. Send the recording to the user with `SendUserFile` — for a reader who doesn't read diffs, watching the walk is a strictly better artifact than a markdown summary of it, and the step narrative's timestamps are what make it navigable. Say plainly whether it is a real recording or a screenshot contact sheet.
 
 **When `SendUserFile` is unavailable** (a subagent, a non-interactive run), print the absolute path to the run directory and to the mapping artifact instead, so the handback is one copy-paste from being watchable. The exit condition is the handback, not the tool.

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Fix:** `windup-nt`'s stray-worktree sweep deleted work. A worktree's `plan/` is gitignored, so it lives in that directory and nowhere else — no commit, no remote, no reflog — and `git worktree remove` takes it with the tree. Step 5 now rescues `plan/` into the main checkout before removing any worktree. Found the hard way: two `walkthrough-nt` reports and 51 screen recordings were destroyed this way in a single session, minutes after the runs that produced them.
+
 - **Fix:** `release-nt` Phase 4 paired `git tag vX.Y.Z` with a `--follow-tags` push, which does not work: `--follow-tags` pushes **annotated** tags only, so a lightweight tag stays local while the push reports success, and `gh release create` then refuses with "tag exists locally but has not been pushed". Now tags with `git tag -a` and confirms the tag reached the remote with `git ls-remote --tags` before creating the release, rather than inferring it from an exit code. Hit while cutting two real releases.
 
 - **Added:** `walkthrough-nt` Phase 5 gains **the amplifier** — the method that made every timing chase this week tractable. An intermittent failure cannot be fixed with confidence, because you cannot prove a fix against a bug that appears 3 times in 40 runs. Find the timing constant it depends on and exaggerate it until the failure is deterministic: one `setTimeout(fn, 0)` changed to `300` took a suite from 85/86 to 49/86 and a focused repro from 3-in-40 to 6-in-6, making the fix provable at 8-in-8 green. Then remove the amplifier and confirm at realistic timing.

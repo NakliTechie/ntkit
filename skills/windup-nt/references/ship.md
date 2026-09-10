@@ -17,6 +17,14 @@ Check that `plan/` (or `/plan/`) appears in the repo's `.gitignore`. If not, add
 - Closing from `building` (uncommitted work, verifier not run or not green): do **not** merge. Push the feature branch as-is and name it in the handoff ("on branch `x`, unmerged: <why>"). A windup never launders unverified work onto main.
 
 **Stray-worktree sweep:**
+
+> **Rescue `plan/` before you remove anything.** A worktree's `plan/` is gitignored, so it exists in
+> that directory and nowhere else — no commit, no remote, no reflog. `git worktree remove` deletes it
+> with the rest of the tree, and a run report, its recordings and its action logs go with it. Before
+> removing a worktree, copy any `plan/` files it holds that the main checkout does not into the main
+> checkout's `plan/`, keeping their names. Only then remove. This has already cost two walkthrough
+> reports and 51 screen recordings in one session.
+
 - Run `git worktree list`. For each linked worktree beyond the main checkout (autopilot/agent leftovers):
   - Clean (no uncommitted changes) and its branch fully merged into the default branch → `git worktree remove <path>` and delete the branch.
   - Dirty, or holding unmerged commits → leave it untouched and list it in the handoff with what it's holding. Never delete work to tidy up.

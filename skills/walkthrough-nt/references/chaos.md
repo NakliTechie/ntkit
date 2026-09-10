@@ -25,7 +25,9 @@ From each state the scripted walk reached, run a bounded random walk:
 Timings are part of the input space. Sometimes act immediately, before the previous action settles;
 sometimes wait. Double-submit. Navigate mid-request. Hit back after a mutation.
 
-**Values are a second axis, and a more productive one than the action sequence.** Wherever the app
+**Reload after anything that should be durable.** Act, refresh, check you are where you left off, with the state you left. It is one action and it finds the worst class of defect there is — an app that reopens on different data than the user was working in reads as data loss whether or not the bytes are technically recoverable.
+
+**Values are a third axis, and a more productive one than the action sequence.** Wherever the app
 ingests data — a file picker, a paste target, an import dialog, a URL field — hand it the wrong type,
 an empty file, a binary, something enormous. An importer that accepts the wrong file, invents rows,
 and reports success is worse than one that crashes, and no scripted journey will ever hand it the

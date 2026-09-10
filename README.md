@@ -98,6 +98,12 @@ Both work with nothing but `rg`. If your vault ships an optional index at `bin/v
 
 Both expect a vault at `~/Code/knowledge` — edit the path in `skills/capture-nt/SKILL.md` and `skills/ask-nt/SKILL.md` if yours differs.
 
+**The convention: check the vault before the web.** Any command that needs prior art — `/lab-nt`'s Phase 0 sweep, `/scaffold-nt` sizing up a new project, a research detour mid-build — runs `/ask-nt` first. This is not a claim that web search is weak. It is that the vault is **curated** and **opinionated**: its `sources/` are things you already decided were worth keeping, and its `notes/` are conclusions *you* reached and wrote down — including the ones that cut against the consensus a search returns. A search gives you what is true in general. The vault gives you what you concluded, on your stack, under your constraints, and no amount of searching reproduces that. `/ask-nt` is read-only and costs one command, so checking first is close to free.
+
+Then search the web for what the vault does not have — and `/capture-nt` the result, so the next run does not have to search at all. That is the whole point of keeping one: the loop closes, and the second time a question comes up it is already answered.
+
+No vault? These commands degrade to "search the web," and nothing else in the kit depends on it.
+
 ## Install
 
 ```bash

@@ -28,6 +28,8 @@ Bootstrap a new project from the handoff materials the user attached this sessio
 
 If neither files nor a substantive description is present (e.g., bare `/scaffold-nt` or just `/scaffold-nt myapp` with no context), stop and ask: *"Give me a handoff — drag md/zip into chat, or describe the project in a sentence or two."*
 
+**Before Phase 2, check the vault.** Run `/ask-nt` on the handoff's core terms — the domain, the stack, the hard problem it names. A new project is the cheapest possible moment to find out that you already captured the paper, already tried the library, or already wrote down why an approach does not work; it is also the moment that knowledge is easiest to forget you have. Check the vault before the web: it is curated and it carries your conclusions, not just facts (see the README's Knowledge vault section). Fold anything you find into the Phase 7 brief as prior art, with the note slug so the next reader can follow it. Nothing found is a fine answer and takes one command.
+
 ## Phase 2 — Project name + location
 
 Parse `$ARGUMENTS`:

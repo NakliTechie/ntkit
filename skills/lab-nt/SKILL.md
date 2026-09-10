@@ -27,7 +27,7 @@ This is where lab differs most from autopilot. Autopilot's Phase 0 is a veto win
    - **per-leg**: one run of this command (default: 4 hours or 25 experiments, whichever first) — the session budget;
    - **per-campaign — the odometer**: across all legs (default: 5 legs). Exhausted ⇒ RETIRED regardless of trend; extendable only by a logged `/decide-nt`.
 
-Also settled here, stated not asked (veto-window style, per the STATES.md ask rule): the **critic cadence** (default: every 5 experiments), the **stagnation threshold** (default: 8 consecutive experiments without improvement ends the leg STAGNANT), and the **prior-art check** — before any experiment runs, sweep the vault (`/ask-nt`), the repo and its `plan/`, and the web for existing answers; a question already answered ends the campaign at leg zero, GOAL-MET by citation, and that's the cheapest win the command can deliver.
+Also settled here, stated not asked (veto-window style, per the STATES.md ask rule): the **critic cadence** (default: every 5 experiments), the **stagnation threshold** (default: 8 consecutive experiments without improvement ends the leg STAGNANT), and the **prior-art check** — before any experiment runs, sweep the vault (`/ask-nt`) **first**, then the repo and its `plan/`, then the web — the vault is curated and carries your own conclusions, so it answers in one command what a search answers in ten, and sometimes tells you the consensus is wrong for your case; a question already answered ends the campaign at leg zero, GOAL-MET by citation, and that's the cheapest win the command can deliver.
 
 ## Phase 0.5 — Isolate and instrument
 

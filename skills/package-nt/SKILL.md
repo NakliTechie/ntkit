@@ -29,7 +29,8 @@ Don't generate launch assets for an unshippable repo. Run the full gate:
 - Treat **Critical / High** findings as launch blockers; Medium / Low as nice-to-haves.
 
 **Launch essentials.**
-- **README** — exists with: one-line what-it-is, a hero screenshot/demo, install that actually works, usage, links (demo / source), license.
+- **README** — in the house shape (`~/.claude/reference/naklitechie-doctrines/README-DOCTRINE.md`): header sentence + constraints line + ≤4 claim badges + one hero, install before why, a "use something else if" paragraph, commands block, verify-it-yourself, license + pointers line; ≤ 120 lines. Over the ceiling or missing a part → blocker, with the section named.
+- **Social preview set on the repo** — `gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){usesCustomOpenGraphImage}}'` must be `true`. `false` means every shared link shows GitHub's default card → **blocker**. There is no API to set it: produce `marketing/social.png` (1280×640) in Phase 2 and upload it at Settings → General → Social preview (drive the UI via Claude-in-Chrome, or hand it to Chirag), then re-check.
 - **LICENSE** — present and appropriate to intent.
 - **A `/guide-nt`** (or equivalent docs), a live/demo link, screenshots, a clear value prop.
 - **First-run onboarding** — a tool with a surface ships a first-run guided tour (the spotlight walkthrough per the Build Doctrine's *Surface conventions*): shows once, skippable, replayable from `?`, driven by the vendored `tour.js`. A surface with no first-contact affordance is a nice-to-have miss, not a hard blocker; note it if absent.
@@ -50,7 +51,7 @@ Two categories that nothing else in the kit covers, and both are launch-facing:
 
 Social-ready visuals, written into a committed `marketing/` folder (shippable, versioned):
 - **Reuse the `/guide-nt` generator** if the repo has one (its screenshots); otherwise capture with the same Playwright pattern — prod build, hydration waits, and **WebGPU flows via the Chrome MCP** (headless has no WebGPU).
-- Produce **social-framed** assets: a **hero** (the money screen), an optional **montage / GIF**, padded and sized for **X (~1600×900)**, **LinkedIn (1200×627)**, and a **square (1080×1080)**. Clean background, the best-looking screen, no dev chrome.
+- Produce **social-framed** assets: a **hero** (the money screen), an optional **montage / GIF**, padded and sized for **X (~1600×900)**, **LinkedIn (1200×627)**, a **square (1080×1080)**, and the **GitHub social card (`marketing/social.png`, 1280×640, 2:1)** — the hero recut with the name and the one sentence, legible at thumbnail size. Clean background, the best-looking screen, no dev chrome.
 - Name by channel (`marketing/hero-x.png`, `marketing/hero-linkedin.png`, …) and list what landed.
 - **Make sure `marketing/` is actually committable** — if the repo uses a `*`-plus-allowlist `.gitignore` (the naklios single-file pattern), allowlist `!marketing/` `!marketing/**` or the assets won't ship.
 

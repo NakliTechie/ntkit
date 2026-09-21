@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Changed:** `package-nt`'s readiness gate now reads the README against the house shape (`README-DOCTRINE.md` in the naklitechie-doctrines reference: header · install before why · "use something else if" · commands · verify · license + pointers, ≤ 120 lines) instead of a presence check, and adds a **social preview** gate: `usesCustomOpenGraphImage` must be `true` on the repo, or every shared link renders GitHub's default card — a blocker. GitHub has no API for it, so Phase 2 now produces `marketing/social.png` (1280×640, the hero recut with the name and the one sentence) and the gate names the upload path. Earned from the ferrule v1.1.0 release: the README was rebuilt 245 → 119 lines and the repo turned out to have been on the default card since launch.
+
 - **Fix:** `windup-nt`'s stray-worktree sweep deleted work. A worktree's `plan/` is gitignored, so it lives in that directory and nowhere else — no commit, no remote, no reflog — and `git worktree remove` takes it with the tree. Step 5 now rescues `plan/` into the main checkout before removing any worktree. Found the hard way: two `walkthrough-nt` reports and 51 screen recordings were destroyed this way in a single session, minutes after the runs that produced them.
 
 - **Fix:** `release-nt` Phase 4 paired `git tag vX.Y.Z` with a `--follow-tags` push, which does not work: `--follow-tags` pushes **annotated** tags only, so a lightweight tag stays local while the push reports success, and `gh release create` then refuses with "tag exists locally but has not been pushed". Now tags with `git tag -a` and confirms the tag reached the remote with `git ls-remote --tags` before creating the release, rather than inferring it from an exit code. Hit while cutting two real releases.

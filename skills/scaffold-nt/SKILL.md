@@ -45,13 +45,17 @@ If the target folder exists and isn't empty, suffix `-2` (then `-3`), announce t
 2. **For attached files** (mode A or C):
    - For each attached zip: `unzip <zip> -d <target>` — preserve structure; on a collision keep both (suffix the incoming file) rather than overwriting or stopping to ask.
    - Copy each attached md file into the target root. If a name collides with the zip's contents, merge by renaming (`README.md` + `HANDOFF.md`) and note it in the brief.
-3. **For inline description** (mode B, or to augment mode C): synthesize a starter `README.md` from the user's prose and write it to the target root. Structure it lightly:
+3. **For inline description** (mode B, or to augment mode C): synthesize a starter `README.md` from the user's prose and write it to the target root. Structure it lightly — but the house README (`README-DOCTRINE.md`) puts **Install before Why**, so scaffold an Install section even as a stub; a README that ships without one is incomplete:
    ```markdown
    # <name>
 
    > <one-line summary distilled from the description>
 
    <the user's description, cleaned up — preserve their wording where it's clear>
+
+   ## Install
+   <!-- Install comes before Why (README-DOCTRINE). Fill the moment there is a run path. -->
+   _TODO: the one-command install (`brew install …`, `go install …`) or the from-source path (`git clone … && make run`). Never ship a README without this section._
 
    ## Next steps
    <bulleted next-steps if the description implied them; otherwise omit>

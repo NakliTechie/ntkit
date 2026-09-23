@@ -4,9 +4,9 @@
 
 > Plain teammate language throughout — concrete actions, no AI-speak, no filler; a line nobody would audit doesn't earn its place.
 
-1. **Header** — date, scope, the `Reviewer:` line (this run's model · prior run's model + date, per the rotation rule above), one-line summary counts (e.g. "2 Critical · 9 High · 7 Medium · 8 Low · 9 Stray · 4 Stub").
+1. **Header** — date, scope, the `Reviewer:` line (this run's model · prior run's model + date, per the rotation rule above), one-line summary counts (e.g. "2 Critical · 9 High · 7 Medium · 8 Low · 9 Stray · 4 Stub · 3 Agent-readiness").
 2. **Verification reality** — a short note on how this app can/can't be tested (browser runtime needed? no headless path? pure-logic harness available?), so the `[test]` markers have context.
-3. **Findings** — by ID, grouped Critical → High → Medium → Low → Stray → Stub. Give **Stubs their own dedicated section** (`### Stubs masquerading as done`), even when a stub is also listed under its severity — this is the section Chirag wants to scan first, so make it impossible to miss, and for each entry show the claimed-done source next to the actual stubbed code.
+3. **Findings** — by ID, grouped Critical → High → Medium → Low → Stray → Stub → Agent-readiness. Give **Stubs** (`### Stubs masquerading as done`) and **Agent-readiness gaps** (`### Agent-readiness`) **each their own dedicated section**, even when an entry is also listed under its severity — these are the sections meant to be scanned first, so make them impossible to miss. For a Stub, show the claimed-done source next to the actual stubbed code; for an Agent-readiness gap, show the UI action next to its missing (or unstaged, or unmarked) manifest counterpart.
 4. **False positives / non-issues (verified)** — preserved with reasoning.
 5. **Worth a look (lower confidence)**.
 6. **Coverage map** — what was reviewed and, crucially, what was NOT reached or skipped (the blind spots).
@@ -15,7 +15,7 @@
 
 Create `plan/` if missing and ensure it's gitignored. If today's report already exists, suffix `-2`. Don't commit/push — plan/ is local. **Do not overwrite the canonical `workplan.md`** — this report carries its own Workplan section. (Promotion into `workplan.md` happens via `/replan-nt`, or offer to move it if the user has no competing workplan.)
 
-**Print to chat:** the summary counts + findings grouped by severity + **the Stubs-masquerading-as-done list called out explicitly** (claimed-done vs. actual) + the coverage map. Keep the full batched workplan in the file (just say it's there and name the keystone batch).
+**Print to chat:** the summary counts + findings grouped by severity + **the Stubs-masquerading-as-done list and the Agent-readiness list, both called out explicitly** (claimed-done vs. actual; missing door / parity gap vs. the UI action it corresponds to) + the coverage map. Keep the full batched workplan in the file (just say it's there and name the keystone batch).
 
 ## Phase 6 — Handoff
 

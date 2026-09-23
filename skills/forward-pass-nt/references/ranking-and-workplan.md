@@ -8,8 +8,9 @@ Collect all findings. Dedupe across subagents. Rank by severity and **assign eac
 - **Low → `L1, L2, …`** — minor bug or hardening opportunity
 - **Stray → `S1, S2, …`** — dead/leftover code (separate track, not severity-ranked)
 - **Stub → `SB1, SB2, …`** — stub masquerading as done (separate track). A live-path/claimed-done stub ALSO gets a severity ID (usually C/H) — cross-reference the two so a fake-done section shows up in both places and can't be lost.
+- **Agent-readiness → `AR1, AR2, …`** — a missing/incomplete agent-facing door (separate track). A gap that's also live and consequential right now (an unstaged mutating manifest entry, a reachable capability with no door at all) ALSO gets a severity ID, same cross-reference rule as a live-path Stub. A pure ergonomics gap (DRIVER's self-check) with no live caller yet stays AR-only.
 
-Each finding: `**ID** [Bug|Security|Stray|Stub] path:line — what it is · why it matters · suggested fix`. For a Stub, name the masquerade explicitly: what's claimed (and where) vs. what the code actually does.
+Each finding: `**ID** [Bug|Security|Stray|Stub|Agent-readiness] path:line — what it is · why it matters · suggested fix`. For a Stub, name the masquerade explicitly: what's claimed (and where) vs. what the code actually does. For an Agent-readiness gap, name which check it fails (door missing / parity gap / unstaged mutation / DRIVER principle / attribution) and, for a parity gap, the specific UI action with no manifest counterpart.
 
 **Severity anchor for Security findings** (adapted from [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill), MIT): the discriminator is whether the result *fully defeats* an explicit control with real consequences, or only weakens it. If you can't state the concrete damage, the severity is lower than it feels.
 - **Critical** — unauthenticated actor gets code execution, full data-store access, or takeover of arbitrary accounts.

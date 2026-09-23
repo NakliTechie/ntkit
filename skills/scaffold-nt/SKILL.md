@@ -100,6 +100,7 @@ If `gh` isn't authed or lacks permission, continue local-only and note the owed 
    - Else, one Batch A with the top 3–5 Now items.
    - Tri-state checkboxes throughout. `[test]` markers where runtime verification is owed.
    - **Seed the DRIVER pass** (skip for Throwaway-tier): add to the keystone batch, after the spec-drafting item — `[ ] Agent-first pass (ntkit DRIVER.md): run the driver's-seat meditation over the spec; write the project's agent contract as its §0`. The pass runs once a first spec draft exists, never at scaffold time — scaffold only schedules it so nobody has to remember.
+   - **Seed the agent-face requirement** alongside it (same batch, skip for Throwaway-tier): `[ ] Agent face (Build Doctrine, "two doors, one core"): declare a tool manifest for every UI-dispatchable command; mark non-delegable acts person-only explicitly, never by omission`. The DRIVER pass is about the door being *ergonomic*; this item is about the door *existing at all* with parity to the UI — two different failures, so two items, not one. `/forward-pass-nt`'s agent-readiness lens is what checks both got done, on this project and every later pass over it — scaffold only seeds the intent.
 
 ## Phase 7 — Brief + get started
 

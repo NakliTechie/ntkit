@@ -11,6 +11,8 @@ writes: "plan/harden-<date>.md; status flips on existing workplan items it compl
 
 Use it before calling an agent surface ready: an API other agents call, an MCP server, a CLI contract other tools depend on, a public app boundary. `/forward-pass-nt` audits code once and `/live-check-nt` proves one flow once; this is the iterated version over the whole path space. For a single flow you already suspect is broken, `/live-check-nt` is cheaper.
 
+This command assumes the surface's contract already exists and can be stated — it hardens a door that's there, it doesn't establish that the door exists in the first place. If the app has no declared agent-facing manifest yet, or you haven't checked whether one should, that's `/forward-pass-nt`'s agent-readiness lens or `/scaffold-nt`'s seeded DRIVER pass, run first.
+
 `$ARGUMENTS` (optional): the surface (a URL, an API base, "the CLI"), and/or a budget (default: **6 rounds or 4 hours, whichever ends first**). `resume` continues the most recent open `plan/harden-*.md`.
 
 If the current directory isn't a git repo, ask which project.

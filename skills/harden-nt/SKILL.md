@@ -20,7 +20,7 @@ If the current directory isn't a git repo, ask which project.
 State back, then go — a veto window, not a questionnaire, same as `/autopilot-nt` Phase 0:
 - **The surface**, and which of its paths need a live instance versus which can be exercised statically.
 - **The roster — heterogeneous by default.** Independent agents per round (default 3), drawn from **different model families** wherever more than one is configured. Homogeneous-but-isolated (same stack, separate context and tenant, no shared memory) is the fallback — name it as a downgrade when you take it.
-- **Isolation contract** — each agent gets its own tenant, branch or key where the surface supports it, and **never** the maker's diff, reasoning, or repo access. Black-box, driving the surface as an outside caller would.
+- **Isolation contract** — each agent gets its own tenant, branch or key where the surface supports it, and **never** the maker's diff, reasoning, or repo access. Black-box, driving the surface as an outside caller would. The agent that verifies a finding is never the agent that found it — a Verify round always goes to a fresh agent, not back to the one that raised the finding.
 - **Budget and stop conditions.**
 - **Stop-lines** — `/autopilot-nt` Phase 4 defaults: no agent may publish, send, spend, or touch real customer data. A surface with real side effects gets a **scratch tenant**, never a production identity. Name the tenant before round 1.
 

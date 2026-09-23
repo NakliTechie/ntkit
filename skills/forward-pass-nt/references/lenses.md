@@ -18,7 +18,7 @@ Apply all four lenses to each unit (unless `$ARGUMENTS` narrows the focus):
 
 **Bugs** — logic errors, off-by-one, null/undefined/None handling, unhandled edge cases, incorrect or swallowed error handling, race conditions, await/async mistakes, resource leaks (unclosed handles/connections), wrong assumptions about input shape, broken invariants, timezone/encoding/locale pitfalls.
 
-**Security** — injection (SQL, command, XSS, template, NoSQL), authn/authz gaps and missing checks, hardcoded secrets/keys/tokens, unsafe deserialization, SSRF, path traversal, missing or weak input validation, insecure defaults, weak/misused crypto, permissive CORS/CSP, sensitive data in logs or error responses, dependency risks (known-bad or unpinned), mass-assignment, IDOR.
+**Security** — injection (SQL, command, XSS, template, NoSQL), authn/authz gaps and missing checks, hardcoded secrets/keys/tokens, unsafe deserialization, SSRF, path traversal, missing or weak input validation, insecure defaults, weak/misused crypto, permissive CORS/CSP, sensitive data in logs or error responses, dependency risks (known-bad or unpinned), mass-assignment, IDOR. For a security-sensitive app (untrusted network input, another user's data, an LLM agent/MCP server, or a Cloudflare/cloud deploy), also read `references/security-classes.md` for the domain-specific hunting classes this paragraph doesn't cover.
 
 **Stray code** — dead/unreachable code, unused exports/functions/vars/imports, commented-out blocks, leftover debug logging (`console.log`, `print`, `dbg!`, `println`), `TODO`/`FIXME`/`HACK`/`XXX`, orphaned files imported nowhere, duplicated logic, leftover test/debug endpoints or backdoors, stale feature flags, dead config.
 

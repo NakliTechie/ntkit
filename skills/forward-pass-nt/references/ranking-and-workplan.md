@@ -11,6 +11,14 @@ Collect all findings. Dedupe across subagents. Rank by severity and **assign eac
 
 Each finding: `**ID** [Bug|Security|Stray|Stub] path:line — what it is · why it matters · suggested fix`. For a Stub, name the masquerade explicitly: what's claimed (and where) vs. what the code actually does.
 
+**Severity anchor for Security findings** (adapted from [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill), MIT): the discriminator is whether the result *fully defeats* an explicit control with real consequences, or only weakens it. If you can't state the concrete damage, the severity is lower than it feels.
+- **Critical** — unauthenticated actor gets code execution, full data-store access, or takeover of arbitrary accounts.
+- **High** — an actor fully defeats an explicit control with real consequences: auth bypass, cross-tenant read/write, stored script execution hitting other users, authenticated code execution.
+- **Medium** — a real boundary violation with limited blast radius, uncommon preconditions, or a narrow affected resource set.
+- **Low** — disclosure of non-secret internals, or an effect that needs sustained effort for minimal gain.
+
+**Anti-patterns — don't record these as Security findings** (same source): a missing best-practice with no reachable result (that's a Low or a hardening note, not a Critical); a defense-in-depth gap where an outer layer already stops the attack; guessed deployment/provider/browser behavior not visible in this repo (that's a `Worth a look` with the missing fact named, not a confirmed finding); a caller affecting only their own data (self-impact isn't a boundary violation); a parser/runtime effect reported stronger than what you actually observed.
+
 **Preserve dismissals — don't silently drop.** When you discard something as a false positive or non-issue, record it in a dedicated **"False positives / non-issues (verified)"** list WITH the one-line reasoning that cleared it (e.g. `C3 — false positive: getStockOnHand sums batches only; the opening-stock column is never added to a total`). This stops the next forward pass from re-flagging it. Still drop pure linter/typechecker/CI noise without ceremony.
 
 Keep a short **"Worth a look (lower confidence)" → `W1, W2, …`** bucket for fresh-eyes hunches you couldn't fully verify — don't hide them, don't inflate their severity.

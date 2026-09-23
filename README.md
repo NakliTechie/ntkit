@@ -42,6 +42,7 @@ Commands read and write those files. Every session picks up where the last one l
 | `/lab-nt` | research | The discoverer — shapes an idea into a falsifiable contract, runs bounded experiment legs, journals every attempt. |
 | `/notify-nt` | after a run | Desktop notification + optional phone push. |
 | `/maintain-nt` | upkeep | Stale deps / Actions / advisories / dead links → a ranked fix-workplan; safe fixes applied automatically. |
+| `/reclaim-nt` | upkeep | Sweep a project for orphaned model checkpoints, stale downloads, dead build artifacts → a ranked deletion proposal. Read-only; deletes only per-item on explicit `apply`. |
 | `/release-nt` | launch | Semver bump, CHANGELOG, tag, push, GitHub release, verify the deploy landed live. |
 | `/package-nt` | launch | Ship-readiness gate, marketing screenshots, drafted launch posts. Drafts, never posts. |
 | `/windup-nt` | end of session | Day summary, pending, commit/push, tomorrow's handoff. |

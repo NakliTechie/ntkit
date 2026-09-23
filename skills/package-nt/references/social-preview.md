@@ -1,5 +1,9 @@
 ## Setting the GitHub social preview (no API exists — drive the browser)
 
+This file covers the **repo's** card only — uploading the image to GitHub. For **building**
+the image itself (repo or app), or for the deployed app's own meta tags, see
+[`social-card-build.md`](social-card-build.md) first.
+
 GitHub exposes no API to *set* the social preview image, only to read whether one is set
 (`usesCustomOpenGraphImage`). The steps below are exact — they came from actually doing this
 on `NakliTechie/ntkit`, not from GitHub's docs, and the one gotcha in them (below) cost a

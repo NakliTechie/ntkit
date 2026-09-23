@@ -1,7 +1,9 @@
 <!doctype html>
 <!-- The GitHub social card. assets/render-social.sh renders this to assets/social.png
-     (1280×640). The right half is the BUILD and CLOSE columns of workflow.svg, so the card
-     and the README map always agree. -->
+     (1280×640). The right side stacks two full cards straight from workflow.svg — REVIEW
+     (row 1, box 1066,250 477×326) over CLOSE (row 2, box 814,616 730×326) — each cropped to
+     its own exact box, not a shared column, since row 2's cards are wider than row 1's. So
+     the card and the README map always show the same real content, never a stitched sliver. -->
 <html><head><meta charset="utf-8">
 <style>
   html, body { margin: 0; background: #ffffff; }
@@ -17,19 +19,22 @@
   .facts { position: absolute; left: 72px; bottom: 64px; font-size: 15px; font-weight: 600;
            letter-spacing: 0.04em; color: #656d76; text-transform: uppercase; }
   .facts b { color: #0e7490; font-weight: 700; }
-  /* The map's right column — BUILD over CLOSE — at the map's own scale (viewBox 1600×930,
-     that column at x 1072..1546, rows at y 215..505 and 528..818). */
-  .shot { position: absolute; left: 720px; top: 44px; width: 560px; height: 596px; overflow: hidden; }
-  .shot img { position: absolute; width: 1600px; left: -1066px; top: -208px; }
-  .shot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 80px;
-                 background: linear-gradient(rgba(255,255,255,0), #ffffff); }
+  .shot { position: absolute; left: 720px; overflow: hidden; box-shadow: 0 0 0 1px #d0d7de inset; border-radius: 12px; }
+  .shot img { position: absolute; }
+  /* REVIEW: source box (1066,250)-(1543,576), scaled 1.043x to a 497×340 window. */
+  .shotTop { top: 44px; width: 497px; height: 340px; }
+  .shotTop img { width: 1669px; left: -1112px; top: -261px; }
+  /* CLOSE: source box (814,616)-(1544,942), scaled 0.663x to a 484×216 window. */
+  .shotBottom { top: 400px; width: 484px; height: 216px; }
+  .shotBottom img { width: 1061px; left: -540px; top: -408px; }
 </style></head>
 <body>
   <div class="copy">
     <div class="brand"><span>ntkit</span><i></i></div>
     <h1>The rigor layer for <em>AI-assisted development.</em></h1>
-    <p class="sub">22 Claude Code skills for everything around the code: decisions remembered, sessions resumed, the whole app audited, and "done" only when a verifier says so.</p>
+    <p class="sub">23 Claude Code skills for everything around the code: decisions remembered, sessions resumed, the whole app audited, and "done" only when a verifier says so.</p>
   </div>
-  <div class="facts"><b>22 slash commands</b> &nbsp;·&nbsp; every repo &nbsp;·&nbsp; MIT</div>
-  <div class="shot"><img src="workflow.svg" alt=""></div>
+  <div class="facts"><b>23 slash commands</b> &nbsp;·&nbsp; every repo &nbsp;·&nbsp; MIT</div>
+  <div class="shot shotTop"><img src="workflow.svg" alt=""></div>
+  <div class="shot shotBottom"><img src="workflow.svg" alt=""></div>
 </body></html>

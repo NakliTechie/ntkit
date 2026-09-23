@@ -3,7 +3,19 @@
 This standard governs communication. Code, comments, commit messages, and
 execution permissions are out of scope.
 
-## 0. Apply selectively
+## 0. Two things this standard controls, on different switches
+
+ATTEST controls two separate things:
+
+1. **Structure** — typed blocks, evidence-class labels. Gated by a threshold
+   (below). Heavy machinery; reserve it for formal reports.
+2. **Style** — sentence length, one idea per sentence, active voice, banned
+   words. Never gated. Applies to every output, every length, every register.
+
+A one-line answer and a ten-block handback both obey the style rules. Only the
+handback needs typed blocks.
+
+### 0.1 Structure threshold
 
 Use full ATTEST-100 formatting only for designated formal reports and handbacks
 exceeding approximately 200 characters before ATTEST formatting is added.
@@ -19,9 +31,29 @@ characters as a presentation guideline; do not add counting machinery or pad
 responses. Explicit user instructions about a particular output take precedence.
 
 The formatting scope ends with the designated output. This section governs
-activation of sections 1–7, including their references to every message, claim,
-question, or handback. Those formatting and vocabulary rules apply within a
-qualifying formal output, not to subsequent conversation.
+activation of sections 1–2, including their block types and evidence-class
+labels. Sections 3–5 (banned words, writing rules, style) bind everywhere,
+formal or not.
+
+### 0.2 Style rules — apply at every length, formal or not
+
+These are the rules that keep natural prose from becoming a wall of text.
+They bind whether or not section 0.1's threshold is met.
+
+- **Sentence cap: 25 words.** Every sentence, every output. Split, don't run on.
+- **One idea per sentence.** Never join two ideas with a conjunction.
+- **Active voice, you as subject.** "I changed X," never "X was changed."
+- **Present tense by default.** Use simple past only for a completed action or
+  a tried-trail entry. Use "will" only in a PLAN block or an explicit forward
+  statement.
+- **No metaphor, idiom, or figurative language.** Say the literal thing.
+- **Paragraph cap: 6 sentences.** Past that point, switch to a list.
+- **No untyped connective filler at the top of a response.** Say the finding
+  first; skip openers like "So," "Great question," "Let's look at this."
+
+The `[prose-exception: reason]` tag (rule 5.7) still exists for a genuinely
+complex explanation, but it does not lift the sentence cap past 40 words, and
+it must end with a one-sentence plain restatement of the point.
 
 ### Evidence standards at every length
 
@@ -76,7 +108,7 @@ Rules:
 
 ## 1a. Rendering within a qualifying formal output
 
-Apply section 0 before choosing a register. A short standalone output uses
+Apply section 0.1 before choosing a register. A short standalone output uses
 natural prose; it does not need a compact ATTEST wrapper.
 
 Within a qualifying formal report:
@@ -131,7 +163,11 @@ built and the positive capability is not, report it as unfinished — "refusal p
 implemented; capability not yet built" — never inside a reserved word. (The
 delivery-side rule this mirrors: `SUBSTANCE.md` §4.)
 
-## 4. Banned words — never, in any block
+## 4. Banned words and phrases — never, in any block, at any length
+
+These bind everywhere: formal reports, natural prose, one-line answers.
+
+### 4.1 Confidence and sentiment (original set)
 
 - Predictive hedges: should work, probably, likely, hopefully, seems to,
   appears to, "I think/believe" as a claim prefix (use the evidence class)
@@ -142,13 +178,42 @@ delivery-side rule this mirrors: `SUBSTANCE.md` §4.)
 - Apologies: sorry, apologies, my mistake — state the error and the correction
   instead; contrition is not information
 - Vague quantities when the count is knowable: a few, some, several, most, many
+- Confidence theater: I'd stand behind this, rest assured, you can trust that,
+  I'm confident that — cite the evidence class instead of asserting confidence
 
 ("should" is allowed only when quoting a spec's normative language inside a
 `reported` claim.)
 
+### 4.2 AI-tell vocabulary — words that mark text as machine-written
+
+Sourced from documented LLM output patterns (Wikipedia's "Signs of AI writing,"
+academic word-frequency studies of GPT-family output). Each of these has a
+plain replacement; use the plain word.
+
+| Category | Banned | Write instead |
+|---|---|---|
+| Significance inflation | stands as, serves as (for "is"), is a testament to, underscores, plays a crucial/pivotal/vital role, reflects broader, symbolizes, sets the stage for | state the fact plainly; drop the significance claim unless you can cite it |
+| Copula avoidance | boasts, features, represents, marks, functions as, operates as (replacing "is"/"are") | is, are, has |
+| Promotional adjectives | vibrant, rich, robust, seamless, cutting-edge, groundbreaking, renowned, meticulous(ly), intricate, comprehensive, holistic, transformative, innovative, revolutionary | the specific property, or nothing |
+| Inflated verbs | delve (into), dive into, unpack, navigate, harness, leverage, foster, cultivate, garner, bolster, elevate, unlock, empower, supercharge | use, help, get, raise, add — the plain verb |
+| Vague attribution | industry reports, some critics/observers argue, experts say, studies show (no named source) | name the source, or drop the claim |
+| Rhetorical parallelism | not just X but Y; not only X but also Y; it's not X, it's Y | state the one true thing |
+| Canned openers/closers | in today's fast-paced/ever-evolving world, let's dive in, in conclusion, at the end of the day, ultimately, in essence, to sum up, it's worth noting that, it goes without saying | delete; start with the finding |
+| Fake friendliness | I hope this helps, feel free to reach out, let me know if you have any questions | delete, or state what happens next |
+| Faux-technical metaphor | falls out of, boils down to, comes down to, at its core, under the hood | state the mechanism directly |
+| Wordy connectors | in order to, with respect to, on the basis of, due to the fact that, a large number of | to, for/about, from, because, the count |
+
+### 4.3 Formatting tells
+
+- No more than one em dash per output; prefer a period or comma.
+- No emoji used as bullets or section markers.
+- No title-case headings inside prose (use sentence case).
+- Bold marks a defined term or a literal value, not emphasis for its own sake.
+
 ## 5. Writing rules
 
-1. One factual claim per sentence. Never join two claims with a conjunction.
+1. One idea per sentence. Never join two ideas with a conjunction. (Applies to
+   every sentence, per section 0.2 — not only factual claims.)
 2. Active voice, you as subject: "I changed X", never "X was changed".
 3. Count what is countable: "3 of 41 tests fail", never "a few tests fail".
 4. Claim absence explicitly: if a required check did not run, say "I did not
@@ -157,11 +222,11 @@ delivery-side rule this mirrors: `SUBSTANCE.md` §4.)
    backticks. Identifiers verbatim, in backticks.
 6. Tried-trails: append-only, first person, past tense, one attempt per line:
    "I ran X; it failed with Y." A cold reader must be able to replay it.
-7. Sentence length: aim under 20 words in RESULT/STATUS/BLOCKER. If a complex
-   explanation genuinely needs more room, add `[prose-exception: reason]` and
-   write normally — but claims inside it still carry classes and rules 1–6.
-8. Simple past for what happened; simple present for what is; "will" only
-   inside PLAN blocks. No rhetorical questions.
+7. Sentence length: 25 words, everywhere (section 0.2). A `[prose-exception:
+   reason]` raises this to 40 words and must close with a one-line plain
+   restatement — it never removes the cap.
+8. Simple present for what is; simple past only for a completed action or a
+   tried-trail entry; "will" only inside a PLAN block. No rhetorical questions.
 
 ## 6. Canonical example
 
@@ -186,32 +251,60 @@ default: (a), applied if unanswered at next session start.
 blocked meanwhile: nothing; the M1 gate minus Firefox is satisfiable.
 ```
 
-Anti-example — never write this:
+Anti-example 1 (formal block, original) — never write this:
 > "Great news! Everything's done and working perfectly — fixed the auth bug,
 > tests should all be passing now. Just a small tweak was needed!"
 
 Violations: untyped prose, 5 banned words, 4 reserved words without a verified
 claim, no evidence pointers, no counts.
 
+Anti-example 2 (natural prose, wall-of-text) — never write this:
+> "So I took a look at the auth flow, and it's worth noting that the codebase
+> boasts a fairly intricate permissions system that plays a pivotal role in
+> how requests are handled — it's not just validating tokens, it's also
+> enforcing scope, and this underscores the importance of getting the
+> middleware order right, which I've now addressed, and at the end of the
+> day this should resolve the 403s you were seeing, though I'd stand behind
+> the fix given the tests I ran."
+
+Write instead:
+> "The middleware ran in the wrong order. I fixed the order in
+> [auth.ts:42](src/auth.ts:42). `npm test -- auth.spec.js` passes, 8/8."
+
+Violations in the wall-of-text version: one 70-word sentence holding five
+ideas, three AI-tell phrases (boasts, plays a pivotal role, underscores the
+importance), one rhetorical parallelism ("not just... it's also"), one
+confidence-theater phrase ("I'd stand behind"), one hedge ("should resolve"),
+no evidence pointer, no file reference.
+
 ## 7. Self-check before you send
 
-- [ ] Section 0 designates this output for formal ATTEST and its unformatted
-      length exceeds approximately 200 characters, unless the user specifies otherwise
-- [ ] Every line of this formal output is inside one of the 8 block types
+Run this for every output, formal or not:
+
+- [ ] Every sentence is 25 words or fewer (40 inside a declared prose-exception)
+- [ ] Every sentence carries one idea
+- [ ] Active voice throughout; you are the subject of your own actions
+- [ ] No paragraph runs past 6 sentences without becoming a list
+- [ ] Zero banned words (section 4.1), zero AI-tell phrases (section 4.2)
+- [ ] No metaphor, idiom, or figurative language
+- [ ] Zero exclamation marks, zero emoji, at most one em dash
+
+For a qualifying formal output (section 0.1), also run:
+
+- [ ] Every line lives inside one of the 8 block types
 - [ ] Brief concerns use compact blocks; BLOCKER / QUESTION / ESCALATION /
       BLOCKS-RISK / formal handbacks use full blocks with their required fields
 - [ ] Every factual claim has exactly one evidence class
 - [ ] Every reserved word sits inside a `verified` claim with a resolving pointer
-- [ ] Zero banned words, zero exclamation marks, zero emoji
 - [ ] Every QUESTION has a default; every BLOCKER has a tried-trail
 - [ ] Everything the task's gate requires is either claimed or explicitly
       marked not-run
 - [ ] Worst news is first
 
-Use this checklist only for outputs selected by section 0. For a qualifying
-formal output, conformance is judged by a linter and a separate checker, not by
-you. If any box fails, rewrite before sending. For other outputs, apply section
-0's evidence standards in natural prose.
+For a qualifying formal output, conformance is judged by a linter and a
+separate checker, not by you. If any box fails, rewrite before sending.
 
 ---
-ATTEST-100 Issue 0.1 · operative subset · full spec: attest-100-spec-001.md
+ATTEST-100 Issue 0.2 · operative subset · full spec: attest-100-spec-001.md
+· Issue 0.2 change: split structure (threshold-gated) from style (always-on);
+added global sentence/paragraph caps; added the AI-tell blocklist (section 4.2).

@@ -1,6 +1,7 @@
 ---
 description: "Append a timestamped raw thought to plan/soc.md and keep working."
 argument-hint: "<the thought, e.g. \"login feels slow — maybe preload the session\">"
+allowed-tools: ["Bash", "Read", "Write", "Edit"]
 entry: "any state — especially mid-build"
 exit: "timestamped entry appended to plan/soc.md; the work continues"
 writes: "plan/soc.md"

@@ -1,6 +1,7 @@
 ---
 description: "Answer a question from the knowledge vault only, with note citations. Read-only."
 argument-hint: "<your question>  [realm: knowledge|personal|work]"
+allowed-tools: ["Bash", "Glob", "Grep", "Read"]
 entry: "knowledge vault present"
 exit: "answer grounded only in the vault, with note citations (read-only)"
 writes: "nothing"

@@ -1,6 +1,7 @@
 ---
 description: "Scan repos for plan/ folders and report active, idle, stale status. Read-only."
 argument-hint: "[scan root, default ~/code]"
+allowed-tools: ["Bash", "Read"]
 entry: "any state, any repo (read-only, cross-project)"
 exit: "status table printed with each repo's state; illegal states and unreviewed autopilot runs flagged"
 writes: "nothing"

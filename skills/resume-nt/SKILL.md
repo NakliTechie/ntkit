@@ -1,6 +1,7 @@
 ---
 description: "Read plan/ and brief the current state, then pause; `go` starts the top chunk."
 argument-hint: "[go — brief, then start the top chunk immediately]"
+allowed-tools: ["Bash", "Glob", "Read"]
 entry: "any state; plan/ preferred, degrades to git-only"
 exit: "brief printed naming the current state and its legal next moves; paused for direction"
 writes: "nothing"

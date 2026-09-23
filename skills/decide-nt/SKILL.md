@@ -1,6 +1,7 @@
 ---
 description: "Append one dated decision line to plan/history.md."
 argument-hint: <short rationale, e.g., "Chose JWT for stateless validation">
+allowed-tools: ["Bash", "Read", "Write", "Edit"]
 entry: "any state"
 exit: "dated one-line decision appended"
 writes: "plan/history.md"

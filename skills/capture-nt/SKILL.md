@@ -1,6 +1,7 @@
 ---
 description: "Save a URL, file, PDF or chat share into the knowledge vault; commits and pushes."
 argument-hint: "<url | file path>  [realm: knowledge|personal|work]"
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Edit"]
 entry: "knowledge vault present at the configured path"
 exit: "schema'd source note written, linked, committed + pushed; idempotent on re-run"
 writes: "the knowledge vault"

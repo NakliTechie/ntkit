@@ -1,5 +1,7 @@
 ---
 description: "End of session: day summary, pending, commit and push non-plan work, resume handoff."
+argument-hint: "(none)"
+allowed-tools: ["Bash", "Glob", "Read", "Write", "Edit"]
 entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
 exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, clean closes merged to main, stray worktrees swept, resume handoff printed"
 writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/_archive/"

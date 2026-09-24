@@ -4,7 +4,7 @@ argument-hint: "<your question>  [realm: knowledge|personal|work]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read"]
 entry: "knowledge vault present"
 exit: "answer grounded only in the vault, with note citations and a `Rounds: n/4` footer (read-only)"
-writes: "nothing"
+writes: "nothing in the vault (vaultdb.py refreshes its own gitignored caches)"
 ---
 
 Query the **knowledge vault** and answer from it. `/ask-nt` is the read-side sibling of `/capture-nt`: capture writes the substrate, ask reads it back. It answers **only** from what's in the vault and **cites** the notes it used — your personal Google, where the index is your own captured notes.
@@ -19,16 +19,18 @@ Retrieval runs as a loop, not a single pass. The shape comes from WFM's self-ref
 
 Keep one running **evidence set**: each note you have opened, with the claim you took from it. A later round adds to it. It never drops what an earlier round found, unless a later note directly contradicts it; then keep both and say so in Step 4.
 
-Each round `r` (1 to 4) does three things:
+Each round `r` (1 to 4) is one retrieve → read → reflect cycle. A round may run several searches; it ends when you reflect. It does three things:
 
 1. **Retrieve** with that round's query (round 1: the question itself; round 2+: the follow-up query written at the end of the previous round).
-2. **Read** the new candidates (Step 3) and add what they say to the evidence set.
+2. **Read** the new candidates (Step 3) and add what they say to the evidence set. A partial read (a grepped line, a MOC entry) joins the set only for what you read; cite it as `(entry line only)`.
 3. **Reflect.** State all three in your reasoning (never in a file; the read-only contract holds):
    - **draft answer:** the answer the evidence set supports right now, one or two sentences;
    - **follow-up query:** the exact search you would run next, and the gap it closes (a missing number, the other side of a comparison, a name you saw but have not opened);
    - **decision:** `Final` or `Continue`.
 
-   Choose `Final` when the draft answer is fully supported by notes you have read, or when the follow-up query would only repeat an earlier one. Choose `Continue` only when the follow-up names a specific gap. After round 4, stop regardless and treat the draft as final.
+   Choose `Final` when the draft answer is fully supported by notes you have read, or when the follow-up query would only repeat an earlier one. Choose `Continue` only when the follow-up names a specific gap. Before `Final` on a factual claim, run one search for a contradicting note; it can share the round. After round 4, stop regardless and treat the draft as final.
+
+   If the caller asks for a trace, print each round's three lines in the answer; otherwise they stay in your reasoning.
 
 ### What each round retrieves
 Round 1 is **broad**: an unscoped ranked `vaultdb.py search`, then `related` on the strongest hit (`rg` when the index is absent). Round 2+ is **targeted**: it runs the follow-up query with the tool that fits the gap (new terms, `semantic`, MOCs, one-hop links, a realm filter). Read [`references/retrieve.md`](references/retrieve.md) for the commands and the pitfalls (ambiguous terms, any-term hits, the keyword ceiling) before the first round.
@@ -52,6 +54,6 @@ Don't answer from grep snippets. **Open the top ~3–8 new notes** each round an
 - If coverage is **thin or stale** (one source, an old `captured` date): flag it, so the answer carries its own confidence.
 - If the question spans **realms**, say which realm the answer came from.
 
-`/ask-nt` is **read-only** — it never writes to the vault. Capturing is a separate, deliberate step (`/capture-nt`).
+`/ask-nt` is **read-only** — it never writes to the vault's notes. (`vaultdb.py` rebuilds `.vault.db` and fills `.vault.emb.db` on every run; both are gitignored caches, not vault content.) Capturing is a separate, deliberate step (`/capture-nt`).
 
 The one rule this command exists to enforce: **answer from the vault, with receipts.** A confident answer with no citation — or one built from outside knowledge dressed up as a captured note — defeats the point. The whole value is that you can trust the answer because you can trace it.

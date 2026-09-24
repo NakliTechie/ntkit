@@ -22,3 +22,20 @@ Write or update `plan/pending.md`. The canonical structure (shared with /replan-
 
 ```
 # Pending
+
+## Now
+- <actionable, top priority>
+
+## Parked
+- <deferred, not in scope right now but not abandoned>
+
+## Open questions
+- <question that needs answering before it can become a task>
+```
+
+Merge rules:
+- **File exists with sections:** preserve them. New items surfaced today go into `Now` by default, `Open questions` if phrased as a question, or **`Parked` if it was deferred this session** — raised but chosen against for now (skipped, "later", out of current scope, not abandoned). Remove items finished today from wherever they sit. Actively move a "not now" into `Parked` rather than dropping it; leave already-parked items alone unless they came back into scope today.
+- **File exists, flat (no sections):** keep it flat — don't restructure mid-windup. Just add new items and remove finished ones. (User can run `/replan-nt` when ready to migrate to the structured form.)
+- **File doesn't exist:** create it with the three sections (canonical from day one).
+
+Order items by priority within each section. Each item is one line — link to a deeper plan/ doc if there's more context. `pending.md` is the source of truth for what's open; execution order is the workplan's job (next step).

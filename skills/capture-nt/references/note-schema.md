@@ -33,7 +33,7 @@ capture_mode: share-url  # chat-session only — share-url | capture-file
 The three `chat-session` fields appear **only** on chat-session notes. Never rewrite existing notes to backfill fields — old notes stay untouched.
 Then the body, in order — **record what the source said, not your opinion of it:**
 - `## TL;DR` — ≤3 lines.
-- `## Key claims & data` — bullets; preserve concrete numbers; fold in the **followed-link summaries** from Step 4.
+- `## Key claims & data` — bullets; preserve concrete numbers; fold in the **followed-link summaries** from Step 4. End each **load-bearing** claim's bullet line with an Obsidian block ID — a space, `^`, lowercase kebab, unique in the file (`- **Result:** ranked #1 … ^design-arena-rank-1`). Three to five per source; skip for a thin note. IDs never change once cited.
 - `## Quotes` — short, verbatim, attributed. If you couldn't get the full text, say so here rather than inventing quotes.
 - `## Why it matters / connections` — `[[wikilinks]]` to related notes / sources / topics.
 - `## Open questions`.
@@ -45,6 +45,7 @@ For a **dropped PDF / doc / image**, keep the file under `$VAULT/assets/` and po
 
 ## Step 7 — Link it into the graph
 - Pick the right **topic MOC(s)** in `$VAULT/topics/`. Reuse an existing one (`ls "$VAULT/topics/"`); create `topics/<theme>.md` only if the theme is genuinely new (MOC frontmatter: `title`, `type: moc`, `tags`, `updated`). Add a **one-line annotated link** to the new source under the MOC's `## Sources`.
+- **Passage links.** When a note (new or updated) rests on one claim of a source, cite `[[source-slug#^claim-id]]`, not the bare file. If the claim has no block ID yet, add one to the source. Do not rewrite existing links in bulk. `$VAULT/bin/vaultdb.py doctor` lists `#^block` / `#heading` anchors that do not resolve; run it after writing.
 - Make sure the source's _"Why it matters / connections"_ section links back (`[[...]]`) to those topics and any related notes — backlinks are just `rg "\[\[<slug>\]\]"`.
 - Bump the MOC's `updated:` date.
 

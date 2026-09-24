@@ -3,7 +3,7 @@ description: "Answer a question from the knowledge vault only, with note citatio
 argument-hint: "<your question>  [realm: knowledge|personal|work]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read"]
 entry: "knowledge vault present"
-exit: "answer grounded only in the vault, with note citations (read-only)"
+exit: "answer grounded only in the vault, with note citations and a `Rounds: n/4` footer (read-only)"
 writes: "nothing"
 ---
 
@@ -14,35 +14,27 @@ Query the **knowledge vault** and answer from it. `/ask-nt` is the read-side sib
 ## Step 1 — Get the question
 `$ARGUMENTS` is the question. If empty, ask _"What do you want to know?"_ and use the next message. Note any **realm** the question implies (`personal` / `work` / `knowledge`) — you'll filter on it in Step 2.
 
-## Step 2 — Search the vault (broad → narrow)
-The vault is structured for retrieval; use the structure, don't just grep blindly — but don't let a guessed topic narrow your search terms before you've cast a wide net. A note is filed by what it's *about*, not by every term someone might use to ask for it; searching only within an assumed domain is how a real hit gets missed entirely.
+## Step 2 — Search in bounded rounds (budget B = 4)
+Retrieval runs as a loop, not a single pass. The shape comes from WFM's self-reflection loop (arXiv:2609.18182, §3.3): the evidence set **grows** across rounds and is never replaced, and each round ends with an explicit stop-or-continue decision. At a budget of 4 the paper's agent used **2.58 rounds on average**; forcing all 4 cost **1.58×** for the same accuracy. So stop as soon as the evidence answers the question.
 
-1. **Ranked full-text search first, unscoped.** Cast the wide net deterministically before you narrow. If `$VAULT/bin/vaultdb.py` exists, use it — it returns results **ranked by relevance**, which a `rg` file list cannot do, and it rebuilds from the markdown every run so it is never stale:
-   ```bash
-   "$VAULT/bin/vaultdb.py" search <the question's key terms> --limit 12
-   "$VAULT/bin/vaultdb.py" search <terms> --realm work --since 2026-01-01   # when the question scopes it
-   ```
-   It matches all terms first and automatically widens to any-term when that returns nothing — the output says which mode produced the hits, so **treat any-term results as weaker evidence** and lean harder on Step 3's reading.
+Keep one running **evidence set**: each note you have opened, with the claim you took from it. A later round adds to it. It never drops what an earlier round found, unless a later note directly contradicts it; then keep both and say so in Step 4.
 
-   Then **pivot on the strongest hit** to pull in what shares its vocabulary and tags, including notes that use different words for the same thing:
-   ```bash
-   "$VAULT/bin/vaultdb.py" related <best-hit-slug> --limit 8
-   ```
-   Free text works too when nothing hits cleanly: `related "the idea in your own words"`.
+Each round `r` (1 to 4) does three things:
 
-   **Fallback without the index:**
-   ```bash
-   rg -l -i -e "term1" -e "term2" "$VAULT"/sources "$VAULT"/notes "$VAULT"/topics
-   ```
-   Either way: look at titles, tags, authors, TL;DRs, and claims — not just bodies. **For a short or ambiguous term** (an acronym, initials, a two-word phrase), try its most likely literal expansions too, before picking a domain and searching only that domain's jargon — "MS" could mean Microsoft, a maturity model, or something else; the wrong first guess silently forecloses the right one.
+1. **Retrieve** with that round's query (round 1: the question itself; round 2+: the follow-up query written at the end of the previous round).
+2. **Read** the new candidates (Step 3) and add what they say to the evidence set.
+3. **Reflect.** State all three in your reasoning (never in a file; the read-only contract holds):
+   - **draft answer:** the answer the evidence set supports right now, one or two sentences;
+   - **follow-up query:** the exact search you would run next, and the gap it closes (a missing number, the other side of a comparison, a name you saw but have not opened);
+   - **decision:** `Final` or `Continue`.
 
-   **Keyword search has a known ceiling:** it cannot find a note that discusses the same concept in entirely different vocabulary. When the ranked hits look thin but the vault plausibly covers the theme, fall back to browsing the topic MOCs (step 2) rather than concluding the vault is empty.
-2. **Topics next, to narrow.** `ls "$VAULT/topics/"` and read any MOC matching the question's theme — MOCs are the curated indexes, and their linked notes are the high-signal set for *narrowing among* what Step 1 already found. Don't use topic-guessing to decide what to search for in the first place.
-3. **Realm filter** when the question scopes it: add `rg "^domain: work"` etc., or restrict to the matching notes.
-4. **Follow the graph.** From strong hits, follow `[[wikilinks]]` one hop (and their backlinks via `rg "\[\[<slug>\]\]"`) to pull in connected context.
+   Choose `Final` when the draft answer is fully supported by notes you have read, or when the follow-up query would only repeat an earlier one. Choose `Continue` only when the follow-up names a specific gap. After round 4, stop regardless and treat the draft as final.
 
-## Step 3 — Read the candidates
-Don't answer from grep snippets. **Open the top ~3–8 notes** and read them — their TL;DR + key claims are built to answer fast. Prefer:
+### What each round retrieves
+Round 1 is **broad**: an unscoped ranked `vaultdb.py search`, then `related` on the strongest hit (`rg` when the index is absent). Round 2+ is **targeted**: it runs the follow-up query with the tool that fits the gap (new terms, `semantic`, MOCs, one-hop links, a realm filter). Read [`references/retrieve.md`](references/retrieve.md) for the commands and the pitfalls (ambiguous terms, any-term hits, the keyword ceiling) before the first round.
+
+## Step 3 — Read the candidates (inside each round)
+Don't answer from grep snippets. **Open the top ~3–8 new notes** each round and read them — their TL;DR + key claims are built to answer fast. Don't reopen a note already in the evidence set. Prefer:
 - **`notes/` (synthesis)** for "what do I think / conclude" questions,
 - **`sources/`** for "what did X say / what's the data" questions,
 - the most recent when the topic moves fast (check `captured` / `published`).
@@ -52,7 +44,8 @@ Don't answer from grep snippets. **Open the top ~3–8 notes** and read them —
 - **Then the support**, with inline citations to the notes used: `[[2026-06-19-glm-5-2-beats-fable-5-design-arena]]`.
 - **Keep source vs. synthesis straight** — "the article claims X ([[source]]); you concluded Y ([[note]])." Don't blur them.
 - **Ground it ONLY in the vault.** If you draw on anything outside it, label that clearly as outside knowledge — never pass it off as captured.
-- **End with `Sources:`** — the notes you actually read, as a short list.
+- **End with `Sources:`** — the notes you actually read, as a short list. Cite from the whole evidence set, every round, not only the last one.
+- **Footer:** one last line, `Rounds: <n>/4 (<Final | budget>)`, e.g. `Rounds: 2/4 (Final)`. It says how hard the vault had to be searched.
 
 ## Step 5 — Be honest about coverage
 - If the vault **doesn't** answer it: say so plainly. Show what _is_ there that's adjacent, and offer to fill the gap — _"want me to `/capture-nt` something on this?"_

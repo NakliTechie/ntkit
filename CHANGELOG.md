@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Added:** `/forward-pass-nt` gains a sixth lens, **test value**, and a `T` finding track. It hunts tests that cannot fail for the reason they claim (assertion-free probes, expected values produced by the code under test, mocks that implement the asserted behaviour, mirror tests, duplicate proof, vacuous negatives, regressions that never went red) and production seams that exist only for tests. A retention bar outranks the hunt: protocol, migration, security, and other contract tests stay. Each `T` finding names its keeper test and the command that runs it; the lens recommends and never deletes. Catalogue in `references/test-value.md`, adapted from openclaw's `test-audit` skill.
+- **Changed:** `SUBSTANCE.md` §6.3 adds the authoring gate for new tests (four questions: what it protects, what regression turns it red, why existing coverage misses it, whether it needs a test-only seam), failure modes written before isolated code, a regression test must go red on the pre-fix code, and an end-to-end check ends in a replayable artifact.
+- **Added:** `SUBSTANCE.md` §6.8 **deletion without a keeper**, the eighth named pattern: removing a test because "another layer covers it" without naming that test and showing it goes red under a mutation. openclaw's Telegram campaign found 9 real coverage gaps behind cuts that looked safe.
+- **Changed:** `/autopilot-nt`'s checker enforces both: a new regression test is run against the stashed-out fix and must go red first, and a `T` delete/consolidate item passes only when the named keeper goes red under one deliberate mutation, with the source restored byte for byte.
+
 ## v2.0.0 — 2026-09-24
 
 **Breaking:** the kit is 21 skills. `/capture-nt` and `/ask-nt` now ship from [scholia](https://github.com/NakliTechie/scholia); installing ntkit alone no longer gets them.

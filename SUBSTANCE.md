@@ -56,7 +56,7 @@ self-report.
 
 ## 6. Named reward-hacking patterns to refuse
 
-Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Seven that
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Eight that
 agent-driven work invites most — refuse them; §1–5 cover the rest:
 
 1. **Gate self-weakening** — editing the verifier so a failing check passes. The committed
@@ -69,6 +69,17 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
    The sharpest form is a test written *against a defect you just found*: if the assertion you were
    about to add would go green on today's broken behaviour, you are pinning the bug as intended and
    the next reader will treat it as a decision. Delete the test and record the gap instead.
+   **The authoring gate.** Before any new test, answer four questions: what observable behaviour
+   or contract it protects; what credible regression turns it red; why the existing suite does not
+   already catch that (each contract has one owner test, at the strongest boundary that can reach
+   it); and whether it needs a production seam (an export, flag, or hook no real caller uses). A
+   missing answer means no test yet. A needed seam means test at the real boundary instead.
+   **Failure modes first.** For code tested in isolation, write down how it can fail before
+   writing it; each failure mode becomes the assertion a naive build would fail. A test written
+   after the code tends to assert whatever the code does. **A regression test must go red on the
+   pre-fix code** for the reason it names, and the run records that red; one that never failed
+   proves the mock, not the fix. An end-to-end check ends in an artifact a cold reader can replay:
+   the command, its output, the screenshot or trace. A suite that only prints "passed" is not one.
 4. **Stub-as-done** — a placeholder that compiles (a TODO / `unimplemented` marker) counted as
    finished. It builds ≠ it works; committed code carries no scaffolds.
 5. **Spec-editing as progress** — weakening a plan, spec, or frozen decision instead of building
@@ -84,6 +95,13 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
    a longer timeout, or a skip; that is gate self-weakening (#1) with extra steps. The same rule
    covers any tool's silence: a search that returns nothing on a file it refused to read is not
    evidence of absence. A signal nobody read is not a check.
+8. **Deletion without a keeper** — removing a test because "another layer covers it" without
+   naming that test and showing it goes red. Pruning a suite is real work; a deletion count is not
+   progress. Each deleted test names its keeper, and the keeper is shown red under one deliberate
+   mutation of the code it guards, with the source restored byte for byte afterwards. A test that
+   fails on today's code is a bug report, not a deletion candidate. "The E2E suite would catch it"
+   is a claim until the E2E test is named: E2E rarely reaches protocol, migration, or security
+   contracts.
 
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the

@@ -10,11 +10,11 @@ This map drives traversal order and becomes the coverage map in the report. Use 
 
 If the repo has a feature map (`verify/features/`, left by `/walkthrough-nt`), read its index as a second input: a feature-level inventory to cross-check the coverage map against — a feature area in the map with no code path in your traversal is a blind spot to close, and vice versa is map drift worth a Stray finding. It orients the pass; it never substitutes for reading the code cold.
 
-## Phase 2 — Forward traversal with five lenses
+## Phase 2 — Forward traversal with six lenses
 
 Walk the code **start → finish following the real flow** from entry points outward — not alphabetically. For a large app, fan out parallel subagents (Task) by module or flow-segment so coverage is thorough; for a small app, read directly.
 
-Apply all five lenses to each unit (unless `$ARGUMENTS` narrows the focus):
+Apply all six lenses to each unit (unless `$ARGUMENTS` narrows the focus):
 
 **Bugs** — logic errors, off-by-one, null/undefined/None handling, unhandled edge cases, incorrect or swallowed error handling, race conditions, await/async mistakes, resource leaks (unclosed handles/connections), wrong assumptions about input shape, broken invariants, timezone/encoding/locale pitfalls.
 
@@ -38,3 +38,5 @@ A stub on a dead/unused path is Stray. A stub reachable in normal use — especi
 - **Attribution.** Can a machine caller's action be told apart from a human's anywhere in the app's own history or audit log? Missing attribution is Low unless the project specifically claims an audit trail.
 
 A gap with no live caller yet still belongs in this lens — catching it before a caller exists is the whole point. A gap that's *also* live and consequential right now (an unstaged mutating tool call reachable today) gets a severity ID too, same cross-reference rule as a live-path Stub.
+
+**Test value** — the suite that is supposed to catch the other five. Apply it when the traversal reaches tests (skip it for a repo with none, and say so in the coverage map). Read `references/test-value.md` for the hunting classes and the retention bar. Hunt tests that cannot fail for the reason they claim: assertion-free probes, expected values produced by the code under test, mocks that implement the behaviour asserted, mirror tests of source text or export lists, duplicate proof of one contract, vacuous negatives, and regression tests with no record of going red on the pre-fix code. Hunt the production side too: exports, flags, and hooks that exist only so a test can reach inside. The retention bar outranks the hunt — a test guarding a protocol, migration, security, or other contract stays even when it looks like implementation. This lens recommends; it never deletes. A test that fails on today's code is a Bugs finding, not a test to remove.

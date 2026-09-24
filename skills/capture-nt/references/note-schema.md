@@ -3,7 +3,7 @@
 - **date prefix** — the source's **publish date** (`YYYY-MM-DD`) if discoverable, else today. Filename: `sources/<date>-<slug>.md`.
 - **source_type** — `article|tweet|pdf|video|repo|doc|chat-session`, inferred (x.com `/status/` → `tweet`; `/i/article/` → `article`; `.pdf` → `pdf`; `github.com` → `repo`; `.docx` → `doc`; `claude.ai/share/` → `chat-session`).
 - **chat-session extras** — title from the shared chat's title if extractable, else the first user message (truncated); **date prefix = the conversation's date**, not the capture date; set `platform` (`claude.ai` for now — the field future-proofs other assistants), `session_date`, and `capture_mode` (`share-url` | `capture-file`) in the frontmatter.
-- **domain** — which **realm** this belongs to: **`knowledge`** (general learning — the default), **`personal`** (your own life: health, money, home, family), or **`work`** (a job / client / employer). If the user named a realm in the invocation, use it; else infer from the content. Set it when it's clearly personal or work; default `knowledge` when unsure — and if the content looks **sensitive** (a statement, a contract, medical), ask before filing. (Absent ⇒ `knowledge`.)
+- **domain** — which **realm** this belongs to: **`knowledge`** (general learning — the default), **`personal`** (your own life: health, money, home, family), or **`work`** (a job / client / employer). If the user named a realm in the invocation, use it; else infer from the content. Set it when it's clearly personal or work; default `knowledge` when unsure — and if the content looks **sensitive** (a statement, a contract, medical), ask before filing. (Absent ⇒ `knowledge`.) A `personal` note also gets the tag **`private`**, a `work` note the tag **`work`**; `vaultdb.py doctor` flags any that miss it.
 - **tags** — reuse existing tags first:
   ```bash
   grep -rhoE 'tags: \[.*\]' "$VAULT/sources" "$VAULT/notes" "$VAULT/topics" | tr ',[]' '\n' | sed 's/tags://; s/ //g' | grep -v '^$' | sort | uniq -c | sort -rn
@@ -40,6 +40,8 @@ Then the body, in order — **record what the source said, not your opinion of i
 - Raw link(s) at the bottom.
 
 For a **chat session**, the body keeps the **Human/Assistant turn structure** (condensed is fine — the alternation is the content, so don't flatten it into a summary), and adds `## References mentioned` — the URLs the conversation touched, one line each, not deep-indexed (Step 4).
+
+**Every source gets a text snapshot:** save the extracted text to `$VAULT/assets/<slug>.txt` and put `Full text: [<slug>.txt](../assets/<slug>.txt)` under the title, so a dead URL loses nothing. Text only; no HTML or PDF prints of web pages.
 
 For a **dropped PDF / doc / image**, keep the file under `$VAULT/assets/` and point the note at it with a relative link (`[paper.pdf](../assets/paper.pdf)`); the note carries the TL;DR + claims, so the vault stays searchable without opening the binary.
 

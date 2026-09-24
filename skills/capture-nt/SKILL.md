@@ -46,9 +46,9 @@ On entering a step, read its Detail file first, then act; the Outcome column is 
 
 | Step | Outcome | Detail |
 |---|---|---|
-| 3 Fetch | The **whole** readable text, by source type: WebFetch for open pages; the Chrome MCP for login-gated ones (x.com, LinkedIn, paywalls); the `pdf` / `docx` skills for documents (OCR a scanned PDF; save a long extract to `$VAULT/assets/<slug>.txt`); `gh repo view` plus the README for a repo; the full transcript with its Human/Assistant turns for a `claude.ai/share` chat. Fetch fails → Chrome MCP → a stub note with `status: inbox`. Never fabricate. | `references/fetch.md` |
+| 3 Fetch | The **whole** readable text, by source type: WebFetch for open pages; the Chrome MCP for login-gated ones (x.com, LinkedIn, paywalls); the `pdf` / `docx` skills for documents (OCR a scanned PDF); `gh repo view` plus the README for a repo; the full transcript with its Human/Assistant turns for a `claude.ai/share` chat. Fetch fails → Chrome MCP → a stub note with `status: inbox`. Never fabricate. **Snapshot:** save the extracted text of every source (not only long ones) to `$VAULT/assets/<slug>.txt` and link it from the note as `Full text:`, so a dead link loses nothing. Text only — no saved HTML or PDF prints, unless the source *is* a PDF. | `references/fetch.md` |
 | 4 Follow | Every item of a listicle gets a verified one-liner (real stars and license for a repo); an article's load-bearing links only; a repo or arXiv paper the content rests on gets its **own full source note**, wikilinked. Cap at ~15 followed; log what you skipped. A chat session lists its URLs under `## References mentioned` instead. | `references/fetch.md` |
-| 5 Metadata | slug · publish-date prefix · `source_type` · `domain` (`knowledge` unless clearly personal or work; ask when sensitive) · tags reused from the vault first · author · published. Chat sessions add `platform`, `session_date`, `capture_mode`. | `references/note-schema.md` |
+| 5 Metadata | slug · publish-date prefix · `source_type` · `domain` (`knowledge` unless clearly personal or work; ask when sensitive; a `personal` note also gets tag `private`, a `work` note tag `work` — `vaultdb.py doctor` checks it) · tags reused from the vault first · author · published. Chat sessions add `platform`, `session_date`, `capture_mode`. | `references/note-schema.md` |
 | 6 Source note | `sources/<date>-<slug>.md` with the vault frontmatter and, in order: TL;DR · Key claims & data · Quotes · Why it matters / connections · Open questions · raw link. What they said, not your opinion. | `references/note-schema.md` |
 | 7 Link | One annotated line under the right topic MOC's `## Sources` — normally the MOC Step 2 already named (reuse a MOC before creating one); a backlink from the note; the MOC's `updated:` bumped. | `references/note-schema.md` |
 | 8 Promote | An evergreen note in `notes/` only when the source shifts the user's thinking, offered by default for a chat capture file. Ask before creating unless already told to. | `references/note-schema.md` |
@@ -66,7 +66,7 @@ git -C "$VAULT" push
 - `--only` keeps unrelated files already staged in the index out of this commit; leave those staged changes intact.
 - Include only capture-owned files under `sources/`, `notes/`, `topics/`, or `assets/` — `plan/` is gitignored and stays local.
 - If there's **no `origin`** or the **push fails** (offline / auth), keep the local commit and say so — never lose the capture.
-- Pushes to the **private** remote regardless of realm — by design, no waiting. To keep a realm **off** the remote, exclude it structurally (gitignore a path, or a separate local-only repo — the realm-privacy item in `plan/workplan.md`); then it's skipped automatically without a prompt.
+- Pushes to the **private** remote regardless of realm — by design, no waiting. Every realm is pushed; the vault's policy (2026-09-24, `$VAULT/README.md` → Realms) is one private repo, with personal/work notes marked by tag rather than kept off the remote.
 
 ## Step 10 — Confirm
 Short echo:

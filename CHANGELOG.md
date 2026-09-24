@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Removed:** `capture-nt` and `ask-nt` move to their own repo, **[NakliTechie/scholia](https://github.com/NakliTechie/scholia)**, with the vault engine they call. They depended on a `bin/vaultdb.py` that lived only in the author's private vault, so both were broken for anyone else who installed ntkit. Install them from scholia; skills already in `~/.claude/skills/` keep working. `/scaffold-nt` and `/lab-nt` still run `/ask-nt` first when it is installed and fall back to the web when it is not. The kit is 21 skills.
+
 ## v1.6.0 — 2026-09-23
 
 - **Changed:** `package-nt`'s readiness gate now reads the README against the house shape (`README-DOCTRINE.md` in the naklitechie-doctrines reference: header · install before why · "use something else if" · commands · verify · license + pointers, ≤ 120 lines) instead of a presence check, and adds a **social preview** gate: `usesCustomOpenGraphImage` must be `true` on the repo, or every shared link renders GitHub's default card — a blocker. GitHub has no API for it, so Phase 2 now produces `marketing/social.png` (1280×640, the hero recut with the name and the one sentence) and the gate names the upload path. Earned from the ferrule v1.1.0 release: the README was rebuilt 245 → 119 lines and the repo turned out to have been on the default card since launch.

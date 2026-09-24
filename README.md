@@ -1,7 +1,7 @@
 <h1 align="center">ntkit</h1>
 
 <p align="center">
-  <strong>Twenty-three Claude Code skills that give an agent the discipline it's missing — remembers decisions, audits the whole app, and never says "done" without a verifier.</strong>
+  <strong>Twenty-one Claude Code skills that give an agent the discipline it's missing — remembers decisions, audits the whole app, and never says "done" without a verifier.</strong>
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
   <img alt="account: none" src="https://img.shields.io/badge/account-none-0891b2?style=flat-square">
 </p>
 
-![ntkit workflow map — 23 Claude Code skills across five phases, plus a daily session loop and a knowledge vault used at every phase](assets/workflow.png)
+![ntkit workflow map — 21 Claude Code skills across five phases, plus a daily session loop and the scholia knowledge vault used at every phase](assets/workflow.png)
 
 ## Install
 
@@ -35,7 +35,7 @@ Command name = the folder name (`skills/forward-pass-nt/` → `/forward-pass-nt`
 
 Your agent forgets what it decided yesterday. It reviews the diff, never the app it sits inside. It tells you a fix is "done" when nothing ran to check, and starts cold every session because nothing wrote down where the last one stopped.
 
-ntkit is twenty-three skills that add that discipline: a `plan/` folder each repo keeps that every command reads and writes, a cold whole-app audit that hands back a real fix-workplan, and a report format that won't let "done" through without a verifier behind it.
+ntkit is twenty-one skills that add that discipline: a `plan/` folder each repo keeps that every command reads and writes, a cold whole-app audit that hands back a real fix-workplan, and a report format that won't let "done" through without a verifier behind it.
 
 **Use a single `CLAUDE.md`** if your project is small enough that one file of standing instructions is the whole picture. **Use [pi-workflows](https://github.com/osolmaz/pi-workflows)** for the six-point authoring standard alone, without ntkit's `plan/` state machine and report format on top — [`AUTHORING.md`](AUTHORING.md) borrows its shape. **Use your agent's own memory** if you only need continuity inside one long session, not across days or repos.
 
@@ -47,9 +47,9 @@ Most commands share one idea: a gitignored `plan/` folder per repo, three files 
 
 ## Give it a memory
 
-Two commands work a personal knowledge vault — plain markdown, git-backed, separate from any one repo's `plan/`. `/capture-nt <url|file>` checks what you already have before it fetches, then writes a schema'd source note and links it into the right topic map. `/ask-nt <question>` answers only from what's in the vault, with citations — a search over things you already decided were worth keeping, not the open web.
+The knowledge vault is a separate tool: **[scholia](https://github.com/NakliTechie/scholia)** — plain markdown, git-backed, separate from any one repo's `plan/`. Its `/capture-nt <url|file>` checks what you already have before it fetches, then writes a source note and links it into the right topic map; `/ask-nt <question>` answers only from the vault, with citations.
 
-The convention: check the vault before the web. `/lab-nt`'s research phase and `/scaffold-nt` sizing up a new project both run `/ask-nt` first, then `/capture-nt` the result — so the second time a question comes up, it's already answered. No vault at `~/Code/knowledge`? Both degrade to "search the web," and nothing else in the kit depends on either existing.
+The convention: check the vault before the web. `/lab-nt`'s research phase and `/scaffold-nt` sizing up a new project both run `/ask-nt` first when scholia is installed, then `/capture-nt` the result — so the second time a question comes up, it's already answered. No scholia, or no vault at `~/Code/knowledge`? Both degrade to "search the web," and nothing else in the kit depends on either existing.
 
 ## Scheduling
 
@@ -86,8 +86,6 @@ Two commands run without you. `/maintain-nt` weekly — read-only rot detection,
 /windup-nt              # end of session — day summary, pending, commit / push, tomorrow's handoff
 /replan-nt              # occasionally — fold accumulated files back into the three canonical ones
 /notify-nt              # after a run — desktop notification + optional phone push
-/capture-nt <url|file>  # save something into the knowledge vault; commits + pushes
-/ask-nt <question>      # recall something from the vault, read-only, with citations
 ```
 
 ## Verify it yourself
@@ -100,7 +98,7 @@ for f in skills/*/SKILL.md; do
 done
 ```
 
-Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The command above prints nothing when that contract holds across all 23; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against.
+Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The command above prints nothing when that contract holds across all 21; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against.
 
 ## License
 

@@ -6,8 +6,8 @@ the image itself (repo or app), or for the deployed app's own meta tags, see
 
 GitHub exposes no API to *set* the social preview image, only to read whether one is set
 (`usesCustomOpenGraphImage`). The steps below are exact — they came from actually doing this
-on `NakliTechie/ntkit`, not from GitHub's docs, and the one gotcha in them (below) cost a
-retry the first time.
+on `NakliTechie/ntkit` and `NakliTechie/scholia`, not from GitHub's docs; the gotcha in step 2
+cost a broken card the second time.
 
 ### 0. Check current state and regenerate the asset
 
@@ -34,38 +34,30 @@ find → "Social preview" heading
 scroll_to that heading's ref
 ```
 
-### 2. Upload — the gotcha
+### 2. Upload — open the menu first, then attach (never click the picker)
 
-The visible control is an **"Edit"** button on the current preview card. Clicking it opens
-a small dropdown (`Upload an image…` / `Remove image`) — safe to click, it's an ordinary
-menu, not a file dialog.
-
-**Do not click "Upload an image…".** That item *is* a native file-input trigger — clicking
-it opens an OS file picker the browser tool cannot see or interact with, and the run stalls
-there. Instead:
+1. Click the **"Edit"** button on the current preview card. It opens a small dropdown (`Upload an image…` / `Remove image`) — an ordinary menu, safe to click.
+2. With the menu open, find the **hidden file input** itself, not its label:
 
 ```
-find → "file input for social preview image upload" (resolves to the "Upload an image…" control)
+find → "input element with type=file (hidden) for the social preview image"
 file_upload → { ref: <that ref>, tabId, paths: ["<absolute path to the rendered social.png>"] }
 ```
 
-`file_upload` attaches the file directly to the input without opening a picker at all.
+**Do not click "Upload an image…".** It triggers a native OS file picker the browser tool cannot see, and the run stalls. The menu item itself is a `<label>`; `file_upload` to it fails with "Element is not a file input" — target the `type=file` input the query above resolves to.
 
-### 3. Confirm it actually saved
+**Gotcha (2026-09-24, `NakliTechie/scholia`):** a `file_upload` to the input *before* opening the Edit menu registered a new `openGraphImageUrl` that served `AccessDenied` — `usesCustomOpenGraphImage` read `true` while every share would have shown a broken card. Opening the menu first, then uploading, produced a working image on scholia and again on ntkit (one run each; the cause is not confirmed, so keep the order and always run the step-3 check). The control auto-saves; there is no Save button.
 
-This control **auto-saves on upload** — there is no separate "Save" button for it (unlike
-most of the rest of the Settings page). Confirm two ways, not one:
+### 3. Confirm it actually saved — hash what GitHub serves
 
-1. Screenshot immediately after the upload — the preview card should already show the new
-   image's content.
-2. **Reload the settings page from scratch** (`navigate` to the same URL again) and
-   screenshot the Social preview card again. A change that only shows before a reload might
-   be an optimistic UI update that didn't actually persist — the reload is the real check.
+The settings page's preview box can stay **blank even after a successful upload** (seen in dark mode on scholia, 2026-09-24), so a screenshot is not the check. Compare bytes:
+
+```bash
+u=$(gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){openGraphImageUrl}}' --jq .data.repository.openGraphImageUrl)
+curl -s -m 30 -o /tmp/og.png -w "%{http_code} %{content_type}\n" "$u"   # want: 200 image/png
+shasum /tmp/og.png <local social.png>                                     # want: identical hashes
+```
+
+`AccessDenied` XML, a non-200, or a different hash → the upload did not take; repeat step 2 with the menu open. Also check the live page points at it: `curl -s https://github.com/<owner>/<repo> | grep 'og:image'` shows the same URL.
 
 Close the tab when done (`tabs_close_mcp`) — it was opened for this task alone.
-
-### 4. Re-run the API check
-
-`usesCustomOpenGraphImage` should read `true` (it was likely already `true` from a prior
-upload — see the staleness note in step 0, which is why the visual reload-check in step 3
-is the check that actually matters here, not this API call by itself).

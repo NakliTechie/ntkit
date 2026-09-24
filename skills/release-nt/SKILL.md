@@ -55,6 +55,8 @@ A push is not a deploy, and a green local check is not a green live one. Once th
 - **Re-run the checks that can only fail in production.** Anything depending on host routing behaves differently locally: a static dev server 404s a missing file, while most hosts serve `index.html` for it, so `/robots.txt`, `/llms.txt`, redirects, headers and 404 handling are **untestable until deployed**. Confirm each returns the right status *and* the right `content-type`.
 - Confirm response **headers** the repo claims (cache-control, security headers) are actually applied — a `_headers` / `netlify.toml` / `vercel.json` rule that never took effect is silent.
 
+**Social card.** If this release changed the repo's social card image (`marketing/social.png`, `assets/social.png`, or the repo's equivalent) since the last upload, re-upload it yourself through Claude-in-Chrome and verify it by hash — `/package-nt`'s [`references/social-preview.md`](../package-nt/references/social-preview.md) has the procedure. A stale card is what every shared link shows.
+
 ## Phase 5 — Handoff
 
 Print the released version, the release URL, and the **verified** deploy status — what you fetched from the live host, not just that the push succeeded. Suggest `/package-nt` for the announcement collateral. (CHANGELOG is committed; any working drafts stay in local `plan/`.)

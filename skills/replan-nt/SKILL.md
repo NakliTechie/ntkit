@@ -124,7 +124,7 @@ Create `plan/_archive/` if it doesn't exist. Move (don't copy, don't delete) all
 
 ## Step 6: Verify gitignore
 
-Confirm `plan/` is in the repo's `.gitignore`. `_archive/` is inside `plan/` so it inherits that.
+Confirm `git check-ignore -q plan` passes (append `/plan` to `.gitignore` if not — a `plan/` line misses a symlinked `plan`, [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)). `_archive/` is inside `plan/` so it inherits that.
 
 ## Step 7: Print summary
 

@@ -19,7 +19,7 @@ If `$ARGUMENTS` is empty, ask the user: *"What did you decide?"* and use their n
 
 Current directory should be inside a git repo. If not, ask the user which project — don't guess.
 
-If `plan/` folder doesn't exist, create it. Verify `plan/` (or `/plan/`) is in `.gitignore`; add it if missing.
+If `plan/` doesn't exist, create it per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives) (in `$NT_PLAN_STORE` + symlink when set, else `mkdir plan`); it may already be a symlink — use it as is. Verify it is ignored with `git check-ignore -q plan`; if not, append `/plan` (no trailing slash) to `.gitignore`.
 
 If `plan/history.md` doesn't exist, create it with the canonical structure:
 

@@ -13,13 +13,17 @@ Show a cross-project status snapshot. Use at the start of a day or when deciding
 
 ## Step 1: Enumerate projects
 
-Find every `plan/` folder up to 3 levels deep under `$ROOT`:
+Find every `plan/` up to 3 levels deep under `$ROOT`. A `plan` may be a folder **or a symlink** to one ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)), so match both, drop broken links, skip the plan store itself (`$NT_PLAN_STORE`, if set) and worktrees, and keep one row per real folder:
 
 ```bash
-find "$ROOT" -maxdepth 3 -type d -name plan 2>/dev/null
+STORE="${NT_PLAN_STORE:-/nonexistent}"
+find "$ROOT" -maxdepth 3 -name plan \( -type d -o -type l \) \
+  -not -path '*/.worktrees/*' -not -path '*/.claude/*' -not -path "$STORE/*" 2>/dev/null |
+while read -r p; do [ -d "$p" ] && printf '%s\t%s\n' "$(cd "$p" && pwd -P)" "$p"; done |
+sort -u -k1,1 | cut -f2
 ```
 
-Parent of each result = project root.
+Parent of each result = project root. `-type d` alone misses every symlinked `plan`.
 
 Also find git repos under the same tree for the "no plan/" bucket:
 

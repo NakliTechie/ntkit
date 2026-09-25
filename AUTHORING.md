@@ -126,6 +126,7 @@ its slot against the minimal-tooling rule.
 - [ ] Legal states declared; entry-fail refuses; no nested actors
 - [ ] Subagent briefs are state-gated and reasoning-free; scaffolding hints stay out of the record
 - [ ] Long runs fold at seams to recoverable files; record rewrites archive, never delete
+- [ ] `plan/` handled as a folder **or a symlink** ([MEMORY.md §0](MEMORY.md#0-where-plan-lives)): find with `\( -type d -o -type l \)`, ignore-check with `git check-ignore -q plan`, create with the §0 snippet, never replace the link
 - [ ] Evidence standards at every length; full ATTEST only for designated formal outputs over approximately 200 unformatted characters; delivers per SUBSTANCE, transitions per STATES
 - [ ] Description is 15 words or fewer, trigger first; a body over ~1,000 words is a router over `references/`
 - [ ] Earns its place against minimal-tooling — extend before you add

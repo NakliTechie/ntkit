@@ -1,6 +1,6 @@
 ## 4. Verify plan/ is gitignored
 
-Check that `plan/` (or `/plan/`) appears in the repo's `.gitignore`. If not, add it. The plan/ folder is local-only working notes — its contents must not be pushed to remote.
+Check with `git check-ignore -q plan` (exit 0) and `git ls-files plan` (empty) — not by searching `.gitignore` for the line: a `plan/` line matches folders only, and `plan` may be a symlink ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)). If not ignored, append `/plan`. The plan/ folder is local-only working notes — its contents must not be pushed to remote.
 
 ## 5. Commit, merge to main, push — and sweep stray worktrees
 
@@ -22,7 +22,7 @@ Check that `plan/` (or `/plan/`) appears in the repo's `.gitignore`. If not, add
 > that directory and nowhere else — no commit, no remote, no reflog. `git worktree remove` deletes it
 > with the rest of the tree, and a run report, its recordings and its action logs go with it. Before
 > removing a worktree, copy any `plan/` files it holds that the main checkout does not into the main
-> checkout's `plan/`, keeping their names. Only then remove. This has already cost two walkthrough
+> checkout's `plan/`, keeping their names. Only then remove. (A worktree `plan` that is a symlink to the main checkout's holds nothing of its own — removing the worktree removes only the link.) This has already cost two walkthrough
 > reports and 51 screen recordings in one session.
 
 - Run `git worktree list`. For each linked worktree beyond the main checkout (autopilot/agent leftovers):

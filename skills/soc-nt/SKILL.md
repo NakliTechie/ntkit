@@ -12,6 +12,6 @@ Log a passing thought while the build keeps moving. `/decide-nt` records a load-
 The contract: **capture, don't process.** No analysis, no follow-up questions, no acting on it now.
 
 1. **Get the text** — `$ARGUMENTS`, or ask *"What's on your mind?"* and use the next message. Near-verbatim: strip dictation filler, fix nothing else, never paraphrase — the entry reads in the user's voice. Multiple distinct thoughts → multiple entries.
-2. **Locate** — must be inside a git repo (else ask which project — don't guess). Create `plan/` if missing, verify it's gitignored, create `plan/soc.md` with a `# Stream` header if missing.
+2. **Locate** — must be inside a git repo (else ask which project — don't guess). Create `plan/` if missing per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives) (it may be a symlink — use it as is), verify `git check-ignore -q plan` (else append `/plan` to `.gitignore`), create `plan/soc.md` with a `# Stream` header if missing.
 3. **Append at the top** (newest first), timestamped to the minute: `- YYYY-MM-DD HH:MM — <entry>`
 4. **Confirm in one line and get out of the way** — `Logged to plan/soc.md: <the entry>`. If it's obviously a decision you may append `(sounds like a /decide-nt — say the word)` — but never promote on your own, never ask a follow-up. The build has the floor. Don't commit or push — plan/ is gitignored.

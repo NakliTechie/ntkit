@@ -66,7 +66,7 @@ If the target folder exists and isn't empty, suffix `-2` (then `-3`), announce t
 ## Phase 4 — Initial git + .gitignore
 
 1. `git init -b main` in the new folder.
-2. Write `.gitignore`: OS junk + `plan/` (per the plan-folder convention these commands share).
+2. Write `.gitignore`: OS junk + `/plan` — no trailing slash, so it also covers `plan` when it is a symlink ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)).
 3. Stage everything except `plan/`. Use explicit paths — never `git add -A`.
 4. Initial commit: `Initial commit — scaffolded from handoff`.
 
@@ -83,7 +83,15 @@ If `gh` isn't authed or lacks permission, continue local-only and note the owed 
 
 ## Phase 6 — Seed plan/
 
-1. `mkdir plan` (already gitignored).
+1. Create `plan/` ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)). With `NT_PLAN_STORE` set (default: unset) it is made in the store and symlinked in; otherwise a plain folder. Already gitignored by `/plan`.
+   ```bash
+   if [ ! -e plan ] && [ -n "${NT_PLAN_STORE:-}" ]; then
+     root="$(cd "$(dirname "$NT_PLAN_STORE")" && pwd -P)"; here="$(pwd -P)"
+     rel="${here#"$root"/}"; [ "$rel" = "$here" ] && rel="$(basename "$here")"
+     mkdir -p "$NT_PLAN_STORE/$rel/plan" && ln -s "$NT_PLAN_STORE/$rel/plan" plan
+   fi
+   mkdir -p plan
+   ```
 2. Read the most README-like file in the new repo carefully (the handoff). Identify: scope, milestones/phases, explicit todos, open questions, decisions stated up front, deferrals.
 3. Write `plan/history.md` with the canonical three sections:
    - **Decisions** — explicit choices stated in the handoff, each dated today.

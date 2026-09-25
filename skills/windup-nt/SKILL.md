@@ -23,7 +23,7 @@ On entering a step, read its Detail file first, then act; the Outcome column is 
 | 1 Day summary | `plan/<date>-summary.md` from the conversation, today's `git log`, `git status`/`diff`, and today's `soc.md` entries — Shipped (with SHAs) · Verified (and what is still owed) · Decisions · Tried then rolled back · Open questions · Deferred / parked. Bullets, not prose. | `references/summary-and-pending.md` |
 | 2 Pending | `plan/pending.md` merged, not rewritten: Now / Parked / Open questions preserved, finished items removed, a "not now" said today lands in Parked, a flat file stays flat. | `references/summary-and-pending.md` |
 | 3 Workplan | `plan/workplan.md` re-chunked from pending: logical, convenient, related; keystone marked; tri-state checkboxes; loose sizes; finding IDs and `[test]` markers carried; leftovers under `## Unbatched`. Top chunk is what the next session starts on. | `references/workplan.md` |
-| 4 Gitignore | `plan/` present in `.gitignore`; add it if not. | `references/ship.md` |
+| 4 Gitignore | `git check-ignore -q plan` passes; append `/plan` if not. | `references/ship.md` |
 | 5 Ship | Non-plan changes committed by path and pushed to the branch's upstream (never force; pushing to main is authorized by invoking windup). On a feature branch and closing clean → merge to the default branch, push, delete the branch. Closing from `building` → push the branch, do not merge, name it in the handoff. Sweep worktrees: clean and merged → remove; dirty or unmerged → keep and list. `git worktree prune`. | `references/ship.md` |
 | 6 Handoff | The message below, printed last. | below |
 

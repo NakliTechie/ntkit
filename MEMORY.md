@@ -10,6 +10,38 @@ machine — can say why an item is on the list or where it went. `/replan-nt` ca
 that at fold time by reading everything and judging. This file makes most of it
 checkable instead.
 
+## 0. Where plan/ lives
+
+`plan/` is a gitignored folder at the repo root **or a symlink to one**. Every command
+accepts both; neither form is the "real" one.
+
+**Ignore it with `/plan`, no trailing slash.** A `plan/` line matches directories only, so
+git lists a symlinked `plan` as untracked. Check with `git check-ignore -q plan` (exit 0)
+and `git ls-files plan` (empty) — never by searching `.gitignore` for the line. Not
+ignored → append `/plan` to `.gitignore`. An existing `plan/` line stays; it is still
+right for a real folder.
+
+**Create it only when it is missing.** If `NT_PLAN_STORE` is set (default: unset), the
+folder is made in the store and linked in, so every plan lives in one place a single job
+can back up. The path inside the store mirrors the repo's path under the store's parent
+directory (`~/Code/plans` + `~/Code/research/pith` → `~/Code/plans/research/pith/plan`):
+
+```bash
+if [ -L plan ] && [ ! -e plan ]; then
+  echo "plan is a broken symlink -> $(readlink plan)"; exit 1      # stop; never replace it
+elif [ ! -e plan ] && [ -n "${NT_PLAN_STORE:-}" ]; then
+  root="$(cd "$(dirname "$NT_PLAN_STORE")" && pwd -P)"; here="$(pwd -P)"
+  rel="${here#"$root"/}"; [ "$rel" = "$here" ] && rel="$(basename "$here")"
+  mkdir -p "$NT_PLAN_STORE/$rel/plan" && ln -s "$NT_PLAN_STORE/$rel/plan" plan
+fi
+mkdir -p plan
+```
+
+**Never replace a symlinked `plan` with a real folder**, and never `rm -rf`, `mv` or
+`git worktree remove` your way through it expecting the files to go: removing the link
+leaves the plan in the store. A worktree links the main checkout's `plan`
+(`ln -s "$MAIN/plan" plan`); a link to a link resolves.
+
 ## 1. Two kinds of file
 
 Every file under `plan/` is exactly one of two kinds. The distinction is the whole

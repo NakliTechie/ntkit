@@ -41,7 +41,7 @@ ntkit is twenty-one skills that add that discipline: a `plan/` folder each repo 
 
 ## The convention
 
-Most commands share one idea: a gitignored `plan/` folder per repo, three files — `history.md` (decisions · log · dead ends), `pending.md` (now · parked · open questions), `workplan.md` (chunked, checkboxed work). Commands read and write those files, so every session picks up exactly where the last one left off.
+Most commands share one idea: a gitignored `plan/` folder per repo (or a symlink to one — set `NT_PLAN_STORE` to keep every plan in one backed-up folder, [MEMORY.md §0](MEMORY.md#0-where-plan-lives)), three files — `history.md` (decisions · log · dead ends), `pending.md` (now · parked · open questions), `workplan.md` (chunked, checkboxed work). Commands read and write those files, so every session picks up exactly where the last one left off.
 
 `-nt` is just the namespace (NakliTechie), so these don't collide with your own commands — rename freely. `/standup-nt` reports on every repo with a `plan/`; run it first thing, most days.
 

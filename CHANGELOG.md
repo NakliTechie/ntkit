@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v2.1.0 — 2026-09-25
 
 - **Fix:** `/standup-nt` missed every `plan` that is a symlink: `find -type d` does not match a link, so a repo whose plan lives elsewhere reported as "no plan/". It now matches folders and links, drops broken links, skips worktrees and the plan store, and keeps one row per real folder.
 - **Fix:** the ignore check was a text search for `plan/` in `.gitignore`, and a `plan/` line matches folders only — a symlinked `plan` showed as untracked (`?? plan`) while every check passed. `/scaffold-nt` now writes `/plan`; `/decide-nt`, `/soc-nt`, `/windup-nt`, `/replan-nt` and `/package-nt` check with `git check-ignore -q plan` and append `/plan` when it fails. Existing `plan/` lines keep working for real folders.

@@ -13,72 +13,27 @@ If the current directory isn't a git repo, ask which project — don't guess.
 
 `$ARGUMENTS` (optional): `gate` (readiness only), `assets` (screenshots, cards and launch video only), or `drafts` (collateral only). Empty = all three phases.
 
-## Phase 1 — Ship-readiness gate (deep) — this gates the rest
+Example: `/package-nt gate`
 
-Don't generate launch assets for an unshippable repo. Run the full gate:
+## Guards and stop-lines
 
-**Secrets — whole repo + history (the highest-stakes check).** A leaked key at launch is *the* disaster. Scan the **working tree and git history** for API keys, tokens, private keys, `.env` files, hardcoded credentials (known patterns + high-entropy strings), and confirm `.gitignore` covers secret files. `/security-review` is diff-scoped, so a launch *also* needs this whole-repo + history pass — a secret committed months ago is exactly what slips through a diff scan.
-- A hit is a **hard blocker.** **Flag it and tell the user to rotate the key** (and how) — do **not** rewrite git history yourself. Rewriting is dangerous and a pushed key must be rotated regardless, so rotation is the real fix.
+These hold in every phase. The phase files repeat them where they apply; this list is the authority.
 
-**Private working docs must not go public — `plan/` stays gitignored.** Planning docs (dead ends, half-baked thinking, internal strategy, and the launch drafts this command writes) leaking into a public repo is an embarrassing exposure. Verify the `plan/` folder — and any internal scratch / working-notes dirs — is **gitignored and not already tracked**: `git check-ignore -q plan` exits 0 *and* `git ls-files plan` returns nothing (no trailing slash: `plan` may be a symlink, and a `plan/` ignore line misses it — [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)).
-- If `plan/` (or its contents) is already tracked → **hard blocker.** Flag it: `git rm -r --cached plan`, add `/plan` to `.gitignore`, commit. If it was already pushed to a public remote, the history needs scrubbing too — and treat anything sensitive that was in it as exposed.
+- **Drafts, never posts.** Nothing is posted, published or sent. `/package-nt` hands over a ready-to-fire kit; the user pulls the trigger.
+- **One outward action: the repo's social card.** Uploading the card image through **Claude-in-Chrome** is the one outward action `/package-nt` takes itself — it is the project's own repo setting, not a post. Only if Claude-in-Chrome is unavailable does it become a manual step for the user. Procedure: [`references/social-preview.md`](references/social-preview.md).
+- **A red gate stops the run.** Any blocker → say so loudly, skip Phases 2 and 3, and go to Phase 4 for the no-go headline. Going on is an illegal transition per ntkit's `STATES.md` (kit doctrine — not a file in this project). The only path past a blocker is a deliberate, logged override: a `/decide-nt "packaging despite <X> because <why>"` entry in this session, after which proceed with a warning.
+- **Never overridable:** a secret in the working tree or git history, and a tracked `plan/`. No `/decide-nt` entry moves past either.
+- **Rotate, never rewrite.** A secret hit is flagged with an instruction to rotate the key, and how. Do not rewrite git history yourself; a pushed key must be rotated regardless.
+- **Flag, don't fix.** Don't auto-fix code — flag + suggest. You may offer to generate a *missing* README/LICENSE (new file only). Launch-blocking *decisions* point at `/decide-nt`.
+- **Drafts stay local.** Launch drafts go to `plan/launch-drafts.md`, gitignored; never to a committed path.
 
-**Deep audit (folded in, per the launch standard).**
-- Run **`/security-review`** for the vulnerability lens.
-- Run **`/forward-pass-nt`** for the whole-app audit (bugs · stray code · leftover debug / test endpoints / backdoors — the embarrassing-at-launch class).
-- Treat **Critical / High** findings as launch blockers; Medium / Low as nice-to-haves.
+## The run
 
-**Launch essentials.**
-- **README** — in the house shape (`~/.claude/reference/naklitechie-doctrines/README-DOCTRINE.md`): header sentence + constraints line + ≤4 claim badges + one hero, install before why, a "use something else if" paragraph, commands block, verify-it-yourself, license + pointers line; ≤ 120 lines. Over the ceiling or missing a part → blocker, with the section named.
-- **Social card on both surfaces the project has: the repo, and the deployed app.** Two different URLs get shared, and a card fixed on one leaves the other showing nothing.
-  - **Repo:** `gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){usesCustomOpenGraphImage}}'` must be `true` — `false` means every shared repo link shows GitHub's default card → **blocker**. `true` alone doesn't mean the image is *current* (no hash/date is exposed); if `marketing/social.png` (or the repo's equivalent) changed since the last upload, re-upload it. **Default: set it yourself, don't hand it to the user.** There is no API to set it, so upload through **Claude-in-Chrome** (the user's logged-in GitHub; not the built-in pane) per [`references/social-preview.md`](references/social-preview.md): open the card's Edit menu, `file_upload` to the hidden file input (never click it), then prove it persisted by hashing the image GitHub serves against the local file. This is the one outward action `/package-nt` takes itself — it is the project's own repo setting, not a post. Only if Claude-in-Chrome is unavailable does it become a manual step for the user. Also check the repo's **"About" description** (`gh repo edit --description`) is current — it feeds `og:title`/`og:description` and is a separate field the README rebuild doesn't touch.
-  - **Deployed app (any project with a live URL):** `curl -s <deployed-url> | grep -i 'og:image\|twitter:image\|og:title'` — an app URL with zero OG tags is the default and is what gets shared far more than the repo link. No `og:image`/`twitter:image` resolving to an absolute, live image → **blocker**. Check against the *deployed* URL, not localhost — a source change that never made it through the build or is served from a stale edge cache shows nothing when actually shared.
-  - **Building either image:** [`references/render-social-card.sh`](references/render-social-card.sh) + [`references/social-card-build.md`](references/social-card-build.md) — one parameterized template, run twice (repo + app), so nobody hand-codes a card's HTML from scratch per project. The renderer refuses any text colour under 4.5:1 against the card background and prints the nearest passing shade; fix the colour it names, since there is no override.
-- **LICENSE** — present and appropriate to intent.
-- **Agent face present and parity-linted.** `DRIVER.md` itself says to run the agent-first pass again before public release — this is that checkpoint. Run (or re-read a recent) `/forward-pass-nt` agent-readiness lens: a declared tool manifest must exist for a real app surface (MCP tools, `window.<app>.tools`, a documented API/CLI contract), it must satisfy `manifest ⊇ command bus` with every omission either fixed or explicitly marked person-only, and any mutating/irreversible entry must stage before it lands. No manifest at all for a surface meant to be agent-operated → **blocker**. A partial-parity gap with no live consequence → nice-to-have, named in the scorecard so it doesn't vanish after launch.
-- **A `/guide-nt`** (or equivalent docs), a live/demo link, screenshots, a clear value prop.
-- **First-run onboarding** — a tool with a surface ships a first-run guided tour (the spotlight walkthrough per the Build Doctrine's *Surface conventions*): shows once, skippable, replayable from `?`, driven by the vendored `tour.js`. A surface with no first-contact affordance is a nice-to-have miss, not a hard blocker; note it if absent.
-- **An `llms.txt`** — the docs' agent face (the human-face/agent-face rule applied to documentation): a compact, LLM-ready summary of what the tool is, its API surface (`window.<app>` hooks, message channel, file formats), and how to drive it — so a coding agent pointed at the repo gets the surface without scraping. Offer to generate it from the README + code if missing. A large project may add `llms-full.txt` with the complete detail.
-- **Repo hygiene** — GitHub description + topics set; no debug/junk files; and a **clean install from a fresh clone** (the newcomer path — same cold-start ethos as `/ux-review-nt`).
+On entering a phase, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead.
 
-**Machine-face audit (web projects) — run Lighthouse against the DEPLOYED site.**
-Two categories that nothing else in the kit covers, and both are launch-facing:
-- **SEO** — title, meta description, descriptive link text, viewport, and a **valid `robots.txt`**.
-- **Agentic Browsing** — how well an AI agent can read and drive the page. It is the machine-scored version of the `llms.txt` concern above, so audit them together. It's driven mostly by a well-formed accessibility tree plus layout stability; a single `aria-label` on a role-less `div` can sink it.
-
-**Verify against the deployed URL, not localhost — this is the whole point of the check.** A local static server 404s a missing file; most hosts (Cloudflare Pages, Netlify, Vercel SPA mode) serve `index.html` instead. So a missing `robots.txt` or `llms.txt` returns **200 with an HTML body**, Lighthouse parses it as a malformed text file, and you get hundreds of syntax errors — *invisible* locally, where the audit is skipped rather than failed. Fetch `/robots.txt` and `/llms.txt` from the live host and confirm each returns `text/plain`, not `text/html`.
-- **Third-party requests** — count them on the live page (Resource Timing, or the network panel). If the project's pitch is "runs entirely in your browser / no tracking", every third-party host is a claim you can't make. A vendored font or script beats a CDN one here.
-
-**Output — a scorecard:** `Ready ✓ · Blockers (must-fix before launch) · Nice-to-haves`. If there are blockers, say so loudly and **stop** — an illegal transition per ntkit's `STATES.md` (kit doctrine — not a file in this project). The only path past a blocker is a deliberate, logged override: a `/decide-nt "packaging despite <X> because <why>"` entry in this session, after which proceed with a warning. (Secrets and tracked-`plan/` blockers are never overridable.) Don't auto-fix code — flag + suggest; you may offer to generate a *missing* README/LICENSE (new file only). Launch-blocking *decisions* point at `/decide-nt`.
-
-## Phase 2 — Marketing assets → committed `marketing/`
-
-Social-ready visuals, written into a committed `marketing/` folder (shippable, versioned):
-- **Reuse the `/guide-nt` generator** if the repo has one (its screenshots); otherwise capture with the same Playwright pattern — prod build, hydration waits, and **WebGPU flows via the Chrome MCP** (headless has no WebGPU).
-- Produce **social-framed** assets: a **hero** (the money screen), an optional **montage / GIF**, padded and sized for **X (~1600×900)**, **LinkedIn (1200×627)**, a **square (1080×1080)**, and **two social cards from the same template** — the repo's (`marketing/social.png`, or the repo's existing asset convention) and the deployed app's own (its static-asset root, e.g. `public/social.png`), both 1280×640, 2:1. Default to the text-led template ([`references/render-social-card.sh`](references/render-social-card.sh)) — name + one sentence + a facts line — over a stretched/cropped screenshot; use a real screenshot only when one is already genuinely well-framed.
-- **Launch video** — 15–25 s of the product in use, made by `/brag-slim` ([latent-spaces/brag](https://github.com/latent-spaces/brag), MIT) from direction this command assembles: tone from the house shape, the `/guide-nt` generator's `HERO_FLOW` screens as the storyboard, the demo seed as data. It lands as `marketing/launch.mp4` + `marketing/launch.jpg`. Preconditions, the direction, and the output handling: [`references/launch-video.md`](references/launch-video.md). No `brag-slim` skill, an `ffmpeg` that does not start, or no surface to show → skip the video and list it under nice-to-haves with the reason; the video never blocks the run.
-- **Frame 0 is the thumbnail.** X, Slack and Discord build a video's idle thumbnail from frame 0 and ignore cover metadata. Every video or GIF in `marketing/` gets its strongest *settled* frame (every line fully in, nothing mid-transition) baked in as frame 0 with [`references/bake-poster.sh`](references/bake-poster.sh) `<video.mp4> <seconds>`. The script fails unless size, frame count and duration are unchanged and frame 0 matches the poster. Make a GIF from the baked MP4, so frame 0 carries over.
-- **Stranger test.** Once the hero, the cards and the video exist, brief a fresh-context subagent (Task) with images only: `marketing/hero-x.png`, the repo card, and one still per video scene (`ffmpeg -ss <t> -i marketing/launch.mp4 -frames:v 1 <scene>.png`). No README, no repo, no pitch. It answers three lines: what this does · who it is for · how to get it. Compare the answers with the README's header sentence and install line. A wrong or "can't tell" on *what* or *who* → fix the tagline, the facts line, the hero framing or the video direction, then test again. Grade *how* on the video only, since a card travels with its link.
-- Name by channel (`marketing/hero-x.png`, `marketing/hero-linkedin.png`, …) and list what landed.
-- **Make sure `marketing/` is actually committable** — if the repo uses a `*`-plus-allowlist `.gitignore` (the naklios single-file pattern), allowlist `!marketing/` `!marketing/**` or the assets won't ship.
-
-## Phase 3 — Distribution drafts → local `plan/` (gitignored)
-
-Tailored, honest collateral — working material, so it stays local. Write `plan/launch-drafts.md` (gitignored — confirmed in Phase 1; never write launch drafts to a committed path):
-- **The caption, first.** Open the file with one canonical caption: 1–3 sentences, postable as-is, in the product's own words. When the launch video ran, start from `plan/launch-caption.txt`. No "excited to share", no generic SaaS phrasing ("streamline your workflow"). Every channel draft below restates this caption's claim in that channel's voice and adds no claim the caption and README do not make.
-- **X / Twitter** — 2–3 hook variants (≤280 chars) + an optional thread, each pointing at the hero image.
-- **LinkedIn** — longer professional framing: problem → what you built → why it's different → link.
-- **Show HN** — `Show HN: <name> — <one-liner>` + a body in HN's voice: what it is, why you built it, how it works, what's honestly limited, an invite to feedback. **No marketing voice** — HN punishes it.
-- **Reddit** — suggest **specific subreddits derived from this project's actual domain** (not generic), each with a tailored draft **and a one-line note on that sub's self-promotion rules** (most restrict direct promo or want a participation ratio). Be honest about etiquette — no astroturf advice.
-- **Optional** — a Product Hunt tagline + first comment, a dev.to / blog outline.
-- A **where-to-post checklist** with sequencing (Show HN timing; don't simultaneously cross-post; lead with the channel that fits the audience).
-
-Tailor every draft to *this* project — pull the value prop, the audience, and the honest "what's limited" from the README and the gate findings. Generic collateral is worse than none.
-
-## Phase 4 — Summary + go / no-go
-
-Print: the **scorecard** (ready / blockers / nice-to-haves), the **assets** generated (paths, or why the video was skipped), the **stranger-test** answers, and where the **drafts** live (`plan/launch-drafts.md`). End with a clear **go / no-go**:
-- Blockers found → headline "**not launch-ready yet** — fix N blockers first," list them, point decisions at `/decide-nt`.
-- Clean → headline "**launch-ready**," and hand over the kit: commit the `marketing/` assets (via `/windup-nt`), then post from `plan/launch-drafts.md` in the checklist's order.
-
-Never post anything — `/package-nt` hands you a ready-to-fire kit; you pull the trigger.
+| Phase | Outcome | Detail |
+|---|---|---|
+| 1 Gate | A scorecard — `Ready ✓ · Blockers (must-fix before launch) · Nice-to-haves` — over the whole repo and its history: secrets, `plan/` ignored and untracked, `/security-review` + `/forward-pass-nt` (Critical / High block), README in the house shape, a social card on the repo and on the deployed app, LICENSE, agent face with parity, docs + demo + value prop, first-run tour, `llms.txt`, repo hygiene with a fresh-clone install, and Lighthouse SEO + Agentic Browsing + third-party requests against the **deployed** URL. Any blocker stops the run. | `references/gate.md` |
+| 2 Assets | A committed, committable `marketing/`: heroes sized per channel, two 1280×640 social cards from one template (repo + deployed app), a 15–25 s launch video via `/brag-slim` or a named skip reason (the video never blocks), a settled frame 0 baked into every video and GIF, and a stranger test whose *what* and *who* match the README. | `references/assets.md` |
+| 3 Drafts | `plan/launch-drafts.md`, opening with one canonical caption, then X, LinkedIn, Show HN and domain-specific Reddit drafts, optional extras, and a sequenced where-to-post checklist — every draft tailored to this project, adding no claim the caption and README do not make. | `references/drafts.md` |
+| 4 Summary | The scorecard, the asset paths (or why the video was skipped), the stranger-test answers, where the drafts live, and one headline: **launch-ready**, or **not launch-ready yet — fix N blockers first**. Nothing posted. | `references/summary.md` |

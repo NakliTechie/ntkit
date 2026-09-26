@@ -47,8 +47,14 @@ invoke it and then feed the direction piece by piece.
   a product in use, not an empty first run. Never real user data.
 - **Claims**: only what the README and the gate findings support. No invented
   numbers, users, or testimonials. brag-slim has the same rule; restate it anyway.
-- **Last beat**: the name and how to get it (the deployed URL or the install line).
-  The video has to pass the stranger test with no post text around it.
+- **Audience**: who it is for, said on screen in the first 10 seconds, in the README's
+  words. When the README never names an audience, derive one from what the product
+  does and its "use something else if" line, and say so in the summary. brag-slim
+  asks itself who the product is for but does not have to show it. A video that
+  leaves the audience out fails the stranger test on *who*.
+- **Last beat**: the name and how to get it: the deployed URL when there is one, else
+  the repo URL and the install line. The video has to pass the stranger test with no
+  post text around it.
 - **Format**: landscape, 1920×1080. Vertical or square only when asked.
 
 ### Take the output

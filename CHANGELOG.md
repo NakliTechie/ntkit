@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Changed:** `/reclaim-nt` scans with **`disktree-cli`**, the headless side of [NakliTechie/disktree](https://github.com/NakliTechie/disktree) (a fork of `tobi/disktree`), instead of `find` + `du`. Sizes are what deleting gives back (`st_blocks`, hardlinks once), hidden folders are included, and the scan stays on one volume: `~/Code`, 1.63M files, in 22 s. Each finding carries a tier. The `regenerable` tier (build output, `node_modules`, caches) skips the judgment pass; the model judges only the `judge` tier (weights, worktrees with their git state, stale experiments, archives untouched 30+ days). `--store ~/Models` drops the store's own contents and reports weight files already copied there. `apply` now runs `disktree-cli check` then `trash`: tested removal guards, Trash only, never `rm`. Without cargo or the binary, the old `find` sweep lives in `references/find-fallback.md`.
+
 ## v2.1.0 — 2026-09-25
 
 - **Fix:** `/standup-nt` missed every `plan` that is a symlink: `find -type d` does not match a link, so a repo whose plan lives elsewhere reported as "no plan/". It now matches folders and links, drops broken links, skips worktrees and the plan store, and keeps one row per real folder.

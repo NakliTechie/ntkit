@@ -1,22 +1,25 @@
 <!doctype html>
-<!-- Generic 1280x640 social-card template. Text-led per README-DOCTRINE ("type does the
+<!-- Generic 1280x640 social card template. Text-led per README-DOCTRINE ("type does the
      branding" — not a logo on a gradient, nothing that needs zooming at thumbnail size).
      Filled by render-social-card.sh via placeholder substitution; don't hand-edit copy here,
-     edit the params passed to that script instead. -->
+     edit the params passed to that script instead. Every colour is a :root token: the
+     script's contrast gate reads them from here, so a colour set anywhere else escapes it. -->
 <html><head><meta charset="utf-8">
 <style>
-  html, body { margin: 0; background: #ffffff; }
+  :root { --bg: #ffffff; --ink: #1f2328; --muted: #656d76;
+          --accent: __ACCENT__; --accent-text: __ACCENT_TEXT__; }
+  html, body { margin: 0; background: var(--bg); }
   body { width: 1280px; height: 640px; position: relative; overflow: hidden;
-         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1f2328; }
+         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--ink); }
   .copy { position: absolute; left: 88px; top: 130px; width: 1100px; }
   .brand { display: flex; align-items: center; gap: 16px; }
   .brand span { font-size: 58px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
-  .brand i { display: block; width: 15px; height: 42px; border-radius: 2px; background: __ACCENT__; }
+  .brand i { display: block; width: 15px; height: 42px; border-radius: 2px; background: var(--accent); }
   h1 { margin: 44px 0 0; font-weight: 700; font-size: 40px; line-height: 1.28; letter-spacing: -0.01em;
        max-width: 1100px; }
   .facts { position: absolute; left: 88px; bottom: 72px; font-size: 16px; font-weight: 600;
-           letter-spacing: 0.04em; color: #656d76; text-transform: uppercase; }
-  .facts b { color: __ACCENT__; font-weight: 700; }
+           letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; }
+  .facts b { color: var(--accent-text); font-weight: 700; }
 </style></head>
 <body>
   <div class="copy">

@@ -23,8 +23,17 @@ skills/package-nt/references/render-social-card.sh \
   --tagline "<one sentence, the same pitch as the README's bold line>" \
   --facts '<b>the one fact worth bolding</b> &nbsp;&#183;&nbsp; clause two &nbsp;&#183;&nbsp; clause three' \
   --accent "<#hex — the project's own brand/accent token, not a generic color>" \
+  [--accent-text "<#hex — a darker shade of the accent, only if the gate asks for one>"] \
   --out <path>
 ```
+
+**Contrast gate.** Before it renders, the script checks every text colour in the
+template's `:root` against the background and exits 1 when one is under 4.5:1
+(WCAG AA; the facts line is 16px, so the large-text 3:1 floor does not apply).
+The message names the colour, its ratio, and the nearest passing shade. The
+usual miss is a bright brand accent used as text: keep it on the bar with
+`--accent`, and pass the suggested shade as `--accent-text`. There is no
+override flag. A card that fails AA at full size is unreadable as a thumbnail.
 
 Run it **twice**, once per surface, same params except `--out`:
 - Repo: `--out marketing/social.png` (or wherever this repo already keeps its

@@ -1,17 +1,17 @@
 ---
 description: "Launch readiness gate, marketing screenshots, drafted social posts. Drafts only, never posts."
 argument-hint: "[focus: gate | assets | drafts]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task", "Skill"]
 entry: "shipped or gate-green verifying; the readiness gate must pass — a red gate stops the run"
-exit: "gate report + committed screenshots + drafted collateral (drafts, never posts)"
-writes: "marketing/, local draft files"
+exit: "gate report + committed screenshots and launch video + drafted collateral (drafts, never posts)"
+writes: "marketing/, plan/launch-drafts.md, plan/launch-caption.txt, plan/launch-video-plan.md"
 ---
 
 Take the project from "the code is done" to "ready to announce." `/package-nt` is the bookend to `/scaffold-nt`: scaffold opens a project from a handoff; package ships it to the world. It runs a deep ship-readiness gate, generates social-ready screenshots, and drafts the distribution collateral — but it **drafts, it never posts**. Posting is outward-facing; that's yours to pull the trigger on.
 
 If the current directory isn't a git repo, ask which project — don't guess.
 
-`$ARGUMENTS` (optional): `gate` (readiness only), `assets` (screenshots only), or `drafts` (collateral only). Empty = all three phases.
+`$ARGUMENTS` (optional): `gate` (readiness only), `assets` (screenshots, cards and launch video only), or `drafts` (collateral only). Empty = all three phases.
 
 ## Phase 1 — Ship-readiness gate (deep) — this gates the rest
 
@@ -33,7 +33,7 @@ Don't generate launch assets for an unshippable repo. Run the full gate:
 - **Social card on both surfaces the project has: the repo, and the deployed app.** Two different URLs get shared, and a card fixed on one leaves the other showing nothing.
   - **Repo:** `gh api graphql -f query='{repository(owner:"<owner>",name:"<repo>"){usesCustomOpenGraphImage}}'` must be `true` — `false` means every shared repo link shows GitHub's default card → **blocker**. `true` alone doesn't mean the image is *current* (no hash/date is exposed); if `marketing/social.png` (or the repo's equivalent) changed since the last upload, re-upload it. **Default: set it yourself, don't hand it to the user.** There is no API to set it, so upload through **Claude-in-Chrome** (the user's logged-in GitHub; not the built-in pane) per [`references/social-preview.md`](references/social-preview.md): open the card's Edit menu, `file_upload` to the hidden file input (never click it), then prove it persisted by hashing the image GitHub serves against the local file. This is the one outward action `/package-nt` takes itself — it is the project's own repo setting, not a post. Only if Claude-in-Chrome is unavailable does it become a manual step for the user. Also check the repo's **"About" description** (`gh repo edit --description`) is current — it feeds `og:title`/`og:description` and is a separate field the README rebuild doesn't touch.
   - **Deployed app (any project with a live URL):** `curl -s <deployed-url> | grep -i 'og:image\|twitter:image\|og:title'` — an app URL with zero OG tags is the default and is what gets shared far more than the repo link. No `og:image`/`twitter:image` resolving to an absolute, live image → **blocker**. Check against the *deployed* URL, not localhost — a source change that never made it through the build or is served from a stale edge cache shows nothing when actually shared.
-  - **Building either image:** [`references/render-social-card.sh`](references/render-social-card.sh) + [`references/social-card-build.md`](references/social-card-build.md) — one parameterized template, run twice (repo + app), so nobody hand-codes a card's HTML from scratch per project.
+  - **Building either image:** [`references/render-social-card.sh`](references/render-social-card.sh) + [`references/social-card-build.md`](references/social-card-build.md) — one parameterized template, run twice (repo + app), so nobody hand-codes a card's HTML from scratch per project. The renderer refuses any text colour under 4.5:1 against the card background and prints the nearest passing shade; fix the colour it names, since there is no override.
 - **LICENSE** — present and appropriate to intent.
 - **Agent face present and parity-linted.** `DRIVER.md` itself says to run the agent-first pass again before public release — this is that checkpoint. Run (or re-read a recent) `/forward-pass-nt` agent-readiness lens: a declared tool manifest must exist for a real app surface (MCP tools, `window.<app>.tools`, a documented API/CLI contract), it must satisfy `manifest ⊇ command bus` with every omission either fixed or explicitly marked person-only, and any mutating/irreversible entry must stage before it lands. No manifest at all for a surface meant to be agent-operated → **blocker**. A partial-parity gap with no live consequence → nice-to-have, named in the scorecard so it doesn't vanish after launch.
 - **A `/guide-nt`** (or equivalent docs), a live/demo link, screenshots, a clear value prop.
@@ -56,12 +56,16 @@ Two categories that nothing else in the kit covers, and both are launch-facing:
 Social-ready visuals, written into a committed `marketing/` folder (shippable, versioned):
 - **Reuse the `/guide-nt` generator** if the repo has one (its screenshots); otherwise capture with the same Playwright pattern — prod build, hydration waits, and **WebGPU flows via the Chrome MCP** (headless has no WebGPU).
 - Produce **social-framed** assets: a **hero** (the money screen), an optional **montage / GIF**, padded and sized for **X (~1600×900)**, **LinkedIn (1200×627)**, a **square (1080×1080)**, and **two social cards from the same template** — the repo's (`marketing/social.png`, or the repo's existing asset convention) and the deployed app's own (its static-asset root, e.g. `public/social.png`), both 1280×640, 2:1. Default to the text-led template ([`references/render-social-card.sh`](references/render-social-card.sh)) — name + one sentence + a facts line — over a stretched/cropped screenshot; use a real screenshot only when one is already genuinely well-framed.
+- **Launch video** — 15–25 s of the product in use, made by `/brag-slim` ([latent-spaces/brag](https://github.com/latent-spaces/brag), MIT) from direction this command assembles: tone from the house shape, the `/guide-nt` generator's `HERO_FLOW` screens as the storyboard, the demo seed as data. It lands as `marketing/launch.mp4` + `marketing/launch.jpg`. Preconditions, the direction, and the output handling: [`references/launch-video.md`](references/launch-video.md). No `brag-slim` skill, an `ffmpeg` that does not start, or no surface to show → skip the video and list it under nice-to-haves with the reason; the video never blocks the run.
+- **Frame 0 is the thumbnail.** X, Slack and Discord build a video's idle thumbnail from frame 0 and ignore cover metadata. Every video or GIF in `marketing/` gets its strongest *settled* frame (every line fully in, nothing mid-transition) baked in as frame 0 with [`references/bake-poster.sh`](references/bake-poster.sh) `<video.mp4> <seconds>`. The script fails unless size, frame count and duration are unchanged and frame 0 matches the poster. Make a GIF from the baked MP4, so frame 0 carries over.
+- **Stranger test.** Once the hero, the cards and the video exist, brief a fresh-context subagent (Task) with images only: `marketing/hero-x.png`, the repo card, and one still per video scene (`ffmpeg -ss <t> -i marketing/launch.mp4 -frames:v 1 <scene>.png`). No README, no repo, no pitch. It answers three lines: what this does · who it is for · how to get it. Compare the answers with the README's header sentence and install line. A wrong or "can't tell" on *what* or *who* → fix the tagline, the facts line, the hero framing or the video direction, then test again. Grade *how* on the video only, since a card travels with its link.
 - Name by channel (`marketing/hero-x.png`, `marketing/hero-linkedin.png`, …) and list what landed.
 - **Make sure `marketing/` is actually committable** — if the repo uses a `*`-plus-allowlist `.gitignore` (the naklios single-file pattern), allowlist `!marketing/` `!marketing/**` or the assets won't ship.
 
 ## Phase 3 — Distribution drafts → local `plan/` (gitignored)
 
 Tailored, honest collateral — working material, so it stays local. Write `plan/launch-drafts.md` (gitignored — confirmed in Phase 1; never write launch drafts to a committed path):
+- **The caption, first.** Open the file with one canonical caption: 1–3 sentences, postable as-is, in the product's own words. When the launch video ran, start from `plan/launch-caption.txt`. No "excited to share", no generic SaaS phrasing ("streamline your workflow"). Every channel draft below restates this caption's claim in that channel's voice and adds no claim the caption and README do not make.
 - **X / Twitter** — 2–3 hook variants (≤280 chars) + an optional thread, each pointing at the hero image.
 - **LinkedIn** — longer professional framing: problem → what you built → why it's different → link.
 - **Show HN** — `Show HN: <name> — <one-liner>` + a body in HN's voice: what it is, why you built it, how it works, what's honestly limited, an invite to feedback. **No marketing voice** — HN punishes it.
@@ -73,7 +77,7 @@ Tailor every draft to *this* project — pull the value prop, the audience, and 
 
 ## Phase 4 — Summary + go / no-go
 
-Print: the **scorecard** (ready / blockers / nice-to-haves), the **assets** generated (paths), and where the **drafts** live (`plan/launch-drafts.md`). End with a clear **go / no-go**:
+Print: the **scorecard** (ready / blockers / nice-to-haves), the **assets** generated (paths, or why the video was skipped), the **stranger-test** answers, and where the **drafts** live (`plan/launch-drafts.md`). End with a clear **go / no-go**:
 - Blockers found → headline "**not launch-ready yet** — fix N blockers first," list them, point decisions at `/decide-nt`.
 - Clean → headline "**launch-ready**," and hand over the kit: commit the `marketing/` assets (via `/windup-nt`), then post from `plan/launch-drafts.md` in the checklist's order.
 

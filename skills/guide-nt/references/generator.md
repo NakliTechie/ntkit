@@ -2,9 +2,9 @@
 
 Look for an existing generator — a `guide/` or `demo/` folder with a capture script + builder (Bahi uses `demo/{capture.py,build_index.py,regenerate.sh}`).
 
-- **It exists → you are UPDATING.** Read it. Add/adjust route-plan rows (each tagged with its `backend`) and **caption data** for new or changed features; **preserve every existing hand-written caption and section intro**. Then regenerate (Phase 5) — full, or *scoped* to the changed role/feature. **Do not patch `index.html` by hand** — it's regenerated output; edits there are lost on the next run.
+- **It exists → you are UPDATING.** Read it. Add/adjust route-plan rows (each tagged with its `backend`), `HERO_FLOW` (add it if missing), and **caption data** for new or changed features; **preserve every existing hand-written caption and section intro**. Then regenerate (Phase 5) — full, or *scoped* to the changed role/feature. **Do not patch `index.html` by hand** — it's regenerated output; edits there are lost on the next run.
 - **None exists → SCAFFOLD one**, modelled on the Bahi pattern, generalized to whatever Phase 1 detected:
-  - `guide/capture.*` — route-plans per role, each row carrying a `backend` (Phase 4).
+  - `guide/capture.*` — route-plans per role, each row carrying a `backend` (Phase 4), plus the `HERO_FLOW` list (Phase 2) as a top-level constant, so `grep HERO_FLOW` finds it.
   - `guide/build_index.py` — `CAPTIONS` (slug → title + one-line description) and `SECTIONS` (title, intro, item-slugs) as **data**, assembled into `guide/index.html` (Phase 5).
   - `guide/regenerate.sh` — ensure each needed surface is up (dev server / built binary / built .app) → capture → build (Bahi's orchestration; idempotent server start).
 

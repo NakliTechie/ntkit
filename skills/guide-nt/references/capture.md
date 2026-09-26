@@ -6,7 +6,14 @@ Boot whatever the route's backend needs, then walk the route-plan for that backe
 
 Same runtime discipline as `/walkthrough-nt`:
 - **Serve a production build, not dev mode** — faster, pre-compiled, and the bundle users actually run. Use explicit `127.0.0.1` + a known-free port.
-- **Wait for real readiness before each shot** — `load` + `document.fonts.ready` + a short settle; never `domcontentloaded` (it fires before hydration → blank screenshots).
+- **Wait for real readiness before each shot** — `load` + `document.fonts.ready` + every image loaded + no finite animation still running; never `domcontentloaded` (it fires before hydration → blank screenshots). A fixed settle is a guess: it shoots mid-transition when an animation runs long and wastes time when none runs. Wait on the condition instead, with a timeout that fails loudly:
+  ```js
+  // page.wait_for_function(SETTLED, timeout=5000) — a timeout marks the route `unsettled` in the log
+  () => [...document.images].every(i => i.complete)
+     && document.getAnimations().every(a => a.playState !== 'running'
+          || a.effect?.getComputedTiming().endTime === Infinity)
+  ```
+  Infinite animations (spinners, loops) never finish, so the check skips them. A spinner still on screen after the wait is a loading state, and the blank-capture guard below should catch it. The route's `wait_ms` stays for app-specific delays, such as a fetch with no DOM signal.
 - **Enter as each role with seeded data.** Prefer the app's own in-page hooks to inject a seeded dataset and **bypass un-automatable pickers**. Otherwise log in through the UI. Draw from the **shared demo seed** (`demo/seed/`, shared with `/demo-nt` and `/walkthrough-nt`) so the three don't drift.
 - **WebGPU can't be tested headless** — headless Chromium has no WebGPU, so in-browser model inference just errors. To capture a genuinely model-loaded state, drive a real GPU browser via the **Chrome MCP** rather than headless Playwright.
 - **Capture, per route**: retina (`device_scale_factor=2`), fixed viewport (e.g. 1400×900), to `guide/screenshots/<role>/NN-<slug>.png`. **Blank-capture guard** — assert the main content actually rendered (e.g. `#main` innerHTML length > 50; a blank page is also a tell-tale ~8 KB JPEG). Re-shoot or mark `empty`/`fail`. Log console errors/warnings per route — they flag screens that are secretly broken.

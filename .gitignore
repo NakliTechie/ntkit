@@ -6,3 +6,6 @@ plan/
 
 # Agent worktrees
 .worktrees/
+
+# Eval run logs
+evals/results/

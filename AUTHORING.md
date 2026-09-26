@@ -116,6 +116,28 @@ is the floor — one job, best-effort, never blocks. If a new capability is a
 variant of an existing command, **extend it**; a twenty-second command must earn
 its slot against the minimal-tooling rule.
 
+## 11. Test it
+
+A skill that ships a script ships a test for it in `tests/`. A guard that stops a run
+(a blocker, a refusal, a stop-line) gets an eval case in `evals/cases/`. Two layers,
+two costs:
+
+- **`tests/run.sh`** is free and deterministic. It runs the scripts skills ship, the code
+  snippets a skill tells an agent to run, and the eval checks themselves. A test exits 0
+  to pass, 1 to fail, 77 to skip when a tool is missing.
+- **`evals/run.sh`** makes one model run per case, in a scratch project built from a
+  fixture (`evals/fixtures/`) with this checkout's skills installed. It runs under its
+  own Claude config dir, because a skill in `~/.claude/skills/` loads in every run and
+  beats a project skill of the same name. Log that dir in once:
+  `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login`.
+
+A case is `evals/cases/<name>/` holding `prompt`, `setup.sh`, `check.sh`, and optional
+`budget` (USD, default 5) and `timeout` (seconds, default 1800). The rules:
+
+- `check.sh` is deterministic: files, git state, the final reply text. No model grades a model.
+- It fails on a project the skill never touched. `tests/eval-checks.test.sh` holds every case to this.
+- `setup.sh` generates secrets and other scanner bait at run time. A key-shaped string never lands in ntkit's history.
+
 ## Checklist
 
 - [ ] Frontmatter: `description` · `argument-hint` · `allowed-tools` (minimal) · `entry` · `exit` (a check) · `writes`
@@ -130,3 +152,4 @@ its slot against the minimal-tooling rule.
 - [ ] Evidence standards at every length; full ATTEST only for designated formal outputs over approximately 200 unformatted characters; delivers per SUBSTANCE, transitions per STATES
 - [ ] Description is 15 words or fewer, trigger first; a body over ~1,000 words is a router over `references/`
 - [ ] Earns its place against minimal-tooling — extend before you add
+- [ ] A shipped script has a test in `tests/`; a stop-line or refusal has an eval case in `evals/cases/`

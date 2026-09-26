@@ -96,9 +96,11 @@ for f in skills/*/SKILL.md; do
     grep -q "^$k:" "$f" || echo "missing $k: $f"
   done
 done
+tests/run.sh    # free, seconds: the scripts skills ship, and every eval check can fail
+evals/run.sh    # model runs: a fixture project, one prompt, a deterministic check
 ```
 
-Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The command above prints nothing when that contract holds across all 21; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against.
+Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The loop prints nothing when that contract holds across all 21; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against. `evals/run.sh` needs one login first, `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
 
 ## License
 

@@ -1,10 +1,22 @@
 ## The launch video (Phase 2)
 
-A 15–25 second video of the product in use, with a soundtrack and a caption. The
+A short video with a soundtrack and a caption, in one of two modes (below). The
 skill that makes it is `/brag-slim` from [latent-spaces/brag](https://github.com/latent-spaces/brag)
 (MIT): one markdown file, no bundled assets, the model builds and renders the video
 with the tools on the machine. `/package-nt` assembles the direction and takes the
 output. `/brag-slim` owns the story, visuals, audio and render.
+
+### Pick the mode: who watches it
+
+| Mode | For | Length | Shape |
+|---|---|---|---|
+| `demo` (default) | People who will use or install it | 15–25 s | The product in use: entry → key action → result, then how to get it |
+| `promo` | Leadership and non-technical viewers | 35–45 s | One big headline per thing it lets you do, over moving screens, ending on the name |
+
+Use `promo` when the user asks for a promo, or names a leadership, executive or
+non-technical audience. Otherwise use `demo`. Say in the summary which mode ran and why.
+A demo shown to leadership reads as thin. A promo shown to builders leaves out what they
+need to try it.
 
 ### Preconditions: check first; a miss skips the video, it never blocks the run
 
@@ -38,11 +50,26 @@ invoke it and then feed the direction piece by piece.
 
   No Unity sentence → `polished`. Use the loud presets (`chaotic`, `yc-parody`,
   `cinematic`) only when the user asks for one.
-- **Storyboard beats**: when the `/guide-nt` generator (`guide/capture.*`, or
+- **Storyboard beats, `demo`**: when the `/guide-nt` generator (`guide/capture.*`, or
   `demo/capture.*` on the Bahi layout) defines `HERO_FLOW`, pass those captures in
   that order as the entry → key action → result beats, with each route's target (URL
   or command). Without `HERO_FLOW`, derive the flow from the README's "how it works"
   and the main route, and say so in the summary.
+- **Storyboard beats, `promo`**: one beat per key feature the product has today, from
+  the README and the feature list. Each beat is a headline of a few words that says what
+  the viewer gets from it, how it helps them ("Reach the journalists who matter.",
+  "Answer their questions.", "Wake up to the day, by 7 am."),
+  held 3–4 s, over a screen that moves: crop, zoom, pan, or a desktop screen paired
+  with a phone screen. Open with who it is for; add no supporting line unless it earns
+  its place.
+- **What, not how or who (`promo`)**: show what the product lets the viewer do, never
+  how it is done or who does it. Leave out approvals and sign-off, verification
+  methods, owners, deadlines, statuses, roles and security mechanics. Crop or mask
+  that part of a screen; never edit the text inside one.
+- **No technical artefacts (`promo`)**: no URL, repo, install line, command, code,
+  version string or hash, file name, stack name, or jargon (API, passkey, token,
+  database) in any line or on any screen. Crop address bars and version lines out of
+  screens.
 - **Data**: the shared demo seed (`demo/seed/`) when it exists, so the screens show
   a product in use, not an empty first run. Never real user data.
 - **Claims**: only what the README and the gate findings support. No invented
@@ -51,10 +78,17 @@ invoke it and then feed the direction piece by piece.
   words. When the README never names an audience, derive one from what the product
   does and its "use something else if" line, and say so in the summary. brag-slim
   asks itself who the product is for but does not have to show it. A video that
-  leaves the audience out fails the stranger test on *who*.
-- **Last beat**: the name and how to get it: the deployed URL when there is one, else
-  the repo URL and the install line. The video has to pass the stranger test with no
-  post text around it.
+  leaves the audience out fails the stranger test on *who*. When the user names the
+  owner differently (a person rather than an office, say), use their words.
+- **Sample-data label**: when screens show fictional sample content and a real person
+  or organisation is named on screen, every frame with a screen carries a small,
+  readable "Sample data" label. Otherwise fictional statements beside a real name read
+  as real ones.
+- **Last beat, `demo`**: the name and how to get it: the deployed URL when there is
+  one, else the repo URL and the install line. The video has to pass the stranger test
+  with no post text around it.
+- **Last beat, `promo`**: the name alone. No URL, repo or install line; the caption
+  and the post carry the link.
 - **Format**: landscape, 1920×1080. Vertical or square only when asked.
 
 ### Take the output
@@ -70,7 +104,7 @@ the project root, with its intermediates in `work/` inside it.
    brag-slim bakes its own poster; this run proves it, and fails if the size, frame
    count, duration or frame 0 is off.
 4. Check the length: `ffprobe -v error -show_entries format=duration -of csv=p=0 marketing/launch.mp4`
-   prints a value from 15 to 25.
+   prints a value from 15 to 25 (`demo`) or 35 to 45 (`promo`).
 5. Delete the `brag-output*/` folder. This run generated it, its `work/` holds frames
    and audio stems, and none of it belongs in a commit.
 6. The video is a committed asset. Over 25 MB, re-encode it at `-crf 23` before the

@@ -41,11 +41,9 @@ The action sequence is the axis this phase is named for and the *least* producti
 
 1. **Durability.** Act, reload, check you are where you left off with the state you left. `INV-DURABLE` from Phase 3 already watches this; the chaos leg's job is to reach states the scripted journey never did and *then* reload. Highest yield per action of anything here.
 2. **Values.** Wherever the app ingests data — a file picker, a paste target, an import dialog, a URL field — hand it the wrong type, an empty file, a binary, something enormous, a hostile string. An importer that accepts the wrong file, invents rows and reports success is worse than one that crashes, and no scripted journey will ever hand it the wrong file.
-3. **Action sequences and timings.** The random walk proper, below. Wherever the app
-ingests data — a file picker, a paste target, an import dialog, a URL field — hand it the wrong type,
-an empty file, a binary, something enormous. An importer that accepts the wrong file, invents rows,
-and reports success is worse than one that crashes, and no scripted journey will ever hand it the
-wrong file.
+3. **Action sequences and timings.** The random walk proper, in the loop above: unplanned orders,
+double-submits, navigating mid-request, back after a mutation. Least yield per action against a
+mature app, so it gets the budget below, not the whole phase.
 
 ### Budget it, and declare the budget
 

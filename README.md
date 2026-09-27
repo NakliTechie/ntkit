@@ -80,7 +80,7 @@ Two commands run without you. `/maintain-nt` weekly — read-only rot detection,
 /live-check-nt          # verifying → shipped — the real deployed runtime, machine evidence
 /harden-nt              # before "ready" — map a surface's paths, harden each in rounds
 /guide-nt               # anytime — walk each role, build a single-file searchable HTML guide
-/demo-nt                # live demo — boot on the shared seed, open an interactive explorer
+/demo-nt                # live demo — seeded app + explorer; host=<name> serves it via a tunnel
 /package-nt             # launch — ship-readiness gate, screenshots, drafted launch posts
 /release-nt             # launch — semver bump, CHANGELOG, tag, push, verify the deploy live
 /windup-nt              # end of session — day summary, pending, commit / push, tomorrow's handoff

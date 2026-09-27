@@ -108,4 +108,4 @@ MIT © Chirag Patnaik. See [LICENSE](LICENSE).
 
 `/reclaim-nt` scans with a fork of [disktree](https://github.com/tobi/disktree) by [Tobias Lütke](https://github.com/tobi) (MIT). `/package-nt` makes its launch video with [brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), vendored with its license.
 
-The doctrine: [AUTHORING](AUTHORING.md) · [STATES](STATES.md) · [ATTEST](ATTEST.md) · [SUBSTANCE](SUBSTANCE.md) · [MEMORY](MEMORY.md) · [DRIVER](DRIVER.md) — what changed: [CHANGELOG.md](CHANGELOG.md) · [github.com/NakliTechie](https://github.com/NakliTechie)
+The doctrine: [AUTHORING](AUTHORING.md) · [STATES](STATES.md) · [ATTEST](ATTEST.md) · [SUBSTANCE](SUBSTANCE.md) · [MEMORY](MEMORY.md) · [DRIVER](DRIVER.md) — what changed: [CHANGELOG.md](CHANGELOG.md) · the 43-second promo: [launch.mp4](marketing/launch.mp4) · [github.com/NakliTechie](https://github.com/NakliTechie)

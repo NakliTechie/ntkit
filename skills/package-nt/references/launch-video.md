@@ -1,8 +1,7 @@
 ## The launch video (Phase 2)
 
 A short video with a soundtrack and a caption, in one of two modes (below). It is made
-by brag from [latent-spaces/brag](https://github.com/latent-spaces/brag) (MIT), vendored in
-[`brag/`](brag/VENDORED.md) at commit `c893c5e`, so a fresh ntkit install needs no other
+by brag, vendored in [`brag/`](brag/VENDORED.md) at commit `c893c5e`, so a fresh ntkit install needs no other
 skill. `/package-nt` assembles the direction and takes the output. brag owns the story,
 visuals, audio and render.
 

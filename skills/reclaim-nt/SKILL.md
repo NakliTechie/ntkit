@@ -30,9 +30,8 @@ If the current directory isn't a git repo, ask which project or path to sweep.
 ## Phase 0 — The scanner
 
 The sweep runs on **`disktree-cli`**, the headless side of
-[disktree](https://github.com/NakliTechie/disktree) (a fork of
-`tobi/disktree` with the weights, archive and store findings this skill
-needs). It measures what deleting gives back (`st_blocks`, hardlinks once,
+[disktree](https://github.com/NakliTechie/disktree), the build with the
+weights, archive and store findings this skill needs. It measures what deleting gives back (`st_blocks`, hardlinks once,
 hidden folders included, one volume), knows what a directory *is*, and
 removes only through tested guards, and only to the trash.
 

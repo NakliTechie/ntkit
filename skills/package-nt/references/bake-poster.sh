@@ -1,7 +1,7 @@
 #!/bin/sh
 # Bake a poster into frame 0 of a video, so every platform's idle thumbnail shows it.
-# X, Slack and Discord build the thumbnail from frame 0 and ignore cover-art metadata
-# (method from latent-spaces/brag, MIT). Only frame 0's pixels change: the script checks
+# X, Slack and Discord build the thumbnail from frame 0 and ignore cover-art metadata.
+# Only frame 0's pixels change: the script checks
 # that size, frame count and duration match the input, and that frame 0 now is the poster.
 #
 # Usage:

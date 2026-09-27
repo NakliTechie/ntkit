@@ -76,12 +76,12 @@ Two commands run without you. `/maintain-nt` weekly — read-only rot detection,
 /walkthrough-nt         # anytime — drive each role in a real browser, fix bugs, leave a harness
 /ux-review-nt           # anytime — cold first-timer review, ranked onboarding/nav failures
 /maintain-nt            # upkeep — stale deps / Actions / advisories / links; safe fixes applied
-/reclaim-nt             # upkeep — orphaned checkpoints / downloads / artifacts; proposes deletions
+/reclaim-nt             # upkeep — find the GB in old weights, worktrees, archives; Trash only on apply
 /live-check-nt          # verifying → shipped — the real deployed runtime, machine evidence
 /harden-nt              # before "ready" — map a surface's paths, harden each in rounds
 /guide-nt               # anytime — walk each role, build a single-file searchable HTML guide
 /demo-nt                # live demo — seeded app + explorer; host=<name> serves it via a tunnel
-/package-nt             # launch — ship-readiness gate, screenshots, drafted launch posts
+/package-nt             # launch — ship-readiness gate, screenshots, launch video, drafted posts
 /release-nt             # launch — semver bump, CHANGELOG, tag, push, verify the deploy live
 /windup-nt              # end of session — day summary, pending, commit / push, tomorrow's handoff
 /replan-nt              # occasionally — fold accumulated files back into the three canonical ones
@@ -102,8 +102,10 @@ evals/run.sh    # model runs: a fixture project, one prompt, a deterministic che
 
 Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The loop prints nothing when that contract holds across all 21; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against. `evals/run.sh` needs one login first, `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
 
-## License
+## License and credits
 
 MIT © Chirag Patnaik. See [LICENSE](LICENSE).
+
+`/reclaim-nt` scans with a fork of [disktree](https://github.com/tobi/disktree) by [Tobias Lütke](https://github.com/tobi) (MIT). `/package-nt` makes its launch video with [brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), vendored with its license.
 
 The doctrine: [AUTHORING](AUTHORING.md) · [STATES](STATES.md) · [ATTEST](ATTEST.md) · [SUBSTANCE](SUBSTANCE.md) · [MEMORY](MEMORY.md) · [DRIVER](DRIVER.md) — what changed: [CHANGELOG.md](CHANGELOG.md) · [github.com/NakliTechie](https://github.com/NakliTechie)

@@ -1,6 +1,6 @@
 # Vendored: latent-spaces/brag
 
-Upstream: https://github.com/latent-spaces/brag (MIT, © 2026 Shunit Haviv Hakimi; see `LICENSE`).
+Upstream: https://github.com/latent-spaces/brag (MIT; see `LICENSE`).
 Commit: `c893c5ed52aed84e3e2ee56787de869fccdae6b0` (2026-09-24), upstream `skills/brag/`.
 
 `/package-nt` reads these files to make the launch video, so a fresh ntkit install needs

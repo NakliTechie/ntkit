@@ -49,6 +49,8 @@ Most commands share one idea: a gitignored `plan/` folder per repo (or a symlink
 
 The knowledge vault is a separate tool: **[scholia](https://github.com/NakliTechie/scholia)** — plain markdown, git-backed, separate from any one repo's `plan/`. Its `/capture-nt <url|file>` checks what you already have before it fetches, then writes a source note and links it into the right topic map; `/ask-nt <question>` answers only from the vault, with citations.
 
+It also searches a repo's own `plan/`: `scholia history <terms> --plan .` ranks every entry, `_archive/` included, with its date, and needs no vault ([MEMORY.md §8](MEMORY.md#8-recall-over-the-records)).
+
 The convention: check the vault before the web. `/lab-nt`'s research phase and `/scaffold-nt` sizing up a new project both run `/ask-nt` first when scholia is installed, then `/capture-nt` the result — so the second time a question comes up, it's already answered. No scholia, or no vault at `~/Code/knowledge`? Both degrade to "search the web," and nothing else in the kit depends on either existing.
 
 ## Scheduling

@@ -4,7 +4,7 @@ argument-hint: "(none)"
 allowed-tools: ["Bash", "Glob", "Read", "Write"]
 entry: "plan/ accumulated beyond the three canonical files"
 exit: "three canonical files rebuilt; replay check reported; sources archived"
-writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/_archive/"
+writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/standing.md (answers only, if the file exists), plan/_archive/"
 ---
 
 Consolidate the project's `plan/` folder into three canonical files. Run when plan/ has accumulated daily summaries and ad-hoc scratch and needs a reset.
@@ -96,15 +96,16 @@ python3 ~/.claude/skills/replan-nt/bin/plancheck.py . # installed path
 
 Stdlib only — no install step, no dependencies.
 
-It compares provenance tags against the records that exist, and `## Impact` declarations against the items that cite them ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). Three findings:
+It compares provenance tags against the records that exist, quoted tags against the words in those records, and `## Impact` declarations against the items that cite them ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). Four findings:
 
 - **orphan** — a derived item whose `[from:]` names a record that does not exist. State arrived from nowhere.
 - **ghost** — a record declaring an `add` impact that no derived item cites. Work was done and silently dropped.
+- **misquote** — a quoted tag whose words are not in the record it names. The item claims something its source does not say.
 - **untagged** — an item with no provenance. Info, never failure: this is the legacy case and the hand-written case.
 
 If the script is not available, fall back to reading: replay the rebuilt `## Decisions` + `## Log` in order and ask of each item now in `pending.md` whether the log explains how it got there. Say which mode you used.
 
-**Don't fix silently.** Report the count in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts — <one line each>`) and fold the obvious ones back: an orphan gets a dated log line, a ghost gets parked or explicitly closed. Divergence found here is drift caught before it is archived.
+**Don't fix silently.** Report the count in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts / K misquotes — <one line each>`) and fold the obvious ones back: an orphan gets a dated log line, a ghost gets parked or explicitly closed, a misquote gets its item reworded to what the record says (or its quote corrected, if the item was right and the quote was careless). Divergence found here is drift caught before it is archived.
 
 ## Step 4.6: Tag provenance
 
@@ -116,7 +117,11 @@ Every item you wrote into `pending.md` or `workplan.md` this run carries a trail
 - Ask legal about retention  [from: hand]
 ```
 
-Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. Carry existing tags through untouched. **Leave pre-existing untagged items alone** — an untagged item means hand-written, so back-filling tags you cannot source would be inventing provenance. Tag what you fold this run; the folder converges over cycles.
+Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. **Quote when you can:** add the record's own words for the claim after the source, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]` — a few words to one sentence, copied exactly, no `]` or `"` inside. `plancheck` then proves the item says what its record says (MEMORY.md §4). Carry existing tags through untouched. **Leave pre-existing untagged items alone** — an untagged item means hand-written, so back-filling tags you cannot source would be inventing provenance. Tag what you fold this run; the folder converges over cycles.
+
+## Step 4.7: Refresh standing questions
+
+Only if `plan/standing.md` exists (it is opt-in, [MEMORY.md §7](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#7-standing-questions)). For each `##` question, rewrite the bullets under it from the records you just folded plus the canonical files: every bullet tagged, quoted where the record has the words, `- none  [from: <record>]` when the records show nothing. **Never add, remove, reorder or reword a question** — questions are the human's. Then re-run `plancheck` if Step 4.5 ran before this step, so the new answers are checked too. No `standing.md` → skip silently; never create one.
 
 ## Step 5: Archive source files
 
@@ -136,6 +141,7 @@ Replanned <project-name>.
 Folded into history.md: <N> daily summaries, <M> scratch files
 pending.md: <X> Now / <Y> Parked / <Z> Open questions
 workplan.md: <N> chunks, top chunk = "<title>"
+[if standing.md exists:] standing.md: <N> questions refreshed
 Archived to plan/_archive/: <count> files
 
 Preserved untouched: <list of named design docs, or "none">

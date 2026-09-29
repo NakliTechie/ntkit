@@ -19,6 +19,7 @@ Look inside `plan/` for:
 - `workplan.md` — the chunked execution play (primary)
 - `pending.md` — open items, especially the `## Open questions` section; also scan `## Parked` so deferred "not now" items resurface instead of rotting
 - `history.md` — quick scan of `## Decisions` (recent ones) for context
+- `standing.md` — if it exists, the standing questions and their current answers ([MEMORY.md §7](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#7-standing-questions)). Print them as they stand; never recompute an answer here
 - The most recent `plan/YYYY-MM-DD-summary.md` — freshest "where we left off"
 - The most recent `plan/YYYY-MM-DD-autopilot.md` — an unattended run's morning report (branch · final gate · **Shipped: merged or held** · Landed / Needs you / Assumed). If it's **newer than the newest summary**, it's the freshest thing that happened — read its `Shipped:` line: **HELD** (red gate / conflict) means an unmerged `autopilot/<date>` branch is waiting on you, and reviewing it outranks the workplan's top chunk; **MERGED** means a green run already shipped to the default branch — pull it and glance at what landed.
 
@@ -62,6 +63,10 @@ Last session (<date from latest summary, or "no summary on file">):
   Open questions: <bullet, or "—">
   Parked (<count>): <top 2–3 deferred items, or "—"> — not abandoned, still waiting
 
+[if standing.md exists:]
+Standing:
+  <question>: <its answer bullets, one line each, tags dropped>
+
 Next chunk — "<title from top of workplan.md>" (<size estimate>):
   - <item 1>
   - <item 2>
@@ -101,3 +106,5 @@ Keep it conversational. The user might respond with "go", "skip to chunk 3", "ac
 Only after the user confirms direction, start executing. Treat the chosen chunk's items as a working list. Refer back to `plan/workplan.md` and `plan/pending.md` as you go.
 
 If the user picks a different chunk or area, follow that. /resume-nt's job is to present and hand off — not to enforce the top chunk.
+
+**When the question is about the past** — "when did we decide X", "why did we drop Y" — search the records instead of guessing from the canonical files: `scholia history <terms> --plan .` ranks every entry under `plan/`, `_archive/` included, with its date ([MEMORY.md §8](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#8-recall-over-the-records)). No scholia → `rg -n <terms> plan/`.

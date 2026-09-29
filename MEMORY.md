@@ -50,7 +50,7 @@ contract; everything else follows from it.
 | Kind | Files | Rule |
 |---|---|---|
 | **Record** | `soc.md` · `<type>-<date>.md` reports · `<date>-summary.md` · `lab/<slug>/journal.md` · `history.md` `## Log` · `_archive/` | Append-only. Once written, an entry is never edited or deleted. A dead end is recorded exactly like a success. |
-| **Derived** | `pending.md` · `workplan.md` · `history.md` `## Decisions` · `history.md` `## Dead ends` | A projection over the record. Rewritten wholesale by the reconcile pass, and by nothing else. |
+| **Derived** | `pending.md` · `workplan.md` · `history.md` `## Decisions` · `history.md` `## Dead ends` · `standing.md` (optional, §7) | A projection over the record. Rewritten wholesale by the reconcile pass, and by nothing else. |
 
 `history.md` is deliberately hybrid: its `## Log` is the record, its `## Decisions` and
 `## Dead ends` are curated indexes *over* that log. Naming the split is enough; the file
@@ -125,6 +125,21 @@ A derived item may carry a trailing provenance tag naming the record it came fro
 Tag grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`,
 `[from: soc:<timestamp>]`, or `[from: hand]` for anything a person wrote directly.
 
+**A tag may carry the words it rests on.** Put a short exact quote from the record after
+the source, in double quotes:
+
+```markdown
+- Revisit Postgres at 10k rows  [from: 2026-09-10-summary "parked until usage passes 10k rows"]
+- Preload the session  [from: soc:2026-09-11T09:15 "hide the cold start"]
+```
+
+A bare tag proves the record exists. A quoted tag also proves the record says what the
+item claims, and `plancheck` checks it (§5). The comparison ignores case, whitespace,
+curly-vs-straight quotes, dashes and markdown emphasis; nothing else. A `soc:` quote must
+come from that one entry, not the whole stream. A quote cannot contain `]` or `"`. Quote
+the clause that carries the claim, a few words to one sentence; `hand` tags take no quote.
+Quoting is optional and additive, like the tag itself.
+
 **An untagged item means `hand`.** Every `plan/` folder written before this contract
 existed is therefore already valid — provenance is additive, never a migration.
 
@@ -141,6 +156,7 @@ the derived files. It is mechanical, it never calls a model, and it never edits 
 |---|---|
 | **orphan** | A derived item whose `[from:]` names a record that does not exist. State arrived from nowhere. |
 | **ghost** | A record `## Impact` line whose target has no matching derived item. Work was done and silently dropped. |
+| **misquote** | A quoted tag whose words are not in the record it names. The item claims something its source does not say. |
 | **untagged** | A derived item with no provenance tag. Reported as info, never as failure — this is the legacy case and the hand-written case. |
 
 ```
@@ -161,11 +177,48 @@ tedious to verify, which is what a checker is for.
 
 - **It does not make the fold deterministic.** The reconcile pass is still an agent
   reading records and writing a projection. `plancheck` can prove a claimed impact
-  landed somewhere; it cannot prove the wording is faithful. Spot-check by deleting a
-  derived file and rebuilding it from the records — if the two differ in substance,
-  either provenance is incomplete or the fold invented something.
+  landed somewhere. It can prove the wording is faithful only where a tag carries a quote
+  (§4); an unquoted item's wording is unchecked. Spot-check by deleting a derived file
+  and rebuilding it from the records — if the two differ in substance, either provenance
+  is incomplete or the fold invented something.
 - **It does not lock the folder.** Any rule here can be overridden the way
   `STATES.md` §Guards allows: on purpose, through `/decide-nt`, with the reason
   written down. A rule bypassed by drift is a bug; bypassed deliberately is a decision.
 - **It does not add a daemon, a database, or a format.** `plan/` stays plain markdown a
   person can read and edit. Everything above is a convention plus one script.
+
+## 7. Standing questions
+
+`pending.md` and `workplan.md` answer two fixed questions: what is open, and what to do
+next. A repo can keep answers to more questions current in an optional `plan/standing.md`:
+
+```markdown
+# Standing questions
+
+## What is waiting on Chirag?
+- The Postgres decision at 10k rows  [from: 2026-09-10-summary "parked until usage passes 10k rows"]
+
+## What did the last live check find?
+- none  [from: live-check-2026-09-20]
+```
+
+- **The questions are the human's.** Only a person adds, removes or rewords a `##`
+  question (W1). An agent never does.
+- **The answers are derived.** Only the reconcile pass rewrites the bullets under a
+  question (W4), from the records, each with a `[from:]` tag and, where it can, a quote.
+  An answer with nothing behind it is `- none` with the tag of the record that shows it.
+- **Read, not rediscovered.** `/resume-nt` prints the answers as they stand. It never
+  recomputes them, so a session starts from settled answers at no cost.
+- `plancheck` treats `standing.md` like `pending.md`: every answer is provenance-checked.
+
+No `standing.md`, no change: the file is opt-in, and nothing else depends on it.
+
+## 8. Recall over the records
+
+Records are append-only and `_archive/` only grows, so "when and why did we drop X" means
+reading old files. With [scholia](https://github.com/NakliTechie/scholia) installed,
+`scholia history <terms> --plan .` searches every markdown file under `plan/`, archive
+included, and dates each hit from its entry, its `### YYYY-MM-DD` heading or its file
+name. `--since`, `--until` and `--chrono` narrow it. It needs no vault, reads only, and
+builds its index in memory each run. Without scholia, `rg -n <terms> plan/` does the same
+job without ranking or dates.

@@ -3,7 +3,8 @@
 
 Mechanical only: it never calls a model, never edits a file, and never guesses.
 It compares provenance tags in the derived files against the records that exist,
-and `## Impact` declarations in the records against the derived items that cite them.
+checks that a quoted tag's words really appear in the record it names, and compares
+`## Impact` declarations in the records against the derived items that cite them.
 
 Contract: MEMORY.md.  Exit 0 clean · 1 divergence · 2 could not run.
 """
@@ -19,7 +20,7 @@ from pathlib import Path
 
 # --- what counts as what (MEMORY.md §1) ------------------------------------
 
-DERIVED_FILES = ("pending.md", "workplan.md")
+DERIVED_FILES = ("pending.md", "workplan.md", "standing.md")   # standing.md is optional (MEMORY.md §7)
 # history.md is hybrid: these sections are derived, `## Log` is a record.
 HISTORY_DERIVED_SECTIONS = ("Decisions", "Dead ends")
 
@@ -30,6 +31,12 @@ RECORD_GLOBS = ("*.md", "_archive/*.md", "lab/*/journal.md", "lab/*/*-leg.md")
 # and an item that does not parse is an item whose provenance is never checked.
 ITEM = re.compile(r"^\s*(?:[-*]|\d+[.)])\s+(?:\[(?P<box>[ x~])\]\s*)?(?P<text>.+?)\s*$")
 FROM = re.compile(r"\[from:\s*(?P<src>[^\]]+?)\s*\]")
+# A tag may carry the exact words it rests on: [from: <slug> "the words"] (MEMORY.md §4).
+QUOTED = re.compile(r'^(?P<ref>.*?)\s+["\u201c](?P<quote>[^"\u201c\u201d]+)["\u201d]$')
+# Characters folded away before a quote is compared: markdown emphasis and code marks.
+MARKUP = re.compile(r"[*_`]+")
+TYPOGRAPHY = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"',
+                            "\u2013": "-", "\u2014": "-", "\u00a0": " "})
 HEADING = re.compile(r"^##\s+(?P<name>.+?)\s*$")
 SOC_ENTRY = re.compile(r"^\s*[-*]\s+(?P<ts>\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2})")
 DATE = re.compile(r"(\d{4}-\d{2}-\d{2})")
@@ -42,7 +49,7 @@ IMPACT_LINE = re.compile(
 
 @dataclass
 class Finding:
-    kind: str          # orphan | ghost | untagged
+    kind: str          # orphan | ghost | misquote | untagged
     where: str         # file:line
     detail: str
 
@@ -57,7 +64,7 @@ class Plan:
     soc_stamps: set[str] = field(default_factory=set)
     cited: dict[str, list[str]] = field(default_factory=dict)  # record slug -> where cited
     findings: list[Finding] = field(default_factory=list)
-    counts: dict[str, int] = field(default_factory=lambda: {"items": 0, "tagged": 0, "records": 0})
+    counts: dict[str, int] = field(default_factory=lambda: {"items": 0, "tagged": 0, "quoted": 0, "records": 0})
 
 
 def _derived_paths(root: Path) -> list[Path]:
@@ -116,6 +123,46 @@ def resolves(plan: Plan, src: str) -> bool:
     return slug in plan.records
 
 
+def split_tag(src: str) -> tuple[str, str | None]:
+    """`slug "words"` -> ("slug", "words"); an unquoted tag -> (src, None)."""
+    m = QUOTED.match(src.strip())
+    if not m:
+        return src.strip(), None
+    return m.group("ref").strip(), m.group("quote")
+
+
+def fold(text: str) -> str:
+    """Normalise for quote comparison: typography, markup, case, whitespace."""
+    text = MARKUP.sub("", text.translate(TYPOGRAPHY))
+    return " ".join(text.split()).casefold()
+
+
+def record_text(plan: Plan, ref: str) -> str | None:
+    """The text a resolving tag points at: one soc entry, or a whole record file."""
+    if ref.lower().startswith("soc:"):
+        soc = plan.records.get("soc")
+        if soc is None:
+            return None
+        stamp = ref[4:].strip().replace(" ", "T")
+        lines = soc.read_text(errors="replace").splitlines()
+        out: list[str] = []
+        taking = False
+        for line in lines:
+            m = SOC_ENTRY.match(line)
+            if m:
+                taking = m.group("ts").replace(" ", "T").startswith(stamp)
+            if taking:
+                out.append(line)
+        return "\n".join(out) if out else None
+    path = plan.records.get(ref.split("#", 1)[0].strip())
+    return path.read_text(errors="replace") if path else None
+
+
+def quote_found(plan: Plan, ref: str, quote: str) -> bool:
+    text = record_text(plan, ref)
+    return text is not None and fold(quote) in fold(text)
+
+
 def scan_derived(plan: Plan) -> None:
     """Provenance on every derived item: resolving, missing (orphan), or absent (untagged)."""
     targets = [(p, None) for p in _derived_paths(plan.root)]
@@ -144,11 +191,19 @@ def scan_derived(plan: Plan) -> None:
                 )
                 continue
             plan.counts["tagged"] += 1
-            src = tag.group("src")
+            src, quote = split_tag(tag.group("src"))
             plan.cited.setdefault(src.split("#", 1)[0].strip(), []).append(where)
             if not resolves(plan, src):
                 plan.findings.append(
                     Finding("orphan", where, f"[from: {src}] names no record in plan/")
+                )
+                continue
+            if quote is None or src.lower() == "hand":
+                continue
+            plan.counts["quoted"] += 1
+            if not quote_found(plan, src, quote):
+                plan.findings.append(
+                    Finding("misquote", where, f'"{quote[:60]}" is not in {src}')
                 )
 
 
@@ -202,7 +257,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     plan = run(root, args.since)
-    hard = [f for f in plan.findings if f.kind in ("orphan", "ghost")]
+    hard = [f for f in plan.findings if f.kind in ("orphan", "ghost", "misquote")]
     info = [f for f in plan.findings if f.kind == "untagged"]
 
     if args.as_json:
@@ -216,11 +271,13 @@ def main(argv: list[str] | None = None) -> int:
 
     c = plan.counts
     if not hard:
-        print(f"Replay: clean — {c['items']} derived items, {c['tagged']} tagged, {c['records']} records")
+        print(f"Replay: clean — {c['items']} derived items, {c['tagged']} tagged "
+              f"({c['quoted']} quoted), {c['records']} records")
     else:
         orphans = sum(1 for f in hard if f.kind == "orphan")
         ghosts = sum(1 for f in hard if f.kind == "ghost")
-        print(f"Replay: {orphans} orphan(s) / {ghosts} ghost(s)")
+        misquotes = sum(1 for f in hard if f.kind == "misquote")
+        print(f"Replay: {orphans} orphan(s) / {ghosts} ghost(s) / {misquotes} misquote(s)")
         for f in hard:
             print(f"  {f.kind:7} {f.where:28} {f.detail}")
     if info:

@@ -4,7 +4,7 @@ argument-hint: "(none)"
 allowed-tools: ["Bash", "Glob", "Read", "Write", "Edit"]
 entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
 exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, clean closes merged to main, stray worktrees swept, resume handoff printed"
-writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/_archive/"
+writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/standing.md (answers only, if it exists), plan/_archive/"
 ---
 
 Wind up the current project for today, in the project's repo root, steps 0–6 in order.
@@ -57,4 +57,4 @@ This is the bridge to the next conversation — the folder path must be absolute
 - none — nothing shipped today that changes the plan
 ```
 
-`/windup-nt` is one of the **three sanctioned reconcile writers** (with `/replan-nt` and `/scaffold-nt`), so unlike the audit commands it both declares the impact *and* applies it in Steps 2–3. Declare it anyway: the summary is the record that explains why `pending.md` looks the way it does tomorrow, and it is what a replay check reads. Tag every item you add with `[from: <date>-summary]` so the provenance resolves.
+`/windup-nt` is one of the **three sanctioned reconcile writers** (with `/replan-nt` and `/scaffold-nt`), so unlike the audit commands it both declares the impact *and* applies it in Steps 2–3. Declare it anyway: the summary is the record that explains why `pending.md` looks the way it does tomorrow, and it is what a replay check reads. Tag every item you add with `[from: <date>-summary]` so the provenance resolves, and quote the summary's own words where it has them (`[from: <date>-summary "the words"]`, MEMORY.md §4) so `plancheck` can prove the item says what the summary says.

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+Three ideas borrowed from Hindsight (vectorize-io/hindsight), kept inside the plan/ contract: an agent still never edits a record, and only the reconcile pass rewrites a derived file.
+
+- **Added:** **quoted provenance.** A tag may carry the record's own words, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`. `plancheck` checks that the words are in the record it names and reports a new hard finding, **misquote**, when they are not. The comparison ignores case, whitespace, typographic quotes, dashes and markdown emphasis; a `soc:` quote must come from that one entry. Until now `plancheck` could prove a record existed but not that an item said what it said (MEMORY.md §6); a quoted item's wording is now checked. `/replan-nt` and `/windup-nt` quote where the record has the words. Bare tags stay valid.
+- **Added:** **standing questions**, an optional `plan/standing.md`. The human writes the `##` questions; the reconcile pass rewrites the answers from the records, tagged and quoted; `/resume-nt` prints them without recomputing. `plancheck` checks its answers like `pending.md`'s. No file, no change. MEMORY.md §7.
+- **Added:** **recall over the records** (MEMORY.md §8). `/resume-nt` answers "when did we decide X / why did we drop Y" by searching `plan/` and `_archive/` with `scholia history <terms> --plan .`, which dates each hit; without scholia it falls back to `rg`.
+- **Added:** `tests/plancheck.test.sh`: clean, orphan, ghost, misquote, soc-entry scoping, `standing.md` as a derived file, and `--json`. Against the previous `plancheck` it fails 8 checks.
+
 ## v2.2.0 — 2026-09-27
 
 Two additions lead this release: `/package-nt` now makes the **launch video** itself, and `/reclaim-nt` does **disk cleanup** on a real scanner. Credits for the two tools they build on are in the README.

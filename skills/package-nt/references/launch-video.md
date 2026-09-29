@@ -88,7 +88,7 @@ invoke it and then feed the direction piece by piece.
   numbers, users, or testimonials. brag has the same rule; restate it anyway.
 - **Audience**: who it is for, said on screen in the first 10 seconds, in the README's
   words. When the README never names an audience, derive one from what the product
-  does and its "use something else if" line, and say so in the summary. brag asks
+  does and its stated scope and limits, and say so in the summary. brag asks
   itself who the product is for but does not have to show it. A video that
   leaves the audience out fails the stranger test on *who*. When the user names the
   owner differently (a person rather than an office, say), use their words.

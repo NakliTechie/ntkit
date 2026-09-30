@@ -21,7 +21,7 @@ and reviser refine it, section researchers write, one editor edits, and a fresh 
 | `"<question>"` | Phases 0–2 | SPEC-READY |
 | `"<question>" --go` | Phases 0–7, no stop | VERIFIED · FLAGGED · BUDGET · BLOCKED |
 | `go <slug>` | Phases 3–7 on an existing run | VERIFIED · FLAGGED · BUDGET · BLOCKED |
-| `status` | Lists each `plan/research/*/run.md` with its `State:` line; read-only | — |
+| `status` | Read `references/report.md` → status; list each slug, `State:` and `Question:`; read-only | — |
 | empty | Prints this table and the example below; writes nothing | — |
 
 Example: `/research-nt "how do open deep-research harnesses verify citations"`, read the spec, then `/research-nt go <slug>` with the slug it printed.

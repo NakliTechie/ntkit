@@ -9,7 +9,8 @@
    Print the slug.
 4. `mkdir -p $RUN` and write `$RUN/question.md`: the question on line 1, nothing else.
    `check.py assemble` uses that line as the report title.
-5. Vault. Both must hold: `command -v scholia` succeeds, and `$SKILL/../ask-nt/SKILL.md` exists.
+5. Vault. Both must hold: `command -v scholia` succeeds, and an `ask-nt` skill file exists at
+   `$SKILL/../ask-nt/SKILL.md` or `~/.claude/skills/ask-nt/SKILL.md` (first found wins; call it `$ASK`).
    - Yes → launch one subagent (`general-purpose`, model `sonnet`) with the vault brief below. When it
      returns, confirm `$RUN/vault.md` exists.
    - No → write `$RUN/vault.md` as one line: `Vault skipped: <which condition failed>`.
@@ -21,7 +22,7 @@ Answer a question from the user's notes vault, read-only.
 
 Question: <question>
 
-Read <abs path of $SKILL/../ask-nt/SKILL.md> and follow it to answer the question. Do not write to
+Read <abs $ASK> and follow it to answer the question. Do not write to
 the vault. Then write <abs $RUN>/vault.md:
 - the answer, with the note citations ask-nt produces;
 - then `## Sources in the vault`: one line per cited note, `- <note path> — <its url: frontmatter value, or "no url">`.

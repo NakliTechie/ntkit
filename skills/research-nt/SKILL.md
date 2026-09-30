@@ -28,7 +28,7 @@ Example: `/research-nt "how do open deep-research harnesses verify citations"`, 
 - `--go` — off. Skips the approval stop. An unattended run should pass it.
 - Run settings live in the spec's `## Run settings` block, editable at the stop: `sections: 8` (unit cap), `words: 5000` (report length target), `fetches_per_section: 15` (enforced by `fetch.py`; the planner gets 3x), `tool_rounds: 20` (per researcher, by brief). There are no flags for them.
 - `NT_RESEARCH_STORE` — page store root, default `~/.cache/ntkit/research`. Page text stays out of `plan/`, which may sync to a remote.
-- Vault — used when `scholia` is on PATH and the `ask-nt` skill is installed next to this one. Otherwise skipped, and `run.md` says why.
+- Vault — used when `scholia` is on PATH and an `ask-nt` skill is installed (next to this one, or in `~/.claude/skills`). Otherwise skipped, and `run.md` says why.
 - Models — planner and researchers run on `sonnet`. The coordinator is this session.
 
 `$SKILL` below is this skill's base directory, printed when the skill loads. `$RUN` is `plan/research/<slug>`.

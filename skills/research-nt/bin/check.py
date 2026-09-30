@@ -2,6 +2,7 @@
 """check — the /research-nt run checks. No network, no model calls, never edits a report.
 
   check.py spec     RUN_DIR                   validate spec.md
+  check.py section  RUN_DIR UNIT              one sections/<UNIT>.md against the spec and the log
   check.py assemble RUN_DIR                   sections/<id>.md -> draft.md, in spec order
   check.py sample   RUN_DIR [--k 10] [--force]  pick linked sentences from report.md -> claims.json
   check.py gates    RUN_DIR [--without g3]    G1 G2 G2b G4 G3 over report.md -> verify.json
@@ -283,6 +284,14 @@ def fold(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().casefold()
 
 
+def entity_covered(entity: str, text: str, dropped: list[tuple[str, str]]) -> bool:
+    """Named in the folded unit text, or dropped with a reason (folded name, reason)."""
+    names = [fold(n) for n in entity_names(entity)]
+    if any(n and n in text for n in names):
+        return True
+    return any(reason and any(n and n in what for n in names) for what, reason in dropped)
+
+
 # --- report -----------------------------------------------------------------
 
 @dataclass
@@ -356,6 +365,54 @@ def fetched_ok(entries: list[dict]) -> dict[str, dict]:
     return ok
 
 
+def provenance(entries: list[dict]):
+    """A function naming why a cited URL is not evidence, or None when a fetch succeeded."""
+    ok = fetched_ok(entries)
+    failed = {normalize_url(e["url"]): e.get("error") or e.get("status")
+              for e in entries if e.get("status") != "ok" and e.get("url")}
+
+    def why_not(url: str) -> str | None:
+        key = normalize_url(url)
+        if key in ok:
+            return None
+        return f"fetch failed ({failed[key]})" if key in failed else "never fetched"
+    return why_not
+
+
+def read_section(run: Path, u: Unit) -> tuple[list[str], list[tuple[str, str]], list[str]]:
+    """sections/<id>.md as (body lines, Omitted (name, reason) pairs, format problems)."""
+    path = run / "sections" / f"{u.id}.md"
+    if not path.is_file():
+        return [], [], [f"{u.id}: sections/{u.id}.md not found"]
+    lines = path.read_text(encoding="utf-8").splitlines()
+    first = next((i for i, ln in enumerate(lines) if ln.strip()), None)
+    head = HEADING.match(lines[first]) if first is not None else None
+    ided = IDED.match(head.group(2)) if head else None
+    if not head or len(head.group(1)) != 3 or not ided or ided.group(1) != u.id:
+        return [], [], [f"{u.id}: the file must open with '### {u.id} | <title>'"]
+    body, omitted, problems = [], [], []
+    in_fence = False
+    for n, line in enumerate(lines[first + 1:], first + 2):
+        if FENCE.match(line):
+            in_fence = not in_fence
+        h = None if in_fence else HEADING.match(line)
+        if h and len(h.group(1)) <= 3:
+            problems.append(f"{u.id}: line {n} adds a heading above level 4 ('{line.strip()[:50]}')")
+            continue
+        om = None if in_fence else OMITTED.match(line)
+        if om:
+            omitted.append((om.group(1).strip(), om.group(2).strip()))
+        elif not in_fence and line.strip().startswith("Omitted:"):
+            problems.append(f"{u.id}: line {n} 'Omitted:' needs '<name> — <reason>'")
+        else:
+            body.append(line)
+    while body and not body[-1].strip():
+        body.pop()
+    while body and not body[0].strip():
+        body.pop(0)
+    return body, omitted, problems
+
+
 # --- commands ---------------------------------------------------------------
 
 def cmd_spec(run: Path, _args) -> int:
@@ -370,6 +427,46 @@ def cmd_spec(run: Path, _args) -> int:
     print(f"spec ok: {len(spec.mains)} main sections, {len(spec.units)} units, "
           f"{questions} research questions, {entities} required entities")
     print("settings: " + ", ".join(f"{k} {v}" for k, v in spec.settings.items()))
+    return 0
+
+
+def cmd_section(run: Path, args) -> int:
+    spec = load_spec(run)
+    if spec.errors:
+        print("cannot check: spec.md is invalid; run `check.py spec` for the list")
+        return 1
+    unit = next((u for u in spec.units if u.id == args.unit), None)
+    if unit is None:
+        raise CannotRun(f"no unit {args.unit} in spec.md")
+    body, dropped, problems = read_section(run, unit)
+    text = "\n".join(body)
+    why_not = provenance(load_log(run)[0])
+    links = links_in(text)
+    for url in links:
+        why = why_not(url)
+        if why:
+            problems.append(f"{unit.id}: {url} — {why}")
+    folded = fold(text)
+    dropped_folded = [(fold(name), reason) for name, reason in dropped]
+    entities = unit.entities()
+    for entity in entities:
+        if not entity_covered(entity, folded, dropped_folded):
+            problems.append(f"{unit.id}: required entity '{entity}' is neither named in the text "
+                            f"nor dropped with 'Omitted: <name> — <reason>'")
+    ids = {u.id for u in spec.units}
+    for _, line in prose_lines(body):
+        for ref in UNIT_REF.findall(line):
+            if ref not in ids:
+                problems.append(f"{unit.id}: refers to {ref}, which is not a section")
+    words = sum(len(line.split()) for _, line in prose_lines(body))
+    target = spec.settings["words"] // len(spec.units)
+    if problems:
+        print(f"section {unit.id} FAIL: {len(problems)} problem(s)")
+        for p in problems:
+            print(f"  - {p}")
+        return 1
+    print(f"section {unit.id} ok: {len(links)} links, all fetched; {len(entities)} required entities, "
+          f"{len(dropped)} omitted; {words} words (target about {target})")
     return 0
 
 
@@ -393,37 +490,9 @@ def cmd_assemble(run: Path, _args) -> int:
         if main_id != current_main:
             current_main = main_id
             out += [f"## {main_id} | {mains[main_id]}", ""]
-        path = run / "sections" / f"{u.id}.md"
-        if not path.is_file():
-            problems.append(f"{u.id}: sections/{u.id}.md not found")
-            continue
-        lines = path.read_text(encoding="utf-8").splitlines()
-        first = next((i for i, ln in enumerate(lines) if ln.strip()), None)
-        head = HEADING.match(lines[first]) if first is not None else None
-        ided = IDED.match(head.group(2)) if head else None
-        if not head or len(head.group(1)) != 3 or not ided or ided.group(1) != u.id:
-            problems.append(f"{u.id}: the file must open with '### {u.id} | <title>'")
-            continue
-        body = []
-        in_fence = False
-        for n, line in enumerate(lines[first + 1:], first + 2):
-            if FENCE.match(line):
-                in_fence = not in_fence
-            h = None if in_fence else HEADING.match(line)
-            if h and len(h.group(1)) <= 3:
-                problems.append(f"{u.id}: line {n} adds a heading above level 4 ('{line.strip()[:50]}')")
-                continue
-            om = None if in_fence else OMITTED.match(line)
-            if om:
-                omitted.append(f"- {u.id} · {om.group(1).strip()}: {om.group(2).strip()}")
-            elif not in_fence and line.strip().startswith("Omitted:"):
-                problems.append(f"{u.id}: line {n} 'Omitted:' needs '<name> — <reason>'")
-            else:
-                body.append(line)
-        while body and not body[-1].strip():
-            body.pop()
-        while body and not body[0].strip():
-            body.pop(0)
+        body, dropped, found = read_section(run, u)
+        problems += found
+        omitted += [f"- {u.id} · {name}: {reason}" for name, reason in dropped]
         out += [f"### {u.id} | {u.title}", ""] + body + [""]
     out += [f"## {NOT_COVERED}", ""] + (omitted or ["- none"]) + [""]
     if problems:
@@ -505,19 +574,15 @@ def unit_of(parts: list[Part], line_no: int) -> str:
 
 def gate_g1(run: Path, report: str) -> list[str]:
     entries, bad = load_log(run)
-    ok = fetched_ok(entries)
-    failed = {normalize_url(e["url"]): e.get("error") or e.get("status")
-              for e in entries if e.get("status") != "ok" and e.get("url")}
+    why_not = provenance(entries)
     problems = list(bad)
     parts = parse_report(report)
     lines = report.splitlines()
     for i, line in prose_lines(lines):
         for url in links_in(line):
-            key = normalize_url(url)
-            if key in ok:
-                continue
-            why = f"fetch failed ({failed[key]})" if key in failed else "never fetched"
-            problems.append(f"{unit_of(parts, i)}: {url} — {why}")
+            why = why_not(url)
+            if why:
+                problems.append(f"{unit_of(parts, i)}: {url} — {why}")
     return problems
 
 
@@ -568,12 +633,8 @@ def gate_g2b(spec: Spec, report: str) -> list[str]:
     for u in spec.units:
         text = fold(body_text(parts[u.id])) if u.id in parts else ""
         for entity in u.entities():
-            names = [fold(n) for n in entity_names(entity)]
-            if any(n and n in text for n in names):
-                continue
-            if any(reason and any(n and n in what for n in names) for what, reason in dropped.get(u.id, [])):
-                continue
-            problems.append(f"{u.id}: required entity '{entity}' is neither in the section nor in '{NOT_COVERED}'")
+            if not entity_covered(entity, text, dropped.get(u.id, [])):
+                problems.append(f"{u.id}: required entity '{entity}' is neither in the section nor in '{NOT_COVERED}'")
     return problems
 
 
@@ -650,6 +711,20 @@ def gate_g3(run: Path, report: str) -> list[str]:
     return problems
 
 
+def cited_sources(run: Path, report: str) -> list[dict]:
+    """Every URL the report cites, most-cited first, ties in order of first citation."""
+    ok = fetched_ok(load_log(run)[0])
+    counts: dict[str, int] = {}
+    shown: dict[str, str] = {}
+    for url in links_in(report):
+        key = normalize_url(url)
+        counts[key] = counts.get(key, 0) + 1
+        shown.setdefault(key, url)
+    order = sorted(counts, key=lambda k: -counts[k])   # stable: ties keep first-citation order
+    return [{"url": shown[k], "cited": counts[k], "title": (ok.get(k) or {}).get("title") or ""}
+            for k in order]
+
+
 def cmd_gates(run: Path, args) -> int:
     report = read(run, "report.md")
     spec = load_spec(run)
@@ -684,6 +759,7 @@ def cmd_gates(run: Path, args) -> int:
         "run": run.resolve().name,
         "checked_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "gates": results, "without": sorted(without), "verified": verified,
+        "sources": cited_sources(run, report),
     }, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     if verified:
         print("VERIFIED" + (" (G3 skipped by --without)" if without else ""))
@@ -695,9 +771,11 @@ def cmd_gates(run: Path, args) -> int:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="check", description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("spec", "assemble", "sample", "gates"):
+    for name in ("spec", "section", "assemble", "sample", "gates"):
         p = sub.add_parser(name)
         p.add_argument("run", type=Path, help="the run directory, plan/research/<slug>")
+        if name == "section":
+            p.add_argument("unit", help="the unit id, e.g. S1.2")
         if name == "sample":
             p.add_argument("--k", type=int, default=10, help="claims to sample (default 10)")
             p.add_argument("--force", action="store_true", help="overwrite an existing claims.json")
@@ -708,7 +786,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"check: run directory {args.run} not found", file=sys.stderr)
         return 2
     try:
-        return {"spec": cmd_spec, "assemble": cmd_assemble,
+        return {"spec": cmd_spec, "section": cmd_section, "assemble": cmd_assemble,
                 "sample": cmd_sample, "gates": cmd_gates}[args.cmd](args.run, args)
     except CannotRun as e:
         print(f"check: {e}", file=sys.stderr)

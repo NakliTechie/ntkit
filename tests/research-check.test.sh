@@ -147,6 +147,27 @@ for desc, (text, want) in bad_specs.items():
     (d / "spec.md").write_text(text)
     expect(f"spec: {desc}", run("spec", d), 1, want)
 
+# --- section: a researcher's own check --------------------------------------
+d = fresh("section")
+expect("section: clean unit", run("section", d, "S1.1"), 0, "section S1.1 ok: 1 links, all fetched; 2 required entities, 0 omitted")
+expect("section: omitted entity counts", run("section", d, "S1.2"), 0, "2 required entities, 1 omitted")
+expect("section: unknown unit", run("section", d, "S9.9"), 2, "no unit S9.9 in spec.md")
+bad_sections = {
+    "unfetched link": ("S1.1", SECTIONS["S1.1"] + "\nA claim ([blog](https://unfetched.example/post)).\n", "https://unfetched.example/post — never fetched"),
+    "failed fetch": ("S2.1", SECTIONS["S2.1"] + "\nSee https://example.org/broken.\n", "fetch failed (HTTP 404)"),
+    "silent omission": ("S1.2", SECTIONS["S1.2"].replace("Omitted: Treynor — no primary source was reachable\n", ""), "required entity 'Treynor (1962)'"),
+    "omitted without reason": ("S1.2", SECTIONS["S1.2"].replace(" — no primary source was reachable", ""), "'Omitted:' needs '<name> — <reason>'"),
+    "dangling reference": ("S1.2", SECTIONS["S1.2"].replace("See S2.1", "See S1.5"), "refers to S1.5, which is not a section"),
+    "wrong opening heading": ("S1.1", SECTIONS["S1.1"].replace("### S1.1 |", "## S1.1 |"), "must open with '### S1.1 | <title>'"),
+}
+for desc, (sid, text, want) in bad_sections.items():
+    d = fresh("section-bad")
+    (d / "sections" / f"{sid}.md").write_text(text)
+    expect(f"section: {desc}", run("section", d, sid), 1, want)
+d = fresh("section-missing")
+(d / "sections" / "S1.2.md").unlink()
+expect("section: missing file", run("section", d, "S1.2"), 1, "sections/S1.2.md not found")
+
 # --- assemble ---------------------------------------------------------------
 d = fresh("assemble")
 expect("assemble", run("assemble", d), 0, "assembled draft.md: 3 units, 1 omitted entity")
@@ -174,6 +195,17 @@ expect("clean run, G3 skipped", run("gates", d, "--without", "g3"), 0, "VERIFIED
 verify = json.loads((d / "verify.json").read_text())
 if verify["verified"] is not True or verify["gates"]["G3"]["pass"] is not None:
     failures.append(f"verify.json wrong: {verify}")
+if [(s["url"], s["cited"]) for s in verify["sources"]] != [
+        ("https://example.org/markowitz?utm_source=x", 1), ("https://example.org/sharpe/", 1),
+        ("https://arxiv.org/abs/1605.07230", 1), ("https://en.wikipedia.org/wiki/Portfolio_(finance)", 1)]:
+    failures.append(f"verify.json sources wrong: {verify['sources']}")
+d = built("sources-ranked")
+for f in ("draft.md", "report.md"):
+    (d / f).write_text((d / f).read_text().replace("relates beta to return", "relates beta to return ([arXiv](https://arxiv.org/abs/1605.07230/))"))
+run("gates", d, "--without", "g3")
+top = json.loads((d / "verify.json").read_text())["sources"][0]
+if (top["url"], top["cited"]) != ("https://arxiv.org/abs/1605.07230/", 2):
+    failures.append(f"sources: most-cited not first, or normalisation missed: {top}")
 expect("G3 required by default", run("gates", d), 1, "claim check not run")
 expect("--without only takes g3", run("gates", d, "--without", "g1"), 2, "accepts only g3")
 

@@ -7,7 +7,8 @@
   check.py sample   RUN_DIR [--k 10] [--force]  pick linked sentences from report.md -> claims.json
   check.py gates    RUN_DIR [--without g3]    G1 G2 G2b G4 G3 over report.md -> verify.json
 
-Exit 0 pass · 1 a check failed · 2 could not run (missing file, bad usage).
+Exit 0 checks passed · 1 a check failed · 2 could not run (missing file, bad usage).
+With --without g3, exit 0 is diagnostic only: verify.json still records verified=false.
 
 A run directory holds spec.md, sections/, fetch-log.jsonl (written only by fetch.py),
 draft.md, edit-plan.md, report.md, claims.json. The spec is Markdown:
@@ -539,26 +540,40 @@ def linked_sentences(part: Part) -> list[str]:
     return out
 
 
-def cmd_sample(run: Path, args) -> int:
-    report = read(run, "report.md")
-    target = run / "claims.json"
-    if target.exists() and not args.force:
-        print("claims.json exists; it may hold verdicts. Pass --force to re-sample.")
-        return 1
+def sample_claims(run: Path, report: str, k: int = 10) -> tuple[list[dict], int]:
+    """Reconstruct the slug-seeded sample; judges may change only verdict and note."""
     seed = hashlib.sha256(run.resolve().name.encode()).hexdigest()
     ok = fetched_ok(load_log(run)[0])
     candidates = [(p.key, s) for p in parse_report(report) if UNIT_ID.match(p.key)
                   for s in linked_sentences(p)]
     candidates.sort(key=lambda c: hashlib.sha256(f"{seed}|{c[0]}|{c[1]}".encode()).hexdigest())
     claims = []
-    for n, (unit, sentence) in enumerate(candidates[:args.k], 1):
+    for n, (unit, sentence) in enumerate(candidates[:k], 1):
         urls = links_in(sentence)
         pages = sorted({ok[normalize_url(u)]["path"] for u in urls
                         if normalize_url(u) in ok and ok[normalize_url(u)].get("path")})
+        evidence = [{"url": u, "path": ok.get(normalize_url(u), {}).get("path"),
+                     "sha256": ok.get(normalize_url(u), {}).get("text_sha256")}
+                    for u in urls]
         claims.append({"id": f"C{n}", "section": unit, "sentence": sentence, "urls": urls,
-                       "pages": pages, "verdict": None, "note": None})
+                       "pages": pages, "evidence": evidence, "verdict": None, "note": None})
+    return claims, len(candidates)
+
+
+def cmd_sample(run: Path, args) -> int:
+    report = read(run, "report.md")
+    target = run / "claims.json"
+    if target.exists() and not args.force:
+        print("claims.json exists; it may hold verdicts. Pass --force to re-sample.")
+        return 1
+    if args.k < 1:
+        raise CannotRun("--k must be positive")
+    claims, count = sample_claims(run, report, args.k)
     target.write_text(json.dumps(claims, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"sampled {len(claims)} of {len(candidates)} linked sentences -> claims.json")
+    (run / "claims-meta.json").write_text(json.dumps({
+        "report_sha256": hashlib.sha256(report.encode()).hexdigest(), "k": args.k,
+    }, indent=1) + "\n", encoding="utf-8")
+    print(f"sampled {len(claims)} of {count} linked sentences -> claims.json")
     return 0
 
 
@@ -646,7 +661,7 @@ def parse_edit_plan(text: str) -> tuple[set[str], set[str]]:
         h = HEADING.match(line)
         if h:
             m = re.match(r"^(S\d+(?:\.\d+)?)\b", h.group(2).strip())
-            current = m.group(1) if m else None
+            current = m.group(1) if m else ("not-covered" if h.group(2).strip() == NOT_COVERED else None)
             continue
         item = LIST_ITEM.match(line)
         if not item or current is None:
@@ -695,19 +710,62 @@ def gate_g3(run: Path, report: str) -> list[str]:
         return ["claim check not run (no claims.json)"]
     try:
         claims = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
-        return [f"claims.json is not JSON: {e}"]
-    if not claims:
-        return ["claims.json holds no claims"]
+        meta = json.loads((run / "claims-meta.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        return [f"claim sample unreadable: {e}"]
+    if not isinstance(claims, list) or not claims or any(not isinstance(c, dict) for c in claims):
+        return ["claims.json must hold a non-empty list of claim objects"]
+    if not isinstance(meta, dict) or meta.get("k") != 10:
+        return ["G3 requires the default sample of 10 (or every linked sentence when fewer exist)"]
+    if meta.get("report_sha256") != hashlib.sha256(report.encode()).hexdigest():
+        return ["claim sample is stale: report.md changed; sample and judge it again"]
+    expected, _ = sample_claims(run, report)
+    fields = ("id", "section", "sentence", "urls", "pages", "evidence")
+    if [{k: c.get(k) for k in fields} for c in claims] != [
+            {k: c[k] for k in fields} for c in expected]:
+        return ["claims.json does not match the complete deterministic sample; sample and judge it again"]
     problems = []
+    checked = set()
     for c in claims:
-        cid = c.get("id", "?")
-        if c.get("sentence", "") not in report:
-            problems.append(f"{cid}: sentence no longer in report.md; judge it again")
-        elif c.get("verdict") not in VERDICTS:
+        cid = c["id"]
+        for e in c["evidence"]:
+            key = (e["path"], e["sha256"])
+            if key in checked:
+                continue
+            checked.add(key)
+            try:
+                digest = hashlib.sha256(Path(e["path"]).read_bytes()).hexdigest() if e["path"] else None
+            except OSError:
+                digest = None
+            if not digest or not e["sha256"] or digest != e["sha256"]:
+                problems.append(f"{cid}: missing or changed page text for {e['url']}")
+        if c.get("verdict") not in VERDICTS:
             problems.append(f"{cid}: no verdict (want one of {', '.join(VERDICTS)})")
+        elif not isinstance(c.get("note"), str) or not c["note"].strip():
+            problems.append(f"{cid}: verdict needs an evidence note")
         elif c["verdict"] == "unsupported":
-            problems.append(f"{cid} ({c.get('section')}): unsupported — {c.get('note') or 'no note'}")
+            problems.append(f"{cid} ({c['section']}): unsupported — {c['note']}")
+    snapshots = (run / "claims-before-repair.json", run / "report-before-repair.md")
+    if any(p.exists() for p in snapshots):
+        try:
+            old = json.loads(snapshots[0].read_text(encoding="utf-8"))
+            review = json.loads((run / "repair-review.json").read_text(encoding="utf-8"))
+            failed = [c for c in old if c["verdict"] == "unsupported"]
+            results = review["claims"]
+            if (review["report_sha256"] != hashlib.sha256(report.encode()).hexdigest()
+                    or not snapshots[1].is_file()
+                    or not isinstance(results, list)
+                    or [c["id"] for c in results] != [c["id"] for c in failed]):
+                raise ValueError("stale or incomplete repair review")
+            for prior, result in zip(failed, results):
+                verdict = result.get("verdict")
+                if verdict not in ("removed", "supported", "partial") or not result.get("note"):
+                    problems.append(f"{prior['id']}: repair remains unsupported or has no evidence note")
+                if verdict == "removed" and prior["sentence"] in report:
+                    problems.append(f"{prior['id']}: repair says removed but the sentence remains")
+        except (OSError, ValueError, TypeError, KeyError) as e:
+            problems.append(f"repair review missing or invalid: {e}")
+
     return problems
 
 
@@ -754,18 +812,20 @@ def cmd_gates(run: Path, args) -> int:
         for p in problems:
             print(f"       - {p}")
         failed += bool(problems)
-    verified = failed == 0
+    verified = failed == 0 and not without
     (run / "verify.json").write_text(json.dumps({
         "run": run.resolve().name,
         "checked_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "gates": results, "without": sorted(without), "verified": verified,
         "sources": cited_sources(run, report),
     }, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    if verified:
-        print("VERIFIED" + (" (G3 skipped by --without)" if without else ""))
-    else:
+    if failed:
         print(f"NOT VERIFIED: {failed} gate(s) failed")
-    return 0 if verified else 1
+    elif without:
+        print("CHECKED (G3 skipped by --without; not VERIFIED)")
+    else:
+        print("VERIFIED")
+    return 1 if failed else 0
 
 
 def main(argv: list[str] | None = None) -> int:

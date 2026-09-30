@@ -8,7 +8,7 @@ command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
 BIN=$(cd "$(dirname "$0")/.." && pwd)/skills/research-nt/bin
 work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
 PYTHONDONTWRITEBYTECODE=1 BIN="$BIN" WORK="$work" python3 - <<'PY'
-import contextlib, http.server, io, json, os, shutil, sys, threading
+import contextlib, http.server, io, json, os, shutil, subprocess, sys, threading
 from pathlib import Path
 sys.path.insert(0, os.environ["BIN"])
 import check, fetch
@@ -125,6 +125,31 @@ expect("plan cap is 3x", run(c, f"{base}/notes.txt", "--section", "plan"), 0)
 expect("unknown unit refused", run(c, f"{base}/notes.txt", "--section", "S9.9"), 2, "unit id in spec.md")
 expect("bad section name", run(c, f"{base}/notes.txt", "--section", "research"), 2, "must be 'plan' or a unit id")
 
+# Concurrent planner processes cannot exceed the shared cap.
+concurrent = work / "concurrent"; concurrent.mkdir()
+(concurrent / "spec.md").write_text((c / "spec.md").read_text().replace("fetches_per_section: 2", "fetches_per_section: 1"))
+procs = [subprocess.Popen([sys.executable, str(Path(os.environ["BIN"]) / "fetch.py"),
+          str(concurrent), "--section", "plan", "--stdin", "--url", f"https://example.org/{i}",
+          "--store", str(store)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+          text=True) for i in range(8)]
+for proc in procs:
+    proc.stdin.write("Planner evidence.\n"); proc.stdin.close(); proc.stdin = None
+for proc in procs:
+    proc.communicate(timeout=20)
+if len(log(concurrent)) != 3 or sum(p.returncode == 0 for p in procs) != 3:
+    failures.append("concurrent planners exceeded or underfilled their shared cap")
+old_which = fetch.shutil.which
+try:
+    fetch.shutil.which = lambda _: None
+    try:
+        fetch.pdf_to_text(b"%PDF-1.0 fixture")
+        failures.append("missing pdftotext was accepted")
+    except fetch.Failed as e:
+        if "not installed" not in str(e):
+            failures.append(f"missing pdftotext: wrong failure {e}")
+finally:
+    fetch.shutil.which = old_which
+
 # --- --stdin -------------------------------------------------------------------
 expect("stdin", run(d, "--section", "S2.1", "--stdin", "--url", "https://paywalled.example/a", "--via", "chrome",
                     "--title", "A", stdin="Text read in the browser."), 0, "Text read in the browser.")
@@ -133,6 +158,17 @@ if log(d)[-1]["via"] != "chrome" or log(d)[-1]["status"] != "ok":
 expect("stdin empty", run(d, "--section", "S2.1", "--stdin", "--url", "https://x.example/", stdin="  "), 1, "no text on stdin")
 expect("stdin needs --url", run(d, "--section", "S2.1", "--stdin", stdin="x"), 2, "--stdin with --url")
 expect("no urls", run(d, "--section", "S2.1"), 2, "give URLs")
+
+# A real CLI invocation without the test runner's environment leaves installed sources clean.
+cli = work / "installed-bin"; cli.mkdir()
+for name in ("fetch.py", "check.py"):
+    shutil.copy2(Path(os.environ["BIN"]) / name, cli / name)
+cli_env = dict(os.environ); cli_env.pop("PYTHONDONTWRITEBYTECODE", None)
+result = subprocess.run([sys.executable, str(cli / "fetch.py"), str(d), "--section", "plan",
+                         "--stdin", "--url", "https://example.org/cache-test", "--store", str(store)],
+                        input="Cache test evidence.", text=True, capture_output=True, env=cli_env)
+if result.returncode or (cli / "__pycache__").exists():
+    failures.append("CLI mutated the installed helper directory or failed")
 
 # --- the log feeds G1 ----------------------------------------------------------
 ok = check.fetched_ok(log(d))

@@ -1,4 +1,4 @@
-# Phases 2, 4, 5: stop, assemble and gate, close
+# Phases 2 and 7: stop and close
 
 ## run.md
 
@@ -12,7 +12,8 @@ read it. Times come from `date '+%Y-%m-%d %H:%M %Z'`.
 
 State: <SPEC-READY | VERIFIED | FLAGGED | BUDGET | BLOCKED>
 Question: <question, verbatim>
-Layer: L1 (one planner; no critic, editor or claim check; G3 skipped)
+Layer: L5 (three planners, critic, editor, claim check)
+Models: <actual models per role; name any host substitutions>
 Updated: <time>
 
 ## Summary
@@ -22,6 +23,9 @@ Updated: <time>
 | Unit | Title | Status |
 |---|---|---|
 | S1.1 | <title> | <planned · passes check · failed check · missing> |
+
+## Plan review
+<each HP and its accepted unit or rejection reason, from revision.md>
 
 ## Gates
 <final states only: the G1, G2, G2b, G4, G3 lines from `check.py gates`, with each problem>
@@ -52,27 +56,13 @@ Skip this phase with `--go`.
    needed, then run /research-nt go <slug>.`
 2. `/notify-nt "<slug>: research spec ready, <n> units. /research-nt go <slug>"`.
 3. Tell the user: the spec path, the unit table with each unit's research questions (from
-   `spec.md`), and the `go` command. End the turn. Do not start Phase 3.
+   `spec.md`), and every HP outcome, and the `go` command. End the turn. Do not start Phase 3.
 
-## Phase 4: assemble and gate
-
-```bash
-python3 "$SKILL/bin/check.py" assemble "$RUN"
-cp "$RUN/draft.md" "$RUN/report.md"                      # L1 has no editor; G4 requires a byte copy
-python3 "$SKILL/bin/check.py" gates "$RUN" --without g3  # writes verify.json
-```
-
-- `assemble` exits 1 → a unit has no usable section. The run ends **BUDGET**. The Units table marks
-  each unit `passes check`, `failed check` or `missing`. Next: `/research-nt go <slug>` researches
-  only the failing units. Skip `cp` and `gates`.
-- `gates` exits 0 → **VERIFIED**. Exits 1 → **FLAGGED**. Its exit code is the only verdict. Never
-  edit `report.md` to make a gate pass; the only repair pass is Phase 3's.
-
-## Phase 5: close
+## Phase 7: close
 
 1. Write `run.md` with the end state. Summary: units researched, sections passing their check,
    report words (`wc -w $RUN/report.md`), fetches (`wc -l $RUN/fetch-log.jsonl`) and the page store
-   path. Gates: the lines `check.py gates` printed. Most-cited sources: from `verify.json`. Next:
+   path. Record actual agent runs, elapsed time, report length and available token usage; unknown cost stays unknown. Gates: the lines `check.py gates` printed, including supported/partial/unsupported counts and any repair review outcome. Most-cited sources: from `verify.json`. Next:
    - VERIFIED: `Read report.md. Capture a source with /capture-nt <url>.`
    - FLAGGED: which gate failed, and that the report is not verified.
    - BLOCKED: what failed, from the researchers' `BLOCKED` lines.

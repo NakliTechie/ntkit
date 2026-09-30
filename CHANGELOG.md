@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Added:** `/research-nt` L2–L5: three independent planners and a merge judge, one critic/reviser pass, one scoped editor, and sampled claim verification with one repair allowance. L6 comparative research quality remains unmeasured.
+- **Changed:** G3 reconstructs the full ten-claim sample, binds verdicts to the report and stored evidence, and rejects missing repair reviews. Skipping G3 produces a diagnostic result, never VERIFIED.
+- **Fixed:** concurrent planners share a locked fetch budget, preventing simultaneous requests from exceeding their cap.
+- **Added:** `evals/research-bench.py` blinds the five preregistered report pairs and computes the documented shipping rule from complete rubric verdicts and claim-support counts.
+
 Three ideas borrowed from Hindsight (vectorize-io/hindsight), kept inside the plan/ contract: an agent still never edits a record, and only the reconcile pass rewrites a derived file.
 
 - **Added:** **quoted provenance.** A tag may carry the record's own words, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`. `plancheck` checks that the words are in the record it names and reports a new hard finding, **misquote**, when they are not. The comparison ignores case, whitespace, typographic quotes, dashes and markdown emphasis; a `soc:` quote must come from that one entry. Until now `plancheck` could prove a record existed but not that an item said what it said (MEMORY.md §6); a quoted item's wording is now checked. `/replan-nt` and `/windup-nt` quote where the record has the words. Bare tags stay valid.

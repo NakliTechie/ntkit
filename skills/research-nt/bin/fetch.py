@@ -13,8 +13,8 @@ Rules it enforces, not the agent:
 - http and https only; hosts that resolve to private, loopback, link-local, reserved or
   multicast addresses are refused, redirects included;
 - a per-section fetch cap: `fetches_per_section` from RUN_DIR/spec.md (default 15), and
-  3x that for `--section plan`. Every attempt counts, failed or not. Parallel calls from one
-  agent can overshoot by the number running at once;
+  3x that for `--section plan`. Every attempt counts, failed or not. A per-section lock
+  covers counting, fetching and logging, including the shared planning budget;
 - `--section` is `plan` or a unit id that exists in spec.md (any S<n>.<m> before the spec exists).
 
 Page store: $NT_RESEARCH_STORE/<run-slug>/, default ~/.cache/ntkit/research/<run-slug>/.
@@ -43,6 +43,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
+sys.dont_write_bytecode = True  # Running a skill must not leave cache files beside its source.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check import SETTINGS_DEFAULTS, UNIT_ID, normalize_url, parse_spec  # noqa: E402
 
@@ -301,28 +302,31 @@ def main(argv: list[str] | None = None) -> int:
     store = store_dir(run, args.store)
     targets = [args.url] if args.stdin else args.urls
     bad = 0
-    for url in targets:
-        used = attempts(run, args.section)
-        if used >= cap:
-            print(f"REFUSED {url}: fetch cap reached for {args.section} ({used} of {cap}); not fetched, not logged")
-            bad += 1
-            continue
-        result, error = None, None
-        try:
-            if args.stdin:
-                check_url(url, resolve=False)
-                text = tidy(sys.stdin.read())
-                if not text:
-                    raise Failed("no text on stdin")
-                result = {"final_url": url, "http_status": None, "content_type": "text/plain",
-                          "title": args.title, "text": text, "truncated": False}
-            else:
-                result = download(url)
-        except (Refused, Failed) as e:
-            error = e
-        entry = record(run, store, args.section, url, args.via if args.stdin else "urllib", result, error)
-        show(entry, args.print_chars)
-        bad += entry["status"] != "ok"
+    # Hold the budget lock across count, download and log append. Planners share `plan`.
+    with open(run / f".fetch-{args.section}.lock", "a", encoding="utf-8") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        for url in targets:
+            used = attempts(run, args.section)
+            if used >= cap:
+                print(f"REFUSED {url}: fetch cap reached for {args.section} ({used} of {cap}); not fetched, not logged")
+                bad += 1
+                continue
+            result, error = None, None
+            try:
+                if args.stdin:
+                    check_url(url, resolve=False)
+                    text = tidy(sys.stdin.read())
+                    if not text:
+                        raise Failed("no text on stdin")
+                    result = {"final_url": url, "http_status": None, "content_type": "text/plain",
+                              "title": args.title, "text": text, "truncated": False}
+                else:
+                    result = download(url)
+            except (Refused, Failed) as e:
+                error = e
+            entry = record(run, store, args.section, url, args.via if args.stdin else "urllib", result, error)
+            show(entry, args.print_chars)
+            bad += entry["status"] != "ok"
     return 1 if bad else 0
 
 

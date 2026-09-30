@@ -10,8 +10,7 @@ Read `$RUN/spec.md` for the unit ids and titles. Reading the spec is fine; it is
 
 ## Launch
 
-`mkdir -p $RUN/sections` (it does not exist before this phase). Then one `general-purpose` subagent per unit, model `sonnet`, all in **one** message so they run in
-parallel. Each gets the researcher brief below with every `<…>` filled:
+`mkdir -p $RUN/sections` (it does not exist before this phase). Then one `general-purpose` subagent per unit, model `sonnet`, in parallel within host capacity. Queue excess units; never combine owners into one context. Each gets the researcher brief below with every `<…>` filled:
 
 - `<fetch cap>` = `fetches_per_section`; `<rounds>` = `tool_rounds`;
 - `<target words>` = `words` ÷ number of units, rounded down.

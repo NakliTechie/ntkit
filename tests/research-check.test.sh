@@ -6,7 +6,7 @@ command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
 BIN=$(cd "$(dirname "$0")/.." && pwd)/skills/research-nt/bin
 work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
 PYTHONDONTWRITEBYTECODE=1 BIN="$BIN" WORK="$work" python3 - <<'PY'
-import contextlib, io, json, os, shutil, sys
+import contextlib, hashlib, io, json, os, shutil, sys
 from pathlib import Path
 sys.path.insert(0, os.environ["BIN"])
 import check
@@ -117,7 +117,15 @@ def fresh(name):
     (d / "question.md").write_text("How should a portfolio be built?\n")
     for sid, text in SECTIONS.items():
         (d / "sections" / f"{sid}.md").write_text(text)
-    (d / "fetch-log.jsonl").write_text("".join(json.dumps(e) + "\n" for e in LOG))
+    entries = []
+    for i, entry in enumerate(LOG):
+        entry = dict(entry)
+        if entry["status"] == "ok":
+            page = d / f"page-{i}.txt"
+            page.write_text("Fixture source text.")
+            entry.update(path=str(page), text_sha256=hashlib.sha256(page.read_bytes()).hexdigest())
+        entries.append(entry)
+    (d / "fetch-log.jsonl").write_text("".join(json.dumps(e) + "\n" for e in entries))
     return d
 
 def built(name):
@@ -191,9 +199,9 @@ expect("assemble: wrong id in file", run("assemble", d), 1, "must open with '###
 
 # --- gates: the clean run ---------------------------------------------------
 d = built("clean")
-expect("clean run, G3 skipped", run("gates", d, "--without", "g3"), 0, "VERIFIED (G3 skipped by --without)")
+expect("clean run, G3 skipped", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 skipped by --without; not VERIFIED)")
 verify = json.loads((d / "verify.json").read_text())
-if verify["verified"] is not True or verify["gates"]["G3"]["pass"] is not None:
+if verify["verified"] is not False or verify["gates"]["G3"]["pass"] is not None:
     failures.append(f"verify.json wrong: {verify}")
 if [(s["url"], s["cited"]) for s in verify["sources"]] != [
         ("https://example.org/markowitz?utm_source=x", 1), ("https://example.org/sharpe/", 1),
@@ -281,24 +289,35 @@ d = built("g4-move-target")
 (d / "report.md").write_text((d / "report.md").read_text().replace("It learns weights directly", "It learns the weights directly"))
 expect("G4: MOVE target may change", run("gates", d, "--without", "g3"), 0, "VERIFIED")
 
+# Repairs can disclose a required entity omitted after unsupported text is removed.
+d = built("g4-repair-omission")
+report = (d / "report.md").read_text().replace("Harry Markowitz showed", "The paper showed")
+report = report.replace("## Not covered\n", "## Not covered\n\n- S1.1 · Harry Markowitz: the cited source does not support attribution\n")
+(d / "report.md").write_text(report)
+(d / "edit-plan.md").write_text("## S1.1\n- DELETE: unsupported attribution\n## Not covered\n- DELETE: disclose the removed attribution\n")
+expect("scoped repair omission", run("gates", d, "--without", "g3"), 0, "CHECKED")
+(d / "edit-plan.md").write_text("## Repair of S1.1\n- DELETE: unsupported attribution\n## Not covered\n- DELETE: disclose the removed attribution\n")
+expect("repair requires exact unit heading", run("gates", d, "--without", "g3"), 1, "S1.1: changed")
+
 # --- sample and G3 ----------------------------------------------------------
 d = built("g3")
-expect("sample", run("sample", d, "--k", "3"), 0, "sampled 3 of 4 linked sentences")
+expect("sample", run("sample", d), 0, "sampled 4 of 4 linked sentences")
 claims = json.loads((d / "claims.json").read_text())
 first = [c["sentence"] for c in claims]
 expect("sample refuses to overwrite", run("sample", d), 1, "Pass --force")
-expect("sample --force", run("sample", d, "--k", "3", "--force"), 0, "sampled 3")
+expect("sample --force", run("sample", d, "--force"), 0, "sampled 4")
 again = [c["sentence"] for c in json.loads((d / "claims.json").read_text())]
 if first != again:
     failures.append(f"sample is not deterministic: {first} vs {again}")
 if any("code.example.org" in c["sentence"] for c in claims):
     failures.append("sample picked a sentence from a code block")
 wiki = [c for c in claims if "Portfolio_(finance)" in c["sentence"]]
-if wiki and wiki[0]["pages"] != ["/tmp/d.txt"]:
+if wiki and wiki[0]["pages"] != [str(d / "page-3.txt")]:
     failures.append(f"sample: pages not resolved through the log: {wiki[0]}")
 expect("G3: no verdicts yet", run("gates", d), 1, "C1: no verdict")
 for c in claims:
     c["verdict"] = "supported"
+    c["note"] = "page fixture supports the claim"
 claims[-1]["verdict"] = "partial"
 (d / "claims.json").write_text(json.dumps(claims))
 expect("G3: supported and partial pass", run("gates", d), 0, "VERIFIED")
@@ -307,7 +326,47 @@ claims[0]["verdict"] = "unsupported"; claims[0]["note"] = "page says 1959"
 expect("G3: unsupported fails", run("gates", d), 1, "unsupported — page says 1959")
 claims[0]["verdict"] = "supported"; claims[0]["sentence"] = "A sentence the report no longer has."
 (d / "claims.json").write_text(json.dumps(claims))
-expect("G3: stale verdict", run("gates", d), 1, "no longer in report.md")
+expect("G3: stale verdict", run("gates", d), 1, "does not match the complete deterministic sample")
+
+# G3 cannot be passed by shortening, substituting, or reusing stale samples.
+d = built("g3-integrity")
+run("sample", d)
+valid = json.loads((d / "claims.json").read_text())
+for c in valid:
+    c.update(verdict="supported", note="page fixture supports the claim")
+for desc, malformed in (("short sample", valid[:1]), ("wrong type", {}),
+                        ("non-object", [1]), ("empty", []), ("duplicate", valid + valid[:1])):
+    (d / "claims.json").write_text(json.dumps(malformed))
+    expect(desc, run("gates", d), 1)
+(d / "claims.json").write_text(json.dumps(valid))
+expect("full judged sample", run("gates", d), 0, "VERIFIED")
+(d / "report.md").write_text((d / "report.md").read_text() + "\n")
+expect("report mutation invalidates verdicts", run("gates", d), 1, "sample is stale")
+shutil.copy(d / "draft.md", d / "report.md")
+page = Path(valid[0]["pages"][0])
+page.write_text("Changed evidence")
+expect("page mutation invalidates verdicts", run("gates", d), 1, "changed page text")
+page.write_text("Fixture source text.")
+run("sample", d, "--force", "--k", "1")
+expect("small sample cannot verify", run("gates", d), 1, "requires the default sample")
+expect("nonpositive sample refused", run("sample", d, "--force", "--k", "0"), 2, "positive")
+run("sample", d, "--force")
+(d / "claims.json").write_text(json.dumps(valid))
+prior = [dict(c) for c in valid]
+prior[0]["verdict"] = "unsupported"
+(d / "claims-before-repair.json").write_text(json.dumps(prior))
+shutil.copy(d / "report.md", d / "report-before-repair.md")
+expect("repair needs review", run("gates", d), 1, "repair review missing")
+review = {"report_sha256": hashlib.sha256((d / "report.md").read_bytes()).hexdigest(),
+          "claims": [{"id": prior[0]["id"], "verdict": "unsupported", "note": "still wrong"}]}
+(d / "repair-review.json").write_text(json.dumps(review))
+expect("repair failure cannot be hidden by new sample", run("gates", d), 1, "repair remains unsupported")
+review["claims"][0]["verdict"] = "removed"
+(d / "repair-review.json").write_text(json.dumps(review))
+expect("false removal rejected", run("gates", d), 1, "sentence remains")
+review["claims"][0].update(verdict="supported", note="reviewed against fixture")
+(d / "repair-review.json").write_text(json.dumps(review))
+expect("reviewed repair passes", run("gates", d), 0, "VERIFIED")
 
 # --- could not run ----------------------------------------------------------
 expect("missing run dir", run("gates", work / "nope"), 2, "not found")

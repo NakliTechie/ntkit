@@ -1,18 +1,32 @@
 # Changelog
 
-## Unreleased
+## [2.3.0] — 2026-09-30
 
-- **Added:** `/research-nt` L2–L5: three independent planners and a merge judge, one critic/reviser pass, one scoped editor, and sampled claim verification with one repair allowance. L6 comparative research quality remains unmeasured.
-- **Changed:** G3 reconstructs the full ten-claim sample, binds verdicts to the report and stored evidence, and rejects missing repair reviews. Skipping G3 produces a diagnostic result, never VERIFIED.
-- **Fixed:** concurrent planners share a locked fetch budget, preventing simultaneous requests from exceeding their cap.
-- **Added:** `evals/research-bench.py` blinds the five preregistered report pairs and computes the documented shipping rule from complete rubric verdicts and claim-support counts.
+### Added
 
-Three ideas borrowed from Hindsight (vectorize-io/hindsight), kept inside the plan/ contract: an agent still never edits a record, and only the reconcile pass rewrites a derived file.
+- `/research-nt`: a question-to-report workflow with optional vault lookup, an approval stop, bounded web fetches, section research, editing, and sampled citation checks.
+- `/research-nt` L2–L5: three independent planners and a merge judge, one critic/reviser pass, one scoped editor, and sampled claim verification with one repair allowance. L6 comparative research quality remains unmeasured.
+- `evals/research-bench.py` blinds the five preregistered report pairs and computes the documented shipping rule from complete rubric verdicts and claim-support counts.
+- **quoted provenance.** A tag may carry the record's own words, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`. `plancheck` checks that the words are in the record it names and reports a new hard finding, **misquote**, when they are not. The comparison ignores case, whitespace, typographic quotes, dashes and markdown emphasis; a `soc:` quote must come from that one entry. Until now `plancheck` could prove a record existed but not that an item said what it said (MEMORY.md §6); a quoted item's wording is now checked. `/replan-nt` and `/windup-nt` quote where the record has the words. Bare tags stay valid.
+- **standing questions**, an optional `plan/standing.md`. The human writes the `##` questions; the reconcile pass rewrites the answers from the records, tagged and quoted; `/resume-nt` prints them without recomputing. `plancheck` checks its answers like `pending.md`'s. No file, no change. MEMORY.md §7.
+- **recall over the records** (MEMORY.md §8). `/resume-nt` answers "when did we decide X / why did we drop Y" by searching `plan/` and `_archive/` with `scholia history <terms> --plan .`, which dates each hit; without scholia it falls back to `rg`.
+- `tests/plancheck.test.sh`: clean, orphan, ghost, misquote, soc-entry scoping, `standing.md` as a derived file, and `--json`. Against the previous `plancheck` it fails 8 checks.
+- Research workflow documentation, updated workflow and social images, and research, hardening, chaos-leg, and ATTEST promo videos.
 
-- **Added:** **quoted provenance.** A tag may carry the record's own words, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`. `plancheck` checks that the words are in the record it names and reports a new hard finding, **misquote**, when they are not. The comparison ignores case, whitespace, typographic quotes, dashes and markdown emphasis; a `soc:` quote must come from that one entry. Until now `plancheck` could prove a record existed but not that an item said what it said (MEMORY.md §6); a quoted item's wording is now checked. `/replan-nt` and `/windup-nt` quote where the record has the words. Bare tags stay valid.
-- **Added:** **standing questions**, an optional `plan/standing.md`. The human writes the `##` questions; the reconcile pass rewrites the answers from the records, tagged and quoted; `/resume-nt` prints them without recomputing. `plancheck` checks its answers like `pending.md`'s. No file, no change. MEMORY.md §7.
-- **Added:** **recall over the records** (MEMORY.md §8). `/resume-nt` answers "when did we decide X / why did we drop Y" by searching `plan/` and `_archive/` with `scholia history <terms> --plan .`, which dates each hit; without scholia it falls back to `rg`.
-- **Added:** `tests/plancheck.test.sh`: clean, orphan, ghost, misquote, soc-entry scoping, `standing.md` as a derived file, and `--json`. Against the previous `plancheck` it fails 8 checks.
+### Changed
+
+- G3 reconstructs the full ten-claim sample, binds verdicts to the report and stored evidence, and rejects missing repair reviews. Skipping G3 produces a diagnostic result, never VERIFIED.
+- `/research-nt status` prints the run slug, state, and original question. Offline eval fixtures cover BUDGET resume and infrastructure failure.
+- README software comparisons are optional in the packaging gate. The chaos-leg brief describes the action-sequence walk explicitly.
+
+### Fixed
+
+- concurrent planners share a locked fetch budget, preventing simultaneous requests from exceeding their cap.
+
+### Validation limits
+
+- The L6 comparison stopped before completion. This release makes no claim of measured superiority over the baseline research workflow.
+- Native role validation does not establish Claude-host compatibility. Notification integrations remain untested.
 
 ## v2.2.0 — 2026-09-27
 

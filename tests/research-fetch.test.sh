@@ -7,7 +7,7 @@ set -eu
 command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
 BIN=$(cd "$(dirname "$0")/.." && pwd)/skills/research-nt/bin
 work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
-BIN="$BIN" WORK="$work" python3 - <<'PY'
+PYTHONDONTWRITEBYTECODE=1 BIN="$BIN" WORK="$work" python3 - <<'PY'
 import contextlib, http.server, io, json, os, shutil, sys, threading
 from pathlib import Path
 sys.path.insert(0, os.environ["BIN"])

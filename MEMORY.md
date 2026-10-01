@@ -73,6 +73,10 @@ is the one thing that makes the log untrustworthy.
 and append an evidence pointer to that item. `[ ] → [x]`, `[ ] → [~]`, plus the row
 saying how it was verified. Status is the item's own lifecycle and belongs to whoever
 did the work — this is also what lets progress survive a crash mid-run.
+The same holds for the `[ ]` items of a record's own Workplan section (a forward-pass or
+ux-review report, a run's own queue): any executor may flip them, appending an evidence row to
+that report's progress log. A status flip is not an edit of a past entry under W2; rewording or
+removing the item still is.
 
 **W4 — Only the reconcile pass may add, remove, re-rank, or re-word a derived item.**
 That is `/replan-nt`, `/windup-nt`'s implicit replan, and `/scaffold-nt` at seeding.

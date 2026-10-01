@@ -1,6 +1,6 @@
 ## Phase 3 — Aggregate, dedupe, rank, assign IDs
 
-Collect all findings. Dedupe across subagents. Rank by severity and **assign each a stable ID** so it can be referenced everywhere downstream (workplan, progress log, commits):
+Collect all findings. Dedupe across subagents. Challenge the serious ones (below), then rank by severity and **assign each a stable ID** so it can be referenced everywhere downstream (workplan, progress log, commits):
 
 - **Critical → `C1, C2, …`** — exploitable security hole, data loss, or a bug that breaks core functionality in normal use
 - **High → `H1, H2, …`** — likely-hit bug or real security weakness; fix before shipping
@@ -11,7 +11,7 @@ Collect all findings. Dedupe across subagents. Rank by severity and **assign eac
 - **Test value → `T1, T2, …`** — a test that costs maintenance without protecting anything, or a production seam that exists only for tests (separate track). Each carries its recommendation (`D` delete · `C` consolidate · `F` fix the assertion · `seam` remove a test-only production seam) plus the keeper test that still proves the contract and the command that runs it. A vacuous test that hides a live defect (a negative that passes because the guard it claims to test is missing) ALSO gets a severity ID.
 - **Agent-readiness → `AR1, AR2, …`** — a missing/incomplete agent-facing door (separate track). A gap that's also live and consequential right now (an unstaged mutating manifest entry, a reachable capability with no door at all) ALSO gets a severity ID, same cross-reference rule as a live-path Stub. A pure ergonomics gap (DRIVER's self-check) with no live caller yet stays AR-only.
 
-Each finding: `**ID** [Bug|Security|Stray|Stub|Test|Agent-readiness] path:line — what it is · why it matters · suggested fix`. For a Stub, name the masquerade explicitly: what's claimed (and where) vs. what the code actually does. For an Agent-readiness gap, name which check it fails (door missing / parity gap / unstaged mutation / DRIVER principle / attribution) and, for a parity gap, the specific UI action with no manifest counterpart. For a Test finding, name the hunting class, the keeper, and the command that runs the keeper.
+Each finding: `**ID** [Bug|Security|Stray|Stub|Test|Agent-readiness] path:line — what it is · why it matters · suggested fix`, with `path` written from the project root. For a Stub, name the masquerade explicitly: what's claimed (and where) vs. what the code actually does. For an Agent-readiness gap, name which check it fails (door missing / parity gap / unstaged mutation / DRIVER principle / attribution) and, for a parity gap, the specific UI action with no manifest counterpart. For a Test finding, name the hunting class, the keeper, and the command that runs the keeper. A Security finding also names its `ingress: path:line` (`references/security-classes.md`, "What counts as a finding").
 
 **Severity anchor for Security findings** (adapted from [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill), MIT): the discriminator is whether the result *fully defeats* an explicit control with real consequences, or only weakens it. If you can't state the concrete damage, the severity is lower than it feels.
 - **Critical** — unauthenticated actor gets code execution, full data-store access, or takeover of arbitrary accounts.
@@ -19,7 +19,28 @@ Each finding: `**ID** [Bug|Security|Stray|Stub|Test|Agent-readiness] path:line �
 - **Medium** — a real boundary violation with limited blast radius, uncommon preconditions, or a narrow affected resource set.
 - **Low** — disclosure of non-secret internals, or an effect that needs sustained effort for minimal gain.
 
+**Caps for Security findings — rank by marginal capability** (adapted from [google/mantis](https://github.com/google/mantis) `mantis-calibrate`, Apache-2.0). A finding is worth what the attacker gains over the position they start from. A cap only lowers the ceiling; it never raises a finding.
+- **Critical** needs a full trace: the ingress `path:line`, the sink `path:line`, and every guard between them named. A missing link caps it at **High**.
+- **High** at most when the defect fires only under a non-default configuration.
+- **Medium** at most when the attacker needs admin or owner rights and stays inside that domain; when a normal feature already gives them the same power (an admin pulling through a bug what the UI already lets them download); or when the defect fires only under a configuration the docs call insecure or dev-only.
+- **Low** at most for a dependency CVE with no path shown from this app's input to the vulnerable function, for a precondition that already grants what the exploit gives (a shell user gaining a shell), and for a defect that fires only in a debug build, dev mode, or test route that production cannot reach. A leftover route is also a Stray finding.
+
 **Anti-patterns — don't record these as Security findings** (same source): a missing best-practice with no reachable result (that's a Low or a hardening note, not a Critical); a defense-in-depth gap where an outer layer already stops the attack; guessed deployment/provider/browser behavior not visible in this repo (that's a `Worth a look` with the missing fact named, not a confirmed finding); a caller affecting only their own data (self-impact isn't a boundary violation); a parser/runtime effect reported stronger than what you actually observed.
+
+**Challenge before ranking — the finder never validates its own finding** (adapted from [google/mantis](https://github.com/google/mantis) `mantis-review`, Apache-2.0). Every candidate headed for Critical or High, and every Security candidate, goes to a fresh subagent that did not find it: one per claim, or one per small batch of unrelated claims. The brief carries the one-sentence claim, its `path:line`, and its ingress for Security. It never carries the finder's reasoning, which may be invented. The instruction: *assume this is false and try to disprove it from the code.* The challenger checks that every cited path, line, and symbol exists, that the attacker really controls the source, and that no guard on the path already stops it. Use a different model family when one is reachable, same rule as the rotation. Three outcomes:
+- **stands** — keeps its place, with the challenger's one line of confirming evidence in the entry;
+- **falls** — moves to False positives with the challenger's reason;
+- **unclear** — moves to Worth a look, naming the fact that would settle it.
+
+**Chain pass.** After ranking, ask whether two findings combine into a worse one: a path traversal plus a writable config directory, a stored XSS plus a missing CSRF check, an info leak plus a guessable ID. A chain gets its own ID at the severity of the combined result, judged by the privilege its first step needs, and lists its parts; the parts keep their own IDs.
+
+**Reconcile with prior runs — after your own findings are ranked, never before.** Now read the earlier `plan/forward-pass-*.md` reports (and those in `plan/_archive/`) and `history.md`'s Dead ends. Match on the sink's file plus the defect class, never on ID, since IDs restart every run. A prior finding whose file changed since that report's `Commit:` is matched against today's code, not by line number. Mark each of your findings:
+- **new**;
+- **still open** — cite the prior report and ID;
+- **regression** — the prior item was `[x]` and the defect is back; rank it at least at its prior severity and name the reintroducing commit when `git log -L` shows it;
+- **re-flagged** — a prior dismissal covers it; keep the dismissal unless you can name new evidence that defeats its reasoning, and when you reopen, quote both.
+
+A prior open finding your pass did not meet is never closed by silence. Check it now, or list it in the coverage map as not re-checked.
 
 **Preserve dismissals — don't silently drop.** When you discard something as a false positive or non-issue, record it in a dedicated **"False positives / non-issues (verified)"** list WITH the one-line reasoning that cleared it (e.g. `C3 — false positive: getStockOnHand sums batches only; the opening-stock column is never added to a total`). This stops the next forward pass from re-flagging it. Still drop pure linter/typechecker/CI noise without ceremony.
 

@@ -3,7 +3,7 @@ description: "Cold whole-codebase audit for bugs, security, stray code, stubs, t
 argument-hint: "[path or focus, e.g. src/api | security]"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Task", "Write"]
 entry: "briefed or later; a codebase to read"
-exit: "batched workplan with stable finding IDs written"
+exit: "batched workplan with stable finding IDs written; `bin/cite-check.py` exits 0 on the report"
 writes: "plan/forward-pass-<date>.md"
 ---
 
@@ -11,7 +11,7 @@ Do a **fresh-eyes forward pass** over the project's code — a cold read of the 
 
 **READ-ONLY.** Report, rank, and plan — never edit code, never auto-fix.
 
-**Rotate the eyes.** This is a checker command; two runs of the same model misjudge the same things identically. Before starting, read only the `Reviewer:` header line of this command's most recent report in `plan/` — never its findings, which would anchor the cold read. Repeat run → prefer a different **model family** (an agent CLI on the PATH such as `codex` or `gemini`, checked with `which`, driven through this same brief via Bash); none reachable → a different model of the current family (subagent with a model override); neither → run as-is and say so in the report. Never rotate to materially weaker eyes; log the rotation as unavailable instead. The report header carries `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and names it if you are the family that built most of this code.
+**Rotate the eyes.** This is a checker command; two runs of the same model misjudge the same things identically. Before starting, read only the `Reviewer:` header line of this command's most recent report in `plan/` — never its findings, which would anchor the cold read. Prior findings come back in Phase 3, after your own are ranked. Repeat run → prefer a different **model family** (an agent CLI on the PATH such as `codex` or `gemini`, checked with `which`, driven through this same brief via Bash); none reachable → a different model of the current family (subagent with a model override); neither → run as-is and say so in the report. Never rotate to materially weaker eyes; log the rotation as unavailable instead. The report header carries `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and names it if you are the family that built most of this code.
 
 `$ARGUMENTS` (optional): a path to scope the pass (e.g. `src/api`), a focus hint (e.g. `security`), and/or `fix` — after the report lands, hand the keystone batch to `/autopilot-nt`. The maker–checker split holds either way: the audit completes and the report is written first; fixing is a second pass with its own verification. If empty, audit the whole app with all six lenses.
 
@@ -21,11 +21,11 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 
 | Phase | Outcome | Detail |
 |---|---|---|
-| 1 Map | Languages, entry points, layers, and the primary execution flows — the traversal order and the report's coverage map. Cross-checked against `verify/features/` when a walkthrough left one. | `references/lenses.md` |
+| 1 Map | Languages, entry points, layers, and the primary execution flows — the traversal order and the report's coverage map. Trust boundaries: who can reach each entry point and what they control. A history seed: past fixes to re-check and hunt variants of. Cross-checked against `verify/features/` when a walkthrough left one. | `references/lenses.md` |
 | 2 Traverse | Entry points outward, following the real flow; parallel subagents by module for a large app. Six lenses per unit: bugs · security · stray code · stubs · test value · agent-readiness. The stub lens cross-references what `plan/`, README and CHANGELOG claim finished against what the code does; the agent-readiness lens cross-references what a human can do in the UI against what a machine caller can do through a declared manifest. Both flag the gap loudly. | `references/lenses.md`, `references/test-value.md` |
-| 3 Rank | Deduped findings with stable IDs: `C/H/M/L` by severity, `S` stray, `SB` stub, `T` test value, `AR` agent-readiness gap (a live/reachable stub or gap, or a vacuous test hiding a live defect, also carries a severity ID), `W` worth a look. Dismissals preserved with the reasoning that cleared them. | `references/ranking-and-workplan.md` |
+| 3 Rank | Deduped findings with stable IDs: `C/H/M/L` by severity, `S` stray, `SB` stub, `T` test value, `AR` agent-readiness gap (a live/reachable stub or gap, or a vacuous test hiding a live defect, also carries a severity ID), `W` worth a look. Every Critical, High, and Security candidate is challenged first by a fresh agent that sees only the claim and its `path:line`. Severity capped by what the attacker gains. Then, and only then, reconciled against prior runs: new · still open · regression · re-flagged. Dismissals preserved with the reasoning that cleared them. | `references/ranking-and-workplan.md` |
 | 4 Workplan | Themed batches ordered for execution, keystone first; tri-state checkboxes; finding ID, location, and rationale per item; `[test: how]` markers; deferrals name what unblocks. | `references/ranking-and-workplan.md` |
-| 5 Report | `plan/forward-pass-<date>.md` in fixed order, with stubs and agent-readiness gaps each in their own section, plus the `Reviewer:` line. Print counts, findings by severity, the stubs list, the coverage map. Never overwrite `workplan.md`. | `references/report.md` |
+| 5 Report | `plan/forward-pass-<date>.md` in fixed order, with stubs and agent-readiness gaps each in their own section, plus the `Reviewer:` and `Commit:` lines. Every `path:line` resolves under `bin/cite-check.py` before you print. Print counts, findings by severity, the stubs list, the coverage map. Never overwrite `workplan.md`. | `references/report.md` |
 | 6 Handoff | The keystone batch to start, decisions to record via `/decide-nt`, what `/replan-nt` folds later. Without `fix`: stop here. With `fix`: hand the keystone batch to `/autopilot-nt`. | `references/report.md` |
 
 ## Impact declaration

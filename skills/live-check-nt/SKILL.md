@@ -1,91 +1,75 @@
 ---
 description: "Replay a flow on the real deployed surface for machine evidence; code stays read-only."
 argument-hint: "[flow to verify, e.g. voice-clone | ocr | the feature just changed]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Agent", "mcp__claude-in-chrome__*"]
 entry: "a change deployed or runnable on the real surface; the real runtime reachable (prod URL, or a real browser with the model/state cached)"
 exit: "a live-check report of verified RESULTs (or a BLOCKER) written; the feature's honest state moved to shipped, or held"
 writes: "plan/live-check-<date>.md"
 ---
 
-Prove the **deployed thing actually runs** — load the real model, drive the real surface, fire a real user gesture, instrument the real output, and read **machine evidence** that the feature works end to end. This is the closing verifier: the move that earns the reserved words ("works", "shipped") for a change the dev preview could never exercise.
+Prove the **deployed thing actually runs**, end to end, with machine evidence read from the real runtime. Until this run passes, the honest state of a change on a path the dev preview can't exercise is *"implemented, not yet verified"*, never `shipped`.
 
-It is the **operational discharge of hard rule ⑤** — *"done is the verifier's word (fresh-context tests / lint / schema / **replay / timing**)."* `node --check` passed, the bundle built, the diff reads correct — all of that is `inferred` or `observed`. For a heavy-model / device-API / gesture-gated / cached-state / timing-dependent path, **behaviour is only `verified` by a live replay.** Until this run passes, the honest state is *"implemented, not yet verified"* (ATTEST §3), never `shipped`.
+**READ-ONLY on source.** It drives the app and reads evidence; it never edits code. A failure hands off: a bug → `/walkthrough-nt`; a design or UX gap → `/ux-review-nt` or `/decide-nt`; a code defect → a separate fix pass with its own verification.
 
-Skipping this gate is how a green static check launders a broken feature — the failure class it exists to prevent is "built fine, merged, silently broke the runtime path, shipped."
+`$ARGUMENTS` (optional): the flow to verify (e.g. `voice-clone`, `ocr`, `search`). If empty, verify the feature that changed most recently (from `git log` or the latest `plan/` summary).
 
-Among the checker siblings it runs **last**, after merge/deploy, on the real runtime, and asks *"does the deployed artifact functionally run?"* — not `/forward-pass-nt`'s code audit, not `/walkthrough-nt`'s find-and-fix, and not `/ux-review-nt`'s *"is it good to use?"* (which can run against a mockup; live-check cannot run without the real runtime).
+If the project has no runnable surface (a pure library with full deterministic tests), say so: live-check doesn't apply, and the test suite is the verifier.
 
-**READ-ONLY on source.** live-check drives the app and reads evidence; it never edits code. A failure hands out: a bug → `/walkthrough-nt`; a design/UX gap → `/ux-review-nt` or `/decide-nt`; a code defect → a fix pass (its own verification). The maker–checker split holds.
+## Phase 0 — Does it need a live check?
 
-`$ARGUMENTS` (optional): the flow to verify (e.g. `voice-clone`, `ocr`, `search`). If empty, verify the feature that changed most recently (read `git log` / the latest `plan/` summary to find it).
+If the change is fully exercised by the dev preview plus a deterministic check (a pure function with a unit test, a config edit, copy), say so and stop.
 
-If the current directory isn't a git repo, ask which project — don't guess. If the project has no runnable surface (a pure library with full deterministic tests), say so: live-check doesn't apply, the test suite is already the verifier.
-
-## Phase 0 — Does it even need a live check? (the trigger test)
-
-live-check is **not** for every change. If the change is fully exercised by the dev preview plus a deterministic check (a pure function with a unit test, a config edit, copy), say so and stop — running a live replay adds nothing.
-
-It is **REQUIRED** when the change touches any path the preview structurally can't run:
-- a **heavy in-browser model** (WebGPU / wasm — the preview pane can't load it; it's cached only in a real browser);
-- a **real-device API** — camera, mic, file-system picker, clipboard, notifications;
-- a **gesture-gated** path — audio autoplay, fullscreen, permission prompts (a programmatic call won't trigger it);
-- a **cross-origin / mirrored** surface (e.g. an app embedded under a different origin);
+It is **required** when the change touches a path the preview can't run:
+- a **heavy in-browser model** (WebGPU / wasm), cached only in a real browser;
+- a **real-device API**: camera, mic, file-system picker, clipboard, notifications;
+- a **gesture-gated** path: audio autoplay, fullscreen, permission prompts;
+- a **cross-origin or mirrored** surface (an app embedded under a different origin);
 - **cached or persisted state across a reload** (IndexedDB / OPFS / Cache Storage / picked folders);
-- **timing-dependent** behaviour (streaming, races, debounced/queued work).
+- **timing-dependent** behaviour (streaming, races, debounced or queued work).
 
-If any apply, the static gate is not the verifier — this run is. Name which trigger(s) fired in the report header.
+Name the trigger(s) that fired in the report header.
 
 ## Phase 1 — Reach the real runtime
 
-Pick the surface that actually exercises the path:
-- **Prod, if it auto-deploys** — the real bundle a user hits. Confirm the deploy **landed**, and beware: a CDN edge / `curl` can serve a *stale* copy for minutes after the browser already sees the new one. **The browser is the source of truth** — check for a marker unique to the change *in the loaded page* (an element id, a string), not via `curl`.
-- **A real GPU browser where the model/state is cached** — drive it with the Chrome MCP (claude-in-chrome), not the in-app preview pane. Headless / preview Chromium has **no WebGPU** and an empty cache; the real browser has the ~GB model already on disk.
+- **Prod, if it auto-deploys.** Confirm the deploy landed in the browser: a CDN edge or `curl` can serve a stale copy for minutes after the browser sees the new one. Check for a marker unique to the change in the loaded page (an element id, a string).
+- **A real browser where the model is cached (Chrome via claude-in-chrome).** Headless Chromium has no WebGPU, and the built-in browser pane starts with an empty cache; the user's Chrome has the multi-GB model on disk.
 
-Then confirm the **prerequisites are actually present** before you test behaviour — don't assume:
-- the project's verification harness, if it has a `doctor` (left by `/walkthrough-nt`), reports green — run it before hand-checking the items below,
-- the model is cached (enumerate Cache Storage / IDB for its files),
-- the capability exists (`navigator.gpu`, `getUserMedia`, the picker API),
-- **the tab is FOREGROUND.** WebGPU (and rAF-driven loops) **throttle or stall in a hidden/backgrounded tab** — a load that hangs at "100%" is almost always this. Check `document.visibilityState`; if `hidden`, ask the user to front the tab and wait, don't diagnose a bug.
+Confirm the prerequisites before testing behaviour:
+- the project's harness `doctor` (left by `/walkthrough-nt`), if any, reports green;
+- the model is cached (enumerate Cache Storage / IDB for its files);
+- the capability exists (`navigator.gpu`, `getUserMedia`, the picker API);
+- **the tab is in the foreground.** WebGPU and rAF loops stall in a hidden tab; a load that hangs at "100%" is almost always this. If `document.visibilityState` is `hidden`, ask the user to front the tab and wait.
 
 ## Phase 2 — Exercise the real user path with a real gesture
 
-Walk the genuine sequence a user takes, through the **actual UI**. Read the flow's file in the feature map first (`verify/features/`, left by `/walkthrough-nt`) when one exists — it names the entry points, the gated variants, and what usually lies, so you drive the real path instead of rediscovering it:
-- For anything **gesture-gated**, use a **trusted input** — a real click/keypress via the browser MCP, not `element.click()` in JS. A programmatic click doesn't carry user activation, so audio stays suspended and focus doesn't move — you'll mis-read a working feature as broken.
-- Feed **real input**. If the path needs a real-world asset (a voice sample, a document, an image), use a genuine one. When a **real person's likeness/voice** would be the input, prefer a **public-domain / properly-licensed** source, keep the output **on-device**, and keep any generated content an obvious **test artifact** — never a distributable impersonation. (Functional QA of your own tool is fine; producing deceptive content is not, even for "testing".)
-- Follow the true order — upload/record → process → act → persist — not a shortcut that skips the step under test.
+Read the flow's file in `verify/features/` first, when one exists. Then walk the genuine sequence through the actual UI:
+- For anything gesture-gated, use **trusted input** (a real click or keypress via the browser MCP), not `element.click()` in JS: a programmatic click carries no user activation, so audio stays suspended and focus doesn't move.
+- Feed **real input**. When a real person's likeness or voice would be the input, use a **public-domain or properly licensed** source, keep the output on-device, and keep anything generated an obvious test artifact, never a distributable impersonation.
+- Follow the true order (upload/record → process → act → persist), not a shortcut that skips the step under test.
 
 ## Phase 3 — Instrument, and read machine evidence
 
-Do **not** eyeball "it seems to work." Attach a probe and read numbers — every claim needs a resolving pointer:
-- **Hook the output.** Wrap the sink that proves the work happened and read its shape: audio buffer sample-count & duration, generated token count, decoded image dimensions, row counts, the actual network requests fired (or *not* fired, for an on-device claim). (LocalMind example: wrap `AudioContext.prototype.createBuffer` → a 175 680-sample / 7.32 s buffer is proof of non-degenerate speech; a <2 400-sample buffer is the bug.)
-- **Run a CONTROL** when the defect is input-specific. Prove the fix by contrast: the failing input *and* a known-good input, side by side (the `!`-ending line vs a plain line). One passing run doesn't isolate the cause; the pair does.
-- **Reload to prove persistence.** For any "survives a refresh / restored from disk" claim, actually reload and re-read the restored state — don't infer it from the write path.
-- **For a web-facing surface, response headers are machine evidence too.** Static review (`/forward-pass-nt`) can read code, not what the deployed edge actually serves. While you're already hitting the real runtime, capture the response headers on the flow's requests and flag: wildcard CORS combined with `Access-Control-Allow-Credentials`, a session/auth cookie missing `HttpOnly`/`Secure`/`SameSite`, a stack trace or SQL error text in a production error response, and an unauthenticated `/debug`/`/admin`/`/status`/`/.env` route reachable from this surface. (Checklist condensed from [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill), MIT — its "obvious things" pass.) A hit here is a Security finding for the report, same severity handling as any other; it isn't the point of the run, so don't let it turn into a full sweep — that's `/forward-pass-nt`'s job.
-- **Confirm a suspected regression with a second measurement.** First readings mislead. Two classic false-positives (shared with `/ux-review-nt`): a programmatic `.click()` doesn't move focus / grant activation like a real click (focus-restore & audio look broken when they aren't); and a **synchronous read right after an `async` handler** reads *before* the handler resumed (persistence looks broken when it isn't). Reproduce with real input and a settled microtask before it earns a finding.
+Every claim needs a resolving pointer; don't eyeball it.
+- **Hook the output.** Wrap the sink that proves the work happened and read its shape: buffer sample count and duration, token count, image dimensions, row counts, the network requests fired (or not fired, for an on-device claim). LocalMind example: wrap `AudioContext.prototype.createBuffer`; a 175 680-sample / 7.32 s buffer is real speech, a <2 400-sample buffer is the bug.
+- **Run a control** when the defect is input-specific: the failing input and a known-good input side by side.
+- **Reload to prove persistence**, then re-read the restored state; don't infer it from the write path.
+- **Read the response headers** on the flow's requests and flag: wildcard CORS with `Access-Control-Allow-Credentials`, a session or auth cookie missing `HttpOnly`/`Secure`/`SameSite`, a stack trace or SQL error text in a production error response, an unauthenticated `/debug`, `/admin`, `/status` or `/.env` route. (Checklist condensed from [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill), MIT.) A hit is a Security finding; don't widen it into a full sweep, which is `/forward-pass-nt`'s job.
+- **Confirm a suspected regression with a second measurement.** A programmatic `.click()` doesn't move focus or grant activation, and a synchronous read right after an `async` handler runs before the handler resumes; both make working features look broken. Reproduce with real input and a settled microtask before it earns a finding.
 
 ## Phase 4 — Report as verified RESULTs, and set the state
 
 Write `plan/live-check-<date>.md` in ATTEST form:
-- **Header** — the flow, the surface (prod URL / real browser), which Phase-0 trigger(s) fired, and whose eyes (maker or checker — machine-read evidence makes this less eyes-dependent than the heuristic reviews, but still say it).
-- **One `RESULT (verified)` per proven claim, each with its resolving pointer** — the command run, the sample count, the duration, the restored value. These are the only claims allowed the reserved words.
-- **Explicit `not exercised` lines** for paths you couldn't reach — with *why* (env / hardware / gesture) and the residual `RISK` (severity + what would confirm it). Never let an un-run path read as passing by omission (ATTEST §3, rule 4).
-- **A `BLOCKER`** if the runtime was unreachable at all (deploy didn't land, no cached model, WebGPU absent) — with the tried-trail.
+- **Header**: the flow, the surface (prod URL or real browser), the Phase 0 trigger(s), and whose eyes (maker or checker).
+- **One `RESULT (verified)` per proven claim**, each with its resolving pointer: the command run, the sample count, the duration, the restored value. Only these claims may use the reserved words.
+- **Explicit `not exercised` lines** for paths you couldn't reach, with why (env / hardware / gesture) and the residual `RISK` (severity + what would confirm it). An un-run path never reads as passing by omission.
+- **A `BLOCKER`** with the tried-trail if the runtime was unreachable (deploy didn't land, no cached model, WebGPU absent).
 
-**The gate:** a clean live-check is what moves the feature's honest state to `shipped`. A fail (or an unreachable runtime) caps it at *"implemented, not yet verified"* and hands the defect to the right sibling. Report worst-news-first; do not launder a partial run into a full pass.
+**The gate:** a clean live-check moves the feature's honest state to `shipped`. A fail or an unreachable runtime caps it at *"implemented, not yet verified"* and hands the defect to the right command. Report worst news first; never launder a partial run into a full pass.
 
 ## Playbook hook
 
-If the user's config (CLAUDE.md / memory) or the project itself names a live-check or replay playbook for this kind of surface, read it before Phase 1 — it carries the concrete probes and gotchas this generic spec can't.
+If the user's config (CLAUDE.md / memory) or the project names a live-check or replay playbook for this kind of surface, read it before Phase 1.
 
 ## Impact declaration
 
-`plan/live-check-<date>.md` is a **record**: append-only, never rewritten. The derived files (`pending.md`, `workplan.md`, `history.md`'s `## Decisions` and `## Dead ends`) are a projection over the records, rewritten only by `/replan-nt`, `/windup-nt` and `/scaffold-nt`. (Full contract: [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) in the ntkit repo.) End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
-
-```markdown
-## Impact
-- pending.md/Now — add: <item this run says belongs on the list>
-- workplan.md/B2#3 — status: [ ] → [x], verified by <the check that proves it>
-- none — <reason nothing changes>
-```
-
-Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. Do not write the item into `pending.md` or `workplan.md` yourself — a record that declares its impact and a reconcile pass that folds it are what keep the plan rebuildable from the log. An `add` line with nothing later citing this record is a **ghost**, and `plancheck` reports it.
+`plan/live-check-<date>.md` is a record: append-only. End it with an `## Impact` section, one line per change it implies for `pending.md`, `workplan.md` or `history.md`'s indexes (`- pending.md/Now — add: …`, `- workplan.md/B2#3 — status: [ ] → [x], verified by …`), or `- none — <reason>`. Declare it; never add, drop or reword items in `pending.md` or `workplan.md` yourself (a status flip on an existing item is allowed). `/replan-nt` applies it ([MEMORY.md §3](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#3-declared-impact)).

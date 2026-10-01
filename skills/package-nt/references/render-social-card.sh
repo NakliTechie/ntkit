@@ -15,8 +15,8 @@
 # (--ink, --muted, --accent-text) must reach 4.5:1 (WCAG AA) against --bg. A miss exits 1
 # and prints the nearest passing shade of that colour; there is no override flag.
 # Run this once for the repo's marketing/social.png and once for the app's own
-# public/social.png (or wherever it serves static assets) — same template, same look,
-# two surfaces (see references/social-preview.md and README-DOCTRINE's "two surfaces" note).
+# card at marketing/social-app.png, which the user ships into their static assets — same
+# template, same look, two surfaces (see references/social-card-build.md).
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 

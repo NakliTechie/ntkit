@@ -1,31 +1,21 @@
 ## 4. Verify plan/ is gitignored
 
-Check with `git check-ignore -q plan` (exit 0) and `git ls-files plan` (empty) — not by searching `.gitignore` for the line: a `plan/` line matches folders only, and `plan` may be a symlink ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)). If not ignored, append `/plan`. The plan/ folder is local-only working notes — its contents must not be pushed to remote.
+Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives) (`git check-ignore -q plan`; add `/plan`, no trailing slash). Nothing under `plan/` is ever pushed.
 
 ## 5. Commit, merge to main, push — and sweep stray worktrees
 
 **Commit + push:**
-- Run `git status` to see what's outside plan/.
-- If there are uncommitted changes outside plan/: stage them (by path, never `git add -A`), commit with a clear one-line message summarizing the day's work, then `git push` to the current branch's upstream.
-- If there's nothing to commit, skip the commit but still attempt `git push` in case earlier local commits haven't been pushed.
-- If the repo has no remote configured or the push fails, note it in the final handoff message rather than silently swallowing the error.
-- Never force-push. Otherwise, push without prompting — including to `main`/`master`. (windup is end-of-session ritual; if the user invoked it, they're authorizing the push.)
+- Stage changes outside `plan/` by path, never `git add -A`; commit with a one-line message summarizing the day's work; `git push` to the current branch's upstream.
+- Nothing to commit → still `git push`, in case earlier local commits are unpushed.
+- No remote, or the push fails → say so in the handoff; never swallow the error.
+- Never force-push. Otherwise push without prompting, including to `main`/`master`.
 
-**Merge to main (conditional — the closing-state guard gates it):**
+**Merge to main (the closing-state guard gates it):**
 - On the default branch already → nothing to merge.
-- On a feature branch AND closing clean (work committed, verifier run and green): merge into the default branch, push it, delete the feature branch (local + remote). Small logical chunks land on main at close — that's the convention.
-- Closing from `building` (uncommitted work, verifier not run or not green): do **not** merge. Push the feature branch as-is and name it in the handoff ("on branch `x`, unmerged: <why>"). A windup never launders unverified work onto main.
+- On a feature branch and closing clean (work committed, verifier run and green) → merge into the default branch, push it, delete the feature branch (local + remote).
+- Closing from `building` → do **not** merge. Push the feature branch as-is and name it in the handoff ("on branch `x`, unmerged: <why>"). A windup never puts unverified work on main.
 
 **Stray-worktree sweep:**
-
-> **Rescue `plan/` before you remove anything.** A worktree's `plan/` is gitignored, so it exists in
-> that directory and nowhere else — no commit, no remote, no reflog. `git worktree remove` deletes it
-> with the rest of the tree, and a run report, its recordings and its action logs go with it. Before
-> removing a worktree, copy any `plan/` files it holds that the main checkout does not into the main
-> checkout's `plan/`, keeping their names. Only then remove. (A worktree `plan` that is a symlink to the main checkout's holds nothing of its own — removing the worktree removes only the link.) This has already cost two walkthrough
-> reports and 51 screen recordings in one session.
-
-- Run `git worktree list`. For each linked worktree beyond the main checkout (autopilot/agent leftovers):
-  - Clean (no uncommitted changes) and its branch fully merged into the default branch → `git worktree remove <path>` and delete the branch.
-  - Dirty, or holding unmerged commits → leave it untouched and list it in the handoff with what it's holding. Never delete work to tidy up.
-- Finish with `git worktree prune` to clear stale registrations.
+- **Rescue `plan/` first.** Before removing a worktree, copy any `plan/` files it holds that the main checkout lacks into the main checkout's `plan/`, keeping their names. A real-folder `plan/` in a worktree exists nowhere else and dies with it (this once cost two walkthrough reports and 51 screen recordings); a symlinked `plan` holds nothing of its own.
+- For each linked worktree in `git worktree list`: clean and its branch fully merged into the default branch → `git worktree remove <path>` and delete the branch; dirty or holding unmerged commits → leave it untouched and list it in the handoff with what it holds. Never delete work to tidy up.
+- Finish with `git worktree prune`.

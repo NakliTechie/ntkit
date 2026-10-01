@@ -4,30 +4,29 @@ argument-hint: "(none)"
 allowed-tools: ["Bash", "Glob", "Read", "Write"]
 entry: "plan/ accumulated beyond the three canonical files"
 exit: "three canonical files rebuilt; replay check reported; sources archived"
-writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/standing.md (answers only, if the file exists), plan/_archive/"
+writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/standing.md (answers only, if the file exists), plan/_archive/, plan/ideas.md (or IDEAS.md) from soc triage"
 ---
 
-Consolidate the project's `plan/` folder into three canonical files. Run when plan/ has accumulated daily summaries and ad-hoc scratch and needs a reset.
-
-If the current directory is not inside a git repo with a `plan/` folder, stop and ask the user which project to replan.
+Consolidate the project's `plan/` folder into three canonical files and archive the folded sources. Never commit or push; `plan/` is gitignored. Not in a git repo with a `plan/` → ask which project.
 
 ## Step 1: Inventory and classify
 
-List everything currently in `plan/` (excluding any existing `_archive/`). Classify each file into exactly one bucket:
+List everything in `plan/` except `_archive/`. Classify each file into exactly one bucket:
 
-- **Daily summary** — matches `plan/YYYY-MM-DD-summary.md`, or a similar dated note that isn't one of the report types below. → folds into `history.md`
-- **Autopilot morning report** — `plan/YYYY-MM-DD-autopilot.md` (from `/autopilot-nt`). → sweep **Parked — needs you** items into `pending.md` (questions → `Open questions`, stop-lined actions the human must perform → `Now`); fold **Assumed** entries into `history.md` Decisions, dated and marked `(autopilot default)`; carry any `[~]` items into `workplan.md`; then archive the report. If the `autopilot/<date>` branch it names is still unmerged, add one `Now` item: `Review/merge autopilot/<date>`.
-- **Unnamed scratch** — generic names like `notes.md`, `scratch.md`, `thoughts.md`, untitled drafts. → folds into `history.md`
-- **Stream-of-consciousness log** — `plan/soc.md` (from `/soc-nt`). → **triage line by line**, don't blanket-fold: load-bearing choices → `history.md` Decisions (dated from the entry's timestamp); actionable future work → the ideas backlog (`plan/ideas.md`, or `IDEAS.md` if the repo has one); deferred / "not now" items → `pending.md` `## Parked` (raised, consciously parked, not abandoned); questions → `pending.md` Open questions; the remainder → `history.md` Log under the entry's date. Then archive it as `soc-<replan-date>.md` — the bare name would collide on the next cycle.
-- **Dated audit report** — any `plan/<type>-YYYY-MM-DD.md` written by a kit command (forward-pass, walkthrough, ux-review, maintenance, live-check, and any future report-writer). → one handling for all: sweep open (`[ ]`/`[~]`) / deferred items into `pending.md`/`workplan.md`; fold verified false-positives and non-issues into `history.md` Dead ends; anything that is really a *decision* (structural recommendations, major bumps) surfaces for `/decide-nt`; then archive the report. A new report-writing command needs no edit here — the pattern covers it.
-- **Canonical output** — `pending.md`, `workplan.md`, `history.md`. → gets rewritten this run
+- **Daily summary** — `plan/YYYY-MM-DD-summary.md`, or a similar dated note that isn't a report. → fold into `history.md`; archive.
+- **Autopilot morning report** — `plan/YYYY-MM-DD[-N]-autopilot.md` (from `/autopilot-nt`). → apply its `## Impact` adds (its Needs-you items, and `Review/merge autopilot/<date>` for a held branch). An older report with no `## Impact`: **Needs you** questions → `Open questions`, stop-lined actions → `Now`, and `Review/merge` if its branch is unmerged. **Assumed** entries into `history.md` Decisions, dated and marked `(autopilot default)`; `[~]` items into `workplan.md`. Archive.
+- **Unnamed scratch** — generic names like `notes.md`, `scratch.md`, `thoughts.md`, untitled drafts. → fold into `history.md`; archive.
+- **Stream-of-consciousness log** — `plan/soc.md` (from `/soc-nt`). → **triage line by line**, never blanket-fold: load-bearing choices → `history.md` Decisions (dated from the entry's timestamp); actionable future work → the ideas backlog (`plan/ideas.md`, or `IDEAS.md` if the repo has one); deferred / "not now" → `pending.md` `## Parked`; questions → `pending.md` Open questions; the rest → `history.md` Log under the entry's date. Archive it as `soc-<replan-date>.md` so the next cycle's name doesn't collide.
+- **Dated audit report** — any `plan/<type>-YYYY-MM-DD.md` written by a kit command. → open (`[ ]`/`[~]`) and deferred items into `pending.md`/`workplan.md`; verified false positives and non-issues into `history.md` Dead ends (finding ID + one-line reason), so a future audit doesn't re-flag them; anything that is really a *decision* (structural recommendations, major bumps) surfaces for `/decide-nt`. Archive.
+- **Lab campaign** — `plan/lab/<slug>/` (from `/lab-nt`). → fold each leg report that no derived item and no `## Log` line cites yet: apply its `## Impact` lines, then append a Log line tagged `[from: <date>-leg]` so the next replan skips it. Leave the folder in place, never archive it; `/lab-nt` resumes from it.
+- **Canonical output** — `pending.md`, `workplan.md`, `history.md` → rewritten this run; `standing.md` → answers only (Step 4.7).
 - **Named design / intentional artifact** — anything with a meaningful name: `feature-x-design.md`, `<milestone>-breakdown.md`, `pending-from-<source>.md`, charters, spec drafts. → **leave untouched**
 
-Print the classification and proceed — no waiting. Ambiguity defaults to the safe side: if unsure whether a file is "named design" or "unnamed scratch", treat it as named (preserve untouched) and list it under `Preserved` in the Step 7 summary. A default that safe needs no question.
+From every record you fold, apply each `## Impact` line not yet reflected in the derived files. A status flip the recorder already made (W3) needs nothing, and neither does a `<date>-summary`'s Impact (windup applied it). Print the classification and proceed without waiting. Unsure whether a file is named design or unnamed scratch → treat it as named, leave it untouched, and list it under `Preserved` in the Step 7 summary.
 
 ## Step 2: Rewrite history.md
 
-Merge existing `plan/history.md` (if present) with the daily summaries + scratch being folded in. Final shape:
+Merge existing `plan/history.md` (if present) with the summaries and scratch being folded in. Final shape:
 
 ```
 # History
@@ -52,14 +51,13 @@ Merge existing `plan/history.md` (if present) with the daily summaries + scratch
 ```
 
 Merge rules:
-- Pull existing Decisions and Dead ends content forward — never overwrite blindly.
-- Newest entries first in Log.
-- Pull insights from the daily summaries' "Decisions" and "Dead ends" mentions into the top-level Decisions and Dead ends sections, so they're findable.
-- Fold forward-pass reports' verified false-positives/non-issues into `## Dead ends` (keep the finding ID + the one-line reasoning) so a future audit doesn't re-flag them.
+- Carry existing `## Log` entries through verbatim; the Log is a record (MEMORY.md §1). Newest entries first.
+- Pull existing Decisions and Dead ends forward; never overwrite blindly.
+- Lift the summaries' decisions and dead ends into the top-level Decisions and Dead ends sections, so they're findable.
 
 ## Step 3: Restructure pending.md
 
-Rewrite `plan/pending.md` into three sections, pulling from existing `pending.md`, any open items surfaced in the folded summaries, and any open (`[ ]`/`[~]`) / deferred items from forward-pass, walkthrough, ux-review, and maintenance reports:
+Rewrite `plan/pending.md` from existing `pending.md` plus the open and deferred items of every record folded in Step 1:
 
 ```
 # Pending
@@ -77,39 +75,37 @@ Rewrite `plan/pending.md` into three sections, pulling from existing `pending.md
 - ...
 ```
 
-Existing pending.md items are categorized by best judgment: actionable → `Now`, deferred-but-not-abandoned → `Parked`, unanswered → `Open questions`. Items pulled from the daily summaries' "Open questions" sections land in Open questions; anything a summary marked deferred/parked lands in Parked. If something's genuinely unclear, leave it in Now and flag in the summary at the end.
+Existing items by judgment: actionable → `Now`, deferred but not abandoned → `Parked`, unanswered → `Open questions`. Anything genuinely unclear stays in `Now` and is flagged in the Step 7 summary.
 
 ## Step 4: Refresh workplan.md
 
-Regenerate `plan/workplan.md` from the freshly restructured pending Now. Same shape as /windup-nt produces: each chunk gets a short title, 2–5 items from Now, and a rough size estimate ("30 min", "half day", "1–2 hours"). Items that don't yet cluster go under `## Unbatched`.
+Regenerate `plan/workplan.md` from the new pending `Now`, in the shape `/windup-nt` produces: each chunk gets a short title, 2–5 items from Now, and a rough size estimate ("30 min", "half day", "1–2 hours"). Items that don't yet cluster go under `## Unbatched`.
 
-**Preserve in-flight chunks:** If a chunk in the existing workplan still has all its items in pending Now, copy it through verbatim. Don't shuffle chunks for no reason — the user may be mid-execution.
+**Preserve in-flight chunks:** if a chunk in the existing workplan still has all its items in pending Now, copy it through verbatim. The user may be mid-execution.
 
 ## Step 4.5: Replay check
 
-`history.md` is the event log; `pending.md` and `workplan.md` are derived state. Before archiving anything, run the mechanical check rather than judging by reading:
+Before archiving anything, run the mechanical check rather than judging by reading:
 
 ```bash
 python3 "$SKILL/bin/plancheck.py" .                  # $SKILL: this skill's base directory, printed at load
 python3 ~/.claude/skills/replan-nt/bin/plancheck.py . # installed path
 ```
 
-Stdlib only — no install step, no dependencies.
+It compares provenance tags, quoted tags and `## Impact` declarations against the records ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) §5). Four findings:
 
-It compares provenance tags against the records that exist, quoted tags against the words in those records, and `## Impact` declarations against the items that cite them ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md)). Four findings:
-
-- **orphan** — a derived item whose `[from:]` names a record that does not exist. State arrived from nowhere.
-- **ghost** — a record declaring an `add` impact that no derived item cites. Work was done and silently dropped.
-- **misquote** — a quoted tag whose words are not in the record it names. The item claims something its source does not say.
-- **untagged** — an item with no provenance. Info, never failure: this is the legacy case and the hand-written case.
+- **orphan** — a derived item whose `[from:]` names a record that does not exist.
+- **ghost** — a record declaring an `add` impact that no derived item cites.
+- **misquote** — a quoted tag whose words are not in the record it names.
+- **untagged** — an item with no provenance. Info, never failure.
 
 If the script is not available, fall back to reading: replay the rebuilt `## Decisions` + `## Log` in order and ask of each item now in `pending.md` whether the log explains how it got there. Say which mode you used.
 
-**Don't fix silently.** Report the count in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts / K misquotes — <one line each>`) and fold the obvious ones back: an orphan gets a dated log line, a ghost gets parked or explicitly closed, a misquote gets its item reworded to what the record says (or its quote corrected, if the item was right and the quote was careless). Divergence found here is drift caught before it is archived.
+**Don't fix silently.** Report the result in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts / K misquotes — <one line each>`) and fold the obvious ones back: an orphan gets a dated log line, a ghost gets parked or explicitly closed, a misquote gets its item reworded to what the record says (or its quote corrected, if the item was right and the quote careless).
 
 ## Step 4.6: Tag provenance
 
-Every item you wrote into `pending.md` or `workplan.md` this run carries a trailing tag naming the record it came from, so the next replay check is a set comparison instead of a re-read:
+Every item you wrote into `pending.md` or `workplan.md` this run carries a trailing tag naming its record:
 
 ```markdown
 - [ ] Fix the nil deref in parser  [from: forward-pass-2026-09-06#F3]
@@ -117,19 +113,19 @@ Every item you wrote into `pending.md` or `workplan.md` this run carries a trail
 - Ask legal about retention  [from: hand]
 ```
 
-Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. **Quote when you can:** add the record's own words for the claim after the source, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]` — a few words to one sentence, copied exactly, no `]` or `"` inside. `plancheck` then proves the item says what its record says (MEMORY.md §4). Carry existing tags through untouched. **Leave pre-existing untagged items alone** — an untagged item means hand-written, so back-filling tags you cannot source would be inventing provenance. Tag what you fold this run; the folder converges over cycles.
+Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. **Quote when you can:** add the record's own words after the source, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`, a few words to one sentence, copied exactly, no `]` or `"` inside (MEMORY.md §4). Carry existing tags through untouched. **Leave pre-existing untagged items alone**: untagged means hand-written, and a back-filled tag you cannot source is invented provenance.
 
 ## Step 4.7: Refresh standing questions
 
-Only if `plan/standing.md` exists (it is opt-in, [MEMORY.md §7](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#7-standing-questions)). For each `##` question, rewrite the bullets under it from the records you just folded plus the canonical files: every bullet tagged, quoted where the record has the words, `- none  [from: <record>]` when the records show nothing. **Never add, remove, reorder or reword a question** — questions are the human's. Then re-run `plancheck` if Step 4.5 ran before this step, so the new answers are checked too. No `standing.md` → skip silently; never create one.
+Only if `plan/standing.md` exists ([MEMORY.md §7](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#7-standing-questions)). For each `##` question, rewrite the bullets under it from the records you just folded plus the canonical files: every bullet tagged, quoted where the record has the words, `- none  [from: <record>]` when the records show nothing. **Never add, remove, reorder or reword a question**; questions are the human's. Re-run `plancheck` if Step 4.5 ran before this step. No `standing.md` → skip silently; never create one.
 
 ## Step 5: Archive source files
 
-Create `plan/_archive/` if it doesn't exist. Move (don't copy, don't delete) all files classified as "Daily summary", "Unnamed scratch", "Autopilot morning report", "Forward-pass audit report", "Walkthrough audit report", "UX-review report", or "Maintenance report" into it. Preserve filenames. (For audit reports, make sure open/deferred items landed in `pending.md`/`workplan.md` and verified non-issues landed in `history.md` Dead ends — and for autopilot reports, that Parked landed in pending and Assumed in Decisions — per Steps 2 & 3 — before archiving.)
+Move (never copy or delete) every file Step 1 marked archive into `plan/_archive/`, keeping filenames (`soc.md` renamed as Step 1 says). Move a file only after its items have landed per Steps 2–4.
 
 ## Step 6: Verify gitignore
 
-Confirm `git check-ignore -q plan` passes (append `/plan` to `.gitignore` if not — a `plan/` line misses a symlinked `plan`, [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)). `_archive/` is inside `plan/` so it inherits that.
+Check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives) (`git check-ignore -q plan`; add `/plan`, no trailing slash). `_archive/` inherits it.
 
 ## Step 7: Print summary
 
@@ -143,8 +139,7 @@ pending.md: <X> Now / <Y> Parked / <Z> Open questions
 workplan.md: <N> chunks, top chunk = "<title>"
 [if standing.md exists:] standing.md: <N> questions refreshed
 Archived to plan/_archive/: <count> files
+Replay: <clean | N orphans / M ghosts / K misquotes — one line each>
 
 Preserved untouched: <list of named design docs, or "none">
 ```
-
-Keep tight — the user wants to see what changed without re-reading the files. Do NOT commit or push as part of /replan-nt; plan/ is gitignored, so consolidation stays local. (Push happens via /windup.)

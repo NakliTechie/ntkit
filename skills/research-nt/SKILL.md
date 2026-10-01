@@ -2,17 +2,13 @@
 name: research-nt
 description: "Research a question into a cited report; pauses for plan approval; writes plan/research/."
 argument-hint: "<question> [--go] | go <slug> | status — e.g. \"how do open deep-research harnesses verify citations\""
-allowed-tools: ["Bash", "Glob", "Read", "Write", "Edit", "Task", "Skill"]
+allowed-tools: ["Bash", "Glob", "Read", "Write", "Edit", "Agent", "Skill"]
 entry: "a question in $ARGUMENTS, or a SPEC-READY or BUDGET run in plan/research/<slug>/ for `go`"
 exit: "plan/research/<slug>/run.md says SPEC-READY, VERIFIED, FLAGGED, BUDGET or BLOCKED; VERIFIED only when `check.py gates` without bypass exits 0"
 writes: "plan/research/<slug>/ only (question.md, vault.md, candidates/, spec.md, merge.md, spec-before-critique.md, critique.md, revision.md, sections/, fetch-log.jsonl, .fetch-*.lock, draft.md, edit-plan.md, report.md, claims*.json, verify.json, *-before-repair.*, repair-review.json, run.md); page text goes to the page store"
 ---
 
 Answer a question from the web with a cited report. The run plans the report as a spec, stops for your approval, researches each unit in its own subagent, assembles the report, then runs deterministic gates that decide whether the report may be called VERIFIED.
-
-The pipeline implements layers L0–L5. The L6 benchmark decides release readiness; implementation
-alone does not establish research quality. Three planners and a judge produce the spec, one critic
-and reviser refine it, section researchers write, one editor edits, and a fresh checker judges claims.
 
 ## Invocations
 
@@ -47,7 +43,7 @@ Example: `/research-nt "how do open deep-research harnesses verify citations"`, 
 
 ## Guards
 
-- **Legal states:** any. The command never reads the project's code. No `plan/` → create it with the MEMORY.md §0 snippet (a symlinked `plan` is fine; never replace it).
+- **Legal states:** any. The command never reads the project's code. No `plan/` → create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore` (a symlinked `plan` is fine; never replace it).
 - **Refuse, writing nothing,** when: `$ARGUMENTS` is empty; `go <slug>` names no run; the run's `State:` is not SPEC-READY or BUDGET; `python3 $SKILL/bin/check.py spec $RUN` fails on `go` (show its problem list — the user's edit broke the spec).
 - **Fold at seams** (AUTHORING §8). Subagents return one status line; the files hold the rest. Re-read a file rather than carry its content.
 

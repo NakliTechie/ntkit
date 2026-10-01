@@ -27,5 +27,3 @@ Uncovered:
 
 Needs you: <anything a stop-line parked, or a design call Phase 4 couldn't make alone>
 ```
-
-End by naming whether the surface is ready for `/live-check-nt` (one final deployed-artifact replay) or `/release-nt`, and note that an uncovered list feeds `/autopilot-nt` like any other fix-workplan.

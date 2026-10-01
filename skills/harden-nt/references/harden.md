@@ -1,10 +1,11 @@
 ## Phase 4 — Harden: fix, then prove the check bites
 
 For each failing path, in order:
-1. **Fix it** — the smallest change against the surface's actual contract, same discipline as `/autopilot-nt` Phase 2.
+1. **Fix it** — the smallest change against the surface's actual contract, same discipline as `/autopilot-nt` Phase 2. Fix the cause, not the input. A fix that removes the feature (an early `return`, a hardcoded `false`, a disabled route, a commented-out call) is a stub wearing a fix: the attack fails because nothing runs. The Verify round's known-good input catches it, since it must still reach the guarded code and succeed.
 2. **Leave a check behind.** The fix is half the work; the path is not hardened until something will catch its return.
 3. **Prove the check can fail — before believing it can pass.** Deliberately reintroduce the defect (revert the fix, or hand-craft the bad input again) and confirm that specific check goes red. Only then run it against the real fix and confirm green. A check green through both is not a check — find the real cause and rewrite it; don't note the anomaly and move on.
 4. **Commit it** — one focused commit per path.
 5. **Log it** in `plan/harden-<date>.md`: the path, the fix SHA, and the proof (what red looked like, what green looks like now). The path moves to **hardened**.
+6. **Add it to the neuter matrix** — one row in the project's committed `verify/neuter-matrix.md`: `| <path> | <how to bring the defect back> | <check command> | red <date> |`. The default way back reverse-applies the fix's production hunks and leaves its check in place: `git show <fix SHA> -- <non-test paths> | git apply -R`. Reverting the whole commit would delete the check it is meant to run. The matrix turns step 3's one-time proof into a replay (adapted from google/mantis `neuter_matrix.py`, Apache-2.0). To replay a row: in a scratch worktree at HEAD, bring the defect back, run the check, confirm red, then discard the worktree. A reverse patch that no longer applies means the code moved. Bring the defect back by hand, write the new way into the row, and carry on.
 
 A path two honest fix attempts cannot close is parked, not forced — `/autopilot-nt` Phase 3 discipline.

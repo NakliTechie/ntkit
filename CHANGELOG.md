@@ -1,5 +1,43 @@
 # Changelog
 
+## [2.4.0] — 2026-10-01
+
+**Upgrade note:** the kit is 20 skills. `/standup-nt` and `/maintain-nt` are removed. Delete `~/.claude/skills/standup-nt/` and `~/.claude/skills/maintain-nt/` after upgrading.
+
+### Removed
+
+- `/standup-nt` (2 runs since 2026-06-20) and `/maintain-nt` (1 run). Cross-repo status lives in the plan store (`NT_PLAN_STORE`); dependency and Actions upkeep is Dependabot's job; performance drift is the `web-perf` skill's. maintain-nt's supply-chain and CI-privilege checks moved into `/forward-pass-nt` (below).
+- `DRIVER-HARNESS.md`. `/harden-nt` carries every rule it described.
+
+### Changed
+
+- Every command trimmed to what still changes a current model's behaviour: 64,010 → about 41,700 words across the kit. Cut generic how-to, textbook lists, rationale prose and text repeated across files; kept every contract, stop-line and incident rule, and the guards against self-grading, unverified "done", stubs and anchoring. Three fresh checkers compared old against new; every lost rule they found is restored.
+- One short `## Impact` block (MEMORY.md §3) in every record writer, naming the writer rule: a command may flip an item's status, never add, drop or reword it.
+- MEMORY.md W3: any executor may tick the `[ ]` items of a report's own Workplan, with an evidence row in its progress log.
+- `/forward-pass-nt` (from [google/mantis](https://github.com/google/mantis), Apache-2.0): every Critical, High and Security candidate is challenged by a fresh agent that sees only the claim and its `path:line`; Security severity is capped by marginal capability and a Security finding cites its ingress; a git-history seed re-checks past fixes and hunts their variants; findings are reconciled against prior reports after the cold read (new · still open · regression · re-flagged); the report header carries `Commit:`.
+- `/forward-pass-nt` security classes gain **Supply chain & CI**: floating sources, privileged fork triggers, script injection, cache poisoning, and known-advisory scanning. Any repo with dependencies or workflows runs it.
+- `/harden-nt` attacks the fix, not the input: a Verify round needs at least three variants of the same defect class, every run must show it reached the guarded code, and a fix that removes the feature counts as a stub. Hardened paths get a row in `verify/neuter-matrix.md`, replayed in Phase 6. `/autopilot-nt` applies the same variant rule to `[Security]` items.
+- `/ux-review-nt` reports end with a batched `[ ]` Workplan, which `/release-nt` and `/autopilot-nt` already read.
+- `/package-nt` no longer edits the app's `<head>`, deploys or pushes. A missing app card or meta tags is a gate finding; the app card renders to `marketing/social-app.png`. A missing LICENSE, a failed fresh-clone install, and a third-party host under a local-only README claim are blockers.
+- `/replan-nt` applies each record's Impact once and folds lab leg reports; `/resume-nt` names open lab campaigns.
+- Rotation in `/forward-pass-nt`, `/walkthrough-nt` and `/ux-review-nt` says what to do when no other model is reachable: run as-is and write `rotation: unavailable`.
+- `allowed-tools` names `Agent` instead of `Task`, and lists the browser tools of every skill that drives one.
+
+### Added
+
+- `forward-pass-nt/bin/cite-check.py`: the report's exit check. Every `path:line` must name an existing file and line, and every finding must cite one. `tests/cite-check.test.sh`.
+- `tests/anchoring.test.sh`: skills run their own scripts by anchored path (`$SKILL/...`), never repo-relative (AUTHORING §11). `tests/security-classes-sync.test.sh`: the two copies of the class catalogue stay identical.
+
+### Fixed
+
+- `/autopilot-nt` wrote `pending.md` and `history.md` directly, against its own contract; it now declares them as Impact lines. Its branch, worktree and record names are fixed once at launch, so a run that crosses midnight no longer merges a branch that does not exist; same-day runs take the first free `-N`.
+- `/replan-nt`'s plancheck command used `$(dirname "$0")`, which names the shell in an agent's Bash; `/package-nt` ran two scripts by repo-relative path. All three are anchored.
+- `/walkthrough-nt` and `/ux-review-nt` disagreed on the number of floor invariants (seven) and on waiting (a condition, never a fixed sleep).
+- Cross-skill paths use `$SKILL/../<skill>/`, so per-project installs resolve them.
+- Private project names removed from skill text and this changelog.
+
+Not verified: the model evals (`evals/run.sh`) did not run for this release; the eval login needs a keychain approval. `tests/run.sh`: 13 passed, 0 failed.
+
 ## [2.3.0] — 2026-09-30
 
 ### Added

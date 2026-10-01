@@ -116,7 +116,8 @@ project root: brag-slim keeps its intermediates in `work/`, full brag in `compos
 2. Copy `share-copy.txt` → `plan/launch-caption.txt` and `brag-plan.md` →
    `plan/launch-video-plan.md`. Both are working material, so they stay in the
    gitignored `plan/`. Phase 3 starts its caption from the first.
-3. Run `references/bake-poster.sh marketing/launch.mp4 marketing/launch.jpg`.
+3. Run `"$SKILL/references/bake-poster.sh" marketing/launch.mp4 marketing/launch.jpg`, where
+   `$SKILL` is this skill's base directory, printed when the skill loads.
    Both paths bake their own poster; this run proves it, and fails if the size, frame
    count, duration or frame 0 is off.
 4. Check the length: `ffprobe -v error -show_entries format=duration -of csv=p=0 marketing/launch.mp4`

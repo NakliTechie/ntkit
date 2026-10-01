@@ -90,7 +90,7 @@ Regenerate `plan/workplan.md` from the freshly restructured pending Now. Same sh
 `history.md` is the event log; `pending.md` and `workplan.md` are derived state. Before archiving anything, run the mechanical check rather than judging by reading:
 
 ```bash
-python3 "$(dirname "$0")/bin/plancheck.py" .          # from the skill folder
+python3 "$SKILL/bin/plancheck.py" .                  # $SKILL: this skill's base directory, printed at load
 python3 ~/.claude/skills/replan-nt/bin/plancheck.py . # installed path
 ```
 

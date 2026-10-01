@@ -17,8 +17,10 @@ visible screenshot is worse than clean type; when in doubt, use the template.
 
 ### Build it
 
+`$SKILL` is this skill's base directory, printed when the skill loads.
+
 ```bash
-skills/package-nt/references/render-social-card.sh \
+"$SKILL/references/render-social-card.sh" \
   --name "<ProductName>" \
   --tagline "<one sentence, the same pitch as the README's bold line>" \
   --facts '<b>the one fact worth bolding</b> &nbsp;&#183;&nbsp; clause two &nbsp;&#183;&nbsp; clause three' \

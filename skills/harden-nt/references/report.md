@@ -1,6 +1,6 @@
 ## Phase 6 — Covered or stopped
 
-**Covered** when every path is hardened, every hardened path's check still goes red on re-run against its defect, and the last adversarial round added no new paths. Write it as what it is — *this map, fully hardened, as of this run* — not a permanent guarantee about a surface.
+**Covered** when every path is hardened, every hardened path's check still goes red on re-run against its defect, and the last adversarial round added no new paths. The re-run is a replay of every row in `verify/neuter-matrix.md`, this run's and earlier runs'. A row that stays green is a reopened path, not a footnote. Write it as what it is — *this map, fully hardened, as of this run* — not a permanent guarantee about a surface.
 
 Otherwise **stopped**: the budget ran out, or three consecutive rounds hardened nothing while paths remain uncovered. Report the uncovered list either way.
 

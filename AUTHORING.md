@@ -138,6 +138,13 @@ A case is `evals/cases/<name>/` holding `prompt`, `setup.sh`, `check.sh`, and op
 - It fails on a project the skill never touched. `tests/eval-checks.test.sh` holds every case to this.
 - `setup.sh` generates secrets and other scanner bait at run time. A key-shaped string never lands in ntkit's history.
 
+**Anchor every script path.** A skill runs its own scripts by absolute path: `$SKILL/bin/x.py`
+(the base directory printed when the skill loads) or `~/.claude/skills/<name>/bin/x.py`. Never
+`bin/x.py`, `./bin/x.py`, or `$(dirname "$0")/...`. The command runs inside someone else's repo,
+so a relative path runs whatever that repo put there; and `$0` in an agent's shell names the shell
+(`/bin/zsh`), not the skill. `tests/anchoring.test.sh` holds every skill to this. (Borrowed from
+[google/mantis](https://github.com/google/mantis) `check_skill_anchoring.py`, Apache-2.0.)
+
 ## Checklist
 
 - [ ] Frontmatter: `description` · `argument-hint` · `allowed-tools` (minimal) · `entry` · `exit` (a check) · `writes`
@@ -153,3 +160,4 @@ A case is `evals/cases/<name>/` holding `prompt`, `setup.sh`, `check.sh`, and op
 - [ ] Description is 15 words or fewer, trigger first; a body over ~1,000 words is a router over `references/`
 - [ ] Earns its place against minimal-tooling — extend before you add
 - [ ] A shipped script has a test in `tests/`; a stop-line or refusal has an eval case in `evals/cases/`
+- [ ] Every script the skill runs is called by an anchored path (`$SKILL/...` or `~/.claude/skills/...`)

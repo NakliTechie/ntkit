@@ -1,89 +1,41 @@
 ---
 description: "Bootstrap a new project: folder, git, remote repo, seeded plan/, first-move brief."
 argument-hint: "[name | parent/name]  (attach md/zip OR describe inline)"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Task"]
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Agent"]
 entry: "fresh — no repo yet; handoff materials attached"
 exit: "repo + remote exist, plan/ seeded, brief printed, top chunk underway"
 writes: "plan/history.md, plan/pending.md, plan/workplan.md, git"
 ---
 
-Bootstrap a new project from the handoff materials the user attached this session (md files, zip, or a combination). End state: local folder + remote repo + seeded `plan/` + a `/resume-nt`-style brief on the first move.
+Bootstrap a new project from the handoff the user gave this session. End state: local folder, remote repo, seeded `plan/`, and a `/resume-nt`-style brief on the first move.
 
-**Default parent dir:** `~/code` (edit this to match where you keep your repos — e.g. `~/projects`, `~/src`). Call the resolved value `$ROOT` below.
+**Default parent dir:** `~/code` (edit to match where you keep repos). Call it `$ROOT`.
 
-## Phase 1 — Identify the handoff source
+## Phase 1 — The handoff
 
-`/scaffold-nt` accepts the handoff in three modes — pick whichever the user provided:
+The handoff is attached files (md, zip, or both), an inline description in `$ARGUMENTS` or the surrounding prose, or both (files primary; put the prose in the initial commit body and a `## Context` section of the README). A bare name slug (`myapp`, `research/myapp`) is a name, not a description. No files and no description → ask: *"Give me a handoff — drag md/zip into chat, or describe the project in a sentence or two."*
 
-**A. Attached files.** Markdown handoffs, zips, or a combination.
-- Markdown files → go to the project root
-- Zip files → extracted at the project root, preserving structure
-- Anything else → include it at the project root and note it in the brief
+**Check the vault first.** If scholia's `/ask-nt` is installed, run it on the handoff's domain, stack and hard problem. Fold anything found into the Phase 7 brief as prior art, with the note slug.
 
-**B. Inline description.** `$ARGUMENTS` and/or the natural-language context around the user's `/scaffold-nt` invocation IS the handoff. Examples: *"a static site tracking wage data over 50 years, Python + Pandas + Quarto"* or *"tiny CLI that watches a folder and runs pytest on change, single-file Bash for v0"*. Treat the prose as the handoff and synthesize a starter `README.md` from it in Phase 3.
+## Phase 2 — Name and location
 
-**C. Both.** Attached files are primary; the inline description is context. Drop the description into the initial commit message body and/or append a `## Context` section to the synthesized README.
+Empty `$ARGUMENTS` → derive the name from the handoff (H1, "Project:" line, README-like filename), announce it, proceed. `myapp` → `$ROOT/myapp/`; `parent/myapp` → `$ROOT/parent/myapp/`. If the target exists and isn't empty, suffix `-2`, `-3`, and announce it.
 
-**Heuristic:** `$ARGUMENTS` containing only a name slug (`myapp`, `research/myapp`) is *not* a description — that's just the name. A description has multiple words / sentence-like prose.
+## Phase 3 — Materialize the folder
 
-If neither files nor a substantive description is present (e.g., bare `/scaffold-nt` or just `/scaffold-nt myapp` with no context), stop and ask: *"Give me a handoff — drag md/zip into chat, or describe the project in a sentence or two."*
+Unzip attached zips at the target root preserving structure, copy attached md files beside them, and on a name collision keep both (suffix the incoming file) and note it. For an inline description, write a starter `README.md`: H1, a one-line summary, the user's description cleaned up in their wording, and an **Install** section (README-DOCTRINE puts Install before Why) as a TODO stub, never omitted. Show a 3–5 line preview and proceed unless interrupted.
 
-**Before Phase 2, check the vault.** If [scholia](https://github.com/NakliTechie/scholia)'s `/ask-nt` is installed, run it on the handoff's core terms — the domain, the stack, the hard problem it names. A new project is the cheapest possible moment to find out that you already captured the paper, already tried the library, or already wrote down why an approach does not work; it is also the moment that knowledge is easiest to forget you have. Check the vault before the web: it is curated and it carries your conclusions, not just facts (see the README's Knowledge vault section). Fold anything you find into the Phase 7 brief as prior art, with the note slug so the next reader can follow it. Nothing found is a fine answer and takes one command.
+## Phase 4 — Git
 
-## Phase 2 — Project name + location
+`git init -b main`; `.gitignore` with OS junk and `/plan` (no trailing slash, so a symlinked `plan` is covered, MEMORY.md §0); stage by explicit path, never `git add -A`; commit `Initial commit — scaffolded from handoff`.
 
-Parse `$ARGUMENTS`:
-- **Empty** → derive a name from the handoff (top `# H1` heading, "Project:" line, or filename of a README-like file). If ambiguous, pick the strongest candidate, announce it, and proceed — a rename later is cheap.
-- **Single token** (`myapp`) → location: `$ROOT/myapp/`.
-- **Slash-separated** (`research/myapp`, `apps/myapp`, etc.) → location: `$ROOT/<parent>/<name>/`. Useful if you organize repos by category.
+## Phase 5 — Remote
 
-If the target folder exists and isn't empty, suffix `-2` (then `-3`), announce the adjusted path, and proceed. If the parent dir doesn't exist, create it.
-
-## Phase 3 — Materialize the local folder
-
-1. `mkdir -p` the target folder.
-2. **For attached files** (mode A or C):
-   - For each attached zip: `unzip <zip> -d <target>` — preserve structure; on a collision keep both (suffix the incoming file) rather than overwriting or stopping to ask.
-   - Copy each attached md file into the target root. If a name collides with the zip's contents, merge by renaming (`README.md` + `HANDOFF.md`) and note it in the brief.
-3. **For inline description** (mode B, or to augment mode C): synthesize a starter `README.md` from the user's prose and write it to the target root. Structure it lightly — but the house README (`README-DOCTRINE.md`) puts **Install before Why**, so scaffold an Install section even as a stub; a README that ships without one is incomplete:
-   ```markdown
-   # <name>
-
-   > <one-line summary distilled from the description>
-
-   <the user's description, cleaned up — preserve their wording where it's clear>
-
-   ## Install
-   <!-- Install comes before Why (README-DOCTRINE). Fill the moment there is a run path. -->
-   _TODO: the one-command install (`brew install …`, `go install …`) or the from-source path (`git clone … && make run`). Never ship a README without this section._
-
-   ## Next steps
-   <bulleted next-steps if the description implied them; otherwise omit>
-   ```
-   Show a brief preview of the synthesized README in chat (3–5 lines) so the user can flag if it's wrong before the commit. Don't block on confirmation — proceed unless they interrupt.
-4. Run `ls -la <target>` to confirm what landed where.
-
-## Phase 4 — Initial git + .gitignore
-
-1. `git init -b main` in the new folder.
-2. Write `.gitignore`: OS junk + `/plan` — no trailing slash, so it also covers `plan` when it is a symlink ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)).
-3. Stage everything except `plan/`. Use explicit paths — never `git add -A`.
-4. Initial commit: `Initial commit — scaffolded from handoff`.
-
-## Phase 5 — Remote repo
-
-Default, no question: the user's **own account** (`gh api user --jq .login`) and **private** — the safe posture for handoffs that may contain sensitive info. Announce the choice in the brief; if the user wants an org, public visibility, or no remote, they'll say so (or pass it in the `$ARGUMENTS` prose) — don't poll.
-
-Then:
-```bash
-gh repo create <org>/<name> --<private|public> --source=. --remote=origin --push
-```
-
-If `gh` isn't authed or lacks permission, continue local-only and note the owed remote in the brief — don't block the scaffold on auth. Capture the repo URL on success.
+Default, no question: the user's own account (`gh api user --jq .login`), **private**. Announce it in the brief; the user asks for an org, public, or no remote if they want one. `gh repo create <owner>/<name> --private --source=. --remote=origin --push`. If `gh` isn't authed, continue local-only and name the owed remote in the brief.
 
 ## Phase 6 — Seed plan/
 
-1. Create `plan/` ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)). With `NT_PLAN_STORE` set (default: unset) it is made in the store and symlinked in; otherwise a plain folder. Already gitignored by `/plan`.
+1. Create `plan/` per MEMORY.md §0: with `NT_PLAN_STORE` set, make it in the store and symlink it in; else a plain folder.
    ```bash
    if [ ! -e plan ] && [ -n "${NT_PLAN_STORE:-}" ]; then
      root="$(cd "$(dirname "$NT_PLAN_STORE")" && pwd -P)"; here="$(pwd -P)"
@@ -92,27 +44,13 @@ If `gh` isn't authed or lacks permission, continue local-only and note the owed 
    fi
    mkdir -p plan
    ```
-2. Read the most README-like file in the new repo carefully (the handoff). Identify: scope, milestones/phases, explicit todos, open questions, decisions stated up front, deferrals.
-3. Write `plan/history.md` with the canonical three sections:
-   - **Decisions** — explicit choices stated in the handoff, each dated today.
-   - **Log** → today's entry: `Shipped: scaffolded from <handoff filename(s)> at <folder> · remote: <url> · initial commit: <sha>.` Verified: nothing yet. Tried then rolled back: none. Open questions: pointer to pending.
-   - **Dead ends** — empty.
-4. Write `plan/pending.md` (Now / Parked / Open questions). Pull from the handoff:
-   - "Next steps" / "Todo" lines → Now (in stated order)
-   - "Future" / "Later" / "Out of scope" → Parked
-   - Anything with "?" / "TBD" / explicit Open Questions → Open questions
-4.5. **Tag what you seed.** Every item written into `pending.md` and `workplan.md` this run traces to the handoff, so tag it `[from: <handoff-filename-stem>]` — or `[from: hand]` for anything the user said inline rather than in a file. Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, `[from: hand]`; an untagged item means hand-written. `/scaffold-nt` is one of the three sanctioned reconcile writers, so seeding these files is legal; tagging is what keeps the first replay check meaningful.
+2. From the handoff, write `plan/history.md` (Decisions stated in the handoff, dated today · Log entry `Shipped: scaffolded from <handoff> at <folder> · remote: <url> · initial commit: <sha>.` · empty Dead ends) and `plan/pending.md` (next steps/todos → Now in stated order; future/later/out of scope → Parked; `?`/TBD → Open questions).
+3. Tag every seeded item `[from: <handoff-filename-stem>]`, or `[from: hand]` for what the user said inline. Scaffold is one of the three sanctioned reconcile writers.
+4. Write `plan/workplan.md`: one batch per handoff phase (first marked `(keystone)`), else Batch A with the top 3–5 Now items; tri-state checkboxes; `[test]` markers where runtime verification is owed. Unless the project is Throwaway tier, add two items to the keystone batch:
+   - `[ ] Agent-first pass (ntkit DRIVER.md): run the driver's-seat meditation over the spec; write the project's agent contract as its §0` — runs once a spec draft exists, not now.
+   - `[ ] Agent face (Build Doctrine, "two doors, one core"): declare a tool manifest for every UI-dispatchable command; mark non-delegable acts person-only explicitly, never by omission`.
 
-5. Write `plan/workplan.md`:
-   - If the handoff has phases/milestones, one Batch per phase, first one tagged `(keystone)`.
-   - Else, one Batch A with the top 3–5 Now items.
-   - Tri-state checkboxes throughout. `[test]` markers where runtime verification is owed.
-   - **Seed the DRIVER pass** (skip for Throwaway-tier): add to the keystone batch, after the spec-drafting item — `[ ] Agent-first pass (ntkit DRIVER.md): run the driver's-seat meditation over the spec; write the project's agent contract as its §0`. The pass runs once a first spec draft exists, never at scaffold time — scaffold only schedules it so nobody has to remember.
-   - **Seed the agent-face requirement** alongside it (same batch, skip for Throwaway-tier): `[ ] Agent face (Build Doctrine, "two doors, one core"): declare a tool manifest for every UI-dispatchable command; mark non-delegable acts person-only explicitly, never by omission`. The DRIVER pass is about the door being *ergonomic*; this item is about the door *existing at all* with parity to the UI — two different failures, so two items, not one. `/forward-pass-nt`'s agent-readiness lens is what checks both got done, on this project and every later pass over it — scaffold only seeds the intent.
-
-## Phase 7 — Brief + get started
-
-Print a `/resume-nt`-style brief:
+## Phase 7 — Brief, then start
 
 ```
 Scaffolded <name>.
@@ -120,6 +58,7 @@ Scaffolded <name>.
 Folder: <absolute path>
 Repo: <url> (<private|public>)
 Scope (from handoff): <1–2 line summary>
+Prior art (vault): <note slugs, or "none">
 
 Top chunk — "<title>" (<size>):
   - <item>
@@ -130,8 +69,4 @@ Blocking (if any):
   - <open question>
 ```
 
-End the brief with a heads-up, then go:
-
-> Starting on **"<chunk title>"** — redirect me if you'd rather read the handoff first.
-
-Then begin the top chunk. The brief is a veto window, not a questionnaire — the user steers by interrupting, not by being polled.
+End with *"Starting on **"<chunk title>"** — redirect me if you'd rather read the handoff first."* and begin. The brief is a veto window, not a questionnaire.

@@ -7,49 +7,16 @@ exit: "dated one-line decision appended"
 writes: "plan/history.md"
 ---
 
-Record a decision in the current project's `plan/history.md`. (Its sibling `/soc-nt` catches everything else mid-flow — future-work ideas, observations, unfiltered thinking-out-loud — as a raw stream that `/replan-nt` sorts out later.)
+Record a decision in the current project's `plan/history.md`. Everything that isn't a decision (ideas, observations, deferrals) goes to `/soc-nt` instead.
 
-## Step 1: Get the decision text
-
-If `$ARGUMENTS` is non-empty, that's the decision text. Use it verbatim.
-
-If `$ARGUMENTS` is empty, ask the user: *"What did you decide?"* and use their next message as the decision text.
-
-## Step 2: Locate plan/history.md
-
-Current directory should be inside a git repo. If not, ask the user which project — don't guess.
-
-If `plan/` doesn't exist, create it per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives) (in `$NT_PLAN_STORE` + symlink when set, else `mkdir plan`); it may already be a symlink — use it as is. Verify it is ignored with `git check-ignore -q plan`; if not, append `/plan` (no trailing slash) to `.gitignore`.
-
-If `plan/history.md` doesn't exist, create it with the canonical structure:
-
-```
-# History
-
-## Decisions
-
-## Log
-
-## Dead ends
-```
-
-## Step 3: Append the decision
-
-Insert at the **top** of the `## Decisions` section (newest first), in this format:
-
-```
-- YYYY-MM-DD <decision text>
-```
-
-Use today's date. Preserve any existing Decisions entries below.
-
-## Step 4: Confirm
-
-Short echo, nothing more:
+1. **Text** — `$ARGUMENTS` verbatim; if empty, ask *"What did you decide?"* and use the reply.
+2. **Locate** — not in a git repo → ask which project. create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`. If `plan/history.md` is missing, create it with `# History`, `## Decisions`, `## Log`, `## Dead ends`.
+3. **Append** at the top of `## Decisions` (newest first): `- YYYY-MM-DD <decision text>`.
+4. **Confirm**, nothing more:
 
 ```
 Recorded in plan/history.md:
   - <YYYY-MM-DD> <decision text>
 ```
 
-Don't commit, don't push, don't run /windup-nt — plan/ is gitignored, so the decision lives locally. /replan-nt will carry it forward; /windup-nt may surface it in the day summary if relevant.
+Don't commit, push, or run `/windup-nt`.

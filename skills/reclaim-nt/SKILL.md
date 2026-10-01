@@ -25,8 +25,6 @@ Trash, through disktree's removal guards.
 <id>` trashes exactly the finding with that ID from the most recent
 `plan/reclaim-*.md` in this repo — nothing else, no bulk apply.
 
-If the current directory isn't a git repo, ask which project or path to sweep.
-
 ## Phase 0 — The scanner
 
 The sweep runs on **`disktree-cli`**, the headless side of
@@ -135,12 +133,4 @@ deliberate call naming its ID.
 
 ## Impact declaration
 
-`plan/reclaim-<date>.md` is a **record**: append-only, never rewritten. The derived files (`pending.md`, `workplan.md`, `history.md`'s `## Decisions` and `## Dead ends`) are a projection over the records, rewritten only by `/replan-nt`, `/windup-nt` and `/scaffold-nt`. (Full contract: [`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) in the ntkit repo.) End it with an `## Impact` section saying what should change in the derived files — or that nothing should:
-
-```markdown
-## Impact
-- pending.md/Now — add: <item this run says belongs on the list>
-- none — <reason nothing changes>
-```
-
-Declaring the impact is this command's job; **applying** it is `/replan-nt`'s. A High-confidence finding left un-applied by the end of the run is worth a `pending.md` line so it isn't lost between sessions.
+`plan/reclaim-<date>.md` is a record: append-only. End it with an `## Impact` section, one line per change it implies for `pending.md`, `workplan.md` or `history.md`'s indexes (`- pending.md/Now — add: …`), or `- none — <reason>`. Declare it; never add, drop or reword items in `pending.md` or `workplan.md` yourself (a status flip on an existing item is allowed). `/replan-nt` applies it ([MEMORY.md §3](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#3-declared-impact)). A High-confidence finding left un-applied at the end of the run is worth an add line so it isn't lost between sessions.

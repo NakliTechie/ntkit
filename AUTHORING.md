@@ -2,7 +2,7 @@
 
 Every `-nt` skill (`skills/<name>/SKILL.md`) is a prompt with a contract. This file is the standard for
 writing a new one — and the checklist for reviewing a change to an existing one.
-It exists because twenty-one commands drifting apart in shape is how a kit rots; one
+It exists because twenty commands drifting apart in shape is how a kit rots; one
 shape is how they stay composable. (The six-point idea is ported from the
 built-in-skill standards in [osolmaz/pi-workflows](https://github.com/osolmaz/pi-workflows),
 folded into ntkit's own doctrine.)
@@ -39,9 +39,8 @@ delete, send, post, spend** — is granted per run and **defaults to denied when
 unstated**. A command never assumes it. Reversible, in-repo work (edit, commit to
 a branch, write `plan/`) needs no grant. This is the authoring face of STATES
 guard #4: the safe default for outward-facing power is *off*, and the command asks
-or refuses rather than assuming yes. `/maintain-nt` models it — the sweep is
-read-only, only the *reversible* safe class auto-applies, and anything that can
-break you defers to `/autopilot-nt`.
+or refuses rather than assuming yes. `/reclaim-nt` models it — the sweep is
+read-only, and nothing moves to the Trash without a per-item `apply`.
 
 ## 4. One complete, valid example
 

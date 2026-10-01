@@ -1,7 +1,7 @@
 <h1 align="center">ntkit</h1>
 
 <p align="center">
-  <strong>Twenty-two Claude Code skills that give an agent the discipline it's missing — remembers decisions, audits the whole app, and never says "done" without a verifier.</strong>
+  <strong>Twenty Claude Code skills that give an agent the discipline it's missing — remembers decisions, audits the whole app, and never says "done" without a verifier.</strong>
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
   <img alt="account: none" src="https://img.shields.io/badge/account-none-0891b2?style=flat-square">
 </p>
 
-![ntkit workflow map — 22 Claude Code skills across five phases, plus a daily session loop and the scholia knowledge vault used at every phase](assets/workflow.png)
+![ntkit workflow map — 20 Claude Code skills across five phases, plus a daily session loop and the scholia knowledge vault used at every phase](assets/workflow.png)
 
 ## Install
 
@@ -35,7 +35,7 @@ Command name = the folder name (`skills/forward-pass-nt/` → `/forward-pass-nt`
 
 Your agent forgets what it decided yesterday. It reviews the diff, never the app it sits inside. It tells you a fix is "done" when nothing ran to check, and starts cold every session because nothing wrote down where the last one stopped.
 
-ntkit is twenty-two skills that add that discipline: a `plan/` folder each repo keeps that every command reads and writes, a cold whole-app audit that hands back a real fix-workplan, and a report format that won't let "done" through without a verifier behind it.
+ntkit is twenty skills that add that discipline: a `plan/` folder each repo keeps that every command reads and writes, a cold whole-app audit that hands back a real fix-workplan, and a report format that won't let "done" through without a verifier behind it.
 
 **Use a single `CLAUDE.md`** if your project is small enough that one file of standing instructions is the whole picture. **Use [pi-workflows](https://github.com/osolmaz/pi-workflows)** for the six-point authoring standard alone, without ntkit's `plan/` state machine and report format on top — [`AUTHORING.md`](AUTHORING.md) borrows its shape. **Use your agent's own memory** if you only need continuity inside one long session, not across days or repos.
 
@@ -43,7 +43,7 @@ ntkit is twenty-two skills that add that discipline: a `plan/` folder each repo 
 
 Most commands share one idea: a gitignored `plan/` folder per repo (or a symlink to one — set `NT_PLAN_STORE` to keep every plan in one backed-up folder, [MEMORY.md §0](MEMORY.md#0-where-plan-lives)), three files — `history.md` (decisions · log · dead ends), `pending.md` (now · parked · open questions), `workplan.md` (chunked, checkboxed work). Commands read and write those files, so every session picks up exactly where the last one left off.
 
-`-nt` is just the namespace (NakliTechie), so these don't collide with your own commands — rename freely. `/standup-nt` reports on every repo with a `plan/`; run it first thing, most days.
+`-nt` is just the namespace (NakliTechie), so these don't collide with your own commands — rename freely.
 
 ## Give it a memory
 
@@ -51,14 +51,13 @@ The knowledge vault is a separate tool: **[scholia](https://github.com/NakliTech
 
 It also searches a repo's own `plan/`: `scholia history <terms> --plan .` ranks every entry, `_archive/` included, with its date, and needs no vault ([MEMORY.md §8](MEMORY.md#8-recall-over-the-records)).
 
-The convention: check the vault before the web. `/research-nt`, `/lab-nt`'s research phase and `/scaffold-nt` sizing up a new project all run `/ask-nt` first when scholia is installed, then `/capture-nt` what they found — so the second time a question comes up, it's already answered. No scholia, or no vault at `~/Code/knowledge`? Both degrade to "search the web," and nothing else in the kit depends on either existing.
+The convention: check the vault before the web. `/research-nt`, `/lab-nt`'s research phase and `/scaffold-nt` sizing up a new project all run `/ask-nt` first when scholia is installed, then offer `/capture-nt` for what they found — so the second time a question comes up, it's already answered. No scholia, or no vault at `~/Code/knowledge`? Both degrade to "search the web," and nothing else in the kit depends on either existing.
 
 ## Scheduling
 
-Two commands run without you. `/maintain-nt` weekly — read-only rot detection, ideal cron work. `/autopilot-nt` nightly — worktree-isolated, ships a green gate to main, holds a red one on its own branch.
+`/autopilot-nt` runs without you, nightly: worktree-isolated, it ships a green gate to main and holds a red one on its own branch.
 
 ```cron
-0 7 * * 1  cd ~/code/myproject && timeout 30m claude -p "/maintain-nt" --dangerously-skip-permissions >> ~/.ntkit-cron.log 2>&1
 0 2 * * *  cd ~/code/myproject && timeout 6h claude -p "/autopilot-nt" --dangerously-skip-permissions >> ~/.ntkit-cron.log 2>&1
 ```
 
@@ -68,7 +67,6 @@ Two commands run without you. `/maintain-nt` weekly — read-only rot detection,
 
 ```
 /scaffold-nt            # new project — bootstrap folder + git + remote + seeded plan/
-/standup-nt             # start of day — scan every repo with plan/, active / idle / stale
 /resume-nt              # start of session — read the handoff, name the state, wait or go
 /decide-nt "<why>"      # mid-session — append a dated one-line decision
 /soc-nt "<thought>"     # mid-build — raw stream-of-consciousness; replan-nt triages later
@@ -78,7 +76,6 @@ Two commands run without you. `/maintain-nt` weekly — read-only rot detection,
 /forward-pass-nt        # anytime — fresh-eyes whole-app audit, batched fix-workplan
 /walkthrough-nt         # anytime — drive each role in a real browser, fix bugs, leave a harness
 /ux-review-nt           # anytime — cold first-timer review, ranked onboarding/nav failures
-/maintain-nt            # upkeep — stale deps / Actions / advisories / links; safe fixes applied
 /reclaim-nt             # upkeep — find the GB in old weights, worktrees, archives; Trash only on apply
 /live-check-nt          # verifying → shipped — the real deployed runtime, machine evidence
 /harden-nt              # before "ready" — map a surface's paths, harden each in rounds
@@ -103,7 +100,7 @@ tests/run.sh    # free, seconds: the scripts skills ship, and every eval check c
 evals/run.sh    # model runs: a fixture project, one prompt, a deterministic check
 ```
 
-Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The loop prints nothing when that contract holds across all 22; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against. A `/research-nt` report is VERIFIED only when its `check.py gates` exits 0: every cited page came through its fetch log, every planned section and required name is present. `evals/run.sh` needs one login first, `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
+Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The loop prints nothing when that contract holds across all 20; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against. A `/research-nt` report is VERIFIED only when its `check.py gates` exits 0: every cited page came through its fetch log, every planned section and required name is present. `evals/run.sh` needs one login first, `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
 
 ## License and credits
 

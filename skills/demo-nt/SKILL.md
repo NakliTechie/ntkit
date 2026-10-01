@@ -1,21 +1,19 @@
 ---
 description: "Boot the app on the demo seed, open a feature explorer, optionally host it publicly."
 argument-hint: "[focus: seed | explorer | launch | host | probe] [host=<demo-hostname>] [files=<storage-hostname>]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent", "mcp__claude-in-chrome__*", "mcp__Claude_Browser__*"]
 entry: "app boots with the shared demo seed; hosted mode also needs host=<hostname> in a zone the user named"
 exit: "live-app and explorer links handed to the presenter; hosted: every public hostname refused the anonymous probe first"
 writes: "plan/demo-protocol.md (created or updated in place)"
 ---
 
-A presenter's launcher for live demos. When you need to show work-in-progress to a customer or a senior exec, `/demo-nt` does two things: boots the real app **seeded and ready** (no empty-state fumbling in front of the room), and builds + opens an **interactive explorer** — a drill-down map of what's been built (features · connections · dependencies) with inline search — then hands you **clickable links to both**.
+A presenter's launcher for live demos: boot the real app **seeded and ready**, build an **interactive explorer** of what's been built (features, connections, dependencies, inline search), and hand over **clickable links to both**. Drive the browser with Claude in Chrome (a real GPU browser) or the built-in browser pane; Playwright runs through Bash.
 
-Where `/guide-nt` *documents* how to use features and `/ux-review-nt` *critiques* the cold newcomer path, `/demo-nt` is **presenter mode**: the app is running, seeded, and the story is on one page.
-
-If the project has no runnable surface, say so. If the current directory isn't a git repo, ask which project — don't guess.
+If the project has no runnable surface, say so.
 
 ## Inputs and defaults
 
-- **Focus** (`$ARGUMENTS`, optional): `seed`, `explorer`, or `launch` run just that part, as before. `host` runs Phases 5–7 against an app that already boots; `probe` runs Phase 6 alone. Default: every phase that applies.
+- **Focus** (`$ARGUMENTS`, optional): `seed` runs Phase 1 only, `explorer` runs Phase 4, `launch` runs Phases 3 and 8 (boot the seeded app, hand over the links). `host` runs Phases 5–7 against an app that already boots; `probe` runs Phase 6 alone. Default: every phase that applies.
 - **`host=<hostname>`** (default: unset → **local-only mode**, the demo runs on `127.0.0.1` and nothing is published). Setting it selects **hosted mode**: a public URL served from this machine through a named Cloudflare tunnel. Its registered domain is the only zone the run may touch.
 - **`files=<hostname>`** (default: unset). A second public hostname for object storage, needed only when the app hands browsers presigned storage URLs. Must sit in the same zone as `host=`.
 - **Persona sign-in**: built when the app has accounts; skipped when it has none. Announced either way.
@@ -24,7 +22,7 @@ Examples: `/demo-nt` (local) · `/demo-nt host=demo.<your-domain>` · `/demo-nt 
 
 ## Guards and stop-lines
 
-These hold in every phase. The phase files repeat them where they apply; this list is the authority.
+These hold in every phase.
 
 - **No zone named, nothing published.** Without `host=`, the run creates no tunnel, no DNS record and no public URL. `host` or `probe` focus without `host=` stops with that reason and asks for the hostname.
 - **Only the named zone.** Never create a Cloudflare account, an API token, a key, or a DNS record in a zone the user has not named. Never overwrite an existing DNS record (`--overwrite-dns` is never passed); an existing record stops the phase.
@@ -49,13 +47,13 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 | 7 Protocol | `plan/demo-protocol.md` created or updated: addresses, what runs where, before-a-demo checklist, personas, storylines per audience, after-a-demo steps, safety rails. | `references/protocol.md` |
 | 8 Hand over | The two links, below. | this file |
 
-## Phase 8 — Present + open, and hand over the two links
+## Phase 8 — Hand over the two links
 
-Serve both and confirm they work — the explorer renders and its search filters, and the **Launch** control reaches the seeded app. Then **end the run by printing two clickable links** so you can open either in one move when the meeting starts:
+Serve both and confirm in a browser that the explorer renders, its search filters, and its **Launch** control reaches the seeded app. End the run with two clickable links:
 
 - **→ Live demo** — the running, seeded app (the URL from Phase 3; in hosted mode `https://<host>/demo`, printed only after Phase 6 passed).
 - **→ Explorer** — `demo/explorer.html` (served, or `file://`; in hosted mode `https://<host>/demo/explorer.html`).
 
-Also note the opening screen, what's seeded, that the seed is now shared with `/walkthrough-nt` and `/guide-nt`, and where the protocol file is. In hosted mode, add the reset command and how to take the demo offline.
+Also note the opening screen, what's seeded, and where the protocol file is. In hosted mode, add the reset command and how to take the demo offline.
 
-**Privacy:** the explorer is committed (`demo/`, so it evolves with the app), but **curated for the audience** — the built-and-coming story, not the internal kitchen. If the repo is public or the WIP is sensitive, gitignore `demo/explorer.html` instead — a one-line change.
+**Privacy:** the explorer is committed (`demo/`) but curated for the audience: the built-and-coming story, not the internal kitchen. If the repo is public or the WIP is sensitive, gitignore `demo/explorer.html` instead.

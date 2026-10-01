@@ -1,48 +1,29 @@
 # Test-value lens — hunting classes and the retention bar
 
-Read this when the traversal reaches a test suite. The lens asks one question per test: does
-it protect observable behaviour, a credible regression, or an independent contract? A test that
-does none of those costs maintenance and returns nothing. A test that *looks* like it does none
-of those may still be the only guard on a contract, so the retention bar below outranks the
-hunting list.
+Adapted from openclaw's `test-audit` skill (`.agents/skills/test-audit/` in
+[openclaw/openclaw](https://github.com/openclaw/openclaw)), paraphrased. Its campaign found 9 real
+coverage gaps behind cuts that looked safe, so this lens recommends and never deletes.
 
-(Adapted from openclaw's `test-audit` skill, `.agents/skills/test-audit/` in
-[openclaw/openclaw](https://github.com/openclaw/openclaw), paraphrased; its campaign found
-9 real coverage gaps behind cuts that looked safe, which is why this lens reports and never
-deletes.)
-
-## Read before judging
-
-For each candidate, read the whole test and the production code it claims to cover: the
-entry point, its callers, sibling implementations, overlapping tests, and how CI routes it.
-When the test claims dependency-backed behaviour, read the dependency's source or types. Judge
-a test by its assertions, not its name — a test named for clearing a window can assert the
-window was *not* cleared.
+Read the whole test and the code it claims to cover, including how CI routes it. Judge a test by its assertions, not its name: a test named for clearing a window can assert the window was *not* cleared.
 
 ## Hunting classes
 
-- **Assertion-free** — runs code, asserts nothing, or asserts only that nothing threw.
-- **Self-fulfilling** — the expected value comes from the helper or renderer under test; a
-  self-comparison; a copier that asserts identity.
-- **Mock-as-subject** — the mock implements the behaviour being asserted, or one identical mock
-  stands in for different APIs; fixtures hand the code the receipt, ordering, or callback the
-  real owner should produce; persistence asserted against a store the real path never writes.
-- **Mirror tests** — a copied fixture, inventory, manifest, or export list; an exact source,
-  import, or string grep that breaks on a rename and survives a behaviour change.
-- **Implementation-coupled** — asserts private call shape or internal predicates already covered
-  at a real boundary. The check: would it break under a behaviour-preserving refactor?
-- **Duplicate proof** — the same contract invoked again at another layer with no new risk; a
-  per-provider replay of a shared helper.
-- **Test-only seams** — an export, flag, getter, reset hook, or injection parameter that no
-  production caller uses and that exists so a test can reach inside. Also production code whose
-  only callers are tests.
-- **Flag restatement** — a capability test that re-reads a declared flag instead of exercising
-  the delivery or acknowledgement the flag promises.
-- **Vacuous negative** — a rejection test that passes for an unrelated reason: a different guard
-  fires, or the production path never reaches the branch.
-- **Regression that never went red** — a test added with a fix, with no record of failing on the
-  pre-fix code. It proves the mock, not the fix (`SUBSTANCE.md` §6.3). Always an `F` (reintroduce
-  the defect, record the red, repair the test if it stays green), never a `D`.
+- **Assertion-free** — asserts nothing, or only that nothing threw.
+- **Self-fulfilling** — the expected value comes from the code under test; a self-comparison.
+- **Mock-as-subject** — the mock or fixture implements the asserted behaviour, or hands the code
+  what the real owner should produce; persistence asserted against a store the real path never writes.
+- **Mirror tests** — a copied fixture, manifest, or export list, or a source grep that breaks on a
+  rename and survives a behaviour change.
+- **Implementation-coupled** — asserts private call shape already covered at a real boundary; it
+  breaks under a behaviour-preserving refactor.
+- **Duplicate proof** — the same contract proved again at another layer with no new risk.
+- **Test-only seams** — a production export, flag, hook, or parameter that only tests use.
+- **Flag restatement** — re-reads a declared capability flag instead of exercising what it promises.
+- **Vacuous negative** — a rejection test that passes because a different guard fires or the
+  branch is never reached.
+- **Regression that never went red** — added with a fix, with no record of failing on the pre-fix
+  code (`SUBSTANCE.md` §6.3). Always an `F` (reintroduce the defect, record the red, repair the
+  test if it stays green), never a `D`.
 
 ## Retention bar — keep, even when a class above matches
 

@@ -3,7 +3,7 @@
 ## Phase 0: intake
 
 1. Take `--go` off `$ARGUMENTS`; the rest is the question, verbatim.
-2. No `plan/` → create it with the MEMORY.md §0 snippet. Never replace a symlinked `plan`.
+2. No `plan/` → create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`. Never replace a symlinked `plan`.
 3. Slug: today's date plus 3–6 lowercase ASCII words from the question, kebab-case, e.g.
    `2026-09-30-deep-research-citation-checks`. If `plan/research/<slug>` exists, append `-2`, `-3`, ….
    Print the slug.

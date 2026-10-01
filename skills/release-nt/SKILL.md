@@ -1,62 +1,49 @@
 ---
 description: "Cut a release: semver, CHANGELOG, tag, push, GitHub release, verify the deploy live."
 argument-hint: "[major | minor | patch | x.y.z]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
+allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent"]
 entry: "verifying with gate green — no failing verifier, no open fix-workplan items; refuse otherwise (override via /decide-nt)"
 exit: "tag + GitHub release + CHANGELOG landed and the deploy verified live, or an explicit refusal naming the guard"
 writes: "CHANGELOG.md, version bump, git tag"
 ---
 
-Cut a versioned release. Where `/package-nt` drafts the *announcement*, `/release-nt` does the *mechanics*: read the commits since the last tag, suggest a semver bump, write the CHANGELOG, draft the release notes — and, **only after you confirm**, commit the bump, tag, push, create the GitHub release, and kick the deploy. Tagging and releasing are outward-facing, so it prepares everything and shows it first; it never publishes a release without a yes.
+Cut a versioned release: suggest the bump, write the CHANGELOG and release notes, then — **only after the user confirms** — commit, tag, push, create the GitHub release, and verify the deploy live. `/package-nt` drafts the announcement; this does the mechanics.
 
-If the current directory isn't a git repo, ask which project — don't guess.
+`$SKILL` is this skill's base directory, printed when the skill loads; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
 
-`$ARGUMENTS` (optional): the bump (`major` / `minor` / `patch`) or an explicit version (`1.4.0`). If empty, suggest one from the commits.
+`$ARGUMENTS` (optional): `major` / `minor` / `patch` or an explicit version. Empty → suggest one from the commits (conventional-commit prefixes when the repo uses them).
 
-## Phase 0 — Entry guard (illegal-transition check)
+Not in a git repo → ask which project; this command tags and pushes.
 
-A release is the transition to `shipped` (per ntkit's `STATES.md` — kit doctrine, not a file in this project), and it's guarded. Before anything else, check:
+## Phase 0 — Entry guard
 
-1. **Verifier green** — run the project's own check (tests / typecheck / build — and the committed verification harness if `/walkthrough-nt` has left one; the lever is the definition of green). A failing verifier stops the run. **No verifier defined** (a single-file tool with no tests or build) → the check passes vacuously; note "no verifier defined" in the release notes draft and move on — the guard blocks on red, never on absent.
-2. **No open fix-workplan** — scan `plan/` for the most recent `forward-pass-*` / `ux-review-*` / `maintenance-*` report; any unchecked `[ ]` item in its keystone batch stops the run.
-3. **No HELD autopilot branch** — an unmerged `autopilot/<date>` branch means unreviewed work; stop and point at it.
+A release is the transition to `shipped` (ntkit `STATES.md`). Check:
+1. **Verifier green** — the project's tests / typecheck / build, and the committed harness if `/walkthrough-nt` left one. Red stops the run. No verifier defined → passes; say "no verifier defined" in the notes.
+2. **No open fix-workplan** — the latest `forward-pass-*` or `ux-review-*` report in `plan/` has no unchecked `[ ]` item in its keystone batch.
+3. **No HELD autopilot branch** — an unmerged `autopilot/<date>` branch is unreviewed work.
 
-On failure, **refuse with the guard named**: "Illegal transition to `shipped`: <what failed>. Fix it, or override deliberately with `/decide-nt \"releasing despite <X> because <why>\"` and re-run." An override recorded via `/decide-nt` in this session lets the run proceed — a guard bypassed on purpose with a logged reason is a decision; bypassed silently is a bug.
+On failure, refuse with the guard named: "Illegal transition to `shipped`: <what failed>. Fix it, or override with `/decide-nt \"releasing despite <X> because <why>\"` and re-run." A `/decide-nt` override logged this session lets the run proceed.
 
-## Phase 1 — Read the history
+## Phase 1 — Prepare
 
-- Find the last release: `git describe --tags --abbrev=0` (or `git tag`); if none, this is the first release.
-- Collect the commits since it: `git log <last-tag>..HEAD --oneline`.
-- Detect the version source: `package.json`, `pyproject.toml`, `Cargo.toml`, a `VERSION` file, or git-tags-only. Note the current version.
+From the commits since the last tag (none → first release): the suggested version with one line of reasoning, a new `## [x.y.z] — YYYY-MM-DD` CHANGELOG section (Keep a Changelog: Added / Changed / Fixed / Removed; create the file if missing), the version bump in the manifest (and lockfile), and GitHub release notes with a `<last-tag>...vX.Y.Z` compare link.
 
-## Phase 2 — Suggest the bump
+## Phase 2 — Confirm, then publish
 
-From the commits, suggest **major / minor / patch** — a breaking change → major, a new feature → minor, fixes/chores → patch (honor conventional-commit prefixes — `feat:` / `fix:` / `feat!:` — if the repo uses them; otherwise infer from the messages). `$ARGUMENTS` overrides. Show the suggested new version and the one-line reasoning.
+Show the version, the CHANGELOG diff, the notes and the exact commands, then **pause for confirmation**.
+- **Yes:** commit the bump + CHANGELOG; `git tag -a vX.Y.Z -m "<name> vX.Y.Z"` (annotated: `--follow-tags` silently skips a lightweight tag and `gh release create` then refuses); `git push origin main --follow-tags`; confirm the tag with `git ls-remote --tags origin vX.Y.Z`; `gh release create vX.Y.Z` with the notes; note or trigger the deploy. Never force-push.
+- **No:** leave the bump and CHANGELOG staged for the user to edit.
 
-## Phase 3 — CHANGELOG + release notes
+## Phase 3 — Verify the deploy landed
 
-- **Update `CHANGELOG.md`** (Keep a Changelog style): a new `## [x.y.z] — YYYY-MM-DD` section grouping the commits into **Added / Changed / Fixed / Removed**. Create the file if missing.
-- **Bump the version** in the manifest (and lockfile if relevant).
-- **Draft the GitHub release notes** — the highlights, the changelog section, and a "Full changelog" compare link (`<last-tag>...vX.Y.Z`).
+A push is not a deploy. Against the deployed URL:
+- Fetch a marker that exists only in this release. Missing → still propagating or failed; don't report success.
+- Re-fetch with a cache-busting query and `Cache-Control: no-cache` before concluding a rollout is half-done; the first read after a deploy is often stale.
+- Re-check what only fails in production: hosts serve `index.html` for a missing file, so `/robots.txt`, `/llms.txt`, redirects and 404s need the right status **and** `content-type` from the live host.
+- Confirm the response headers the repo claims (cache-control, security headers) are applied.
 
-## Phase 4 — Confirm, then publish
+**Social card.** If this release changed the repo's social card image, re-upload it through Claude-in-Chrome and verify it by hash, per `$SKILL/../package-nt/references/social-preview.md`.
 
-Show the planned **version**, the **CHANGELOG diff**, the **release notes**, and the exact `git` / `gh` commands. **Pause for confirmation.**
-- On **yes**: commit the bump + CHANGELOG, then **`git tag -a vX.Y.Z -m "<name> vX.Y.Z"`** — annotated, not lightweight — then `git push origin main --follow-tags`, then `gh release create vX.Y.Z` with the notes, and note (or trigger) the deploy. Never force-push.
-  - **`--follow-tags` pushes annotated tags only.** Paired with a plain `git tag`, which creates a *lightweight* tag, the push reports success and silently leaves the tag local; `gh release create` then refuses with "tag exists locally but has not been pushed". Either tag with `-a` as above, or push the tag by name (`git push origin vX.Y.Z`). An annotated tag also carries a tagger, a date and a message, which is what `git describe` and the next release's Phase 1 read.
-  - **Confirm the tag is on the remote before creating the release** — `git ls-remote --tags origin vX.Y.Z` — rather than inferring it from the push's exit code.
-- On **no**: leave the bump + CHANGELOG staged for you to edit.
+## Phase 4 — Handoff
 
-## Phase 4.5 — Verify the deploy actually landed
-
-A push is not a deploy, and a green local check is not a green live one. Once the deploy reports done, verify **against the deployed URL**:
-- **Fetch a marker from the new build** — a string that exists only in this release. If it's missing, the deploy is still propagating or it failed; don't report success on the basis of having pushed.
-- **Bust the cache when you check.** A first read straight after a deploy can be served stale and look like a half-finished rollout — new assets live, old HTML. Re-fetch with a cache-busting query and `Cache-Control: no-cache` before concluding anything is wrong.
-- **Re-run the checks that can only fail in production.** Anything depending on host routing behaves differently locally: a static dev server 404s a missing file, while most hosts serve `index.html` for it, so `/robots.txt`, `/llms.txt`, redirects, headers and 404 handling are **untestable until deployed**. Confirm each returns the right status *and* the right `content-type`.
-- Confirm response **headers** the repo claims (cache-control, security headers) are actually applied — a `_headers` / `netlify.toml` / `vercel.json` rule that never took effect is silent.
-
-**Social card.** If this release changed the repo's social card image (`marketing/social.png`, `assets/social.png`, or the repo's equivalent) since the last upload, re-upload it yourself through Claude-in-Chrome and verify it by hash — `/package-nt`'s [`references/social-preview.md`](../package-nt/references/social-preview.md) has the procedure. A stale card is what every shared link shows.
-
-## Phase 5 — Handoff
-
-Print the released version, the release URL, and the **verified** deploy status — what you fetched from the live host, not just that the push succeeded. Suggest `/package-nt` for the announcement collateral. (CHANGELOG is committed; any working drafts stay in local `plan/`.)
+Print the version, the release URL, and the **verified** deploy status (what you fetched from the live host). Suggest `/package-nt` for announcement collateral.

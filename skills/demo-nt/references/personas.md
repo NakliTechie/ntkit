@@ -1,6 +1,6 @@
 ## Phase 2 — Persona sign-in (apps with accounts only)
 
-Skip this phase when the app has no sign-in. Otherwise a presenter must never type an OTP, wait for an email, or hold a real phone in front of the room. The answer is a demo-only page that signs in as any fictional persona in one click.
+Skip this phase when the app has no sign-in. Otherwise build a demo-only page that signs in as any fictional persona in one click, so the presenter never types an OTP or waits for an email in front of the room.
 
 ### The page (`/demo`)
 
@@ -10,16 +10,13 @@ Skip this phase when the app has no sign-in. Otherwise a presenter must never ty
 
 ### The gate (not optional)
 
-- **Registered only when the demo env var is set** (samvad: `DEMO_ACCOUNTS`, pointing at the personas file). With it unset, the routes do not exist: no 404 page that names them, no hidden link.
-- **Refused in production, at startup.** The app throws before it listens when the demo env var is set and it runs in production mode. Put the check in the config module, where the other production refusals live, and again in the demo module itself. A deploy that forgets to unset the var then fails to start instead of serving one-click sign-in.
-- **Fictional data only.** The page runs against the demo database from Phase 1 and nothing else.
+- **Registered only when the demo env var is set** (it points at the personas file). With it unset, the routes do not exist: no 404 page that names them, no hidden link.
+- **Refused in production, at startup.** The app throws before it listens when the demo env var is set in production mode. Put the check in the config module, where the other production refusals live, and again in the demo module, so a deploy that forgets to unset the var fails to start.
 
 ### Passkey-gated actions: enrol the presenter's device
 
 A persona whose job needs a passkey (an approver who signs) cannot use the seed's private key from a browser. Do not add a signature bypass. Instead:
 
-- The staff card gets a second button, **Add a passkey on this device**. It asks the app to issue an ordinary enrolment invite for that persona and redirects to the app's real enrolment page (samvad: `/join#<invite>`).
+- The staff card gets a second button, **Add a passkey on this device**. It asks the app to issue an ordinary enrolment invite for that persona and redirects to the app's real enrolment page.
 - The presenter enrols once per device, with the device's own authenticator. Every later approval is a real WebAuthn signature against the demo's `RP_ID`.
 - Say in the protocol file (Phase 7) that passkeys are per device, and that a reset removes the server side only.
-
-Worked example: samvad `src/demo.tsx` (about 60 lines): `/demo`, `POST /demo/login`, `POST /demo/passkey`, the explorer routes, and the production refusal also in `src/config.ts`.

@@ -12,18 +12,37 @@ Read the whole test and the code it claims to cover, including how CI routes it.
 - **Self-fulfilling** — the expected value comes from the code under test; a self-comparison.
 - **Mock-as-subject** — the mock or fixture implements the asserted behaviour, or hands the code
   what the real owner should produce; persistence asserted against a store the real path never writes.
+  Also any mock of an in-process or local-substitutable dependency (categories below).
 - **Mirror tests** — a copied fixture, manifest, or export list, or a source grep that breaks on a
   rename and survives a behaviour change.
 - **Implementation-coupled** — asserts private call shape already covered at a real boundary; it
   breaks under a behaviour-preserving refactor.
 - **Duplicate proof** — the same contract proved again at another layer with no new risk.
-- **Test-only seams** — a production export, flag, hook, or parameter that only tests use.
+- **Test-only seams** — a production export, flag, hook, or parameter that only tests use. Not an
+  injection point for an owned-remote or third-party dependency: production's real adapter is its
+  caller, even when production takes the default.
 - **Flag restatement** — re-reads a declared capability flag instead of exercising what it promises.
 - **Vacuous negative** — a rejection test that passes because a different guard fires or the
   branch is never reached.
 - **Regression that never went red** — added with a fix, with no record of failing on the pre-fix
   code (`SUBSTANCE.md` §6.3). Always an `F` (reintroduce the defect, record the red, repair the
   test if it stays green), never a `D`.
+
+## Dependency categories — which stand-in a test may use
+
+Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) `codebase-design/DEEPENING.md`,
+MIT. The category of what the code under test depends on decides the legitimate stand-in.
+
+1. **In-process** — pure computation, in-memory state, no I/O. Run the real code; no stand-in.
+2. **Local-substitutable** — a dependency with a local stand-in: SQLite or PGlite for a database,
+   a temp directory for a filesystem, a local server. Run the stand-in; no mock.
+3. **Owned remote** — your own service across a network. Inject it as a port; tests use an
+   in-memory adapter.
+4. **Third-party** — a service you don't control (payments, mail, a model API), plus the clock and
+   randomness. Inject it as a port; tests use a mock adapter.
+
+A mock in categories 1–2 is Mock-as-subject. A port in categories 3–4 is a real seam with two
+adapters, never a Test-only seam.
 
 ## Retention bar — keep, even when a class above matches
 

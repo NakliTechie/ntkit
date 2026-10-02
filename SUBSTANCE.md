@@ -73,7 +73,9 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
    or contract it protects; what credible regression turns it red; why the existing suite does not
    already catch that (each contract has one owner test, at the strongest boundary that can reach
    it); and whether it needs a production seam (an export, flag, or hook no real caller uses). A
-   missing answer means no test yet. A needed seam means test at the real boundary instead.
+   missing answer means no test yet. A needed seam means test at the real boundary instead. A port
+   for a network, third-party, clock, or randomness dependency is not such a seam: production's real
+   adapter calls it (dependency categories, `skills/forward-pass-nt/references/test-value.md`).
    **Failure modes first.** For code tested in isolation, write down how it can fail before
    writing it; each failure mode becomes the assertion a naive build would fail. A test written
    after the code tends to assert whatever the code does. **A regression test must go red on the

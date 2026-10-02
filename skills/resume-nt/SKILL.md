@@ -28,6 +28,8 @@ None of these exist → read the README, `git log --oneline -10` and `git status
 
 Branch, ahead/behind vs upstream, and the count of uncommitted files (`git status -sb`).
 
+Then run `sh $SKILL/../windup-nt/bin/branches.sh` when it exists. It changes nothing and reads refs as of the last fetch. Count its `merged` lines, and keep its `hold` and `unmerged` lines for the brief.
+
 ## Step 2.5: Determine and validate the state
 
 Name the repo's current state per ntkit's `STATES.md` (kit doctrine, not a file in this project): `fresh` / `briefed` / `building` / `verifying` / `blocked` / `shipped`, from the evidence gathered: open workplan items, uncommitted work, unexecuted audit reports, tried-trails, HELD autopilot branches. Then flag (don't fix) anything that doesn't add up:
@@ -47,6 +49,7 @@ Resuming <project-name>.
 Folder: <absolute path>
 Branch: <branch> · <ahead/behind status> · <clean | N uncommitted files>
 State: <state from Step 2.5> · legal next: <the 2–3 moves that fit this state>
+[if branches.sh listed any:] Branches: <N> merged, not swept (the next /windup-nt deletes them) · <M> waiting on a call: <oldest 2–3 refs>
 <⚠ one line per inconsistency found in Step 2.5, if any>
 
 Last session (<date from latest summary, or "no summary on file">):

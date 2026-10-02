@@ -3,7 +3,7 @@ description: "End of session: day summary, pending, commit and push non-plan wor
 argument-hint: "(none)"
 allowed-tools: ["Bash", "Glob", "Read", "Write", "Edit"]
 entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
-exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, clean closes merged to main, stray worktrees swept, resume handoff printed"
+exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, clean closes merged to main, stray worktrees and merged branches swept, resume handoff printed"
 writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/standing.md (answers only, if it exists), plan/_archive/"
 ---
 
@@ -22,7 +22,7 @@ On entering a step, read its Detail file first, then act; the Outcome column is 
 | 2 Pending | `plan/pending.md` merged, not rewritten: Now / Parked / Open questions preserved, finished items removed, a "not now" said today lands in Parked, a flat file stays flat. | `references/summary-and-pending.md` |
 | 3 Workplan | `plan/workplan.md` re-chunked from pending: logical, convenient, related; in-flight chunks copied through; keystone marked; tri-state checkboxes; loose sizes; finding IDs and `[test]` markers carried; leftovers under `## Unbatched`. Top chunk is what the next session starts on. | `references/workplan.md` |
 | 4 Gitignore | `plan` ignored per MEMORY.md §0 (`git check-ignore -q plan`; add `/plan`, no trailing slash). | `references/ship.md` |
-| 5 Ship | Non-plan changes committed by path and pushed to the branch's upstream (never force; pushing to main is authorized by invoking windup). On a feature branch and closing clean → merge to the default branch, push, delete the branch. Closing from `building` → push the branch, do not merge, name it in the handoff. Sweep worktrees: rescue each one's `plan/` files first; clean and merged → remove; dirty or unmerged → keep and list. `git worktree prune`. | `references/ship.md` |
+| 5 Ship | Non-plan changes committed by path and pushed to the branch's upstream (never force; pushing to main is authorized by invoking windup). On a feature branch and closing clean → merge to the default branch, push, delete the branch. Closing from `building` → push the branch, do not merge, name it in the handoff. Sweep worktrees: rescue each one's `plan/` files first; clean and merged → remove; dirty or unmerged → keep and list. `git worktree prune`. Sweep branches with `$SKILL/bin/branches.sh`: delete `merged` ones (local and remote) with their tip SHAs in the summary; list `hold` and `unmerged` ones and ask about them in one Open question. | `references/ship.md` |
 | 6 Handoff | The message below, printed last. | below |
 
 ## 6. Resume handoff (the final message)
@@ -32,6 +32,8 @@ Wound up <project-name> for today.
 [if Step 0 fired:] Replanned first: <N> files folded · Replay: <clean | N orphans / M ghosts>
 [if unmerged:] Branch `<name>` pushed but NOT merged — <why>
 [if worktrees kept:] Worktrees kept: <path> — <what it holds>
+[if branches deleted:] Branches deleted: <N> merged (tip SHAs in the summary)
+[if held or unmerged:] Branches waiting on you: <ref> — <reason>, … (merge, keep, or delete?)
 
 Folder: <absolute path>
 Resume next session: cd <absolute path> and run /resume-nt

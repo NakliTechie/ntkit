@@ -34,11 +34,13 @@ Each finding: `**ID** [Bug|Security|Stray|Stub|Test|Agent-readiness] path:line �
 
 **Chain pass.** After ranking, ask whether two findings combine into a worse one: a path traversal plus a writable config directory, a stored XSS plus a missing CSRF check, an info leak plus a guessable ID. A chain gets its own ID at the severity of the combined result, judged by the privilege its first step needs, and lists its parts; the parts keep their own IDs.
 
-**Reconcile with prior runs — after your own findings are ranked, never before.** Now read the earlier `plan/forward-pass-*.md` reports (and those in `plan/_archive/`) and `history.md`'s Dead ends. Match on the sink's file plus the defect class, never on ID, since IDs restart every run. A prior finding whose file changed since that report's `Commit:` is matched against today's code, not by line number. Mark each of your findings:
+**Reconcile with prior runs — after your own findings are ranked, never before.** Now read the earlier `plan/forward-pass-*.md` reports (and those in `plan/_archive/`) and `history.md`'s Dead ends and Decisions. Match on the sink's file plus the defect class, never on ID, since IDs restart every run. A prior finding whose file changed since that report's `Commit:` is matched against today's code, not by line number. Mark each of your findings:
 - **new**;
 - **still open** — cite the prior report and ID;
 - **regression** — the prior item was `[x]` and the defect is back; rank it at least at its prior severity and name the reintroducing commit when `git log -L` shows it;
 - **re-flagged** — a prior dismissal covers it; keep the dismissal unless you can name new evidence that defeats its reasoning, and when you reopen, quote both.
+
+**A recorded decision is not re-argued** (adapted from [mattpocock/skills](https://github.com/mattpocock/skills) `improve-codebase-architecture`, MIT). When a finding's fix would undo a dated entry in `history.md` Decisions, quote the decision beside the finding. A severity-ranked finding keeps its rank. A Stray or Worth-a-look finding stays only when you can name the cost the decision causes today; otherwise drop it to False positives, citing the decision. A kept one is a deferral in Phase 4 that points at `/decide-nt`, never an item `/autopilot-nt` can settle by default.
 
 A prior open finding your pass did not meet is never closed by silence. Check it now, or list it in the coverage map as not re-checked.
 

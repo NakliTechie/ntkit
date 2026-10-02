@@ -26,7 +26,7 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 | 0 Launch contract | Goal spec (done-when · because · never-degrade), stop-lines, default-decision policy, budget (default: the scoped batch or 6 hours), worktree, checker model — stated back as a veto window, then go. No user present → safest reading: top batch only, nothing destructive, default budget. | `references/launch.md` |
 | 0.5 Worktree | `.worktrees/autopilot-<date>` on branch `autopilot/<date>`, names fixed once and written into the record; `plan/` symlinked from the main checkout; install step rerun. Never on the user's live checkout. | `references/launch.md` |
 | 1 Order | An ordered queue: keystone first, unblockers front-loaded, stop-line candidates last. A prose goal is recorded verbatim and queued **in this run's own record**, never written into the shared workplan. | below |
-| 2 Loop | Per item: understand · do · verify with fresh eyes · commit by path · log `[x]` with an evidence row. Status flips only — never add, drop, re-rank, or re-word an item in a shared derived file. No pause between items or batches. Fold at batch boundaries; discard only what a file re-read recovers. | `references/loop.md` |
+| 2 Loop | Per item: understand · do (a bug gets the smallest fix; a Stray or refactor item gets its end state, with no-caller paths deleted) · verify with fresh eyes · commit by path · log `[x]` with an evidence row. Status flips only — never add, drop, re-rank, or re-word an item in a shared derived file. No pause between items or batches. Fold at batch boundaries; discard only what a file re-read recovers. | `references/loop.md` |
 | 3 Walls | Route around, never wait: decisions go to the record's Needs you and the item is marked `[~]`; two honest attempts then revert; a stop-line goes to Needs you; three same-cause failures halt the run; budget hit stops cleanly. | `references/loop.md` |
 | 4 Stop-lines | Never crossed unattended. | below |
 | 4.5 Gate | The whole-project deterministic gate once, plus the never-degrade list. Green = landed. Red = held, whatever the per-item log says. | `references/ship.md` |
@@ -45,6 +45,7 @@ Park these; never perform them:
 - **Deleting or moving data irreversibly** — hard deletes, history rewrites, `git push --force`, dropping tables, emptying trash.
 - **Credentials, secrets, money, access** — creating keys/accounts/IAM, changing permissions or sharing, anything financial.
 - **Destructive infra** — tearing down or recreating shared resources.
+- **Breaking a caller outside the repo** — removing or reshaping a published package export, a persisted data shape (storage keys, file formats, schemas), a public URL or route, or a documented CLI flag or config key. Grep cannot see those callers.
 
 Anything ambiguous about reversibility is a stop-line. Standing global stop-signs apply on top of this list.
 

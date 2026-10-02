@@ -7,7 +7,7 @@
 3. **Findings** — by ID, grouped Critical → High → Medium → Low → Stray → Stub → Test value → Agent-readiness. **Stubs** (`### Stubs masquerading as done`) and **Agent-readiness gaps** (`### Agent-readiness`) each get their own section, even when an entry is also listed under its severity. A Stub shows the claimed-done source next to the stubbed code; an Agent-readiness gap shows the UI action next to its missing (or unstaged, or unmarked) manifest counterpart. Each entry ends with its reconcile mark (`new`, `still open: <report> <ID>`, `regression`, `re-flagged`), and each challenged entry carries `challenge: stood — <evidence>`. Regressions go first within their severity.
 4. **False positives / non-issues (verified)** — with reasoning.
 5. **Worth a look (lower confidence)**.
-6. **Coverage map** — what was reviewed and what was NOT reached or skipped.
+6. **Coverage map** — what was contract-checked, what was only read, and what was NOT reached or skipped.
 7. **Workplan** — the batched, ordered, checkbox plan from Phase 4; it doubles as the fix workplan.
 8. **Progress log** — seed with one dated entry: `- YYYY-MM-DD: forward pass complete, workplan created. Starting Batch A.`
 

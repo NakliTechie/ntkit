@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.5.0] — 2026-10-02
+
+### Added
+
+- `/windup-nt` sweeps stray branches. `windup-nt/bin/branches.sh` classifies every local and `origin` branch and changes nothing: `merged` (an ancestor of the default branch, or a squash or rebase merge whose merge changes no file), `hold` (merged, but a long-lived name, a remote or same-name local branch with unmerged commits, or named in `pending.md` or `workplan.md`), or `unmerged`. Windup deletes `merged` branches locally and on the remote, records each tip SHA in the day summary, and asks about the rest in one Open question. `/resume-nt` runs the same script read-only and names the counts in its brief. `tests/branches.test.sh`.
+- Eval cases `forward-pass-nt-structure` (four planted structure findings, with a legitimate injected payment gateway as bait) and `autopilot-nt-external-caller` (a Stray item that would delete a published export).
+
+### Changed
+
+- `/forward-pass-nt` tests live structure. The Stray lens adds three tests: no caller (callers outside the repo count), deletion (a pass-through is Stray), and two adapters (one implementation and no test stand-in is Stray). Security gains a fourth habit: a permission, flag or gate rule written in two places is a finding, ranked by what the weaker copy lets through. The map ranks files by churn, and structure items in busy files come first. A fix that would undo a recorded `history.md` decision quotes it and defers to `/decide-nt`.
+- Dependency categories decide which stand-in a test may use (`test-value.md`, `SUBSTANCE.md` §6.3): the real code for in-process logic, a local stand-in for a database or filesystem, an injected port with a test adapter for owned remote and third-party services, the clock and randomness. An injected payment client is no longer a test-only seam; a mock of in-process code is Mock-as-subject.
+- `/autopilot-nt`: a bug still gets the smallest fix. A Stray item or refactor goal writes its end state in one sentence and deletes compatibility paths with no caller; its checker greps each deleted name for a remaining caller. Removing a published export, a persisted data shape, a public route, or a documented flag or config key is a new stop-line.
+
+### Verified
+
+- `sh tests/run.sh`: 14 passed, 0 failed, 0 skipped.
+- `evals/run.sh`: all 10 model evals pass on Claude Opus 5.5 (about $6.07 in estimated usage). The two new cases check that `/forward-pass-nt` flags the planted structure and leaves the real seam alone, and that `/autopilot-nt` deletes a private helper but parks the published export.
+
 ## [2.4.0] — 2026-10-01
 
 **Upgrade note:** the kit is 20 skills. `/standup-nt` and `/maintain-nt` are removed. Delete `~/.claude/skills/standup-nt/` and `~/.claude/skills/maintain-nt/` after upgrading.

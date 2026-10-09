@@ -10,7 +10,7 @@ read it. Times come from `date '+%Y-%m-%d %H:%M %Z'`.
 ```markdown
 # Research run: <slug>
 
-State: <SPEC-READY | VERIFIED | FLAGGED | BUDGET | BLOCKED>
+State: <SPEC-READY | VERIFIED | PASSED-WITH-NOTES | FLAGGED | BUDGET | BLOCKED>
 Question: <question, verbatim>
 Layer: L5 (three planners, critic, editor, claim check)
 Models: <actual models per role; name any host substitutions>
@@ -64,7 +64,9 @@ Skip this phase with `--go`.
    report words (`wc -w $RUN/report.md`), fetches (`wc -l $RUN/fetch-log.jsonl`) and the page store
    path. Record actual agent runs, elapsed time, report length and available token usage; unknown cost stays unknown. Gates: the lines `check.py gates` printed, including supported/partial/unsupported counts and any repair review outcome. Most-cited sources: from `verify.json`. Next:
    - VERIFIED: `Read report.md. Capture a source with /capture-nt <url>.`
-   - FLAGGED: which gate failed, and that the report is not verified.
+   - PASSED-WITH-NOTES: the advisory notes (which entity G2b found missing), that blocking gates pass,
+     and that the report is not VERIFIED. Then the VERIFIED next step.
+   - FLAGGED: which blocking gate failed, and that the report is not verified.
    - BLOCKED: what failed, from the researchers' `BLOCKED` lines.
 2. `/notify-nt "<slug>: research <STATE>, <n> units, <words> words"`.
 3. Tell the user: the state, the gate table, the report path and the 5 most-cited sources. Offer

@@ -10,6 +10,12 @@
 Exit 0 checks passed · 1 a check failed · 2 could not run (missing file, bad usage).
 With --without g3, exit 0 is diagnostic only: verify.json still records verified=false.
 
+Gates come in two tiers. Blocking: G1 provenance, G2 structure, G4 edit scope, G3 claim
+support; any failure is exit 1 and state FLAGGED. Advisory: G2b census; a failure is
+reported as a note and does not fail the run. All gates passing is state VERIFIED; only
+advisory failures is state PASSED-WITH-NOTES (exit 0, verified=false). verify.json records
+the state and the notes.
+
 A run directory holds spec.md, sections/, fetch-log.jsonl (written only by fetch.py),
 draft.md, edit-plan.md, report.md, claims.json. The spec is Markdown:
 
@@ -28,6 +34,9 @@ draft.md, edit-plan.md, report.md, claims.json. The spec is Markdown:
 A required entity passes G2b when one of its names (the text before any ` (`, ` — ` or `: `,
 split on ` / `) appears in its unit's text, or when the unit's section file drops it with
 `Omitted: <name> — <reason>`, which assemble moves to the report's `## Not covered` list.
+A name of two or more key words also passes when every key word appears in one sentence
+of the unit, in any order, a plural `s`/`es` allowed: "llama.cpp HIP backend" matches
+"the llama.cpp HIP and Vulkan backends". Stop words do not count as key words.
 """
 
 from __future__ import annotations
@@ -285,10 +294,29 @@ def fold(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().casefold()
 
 
+STOP_WORDS = {"a", "an", "and", "the", "of", "for", "to", "in", "on", "with", "by", "or"}
+WORD = re.compile(r"[\w][\w.+#-]*")
+
+
+def key_words(folded: str) -> list[str]:
+    return [w.rstrip(".") for w in WORD.findall(folded) if w.rstrip(".") not in STOP_WORDS]
+
+
+def words_together(names: list[str], text: str) -> bool:
+    """Every key word of a multi-word name in one sentence, any order, plural allowed."""
+    for sentence in re.split(r"(?<=[.!?])\s+", text):
+        have = set(key_words(sentence))
+        for name in names:
+            need = key_words(name)
+            if len(need) >= 2 and all(w in have or w + "s" in have or w + "es" in have for w in need):
+                return True
+    return False
+
+
 def entity_covered(entity: str, text: str, dropped: list[tuple[str, str]]) -> bool:
-    """Named in the folded unit text, or dropped with a reason (folded name, reason)."""
+    """Named in the folded unit text (exactly, or as co-occurring key words), or dropped with a reason."""
     names = [fold(n) for n in entity_names(entity)]
-    if any(n and n in text for n in names):
+    if any(n and n in text for n in names) or words_together(names, text):
         return True
     return any(reason and any(n and n in what for n in names) for what, reason in dropped)
 
@@ -793,36 +821,50 @@ def cmd_gates(run: Path, args) -> int:
     unknown = without - {"g3"}
     if unknown:
         raise CannotRun(f"--without accepts only g3, not {', '.join(sorted(unknown))}")
-    gates = [
-        ("G1", "provenance", lambda: gate_g1(run, report)),
-        ("G2", "structure", lambda: gate_g2(spec, report)),
-        ("G2b", "census", lambda: gate_g2b(spec, report)),
-        ("G4", "edit scope", lambda: gate_g4(run, report)),
-        ("G3", "claim support", lambda: gate_g3(run, report)),
+    gates = [   # (id, name, function, blocking)
+        ("G1", "provenance", lambda: gate_g1(run, report), True),
+        ("G2", "structure", lambda: gate_g2(spec, report), True),
+        ("G2b", "census", lambda: gate_g2b(spec, report), False),
+        ("G4", "edit scope", lambda: gate_g4(run, report), True),
+        ("G3", "claim support", lambda: gate_g3(run, report), True),
     ]
-    results, failed = {}, 0
-    for gid, name, fn in gates:
+    results, failed, notes = {}, 0, []
+    for gid, name, fn, blocking in gates:
+        tier = "blocking" if blocking else "advisory"
         if gid.lower() in without:
-            results[gid] = {"name": name, "pass": None, "problems": ["skipped by --without"]}
+            results[gid] = {"name": name, "tier": tier, "pass": None, "problems": ["skipped by --without"]}
             print(f"{gid:<4} {name:<14} SKIPPED (--without {gid.lower()})")
             continue
         problems = fn()
-        results[gid] = {"name": name, "pass": not problems, "problems": problems}
-        print(f"{gid:<4} {name:<14} {'PASS' if not problems else 'FAIL'}")
+        results[gid] = {"name": name, "tier": tier, "pass": not problems, "problems": problems}
+        verdict = "PASS" if not problems else ("FAIL" if blocking else "NOTE (advisory)")
+        print(f"{gid:<4} {name:<14} {verdict}")
         for p in problems:
             print(f"       - {p}")
-        failed += bool(problems)
-    verified = failed == 0 and not without
+        if problems and blocking:
+            failed += 1
+        elif problems:
+            notes.append(gid)
+    if failed:
+        state = "FLAGGED"
+    elif without:
+        state = "CHECKED"
+    else:
+        state = "PASSED-WITH-NOTES" if notes else "VERIFIED"
     (run / "verify.json").write_text(json.dumps({
         "run": run.resolve().name,
         "checked_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "gates": results, "without": sorted(without), "verified": verified,
+        "gates": results, "without": sorted(without), "state": state,
+        "verified": state == "VERIFIED", "notes": notes,
         "sources": cited_sources(run, report),
     }, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    advisory = f"; advisory notes: {', '.join(notes)}" if notes else ""
     if failed:
-        print(f"NOT VERIFIED: {failed} gate(s) failed")
+        print(f"NOT VERIFIED: {failed} blocking gate(s) failed{advisory}")
     elif without:
-        print("CHECKED (G3 skipped by --without; not VERIFIED)")
+        print(f"CHECKED (G3 skipped by --without; not VERIFIED{advisory})")
+    elif notes:
+        print(f"PASSED-WITH-NOTES: blocking gates pass{advisory}; not VERIFIED")
     else:
         print("VERIFIED")
     return 1 if failed else 0

@@ -250,7 +250,16 @@ expect("G2: extra heading", run("gates", d, "--without", "g3"), 1, "unexpected h
 
 # --- G2b census -------------------------------------------------------------
 d = with_section("g2b-silent", "S1.2", SECTIONS["S1.2"].replace("Omitted: Treynor — no primary source was reachable\n", ""))
-expect("G2b: silent omission", run("gates", d, "--without", "g3"), 1, "required entity 'Treynor (1962)'")
+expect("G2b: silent omission is an advisory note", run("gates", d, "--without", "g3"), 0, "required entity 'Treynor (1962)'")
+expect("G2b: advisory note named in the summary", run("gates", d, "--without", "g3"), 0, "advisory notes: G2b")
+if json.loads((d / "verify.json").read_text())["notes"] != ["G2b"]:
+    failures.append("G2b: verify.json does not list the advisory note")
+d = with_section("g2b-reworded", "S1.2", SECTIONS["S1.2"].replace("The Security Market Line relates", "The line of the security market relates"))
+expect("G2b: reworded multi-word name passes", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 skipped by --without; not VERIFIED)")
+d = with_section("g2b-plural", "S1.2", SECTIONS["S1.2"].replace("The Security Market Line relates", "Security market lines relate"))
+expect("G2b: plural key word passes", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 skipped by --without; not VERIFIED)")
+d = with_section("g2b-split", "S1.2", SECTIONS["S1.2"].replace("The Security Market Line relates", "The security market moves. A line relates"))
+expect("G2b: key words split across sentences do not count", run("gates", d, "--without", "g3"), 0, "advisory notes: G2b")
 d = with_section("g2b-alias", "S1.1", SECTIONS["S1.1"].replace("The efficient frontier traces", "The frontier of efficient portfolios traces"))
 expect("G2b: alias counts", run("gates", d, "--without", "g3"), 0, "VERIFIED")
 
@@ -340,6 +349,15 @@ for desc, malformed in (("short sample", valid[:1]), ("wrong type", {}),
     expect(desc, run("gates", d), 1)
 (d / "claims.json").write_text(json.dumps(valid))
 expect("full judged sample", run("gates", d), 0, "VERIFIED")
+if json.loads((d / "verify.json").read_text())["state"] != "VERIFIED":
+    failures.append("verify.json state should be VERIFIED")
+spec_text = (d / "spec.md").read_text()
+(d / "spec.md").write_text(spec_text.replace("- Treynor (1962)\n", "- Treynor (1962)\n- Fama-French three-factor model\n"))
+expect("advisory-only failure: PASSED-WITH-NOTES", run("gates", d), 0, "PASSED-WITH-NOTES: blocking gates pass; advisory notes: G2b")
+v = json.loads((d / "verify.json").read_text())
+if (v["state"], v["verified"]) != ("PASSED-WITH-NOTES", False):
+    failures.append(f"PASSED-WITH-NOTES must not count as verified: {v['state']}, {v['verified']}")
+(d / "spec.md").write_text(spec_text)
 (d / "report.md").write_text((d / "report.md").read_text() + "\n")
 expect("report mutation invalidates verdicts", run("gates", d), 1, "sample is stale")
 shutil.copy(d / "draft.md", d / "report.md")

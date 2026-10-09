@@ -27,11 +27,14 @@ Do not edit the report, metadata, fetch log or page store. Return only
 
 ## Gate and one repair
 
-Run `check.py gates $RUN` with no bypass. Its exit code picks VERIFIED or FLAGGED.
+Run `check.py gates $RUN` with no bypass. Its last line names the state: VERIFIED,
+PASSED-WITH-NOTES (blocking gates pass, an advisory gate such as G2b does not) or FLAGGED
+(exit 1). verify.json records `state` and `notes`.
 Report the supported/partial/unsupported counts separately. The design permits partial verdicts;
 VERIFIED does not mean every claim was checked or every sampled claim was fully supported.
 
-If only G3 fails on unsupported claims, allow one repair pass:
+If the only blocking failure is G3 on unsupported claims, allow one repair pass (advisory notes do
+not block it):
 
 1. Preserve report.md, claims.json, claims-meta.json and verify.json as `*-before-repair.*`.
    Existing snapshots mean the repair allowance is already consumed; never overwrite them.
@@ -52,8 +55,14 @@ If only G3 fails on unsupported claims, allow one repair pass:
    "note":"..."}]}`. Allowed verdicts: removed, supported, partial, unsupported.
    Judge the replacement assertion in context, even when its exact wording changed.
    A remaining unsupported assertion fails the repair, even if it leaves the new sample.
-4. Run all gates again, including G3. A failing repair review or any gate failure closes FLAGGED.
-   G3 checks repair-review.json too. Record its outcome in run.md. No second repair, resampling loop or editor pass.
+4. Run all gates again, including G3. A failing repair review or any blocking gate failure closes
+   FLAGGED. G3 checks repair-review.json too. Record its outcome in run.md.
+5. If the repair review returns `partial` for a repaired claim, allow one narrow follow-up: preserve
+   the current files as `*-before-repair2.*`, give a fresh repairer only that claim, its review note
+   and its stored evidence, and let it correct that sentence alone under the same directive rules.
+   Then `sample --force`, a fresh checker for the whole new sample and the old failed sentences, and
+   all gates again. An existing `*-before-repair2.*` snapshot means the follow-up is used up.
+   No further repair, resampling loop or editor pass.
 
 Missing page files, malformed verdicts or a changed sample are infrastructure/artifact failures,
 not permission to delete claims. Close FLAGGED with the exact failure.

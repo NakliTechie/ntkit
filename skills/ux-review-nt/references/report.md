@@ -28,6 +28,6 @@ Send each recording from `plan/ux-review-<date>-run/` with `SendUserFile`, one p
 
 ### Media lifecycle
 
-The recordings and screenshots are working evidence, not the record; the report is the record. Keep them while findings are open: the fixer replays beats from them. Once the fixes land and the gates pass, delete the run directory's media by name (`*.webm`, `*.mp4`, `*.cast`, `*.png`, `*.jpg`), report each deletion with its size, and keep the report, the beat logs and the JSON. Video stays out of a synced plan store (`*.webm` and `*.mp4` ignored there), since a run's media runs to 40–110 MB.
+The recordings and screenshots are working evidence, not the record; the report is the record. Keep them while findings are open: the fixer replays beats from them. Once the fixes land and the gates pass, `/windup-nt`'s media sweep deletes the run directory's media by name (or do it then yourself) (`*.webm`, `*.mp4`, `*.cast`, `*.png`, `*.jpg`), report each deletion with its size, and keep the report, the beat logs and the JSON. Video stays out of a synced plan store (`*.webm` and `*.mp4` ignored there), since a run's media runs to 40–110 MB.
 
 **Print to chat:** the worst friction beats, the ranked findings, the flail's yield, the audit results, and the headline of the ideal sequence. Point structural items at `/decide-nt` and bugs and invariant breaches at `/walkthrough-nt`; `/replan-nt` folds the report into `pending.md`/`workplan.md`.

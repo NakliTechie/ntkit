@@ -22,7 +22,7 @@ On entering a step, read its Detail file first, then act; the Outcome column is 
 | 2 Pending | `plan/pending.md` merged, not rewritten: Now / Parked / Open questions preserved, finished items removed, a "not now" said today lands in Parked, a flat file stays flat. | `references/summary-and-pending.md` |
 | 3 Workplan | `plan/workplan.md` re-chunked from pending: logical, convenient, related; in-flight chunks copied through; keystone marked; tri-state checkboxes; loose sizes; finding IDs and `[test]` markers carried; leftovers under `## Unbatched`. Top chunk is what the next session starts on. | `references/workplan.md` |
 | 4 Gitignore | `plan` ignored per MEMORY.md §0 (`git check-ignore -q plan`; add `/plan`, no trailing slash). | `references/ship.md` |
-| 5 Ship | Non-plan changes committed by path and pushed to the branch's upstream (never force; pushing to main is authorized by invoking windup). On a feature branch and closing clean → merge to the default branch, push, delete the branch. Closing from `building` → push the branch, do not merge, name it in the handoff. Sweep worktrees: rescue each one's `plan/` files first; clean and merged → remove; dirty or unmerged → keep and list. `git worktree prune`. Sweep branches with `$SKILL/bin/branches.sh`: delete `merged` ones (local and remote) with their tip SHAs in the summary; list `hold` and `unmerged` ones and ask about them in one Open question. Sweep review media with `$SKILL/bin/review-media.sh`: delete the media of `done` run folders by name, each with its size in the summary; keep `open` ones. | `references/ship.md` |
+| 5 Ship | Non-plan changes committed by path and pushed to the branch's upstream (never force; pushing to main is authorized by invoking windup). On a feature branch and closing clean → merge to the default branch, push, delete the branch. Closing from `building` → push the branch, do not merge, name it in the handoff. Sweep worktrees: rescue each one's `plan/` files first; clean and merged → remove; dirty or unmerged → keep and list. `git worktree prune`. Sweep branches with `$SKILL/bin/branches.sh`: delete `merged` ones (local and remote) with their tip SHAs in the summary; list `hold` and `unmerged` ones and ask about them in one Open question. Sweep review media with `$SKILL/bin/review-media.sh`: delete the media of `done` run folders by name, each with its size in the summary; keep `open` ones. Last, sweep the session scratchpad with `$SKILL/bin/scratch.sh`: delete `drop` entries by name with sizes in the summary, keep `keep` ones, list `older` sessions and ask. | `references/ship.md` |
 | 6 Handoff | The message below, printed last. | below |
 
 ## 6. Resume handoff (the final message)
@@ -33,6 +33,8 @@ Wound up <project-name> for today.
 [if unmerged:] Branch `<name>` pushed but NOT merged — <why>
 [if worktrees kept:] Worktrees kept: <path> — <what it holds>
 [if branches deleted:] Branches deleted: <N> merged (tip SHAs in the summary)
+[if scratch cleared:] Scratch cleared: <N> entries, <MB> MB · free space <df -h / Avail>
+[if scratch kept or older:] Scratch kept: <path> — <open item>; older sessions: <path> (<MB> MB) — delete?
 [if held or unmerged:] Branches waiting on you: <ref> — <reason>, … (merge, keep, or delete?)
 
 Folder: <absolute path>

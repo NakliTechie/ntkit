@@ -33,6 +33,8 @@ Both go on **before the first interaction**, on every surface.
 - **Native:** `xcrun simctl io <device> recordVideo` on iOS; a screen recording or a per-step screenshot sequence on macOS.
 - **CLI:** the annotated transcript: every invocation with its stdout, stderr and exit code, in order.
 
+**One recording per viewport.** A review that covers desktop and phone walks each as its own full pass from wiped storage, with its own recording and beat log (`desktop/`, `phone/`). The phone pass emulates a phone, not a narrow window: `isMobile`, `hasTouch`, a phone user agent, taps instead of hover. Full-page screenshots reset Chromium's touch emulation mid-run. Take viewport-only captures on the phone pass and re-check the emulation at every beat.
+
 Keep an **append-only beat log** beside it: index, time relative to recording start (`T0`), what was done, what appeared, any invariant breach. Write "what was done" as prose from the newcomer's view ("clicked the blue Import button in the toolbar", never `click(600,337)`). If the run spans several recording segments, namespace beat indices by segment and rename each `page@<hash>.webm` to match. Take screenshots as well as video; capture both.
 
 **Build the driver once.** Phase 2 needs a per-beat capture (screenshot, a readable DOM or accessibility snapshot, the prose note, the invariant results) keyed by beat index. Phase 3 needs the same, plus re-driving any beat-log prefix from a cold context.

@@ -24,6 +24,10 @@ Create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit
 
 ### Hand back the recording
 
-Send the recording from `plan/ux-review-<date>-run/` with `SendUserFile`. Without it (a subagent, a non-interactive run), print the absolute path of the run directory and name the video file. Say whether it is a real recording, an asciicast, or a screenshot contact sheet.
+Send each recording from `plan/ux-review-<date>-run/` with `SendUserFile`, one per viewport. Name a file over 25 MB by its path instead. Without `SendUserFile` (a subagent, a non-interactive run), print the absolute path of the run directory and name each video file. Say whether each is a real recording, an asciicast, or a screenshot contact sheet.
+
+### Media lifecycle
+
+The recordings and screenshots are working evidence, not the record; the report is the record. Keep them while findings are open: the fixer replays beats from them. Once the fixes land and the gates pass, delete the run directory's media by name (`*.webm`, `*.mp4`, `*.cast`, `*.png`, `*.jpg`), report each deletion with its size, and keep the report, the beat logs and the JSON. Video stays out of a synced plan store (`*.webm` and `*.mp4` ignored there), since a run's media runs to 40–110 MB.
 
 **Print to chat:** the worst friction beats, the ranked findings, the flail's yield, the audit results, and the headline of the ideal sequence. Point structural items at `/decide-nt` and bugs and invariant breaches at `/walkthrough-nt`; `/replan-nt` folds the report into `pending.md`/`workplan.md`.

@@ -20,12 +20,12 @@
   | `INV-DIALOG` | no native `alert` / `confirm` / `prompt` |
   | `INV-DURABLE` | after anything that should persist, a reload returns the same state |
 
-  - `INV-DURABLE`'s oracle compares **all** persisted state. One that reads only the active tab, sheet or pane reports a UI-state reset as data loss; that produced a false Critical.
+  - `INV-DURABLE`'s oracle compares **all** persisted state. One that reads only the active tab, sheet or pane reports a UI-state reset as data loss.
   - Register an auto-dismissing dialog handler (`page.on("dialog", d => { log(d.type(), d.message()); d.dismiss(); })`) before the first click. An unhandled `confirm()` hangs the driver and loses the run.
-  - `INV-SILENT` is a lead generator, not an oracle: across two runs it fired 28 times for 0 findings. Diff a text digest of the main region plus live regions before and after each action. Whitelist by class (boundary caret moves, downloads unless the context sets `acceptDownloads`, native-seam cancels, controls that render into a detached overlay), never by step. On a canvas or WebGL surface, diff the app's own state (its model, an accessor, its agent face), or disable the invariant and say so.
+  - `INV-SILENT` is a lead generator, not an oracle. Diff a text digest of the main region plus live regions before and after each action. Whitelist by class (boundary caret moves, downloads unless the context sets `acceptDownloads`, native-seam cancels, controls that render into a detached overlay), never by step. On a canvas or WebGL surface, diff the app's own state (its model, an accessor, its agent face), or disable the invariant and say so.
   - `pageerror` misses unhandled rejections. Add `page.addInitScript(() => addEventListener("unhandledrejection", e => console.error("INV-REJ", e.reason)))` and count those as `INV-REJ`, not `INV-ERR`. Tag every breach by cause, not by the channel it arrived on.
   - Report zero breaches as zero. A quiet log is not evidence the app is sound, and the set only sees what the driver requests (headless never fetches a favicon; a headed browser reports that 404 on the console channel, not the `response` event — tag by cause).
-  - Add repo invariants from the repo's own CSP, locked decisions and doctrines, never a generic rule. A generic "no third-party origin" check fired 64 times on a CDN the CSP pins and on the local inference port.
+  - Add repo invariants from the repo's own CSP, locked decisions and doctrines, never a generic rule.
   - Write the armed list into the report header. Attribute each breach to the action that caused it, often several steps back.
   - No global error net in the app is itself a finding.
 - **Record the run** into `plan/walkthrough-<date>-run/`:

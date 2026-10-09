@@ -16,7 +16,7 @@ Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.
 - Closing from `building` → do **not** merge. Push the feature branch as-is and name it in the handoff ("on branch `x`, unmerged: <why>"). A windup never puts unverified work on main.
 
 **Stray-worktree sweep:**
-- **Rescue `plan/` first.** Before removing a worktree, copy any `plan/` files it holds that the main checkout lacks into the main checkout's `plan/`, keeping their names. A real-folder `plan/` in a worktree exists nowhere else and dies with it (this once cost two walkthrough reports and 51 screen recordings); a symlinked `plan` holds nothing of its own.
+- **Rescue `plan/` first.** Before removing a worktree, copy any `plan/` files it holds that the main checkout lacks into the main checkout's `plan/`, keeping their names. A real-folder `plan/` in a worktree exists nowhere else and dies with it; a symlinked `plan` holds nothing of its own.
 - For each linked worktree in `git worktree list`: clean and its branch fully merged into the default branch → `git worktree remove <path>` and delete the branch; dirty or holding unmerged commits → leave it untouched and list it in the handoff with what it holds. Never delete work to tidy up.
 - Finish with `git worktree prune`.
 

@@ -54,7 +54,6 @@ from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 SETTINGS_DEFAULTS = {"sections": 8, "words": 5000, "fetches_per_section": 15, "tool_rounds": 20}
 REQUIRED_BLOCKS = ("what to cover", "research questions", "required entities", "source leads")
 OPTIONAL_BLOCKS = ("presentation",)
-VERBS = ("DELETE", "MERGE", "MOVE", "CROSS-REFERENCE", "VERIFY", "KEEP")
 EDITING_VERBS = ("DELETE", "MERGE", "MOVE", "CROSS-REFERENCE")
 VERDICTS = ("supported", "partial", "unsupported")
 TRACKERS = {"fbclid", "gclid", "mc_cid", "mc_eid", "ref_src"}

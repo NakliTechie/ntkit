@@ -14,7 +14,7 @@ Commit it to the repo, not `plan/`. Give it a real `--help`, error messages that
 
 - **First walkthrough:** create the smallest script that proves each role's happy path.
 - **Later walkthroughs:** run it first, walk what it can't reach, then extend it.
-- **Re-verify every RED under Phase 4's driver-suspect rule before committing.** One first sweep's two REDs were both harness errors; a harness that ships a false RED teaches every later run to ignore it.
+- **Re-verify every RED under Phase 4's driver-suspect rule before committing.** A harness that ships a false RED teaches every later run to ignore it.
 - **Wait on a condition, never a fixed sleep**: `document.activeElement`, an element's presence, an app state flag, with a timeout that fails loudly. A tuned sleep can turn a live defect green (`SUBSTANCE.md` §6.7).
 - **If `make verify` already means a static gate, add yours beside it** (`make walk`, `make doctor`) and document both as required; never replace it.
 - **The repo's own lint applies to the harness.** Fix the harness to satisfy a rule (e.g. a storage-API screen that rejects a `showDirectoryPicker` stub); never exempt it.

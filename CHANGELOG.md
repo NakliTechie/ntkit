@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `/lab-nt` separates signal from noise. A fifth contract gate measures the noise floor (the unchanged baseline re-measured three times, or its eval items bootstrapped) and, for a dataset metric, splits off a confirmation set that joins the measurement lockbox. An experiment is kept only when its gain clears the floor; on a dataset metric, only when the paired 95 % interval against the best-so-far excludes zero. GOAL-MET also needs the confirmation set, read once. The Re-arm line says whether the remaining gap is worth chasing with more items or repeats. The leg report gains `Confirmation:` and `What stays:` lines, and the leg tears down the outside resources it created before reporting.
+- `AUTHORING.md` §3.5: a command that creates anything outside the repo ends with a teardown and a "what stays" list. New checklist line.
+
+Borrowed from the `kev-finetune` agent skill in [jaredpalmer/kev](https://github.com/jaredpalmer/kev) (Apache-2.0): power-analysis sizing, paired bootstrap against the baseline, an untouched final evaluation, and teardown as a phase.
+
 ## [2.5.0] — 2026-10-02
 
 ### Added

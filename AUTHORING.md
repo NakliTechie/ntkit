@@ -42,6 +42,17 @@ guard #4: the safe default for outward-facing power is *off*, and the command as
 or refuses rather than assuming yes. `/reclaim-nt` models it — the sweep is
 read-only, and nothing moves to the Trash without a per-item `apply`.
 
+## 3.5 Clean up what you created
+
+A command that creates anything outside the repo (a cloud instance, an endpoint,
+a volume, a tunnel, a launchd agent, a scheduled job) ends with a teardown step
+and a **what stays** list: each resource that survives the run, why, and the
+command that removes it. Teardown removes only what this run created, never what
+it found running. Secrets and published artefacts are listed, not deleted:
+deleting them is authority (§3). `/demo-nt`'s "After a demo" section and
+`/lab-nt`'s leg report are the house examples. (From the teardown phase in
+[jaredpalmer/kev](https://github.com/jaredpalmer/kev) `skills/kev-finetune`, Apache-2.0.)
+
 ## 4. One complete, valid example
 
 Give at least one invocation the reader can copy, with obvious placeholders
@@ -149,6 +160,7 @@ so a relative path runs whatever that repo put there; and `$0` in an agent's she
 - [ ] Frontmatter: `description` · `argument-hint` · `allowed-tools` (minimal) · `entry` · `exit` (a check) · `writes`
 - [ ] Every scope / authority / safety / routing / completion input documented with a default
 - [ ] Outward-facing authority defaults to denied; reversible work assumed
+- [ ] Anything created outside the repo is torn down at the end, or named in a "what stays" list with its removal command
 - [ ] One complete, copyable example with obvious placeholders
 - [ ] Required input assembled up front; asks only at the unanswerable or outward-facing
 - [ ] Legal states declared; entry-fail refuses; no nested actors

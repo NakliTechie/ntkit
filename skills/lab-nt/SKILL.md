@@ -15,12 +15,13 @@ writes: "its own worktree, plan/lab/<slug>/ (contract.md, journal.md, <date>-leg
 
 ## Phase 0 — The research contract (interactive)
 
-Work the idea with the user until it passes four gates, then write `plan/lab/<slug>/contract.md`. Never launch on a mushy goal; unfalsifiable goals are where infinite runs come from.
+Work the idea with the user until it passes five gates, then write `plan/lab/<slug>/contract.md`. Never launch on a mushy goal; unfalsifiable goals are where infinite runs come from.
 
 1. **Question** — one sentence: "can X do Y under constraint Z", not "explore X".
 2. **Metric** — one scalar, chosen before the loop, fair across interventions, and read from the run's output, never the loop's prose. State the **goal threshold** (GOAL-MET when crossed), or declare the campaign open-ended so the user picks that knowingly.
 3. **Scope fence** — what the loop may touch, plus explicit non-goals. A small surface keeps diffs reviewable, and "nothing left to try" only means something inside a fence.
 4. **Budget ladder** — per-experiment cap (one build+bench cycle, N minutes of training); per-leg (default 4 hours or 25 experiments); per-campaign odometer (default 5 legs; exhausted ⇒ RETIRED, extendable only via `/decide-nt`).
+5. **Noise floor** — before the first experiment, re-measure the unchanged baseline three times (or bootstrap its eval items) and write the spread into the contract. A gain inside the spread is noise: a +0.6 point move with a ±6 point interval is no result. When the metric is computed over a dataset, also split off a **confirmation set** the loop never reads; it joins the lockbox.
 
 State these defaults rather than asking: critic every 5 experiments; 8 consecutive experiments without improvement ⇒ STAGNANT. Run the **prior-art check** before any experiment: the vault first (`/ask-nt`, when scholia is installed), then the repo and its `plan/`, then the web. A question already answered ends the campaign at leg zero, GOAL-MET by citation.
 
@@ -36,7 +37,7 @@ State these defaults rather than asking: critic every 5 experiments; 8 consecuti
 2. **Dedup** against the journal. Two consecutive rejections with nothing new inside the fence ⇒ **DRY-WELL**.
 3. **Run** inside the per-experiment cap. A blown cap is a failed experiment, never extended or retried with more time.
 4. **Measure** — the harness's number goes in the journal verbatim.
-5. **Keep or revert** — improvements commit (`lab <id>: <what> — <old → new>`); anything else reverts clean. The branch tip is always the best-known state.
+5. **Keep or revert** — a gain larger than the noise floor commits (`lab <id>: <what> — <old → new>`); for a dataset metric, score candidate and best-so-far on the same items and keep only when the paired 95 % interval excludes zero. Anything else reverts clean. The branch tip is always the best-known state.
 6. **Journal** the row and go on. Budgets and thresholds are the exits.
 
 Run from contract, journal and branch tip, not from recall of earlier experiments. At each critic point, confirm the journal is current enough to resume the leg from files alone, then fold finished-experiment detail out of context.
@@ -46,7 +47,7 @@ Run from contract, journal and branch tip, not from recall of earlier experiment
 ## Phase 2 — How a leg ends
 
 First exit wins, named in the leg report:
-- **GOAL-MET** — the threshold holds on a clean re-measure from the branch tip, output cited. Never on self-report.
+- **GOAL-MET** — the threshold holds on a clean re-measure from the branch tip **and** on the confirmation set, read once now, output cited. Never on self-report. A confirmation miss is a finding (the loop fit its own eval), reported as BUDGET or STAGNANT, not GOAL-MET.
 - **BUDGET** — clock or experiment cap reached; best-so-far is already committed.
 - **STAGNANT** — the stagnation threshold or two "diminishing" verdicts; include the best hypothesis why.
 - **DRY-WELL** — nothing left inside the fence; report what widening it would mean and park the decision.
@@ -61,20 +62,21 @@ First exit wins, named in the leg report:
 
 ## Phase 4 — Re-arm
 
-- Every next leg is started by the user with `/lab-nt resume` after reading the leg report. Its `Re-arm` line recommends CONTINUE (what to try) or STOP (why).
+- Every next leg is started by the user with `/lab-nt resume` after reading the leg report. Its `Re-arm` line recommends CONTINUE (what to try) or STOP (why), and says whether the gap is worth chasing: the distance to the goal measured in noise floors, and, when the last kept gains sat near the floor, how many more items or repeats would separate them (or that the gap is too small to chase with volume).
 - Resuming a STAGNANT or DRY-WELL campaign with an unchanged contract is refused; say what would have to change (fence, budget, or a new hypothesis from the human).
 - Odometer exhausted ⇒ RETIRED, regardless of trend; extending it is a `/decide-nt` entry.
 
 ## Phase 5 — The leg report
 
-Audit the trail first: every kept experiment maps to a commit, every number to a harness output, every revert is in the story. Write `plan/lab/<slug>/<date>-leg.md`:
+Tear down first. Stop or delete every outside resource this leg created (cloud instances, endpoints, volumes, tunnels, scheduled jobs) unless the contract keeps it; never touch one the leg found running. Secrets and anything published are listed, not deleted. Then audit the trail: every kept experiment maps to a commit, every number to a harness output, every revert is in the story. Write `plan/lab/<slug>/<date>-leg.md`:
 
 ```
 Lab ran <slug> — leg <n> of <odometer>, <duration>, branch lab/<slug>.
 
 Ended:        <GOAL-MET | BUDGET | STAGNANT | DRY-WELL | PARKED> — <one line why>
-Metric:       <start of leg> → <best>   (goal: <threshold | open-ended>)
+Metric:       <start of leg> → <best>   (goal: <threshold | open-ended>; noise floor ±<spread>)
 Best-so-far:  <SHA> — <re-measured clean: harness output cited>
+Confirmation: <score on the confirmation set, read once | not read (no GOAL-MET) | none (scalar metric)>
 
 Kept (survived measurement):
   - <id> — <metric delta> — <SHA>
@@ -82,6 +84,7 @@ Reverted (tried, honest, didn't hold):
   - <id> — <what the number said>
 Critic said:  <verdicts, incl. anything flagged>        [or "no cadence point reached"]
 
+What stays:   <each surviving outside resource + the command that removes it | none>
 Needs you:    <parked decisions · fence question · the stagnation hypothesis>
 Re-arm:       <CONTINUE — try <next> | STOP — <why> | RETIRED (odometer)>
 Resume: /lab-nt resume <slug>   ·   Promote a finding: /capture-nt plan/lab/<slug>/<date>-leg.md

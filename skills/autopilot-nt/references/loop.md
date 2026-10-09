@@ -1,0 +1,27 @@
+## Phase 2 — The autonomous loop
+
+For each item, in order:
+1. **Understand** — its precise location and the one-line what + why. If it is really a *decision* (a UX or structural call with no clearly right answer), don't force code onto it: apply the default-decision policy, log a progress-log row with result `assumed: <default taken, and why>`, and move on.
+2. **Do it** — for a bug, the smallest change that resolves it, matching the surrounding code. For a Stray item or a refactor goal, build the shape the code would have if this design had been there from the start (idea from [jnsahaj/skills](https://github.com/jnsahaj/skills) `zero-tech-debt`). Write that end state as one sentence in the item's progress-log row. Delete compatibility paths that have no caller instead of improving them. Prefer one flow to mode flags, name things for what they do now, and build no general mechanism for a single use. Search for callers before you delete; a caller outside the repo is a stop-line (Phase 4 in `SKILL.md`).
+3. **Verify it with fresh eyes.** Spawn a verification subagent (Agent) whose context is only the item's spec (ID · location · what + why), the diff, and how to check, never the maker's reasoning. For a UI-facing item, include the touched feature's file from `verify/features/` (left by `/walkthrough-nt`) when one exists, and prefer the harness's scoped `verify <feature>`. The checker runs the right check for this item: unit test, typecheck or build for logic; a runtime or browser check for anything UI-facing or `[test]`-marked (Chrome MCP for WebGPU and real-browser flows, never headless where it matters). It returns pass/fail with evidence.
+   - **A fix may never modify, skip, or delete the check that verifies it.** If the diff touches a test file, the item goes in the report's **Tests changed** section whatever the verdict.
+   - **A new regression test goes red first** (`SUBSTANCE.md` §6.3). The checker stashes only the production paths (`git stash push -- <non-test paths>`, so the new test stays in the tree), runs the new test, records the red and its assertion, runs `git stash pop`, and records the green. A new test that passes without the fix fails verification.
+   - **A `T` item from `/forward-pass-nt`'s test-value lens** is the one sanctioned edit to existing tests (`D` delete, `C` consolidate, `F` fix the assertion; `SUBSTANCE.md` §6.8). The checker runs the `T` gate from `$SKILL/../forward-pass-nt/references/ranking-and-workplan.md`: one deliberate mutation of the guarded production code, the keeper (or the repaired test) shown red, the source restored byte for byte. A keeper that stays green parks the item `[~]`.
+   - **A reshaping item** (Stray, or a refactor goal) gives the checker its end-state sentence and the list of deleted paths. The checker greps each deleted name for a remaining caller, then runs the flows the deletion touches: navigation, permissions, persisted state. A remaining caller fails verification.
+   - **A `[Security]` item from `/forward-pass-nt`** needs the fix attacked, not only the input that found it. The checker runs the Verify round from `$SKILL/../harden-nt/references/rounds.md`: a known-good input that still reaches the guarded code and succeeds, plus at least three variants of the same defect that all fail. Fewer than three valid variants parks the item `[~]`.
+4. **Commit it** — one focused commit per item (or tight cluster), by path, never `git add -A`. Never push per item; the single push is Phase 5's.
+5. **Log it** — flip `[ ]` → `[x]` in the file the item came from (the source report, `plan/workplan.md`, or this run's own queue), and append a progress-log row to this run's record: **what changed · evidence · result**. Evidence is a resolvable pointer (commit SHA, `file:line`, a check's output), never prose. Result is the outcome state: `tests green` / `build clean` / `reverted` / `deferred: <why>` / `assumed: <why>`.
+
+Check the launch-contract budget (clock and item cap) between items; it is an exit, not a suggestion.
+
+**Fold at batch boundaries:** once the record and queue could restart the next batch from files alone, drop the finished batch from working context. Continue from the queue, the record and git, never from recall.
+
+## Phase 3 — When you hit a wall, route around it
+
+- **Needs a human decision** (judgment call, ambiguous requirement, product choice): log it as `deferred: needs you — <question, with the context to answer it cold>`, mark the item `[~]` with what blocks it, and move to the next item. The report lists it under **Needs you**.
+- **A fix won't land** — after two honest attempts to pass verification, `git restore` the item's uncommitted changes, mark it `[~]` with what you tried and where it failed, and move on.
+- **A stop-line** (Phase 4): never do it. Log it for the report's **Needs you** list and continue with everything else.
+- **Systemic failure** — three consecutive items failing verification for the same root cause (broken build, wrong shared dependency): halt. Revert the item in flight, write what broke, with the evidence, to the report, and end early.
+- **Budget exhausted** — the wall-clock or item cap is hit: finish or revert the item in flight, then stop cleanly.
+
+The loop ends when the queue is exhausted, the scoped goal or batch is met, only stop-lined and blocked items remain, the budget runs out, or a systemic halt fires. Then go to Phase 4.5.

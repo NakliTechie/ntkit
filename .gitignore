@@ -1,0 +1,11 @@
+# OS cruft
+.DS_Store
+
+# Working notes, if you run the ntkit workflow commands on ntkit itself
+plan/
+
+# Agent worktrees
+.worktrees/
+
+# Eval run logs
+evals/results/

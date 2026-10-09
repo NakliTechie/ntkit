@@ -1,0 +1,3 @@
+/research-nt go fixture-blocked
+
+This disposable offline fault-injection fixture has no search backend. Do not call web tools or the network. Replace only the fetch command in every researcher brief with the absolute path to fixture-bin/fetch.py in this workspace; it logs a deterministic infrastructure error. Keep the canonical skill's coordination, repair limit, checks and state handling. No notifications. Do not invent evidence or modify the fault injector.

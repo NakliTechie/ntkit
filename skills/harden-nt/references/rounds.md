@@ -1,0 +1,15 @@
+## Phase 2 — Prove the target is alive
+
+Probe with a health check, a known record, or a marker string, and confirm the answer. After any restart, confirm the old process is gone.
+
+## Phase 3 — Rounds: constructive, adversarial, verify
+
+Every round is typed, and the type changes the brief.
+
+- **Constructive round** (the default while the map has uncovered paths). Hand each agent a slice of the map and the surface's contract: *"demonstrate that this path behaves as specified, and show your input and output."* A path that holds moves to **exercised**. A path that does not is a finding.
+- **Adversarial round** (run at least one, and again whenever constructive rounds stop finding anything). Brief each agent with the contract and nothing else: *"find a case this surface does not handle correctly."* No hints toward known weak spots. For a security-sensitive surface, swap the bare brief for one class/domain section of `references/security-classes.md` per agent, still contract-only. Every finding here **adds a path to the map**.
+- **Verify round** (a specific path, marked hardened). Brief the agent with only the path's one-sentence claim and how to reach the surface — not the fix, not the diff. Confirm with a **control**: the exact input that used to fail alongside a known-good input, side by side; a single passing run doesn't isolate a fix. Then **attack the fix, not the input** (adapted from [google/mantis](https://github.com/google/mantis) variant hunting, Apache-2.0). The verifier writes at least three variants that reach the same weakness another way: one past each edge of the new bound (length ±1, off by one, a sign flip), another encoding (URL or double encoding, Unicode normalisation, case), another route to the same sink (a second endpoint, field, file format, or role). A variant counts only when it targets the same defect class; junk inputs are discarded. Every variant must fail against the fix. Fewer than three valid variants leaves the path **exercised**, not hardened. A fix that blocks only the input it was shown is the most common way an automated fix fails.
+
+Findings are one sentence each, addressed to the surface rather than the code — "`POST /v1/domains` stores `parent_domain_id` unvalidated" is a finding; "the validation logic looks wrong" is not. A finding without a reproducible input is not a finding; ask for one before recording it.
+
+**Every run must show it reached the code it tests.** An attack, a variant, or a control counts only with evidence that it got to the guarded code: a log line, a counter, a distinctive error raised inside the guard. An input that bounced off something unrelated (a wrong auth header, a 404 before the handler, an upstream parse error) proved nothing. Record it as not exercised and rebuild it.

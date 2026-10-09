@@ -1,0 +1,228 @@
+# The plan/ memory contract
+
+`STATES.md` says *when* a command may run. This file says *what `plan/` means* and
+*who may write which part of it*. Both are about keeping the folder honest; that one
+governs the session, this one governs the memory.
+
+The problem it solves is drift: an agent edits `pending.md`, another edits
+`workplan.md`, a third writes a report, and after four sessions nobody — human or
+machine — can say why an item is on the list or where it went. `/replan-nt` catches
+that at fold time by reading everything and judging. This file makes most of it
+checkable instead.
+
+## 0. Where plan/ lives
+
+`plan/` is a gitignored folder at the repo root **or a symlink to one**. Every command
+accepts both; neither form is the "real" one.
+
+**Ignore it with `/plan`, no trailing slash.** A `plan/` line matches directories only, so
+git lists a symlinked `plan` as untracked. Check with `git check-ignore -q plan` (exit 0)
+and `git ls-files plan` (empty) — never by searching `.gitignore` for the line. Not
+ignored → append `/plan` to `.gitignore`. An existing `plan/` line stays; it is still
+right for a real folder.
+
+**Create it only when it is missing.** If `NT_PLAN_STORE` is set (default: unset), the
+folder is made in the store and linked in, so every plan lives in one place a single job
+can back up. The path inside the store mirrors the repo's path under the store's parent
+directory (`~/Code/plans` + `~/Code/research/pith` → `~/Code/plans/research/pith/plan`):
+
+```bash
+if [ -L plan ] && [ ! -e plan ]; then
+  echo "plan is a broken symlink -> $(readlink plan)"; exit 1      # stop; never replace it
+elif [ ! -e plan ] && [ -n "${NT_PLAN_STORE:-}" ]; then
+  root="$(cd "$(dirname "$NT_PLAN_STORE")" && pwd -P)"; here="$(pwd -P)"
+  rel="${here#"$root"/}"; [ "$rel" = "$here" ] && rel="$(basename "$here")"
+  mkdir -p "$NT_PLAN_STORE/$rel/plan" && ln -s "$NT_PLAN_STORE/$rel/plan" plan
+fi
+mkdir -p plan
+```
+
+**Never replace a symlinked `plan` with a real folder**, and never `rm -rf`, `mv` or
+`git worktree remove` your way through it expecting the files to go: removing the link
+leaves the plan in the store. A worktree links the main checkout's `plan`
+(`ln -s "$MAIN/plan" plan`); a link to a link resolves.
+
+## 1. Two kinds of file
+
+Every file under `plan/` is exactly one of two kinds. The distinction is the whole
+contract; everything else follows from it.
+
+| Kind | Files | Rule |
+|---|---|---|
+| **Record** | `soc.md` · `<type>-<date>.md` reports · `<date>-summary.md` · `lab/<slug>/journal.md` · `history.md` `## Log` · `_archive/` | Append-only. Once written, an entry is never edited or deleted. A dead end is recorded exactly like a success. |
+| **Derived** | `pending.md` · `workplan.md` · `history.md` `## Decisions` · `history.md` `## Dead ends` · `standing.md` (optional, §7) | A projection over the record. Rewritten wholesale by the reconcile pass, and by nothing else. |
+
+`history.md` is deliberately hybrid: its `## Log` is the record, its `## Decisions` and
+`## Dead ends` are curated indexes *over* that log. Naming the split is enough; the file
+does not need to be split.
+
+**Nothing exists only in a derived file.** If a fact is in `pending.md`, some record
+entry put it there. A derived file can be deleted and rebuilt from the records; that is
+the test of whether this contract is being kept.
+
+## 2. Who may write — the writer rule
+
+**W1 — The human writes anywhere.** These rules bind *agent-authored* writes. A person
+editing `pending.md` by hand is always legal and always wins. `/decide-nt` and `/soc-nt`
+are the human speaking through a command, so their appends are human writes.
+
+**W2 — An agent may append to a record. Never edit one.** Rewriting a past record entry
+is the one thing that makes the log untrustworthy.
+
+**W3 — An agent may flip the status of an item that already exists in a derived file,**
+and append an evidence pointer to that item. `[ ] → [x]`, `[ ] → [~]`, plus the row
+saying how it was verified. Status is the item's own lifecycle and belongs to whoever
+did the work — this is also what lets progress survive a crash mid-run.
+The same holds for the `[ ]` items of a record's own Workplan section (a forward-pass or
+ux-review report, a run's own queue): any executor may flip them, appending an evidence row to
+that report's progress log. A status flip is not an edit of a past entry under W2; rewording or
+removing the item still is.
+
+**W4 — Only the reconcile pass may add, remove, re-rank, or re-word a derived item.**
+That is `/replan-nt`, `/windup-nt`'s implicit replan, and `/scaffold-nt` at seeding.
+Three writers, ever.
+
+**W5 — An agent handed a goal records it; it does not author its own checklist.**
+A prose goal becomes a **record** — a dated goal entry — and the reconcile pass turns
+that into workplan items. An agent that writes its own criteria and then ticks them off
+has graded its own exam: it can meet the criteria by editing them. This is W4 applied to
+the case that matters most, and it is why it is stated separately.
+
+## 3. Declared impact
+
+Every agent-written **record** file ends with an `## Impact` section saying what it
+claims should change in the derived files — or explicitly that nothing should.
+
+```markdown
+## Impact
+- pending.md/Now — add: review the auth refactor branch before it goes stale
+- workplan.md/B2#3 — status: [ ] → [x], verified by `npm test -- auth.spec.js` exit 0
+- history.md/Dead ends — add: F7 was a false positive, the guard already covers it
+```
+
+or, when a unit genuinely changes nothing:
+
+```markdown
+## Impact
+- none — investigation only; the finding was already recorded in F3
+```
+
+Declaring the impact is the **recording** agent's job. Applying it is the reconcile
+pass's job. They are different acts by different writers, and keeping them apart is
+what makes W4 enforceable.
+
+**Exempt:** `soc.md`. Its contract is *capture, don't process* — asking for an impact
+declaration mid-flow would defeat the one thing it is for. `/replan-nt` triages the
+stream instead.
+
+## 4. Provenance
+
+A derived item may carry a trailing provenance tag naming the record it came from:
+
+```markdown
+- [ ] Review/merge autopilot/2026-09-08  [from: 2026-09-08-autopilot]
+- [x] Trigram index landed  [from: 2026-09-07-summary]
+- Preload the session on login  [from: soc:2026-09-08T14:32]
+- Ask legal about the data-retention line  [from: hand]
+```
+
+Tag grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`,
+`[from: soc:<timestamp>]`, or `[from: hand]` for anything a person wrote directly.
+
+**A tag may carry the words it rests on.** Put a short exact quote from the record after
+the source, in double quotes:
+
+```markdown
+- Revisit Postgres at 10k rows  [from: 2026-09-10-summary "parked until usage passes 10k rows"]
+- Preload the session  [from: soc:2026-09-11T09:15 "hide the cold start"]
+```
+
+A bare tag proves the record exists. A quoted tag also proves the record says what the
+item claims, and `plancheck` checks it (§5). The comparison ignores case, whitespace,
+curly-vs-straight quotes, dashes and markdown emphasis; nothing else. A `soc:` quote must
+come from that one entry, not the whole stream. A quote cannot contain `]` or `"`. Quote
+the clause that carries the claim, a few words to one sentence; `hand` tags take no quote.
+Quoting is optional and additive, like the tag itself.
+
+**An untagged item means `hand`.** Every `plan/` folder written before this contract
+existed is therefore already valid — provenance is additive, never a migration.
+
+Provenance is what turns the replay check from a reading comprehension task into a set
+comparison. Without it, finding an orphan means re-reading the whole log; with it, an
+orphan is a tag that resolves to nothing.
+
+## 5. The check
+
+`bin/plancheck.py` reads a `plan/` folder and reports divergence between the records and
+the derived files. It is mechanical, it never calls a model, and it never edits anything.
+
+| Finding | Meaning |
+|---|---|
+| **orphan** | A derived item whose `[from:]` names a record that does not exist. State arrived from nowhere. |
+| **ghost** | A record `## Impact` line whose target has no matching derived item. Work was done and silently dropped. |
+| **misquote** | A quoted tag whose words are not in the record it names. The item claims something its source does not say. |
+| **untagged** | A derived item with no provenance tag. Reported as info, never as failure — this is the legacy case and the hand-written case. |
+
+```
+plancheck            # exit 0 clean · 1 divergence found · 2 could not run
+plancheck --since 2026-09-01    # only records and items dated on or after
+plancheck --json                # machine-readable, for a skill to read
+```
+
+`/replan-nt` runs it at Step 4.5 in place of judging by reading. A divergence is
+**reported, never silently fixed** — an orphan gets a log line, a ghost gets parked or
+explicitly closed, and both decisions are visible.
+
+Per `SUBSTANCE.md`: the check is a real gate, not process theater. It exists because
+"the plan and the log agree" is exactly the kind of claim that is easy to assert and
+tedious to verify, which is what a checker is for.
+
+## 6. What this does not do
+
+- **It does not make the fold deterministic.** The reconcile pass is still an agent
+  reading records and writing a projection. `plancheck` can prove a claimed impact
+  landed somewhere. It can prove the wording is faithful only where a tag carries a quote
+  (§4); an unquoted item's wording is unchecked. Spot-check by deleting a derived file
+  and rebuilding it from the records — if the two differ in substance, either provenance
+  is incomplete or the fold invented something.
+- **It does not lock the folder.** Any rule here can be overridden the way
+  `STATES.md` §Guards allows: on purpose, through `/decide-nt`, with the reason
+  written down. A rule bypassed by drift is a bug; bypassed deliberately is a decision.
+- **It does not add a daemon, a database, or a format.** `plan/` stays plain markdown a
+  person can read and edit. Everything above is a convention plus one script.
+
+## 7. Standing questions
+
+`pending.md` and `workplan.md` answer two fixed questions: what is open, and what to do
+next. A repo can keep answers to more questions current in an optional `plan/standing.md`:
+
+```markdown
+# Standing questions
+
+## What is waiting on Chirag?
+- The Postgres decision at 10k rows  [from: 2026-09-10-summary "parked until usage passes 10k rows"]
+
+## What did the last live check find?
+- none  [from: live-check-2026-09-20]
+```
+
+- **The questions are the human's.** Only a person adds, removes or rewords a `##`
+  question (W1). An agent never does.
+- **The answers are derived.** Only the reconcile pass rewrites the bullets under a
+  question (W4), from the records, each with a `[from:]` tag and, where it can, a quote.
+  An answer with nothing behind it is `- none` with the tag of the record that shows it.
+- **Read, not rediscovered.** `/resume-nt` prints the answers as they stand. It never
+  recomputes them, so a session starts from settled answers at no cost.
+- `plancheck` treats `standing.md` like `pending.md`: every answer is provenance-checked.
+
+No `standing.md`, no change: the file is opt-in, and nothing else depends on it.
+
+## 8. Recall over the records
+
+Records are append-only and `_archive/` only grows, so "when and why did we drop X" means
+reading old files. With [scholia](https://github.com/NakliTechie/scholia) installed,
+`scholia history <terms> --plan .` searches every markdown file under `plan/`, archive
+included, and dates each hit from its entry, its `### YYYY-MM-DD` heading or its file
+name. `--since`, `--until` and `--chrono` narrow it. It needs no vault, reads only, and
+builds its index in memory each run. Without scholia, `rg -n <terms> plan/` does the same
+job without ranking or dates.

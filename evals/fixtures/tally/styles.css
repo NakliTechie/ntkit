@@ -1,0 +1,24 @@
+:root {
+  --bg: #fbfaf7; --ink: #1d1b16; --muted: #6b665b; --line: #e4e0d6;
+  --accent: #b4481c; --accent-ink: #ffffff;
+  --font: "Iowan Old Style", Georgia, serif; --ui: -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--ui); }
+main { max-width: 720px; margin: 0 auto; padding: 48px 24px; animation: rise 400ms ease-out; }
+h1 { font-family: var(--font); font-size: 44px; margin: 0 0 12px; }
+p.lede { color: var(--muted); font-size: 19px; margin: 0 0 32px; }
+a.cta, button { font: 600 16px var(--ui); background: var(--accent); color: var(--accent-ink);
+  border: 0; border-radius: 6px; padding: 12px 18px; text-decoration: none; cursor: pointer; }
+button.quiet { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+form { display: flex; gap: 8px; margin: 0 0 24px; }
+input { flex: 1; font: 16px var(--ui); padding: 12px; border: 1px solid var(--line); border-radius: 6px; }
+ul#counters { list-style: none; padding: 0; margin: 0; }
+li.counter { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+li.counter .name { flex: 1; font-size: 18px; }
+li.counter .total { font: 700 28px var(--font); min-width: 3ch; text-align: right; }
+li.counter .today { color: var(--muted); font-size: 14px; min-width: 9ch; }
+li.counter.bump .total { animation: bump 300ms ease-out; }
+p.empty { color: var(--muted); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes bump { 50% { transform: scale(1.25); color: var(--accent); } }

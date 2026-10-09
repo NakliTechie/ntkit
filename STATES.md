@@ -1,0 +1,116 @@
+# The session state machine
+
+Every ntkit session is a state machine. It always was — `plan/` is the external
+state, the commands are the events, windup→resume is a transition. This file just
+names it, so legality is checkable instead of conventional. (Loops and graphs are
+both state machines; agent orchestration is the actor model. Learn the primitives,
+skip the hype.)
+
+## States
+
+A repo with a `plan/` folder is always in exactly one of six states:
+
+| State | Meaning | Evidence on disk |
+| --- | --- | --- |
+| `fresh` | No handoff yet | No `plan/`, or empty of the three canonical files |
+| `briefed` | Context read, nothing in flight | Canonical files present; no open batch, working tree clean |
+| `building` | Mid-chunk | Open `[ ]` items in the active workplan/batch, and/or uncommitted work |
+| `verifying` | Work done, verifier not yet green | Chunk items done but gate condition unmet, or an unexecuted audit report exists |
+| `blocked` | Loop exited without done | A tried-trail in the latest summary/report; a Parked item naming the blocker |
+| `shipped` | Gate green, released | Tag/release exists for the milestone; no open fix-workplan |
+
+`blocked` and `shipped` are exits, not dead ends — both re-enter through
+`/resume-nt`.
+
+## Transitions
+
+```
+fresh ──/scaffold-nt──▶ briefed ──start a chunk──▶ building
+building ──chunk done──▶ verifying ──gate green──▶ briefed (next chunk)
+verifying ──/release-nt──▶ shipped
+building | verifying ──no-progress / budget──▶ blocked
+any ──/windup-nt──▶ (state persisted to plan/) ──/resume-nt──▶ same state, new session
+```
+
+`/windup-nt` and `/resume-nt` are not transitions — they persist and restore
+whatever state the repo is in. The state survives the session; that's the point.
+
+## Legal commands per state
+
+| State | Legal | Illegal (refuse or warn) |
+| --- | --- | --- |
+| `fresh` | `/scaffold-nt` | Everything that reads `plan/` |
+| `briefed` | audits, `/autopilot-nt` (if a report is open), `/lab-nt` (new or resumed campaign), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
+| `building` | `/decide-nt`, `/soc-nt`, `/windup-nt` (warns), `/autopilot-nt`, `/harden-nt` (if the surface's paths are reachable) | `/release-nt`, `/package-nt` |
+| `verifying` | `/live-check-nt` (the replay gate), `/harden-nt` (iterated, before an agent surface is called ready), `/autopilot-nt`, `/walkthrough-nt`, `/forward-pass-nt` | `/release-nt` with open items |
+| `blocked` | `/resume-nt`, `/decide-nt` (unblock), `/replan-nt` | `/autopilot-nt` at the same wall; `/lab-nt resume` at an unchanged wall |
+| `shipped` | `/package-nt`, `/release-nt` (next) | — |
+
+Always legal, any state: `/resume-nt`, `/decide-nt`, `/soc-nt`,
+`/notify-nt`, and the vault pair (`/capture-nt`, `/ask-nt`) — they read, log, or
+live outside the repo entirely.
+
+## Guards
+
+Four rules make the table enforceable, not decorative:
+
+1. **Every command declares its contract in frontmatter** — `entry` (the state and
+   artifacts it requires), `exit` (the machine-checkable condition that means it
+   finished), `writes` (which plan files it touches). A command whose entry
+   condition fails says so and stops; it does not proceed politely.
+2. **"Done" is the verifier's word.** No transition out of `verifying` on an
+   agent's self-report. Tests green, lint clean, replay reconstructs — a
+   deterministic check, or the state doesn't advance. A check that went green on
+   a re-run nobody read is not a deterministic check; it is an unread red
+   (`SUBSTANCE.md` §6.7).
+3. **Deliberate override, logged.** Any guard can be overridden — this is a kit,
+   not a jail — but only through an explicit `/decide-nt` entry stating why. A
+   guard bypassed by drift is a bug; bypassed on purpose with a reason is a
+   decision.
+4. **Ask only at the unanswerable or the outward-facing.** A command asks the
+   user only when the answer can't be derived (missing input, unknown
+   credentials, no repo) or the action is outward-facing (publish, post,
+   release, push to the world). Everything else takes the safe default,
+   announces it, and logs it — the user steers by interrupting, not by being
+   polled. And the safe default for outward-facing *power* is **off**:
+   authority to act irreversibly on the world — push, merge, release, deploy,
+   delete, send, spend — is opt-in per run and **defaults to denied when
+   unstated**; reversible in-repo work (edit, branch commit, `plan/` write)
+   needs no grant. (Authoring face: [`AUTHORING.md`](AUTHORING.md) §3.)
+
+5. **Records append; only the reconcile pass rewrites.** `plan/` is not one
+   undifferentiated folder — [`MEMORY.md`](MEMORY.md) splits it into append-only
+   records and derived files projected over them. A command may flip the status of
+   an item it did the work for; adding, dropping, re-ranking or re-wording one
+   belongs to `/replan-nt`, `/windup-nt`, and `/scaffold-nt` alone. This is what
+   makes the state on disk explainable: every derived item traces to a record, and
+   `plancheck` says so mechanically.
+
+## Scaling — guards fire on evidence, not on ceremony
+
+None of this adds steps to a simple project. Every guard checks for an artifact —
+an open report, a failing verifier, a HELD branch, a dirty tree — and **an artifact
+that doesn't exist can't fail a check**: no verifier defined means the release
+guard passes vacuously (noted, not blocked); no reports means nothing to refuse; a
+repo that never accumulates enough for `/replan-nt` never meets the replay check.
+A single-file tool's session looks exactly as it did before this file existed. The
+machinery earns its keep only where the evidence it reads exists — which is
+precisely the projects complex enough to need it. Same seam as everywhere in the
+doctrine: durability and reach, not ceremony.
+
+## The actor rule (parallel runs)
+
+Concurrent `/autopilot-nt` runs (and `/lab-nt` campaigns) are actors: each in its
+own worktree, private state, **no reading another run's worktree or plan
+scratch**. The only communication is the mailbox — the morning report
+`plan/<date>-autopilot.md` (or the leg report `plan/lab/<slug>/<date>-leg.md`),
+one format, one location. `/resume-nt`, `/windup-nt` and `/replan-nt` read their own repo's
+mailboxes; no command reads another repo's. Message-passing, no shared
+memory — that's what makes parallel runs safe to leave alone.
+
+## Replay check
+
+`history.md` is the event log. Replaying it — decisions plus the daily log —
+should reconstruct the current `pending.md` to within noise. `/replan-nt` runs
+this check before folding; divergence means drift, and drift gets reported before
+it gets archived.

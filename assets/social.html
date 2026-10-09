@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- The GitHub social card. assets/render-social.sh renders this to assets/social.png
+     (1280×640). The right side stacks two full cards straight from workflow.svg — REVIEW
+     (row 1, box 1066,250 477×326) over CLOSE (row 2, box 814,616 730×326) — each cropped to
+     its own exact box, not a shared column, since row 2's cards are wider than row 1's. So
+     the card and the README map always show the same real content, never a stitched sliver. -->
+<html><head><meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: #ffffff; }
+  body { width: 1280px; height: 640px; position: relative; overflow: hidden;
+         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1f2328; }
+  .copy { position: absolute; left: 72px; top: 92px; width: 580px; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand span { font-size: 54px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .brand i { display: block; width: 14px; height: 38px; border-radius: 2px; background: #0891b2; }
+  h1 { margin: 40px 0 0; font-weight: 700; font-size: 44px; line-height: 1.16; letter-spacing: -0.015em; }
+  h1 em { font-style: normal; color: #0891b2; white-space: nowrap; }
+  p.sub { margin: 24px 0 0; font-size: 22px; line-height: 1.42; color: #656d76; }
+  .facts { position: absolute; left: 72px; bottom: 64px; font-size: 15px; font-weight: 600;
+           letter-spacing: 0.04em; color: #656d76; text-transform: uppercase; }
+  .facts b { color: #0e7490; font-weight: 700; }
+  .shot { position: absolute; left: 720px; overflow: hidden; box-shadow: 0 0 0 1px #d0d7de inset; border-radius: 12px; }
+  .shot img { position: absolute; }
+  /* REVIEW: source box (1066,250)-(1543,576), scaled 1.043x to a 497×340 window. */
+  .shotTop { top: 44px; width: 497px; height: 340px; }
+  .shotTop img { width: 1669px; left: -1112px; top: -261px; }
+  /* CLOSE: source box (814,616)-(1544,942), scaled 0.663x to a 484×216 window. */
+  .shotBottom { top: 400px; width: 484px; height: 216px; }
+  .shotBottom img { width: 1061px; left: -540px; top: -408px; }
+</style></head>
+<body>
+  <div class="copy">
+    <div class="brand"><span>ntkit</span><i></i></div>
+    <h1>The rigor layer for <em>AI-assisted development.</em></h1>
+    <p class="sub">20 Claude Code skills for everything around the code: decisions remembered, sessions resumed, the whole app audited, and "done" only when a verifier says so.</p>
+  </div>
+  <div class="facts"><b>20 slash commands</b> &nbsp;·&nbsp; every repo &nbsp;·&nbsp; MIT</div>
+  <div class="shot shotTop"><img src="workflow.svg" alt=""></div>
+  <div class="shot shotBottom"><img src="workflow.svg" alt=""></div>
+</body></html>

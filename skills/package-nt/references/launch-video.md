@@ -62,5 +62,5 @@ Both paths write `brag-output/` (or `brag-output-<timestamp>/` when that exists)
 2. Copy `share-copy.txt` → `plan/launch-caption.txt` and `brag-plan.md` → `plan/launch-video-plan.md`. Phase 3 starts its caption from the first.
 3. Run `"$SKILL/references/bake-poster.sh" marketing/launch.mp4 marketing/launch.jpg`.
 4. Check the length: `ffprobe -v error -show_entries format=duration -of csv=p=0 marketing/launch.mp4` prints a value from 15 to 25 (`demo`) or 35 to 45 (`promo`).
-5. Delete the `brag-output*/` folder.
+5. Delete the `brag-output*/` folder. On any failed render, delete it too and say so; windup's marketing sweep also catches a leftover.
 6. Over 25 MB, re-encode the video at `-crf 23`, then run step 3 again.

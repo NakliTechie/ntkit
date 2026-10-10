@@ -4,6 +4,10 @@
 # Working notes, if you run the ntkit workflow commands on ntkit itself
 plan/
 
+# Promo output (regenerable; /windup-nt sweeps it)
+/marketing
+/brag-output*
+
 # Agent worktrees
 .worktrees/
 

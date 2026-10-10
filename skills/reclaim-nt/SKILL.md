@@ -68,7 +68,7 @@ kept on purpose. Findings under 64 MB are not listed.
 
 The `regenerable` tier needs no judgment beyond one check: if the path is
 **git-tracked** (`git -C "$TARGET" ls-files --error-unmatch <path>`), drop
-it. Everything else in that tier goes in the report as **Regenerable**,
+it. `marketing/` and `brag-output*/` (`/package-nt` output) belong to this tier even when the scanner lists them as something else, unless an open item in `plan/` names them. Everything else in that tier goes in the report as **Regenerable**,
 with its `reason`.
 
 Spend the judgment on the `judge` tier. Check, in order of how much

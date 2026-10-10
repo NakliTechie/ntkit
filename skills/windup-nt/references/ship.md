@@ -25,6 +25,12 @@ Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.
 - `done` → delete that folder's media by name, never the folder: `find <dir> -type f \( -name '*.webm' -o … \) -delete` with the same extension list. Keep the report, beat logs and JSON. List each in the day summary as `<dir> — <files> files, <MB> MB`.
 - `open` → keep; the fixer replays beats from it. Name it in the handoff with the item that holds it.
 
+**Promo-output sweep** (`/package-nt` output is local, gitignored and regenerable; losing it costs a re-render):
+- Run `sh $SKILL/bin/marketing.sh` from the repo root. It changes nothing. It prints `drop` or `keep` per file in `marketing/` and per `brag-output*/` folder, with its size in KB. `keep` means an open item (`[ ]` or `[~]`) names the file or folder.
+- `drop` → delete that entry by name (`rm -rf <path>`), never a glob and never `marketing/` itself. List each in the day summary as `<path> — <MB> MB`.
+- `keep` → leave it, and name it in the handoff with the item that holds it.
+- Confirm `/marketing` and `/brag-output*` are in `.gitignore` (`git check-ignore -q marketing`); add them if not, and `git rm -r --cached marketing` when files are tracked. A repo's existing card path (`assets/social.png`) is not promo output and stays.
+
 **Stray-branch sweep** (after the worktree sweep, so the branches it freed are counted):
 - `git fetch --prune origin` when an `origin` exists, then run `sh $SKILL/bin/branches.sh`. It changes nothing. It prints one line per branch, oldest first: `merged`, `hold`, or `unmerged`, with the tip SHA and the reason. It has already examined each one: is its work in the default branch (an ancestor, or a squash or rebase merge that changes no file), does its remote or a same-name local branch hold unmerged commits, does `pending.md` or `workplan.md` name it, is it a long-lived name (`develop`, `release/*`, `gh-pages` …). It leaves out the default branch, the current branch, worktree branches, and branches with no shared history.
 - `merged` → delete it: `git branch -D <name>` (`-d` refuses a squash-merged branch, and the script has proved the work is in), `git push origin --delete <name>` for an `origin/<name>` line. List each in the day summary as `<ref> @ <sha> — <last commit subject>`; the SHA restores it (`git branch <name> <sha>`, `git push origin <sha>:refs/heads/<name>`).
@@ -37,3 +43,9 @@ Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.
 - `older` → earlier sessions' scratchpads of this project: list them in the handoff with their sizes and ask; delete by name only on a yes. Another project's folders are never listed here and never touched.
 - Anything this session wrote outside the scratchpad (a `/tmp` clone, a profile copy, a model download) is not found by the script. Delete each by name from your own footprint notes, or list it in the handoff.
 - Stop any dev server, preview or watcher this session started from a scratch directory before deleting it.
+
+**Footprint report** (feeds the handoff; deletes nothing):
+- `du -sk .worktrees` for the worktrees kept above.
+- Running outside resources this session started: `/demo-nt` hosted mode leaves a Cloudflare tunnel and launchd agents (`launchctl list | grep -i <project>`; `cloudflared tunnel list`). List each by name; stopping them is the user's call.
+- If `disktree-cli` is installed, `disktree-cli scan . --limit 20`: when `judge`-tier findings total over 1 GB, point at `/reclaim-nt` in the handoff. Windup never runs `apply`.
+- Finish with `df -h /`.

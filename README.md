@@ -1,7 +1,7 @@
 <h1 align="center">ntkit</h1>
 
 <p align="center">
-  <strong>Twenty Claude Code skills that give an agent the discipline it's missing — remembers decisions, audits the whole app, and never says "done" without a verifier.</strong>
+  <strong>Twenty-one Claude Code skills that give an agent the discipline it's missing — remembers decisions, audits the whole app, and never says "done" without a verifier.</strong>
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
   <img alt="account: none" src="https://img.shields.io/badge/account-none-0891b2?style=flat-square">
 </p>
 
-![ntkit workflow map — 20 Claude Code skills across five phases, plus a daily session loop and the scholia knowledge vault used at every phase](assets/workflow.png)
+![ntkit workflow map — 21 Claude Code skills across five phases, plus a daily session loop and the scholia knowledge vault used at every phase](assets/workflow.png)
 
 ## Install
 
@@ -35,7 +35,7 @@ Command name = the folder name (`skills/forward-pass-nt/` → `/forward-pass-nt`
 
 Your agent forgets what it decided yesterday. It reviews the diff, never the app it sits inside. It tells you a fix is "done" when nothing ran to check, and starts cold every session because nothing wrote down where the last one stopped.
 
-ntkit is twenty skills that add that discipline: a `plan/` folder each repo keeps that every command reads and writes, a cold whole-app audit that hands back a real fix-workplan, and a report format that won't let "done" through without a verifier behind it.
+ntkit is twenty-one skills that add that discipline: a `plan/` folder each repo keeps that every command reads and writes, a cold whole-app audit that hands back a real fix-workplan, and a report format that won't let "done" through without a verifier behind it. For systems work it fixes the build order: feature complete, then benchmark, then optimise, with one check per batch and a cap on generated test data ([SUBSTANCE.md](SUBSTANCE.md)).
 
 **Use a single `CLAUDE.md`** if your project is small enough that one file of standing instructions is the whole picture. **Use [pi-workflows](https://github.com/osolmaz/pi-workflows)** for the six-point authoring standard alone, without ntkit's `plan/` state machine and report format on top — [`AUTHORING.md`](AUTHORING.md) borrows its shape. **Use your agent's own memory** if you only need continuity inside one long session, not across days or repos.
 
@@ -101,7 +101,7 @@ tests/run.sh    # free, seconds: the scripts skills ship, and every eval check c
 evals/run.sh    # model runs: a fixture project, one prompt, a deterministic check
 ```
 
-Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The loop prints nothing when that contract holds across all 20; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against. A `/research-nt` report is VERIFIED only when its `check.py gates` exits 0: every cited page came through its fetch log, every planned section and required name is present. `evals/run.sh` needs one login first, `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
+Every skill's frontmatter states its contract — `entry`, `exit`, `writes` — so a run that can't satisfy `entry` refuses instead of proceeding politely, and `exit` names a check, not a vibe. The loop prints nothing when that contract holds across all 21; [`AUTHORING.md`](AUTHORING.md) is the standard it's checked against. A `/research-nt` report is VERIFIED only when its `check.py gates` exits 0: every cited page came through its fetch log, every planned section and required name is present. `evals/run.sh` needs one login first, `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
 
 ## License and credits
 

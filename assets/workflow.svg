@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 990" role="img">
 <title>ntkit — when to use what</title>
-<desc>A light-mode workflow map of ntkit's 20 Claude Code skills across five phases, plus a daily session loop and a knowledge vault used at every phase.</desc>
+<desc>A light-mode workflow map of ntkit's 21 Claude Code skills across five phases, plus a daily session loop and a knowledge vault used at every phase.</desc>
 <style>
 text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 .h1{fill:#1f2328;font-size:58px;font-weight:800}
@@ -28,7 +28,7 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <rect x="214" y="56" width="15" height="40" rx="2" fill="#0891b2"/>
 <text x="58" y="128" class="tag">when to use what  ·  the rigor layer for AI-assisted development</text>
 <rect x="1368" y="52" width="176" height="38" rx="19" class="pill"/>
-<text x="1456" y="77" class="pilltxt" text-anchor="middle">20 slash commands</text>
+<text x="1456" y="77" class="pilltxt" text-anchor="middle">21 slash commands</text>
 
 <rect x="56" y="150" width="1488" height="40" rx="10" class="loopbox"/>
 <text x="80" y="176" class="loop"><tspan class="loopb">↻  The daily loop —</tspan>  /resume → …work… → /windup,  so every session resumes exactly where the last one left off.</text>
@@ -92,9 +92,11 @@ text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 <text x="28" y="135" class="cmd"><tspan class="sl">/</tspan>windup<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— day summary, commit, tomorrow's brief</tspan></text>
 <text x="28" y="165" class="cmd"><tspan class="sl">/</tspan>replan<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— fold plan/ back into the three canonical files</tspan></text>
 <text x="28" y="195" class="cmd"><tspan class="sl">/</tspan>notify<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— desktop + phone ping when a run finishes</tspan></text>
+<text x="28" y="225" class="cmd"><tspan class="sl">/</tspan>tidy<tspan class="suf">-nt</tspan>  <tspan class="suf" font-size="15">— clear what this session made, delete by name</tspan></text>
 </g>
 
 <text x="790" y="779" class="chev">›</text>
 
+<text x="56" y="962" class="foot">Systems work builds in order: feature complete, then benchmark, then optimise. One check per batch.</text>
 <text x="1544" y="962" class="foot" text-anchor="end">github.com/NakliTechie/ntkit  ·  MIT</text>
 </svg>

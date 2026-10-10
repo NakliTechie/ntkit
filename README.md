@@ -102,6 +102,6 @@ Every skill states its contract in frontmatter (`entry`, `exit`, `writes`), so a
 
 ## License
 
-MIT © Chirag Patnaik. `/reclaim-nt` scans with a fork of [disktree](https://github.com/tobi/disktree) by Tobias Lütke (MIT). `/research-nt` adapts prompts from [LongCat-DeepResearch](https://github.com/meituan-longcat/LongCat-DeepResearch) by Meituan's LongCat team (MIT). `/package-nt` renders its launch video with [brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), vendored with its license.
+MIT © Chirag Patnaik. `/reclaim-nt` scans with a fork of [disktree](https://github.com/tobi/disktree) by Tobias Lütke (MIT). `/research-nt` adapts prompts from [LongCat-DeepResearch](https://github.com/meituan-longcat/LongCat-DeepResearch) by Meituan's LongCat team (MIT). `/package-nt` renders its launch video with [brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), vendored with its license. The diff-review method and scanner list in `/forward-pass-nt` come from [OpenQodex](https://github.com/openqodex/openqodex) by the OpenQodex team (Apache-2.0).
 
 [AUTHORING](AUTHORING.md) · [STATES](STATES.md) · [ATTEST](ATTEST.md) · [SUBSTANCE](SUBSTANCE.md) · [MEMORY](MEMORY.md) · [DRIVER](DRIVER.md) · [CHANGELOG](CHANGELOG.md) · [github.com/NakliTechie](https://github.com/NakliTechie)

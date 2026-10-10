@@ -7,7 +7,7 @@ exit: "batched workplan with stable finding IDs written; `bin/cite-check.py` exi
 writes: "plan/forward-pass-<date>.md"
 ---
 
-Do a **fresh-eyes forward pass**: a cold read of the whole app, hunting six things: **bugs**, **security issues**, **stray code**, **stubs masquerading as done**, **low-value tests**, and **agent-readiness gaps**. `/code-review` and `/security-review` review a diff or a named target; this command audits the whole app cold.
+Do a **fresh-eyes forward pass**: a cold read of the whole app, hunting six things: **bugs**, **security issues**, **stray code**, **stubs masquerading as done**, **low-value tests**, and **agent-readiness gaps**. `/code-review` and `/security-review` review a diff or a named target; this command audits the whole app cold. For the diff-time review method and the 22-scanner list, see `references/diff-review.md`.
 
 `$SKILL` is this skill's base directory, printed when the skill loads; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
 

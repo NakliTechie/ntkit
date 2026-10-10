@@ -30,6 +30,12 @@ Branch, ahead/behind vs upstream, and the count of uncommitted files (`git statu
 
 Then run `sh $SKILL/../windup-nt/bin/branches.sh` when it exists. It changes nothing and reads refs as of the last fetch. Count its `merged` lines, and keep its `hold` and `unmerged` lines for the brief.
 
+Also count generated files, since a run that floods the disk is invisible in `git status`:
+
+```bash
+find . \( -name .git -o -name node_modules -o -name .venv -o -name .build -o -name target \) -prune -o -type f -print | wc -l
+```
+
 ## Step 2.5: Determine and validate the state
 
 Name the repo's current state per ntkit's `STATES.md` (kit doctrine, not a file in this project): `fresh` / `briefed` / `building` / `verifying` / `blocked` / `shipped`, from the evidence gathered: open workplan items, uncommitted work, unexecuted audit reports, tried-trails, HELD autopilot branches. Then flag (don't fix) anything that doesn't add up:
@@ -38,6 +44,7 @@ Name the repo's current state per ntkit's `STATES.md` (kit doctrine, not a file 
 - an audit report (`forward-pass` / `ux-review`) has open items but the workplan doesn't mention it — unexecuted findings
 - the latest summary claims a clean close but there's uncommitted work — dishonest windup, trust the tree
 - a HELD `autopilot/<date>` branch is waiting — reviewing it outranks the workplan
+- the file count above exceeds 20,000, or `git status --ignored` shows a generated-data directory with thousands of entries — unbounded evidence (SUBSTANCE.md §3.9); name the directory and propose cleanup by name before any new run
 - a systems-level workplan (engine, server, runtime, kernels) schedules Benchmark or Optimise items while Feature-complete items stay open — the build order is Feature complete → Benchmark → Optimise; flag the early optimisation work
 
 ## Step 3: Present the resumption brief
@@ -54,6 +61,7 @@ Phase: <Feature complete | Benchmark | Optimise — only for a systems-level pro
 [if branches.sh listed any:] Branches: <N> merged, not swept (the next /windup-nt deletes them) · <M> waiting on a call: <oldest 2–3 refs>
 <⚠ one line per inconsistency found in Step 2.5, if any>
 
+Verification: <the project's budget from workplan.md, or "no budget on file — default: check once per batch boundary, 5,000 files / 500 MB of generated data"> · generated files: <N>
 Last session (<date from latest summary, or "no summary on file">):
   Shipped: <one-line bullet, or "—">
   Decisions: <one-line bullet, or "—">
@@ -85,6 +93,10 @@ Autopilot ran <date> — branch autopilot/<date> · gate <GREEN | RED: what> · 
 ```
 
 No `workplan.md`, or an empty one, but `pending.md` has items → show the top 3–5 items from `## Now` instead of a chunk, and note that `/replan-nt` would generate a proper workplan.
+
+## Verification discipline (applies to the chunk this brief starts)
+
+When the next chunk is underway, hold to the verification budget: build the whole batch, check it once at its boundary, run only the checks that cover that batch, keep generated test data in one capped temp directory, and take one diagnostic batch per failure. Do not run tests or evals between steps. A suite that already passed on unchanged code does not run again. State in the brief which checks the chunk owes and when, so the next session runs those and no others.
 
 ## Step 4: Hand off — `go` or one open-ended question
 

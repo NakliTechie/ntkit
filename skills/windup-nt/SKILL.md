@@ -37,6 +37,7 @@ Wound up <project-name> for today.
 [if promo output cleared:] Promo output cleared: <N> entries, <MB> MB (regenerate with /package-nt assets)
 [if scratch cleared:] Scratch cleared: <N> entries, <MB> MB · free space <df -h / Avail>
 [if scratch kept or older:] Scratch kept: <path> — <open item>; older sessions: <path> (<MB> MB) — delete?
+[if generated files > 20,000:] Generated files: <N> in <dir> — unbounded evidence; clean by name (SUBSTANCE.md §3.9)
 [if footprint left:] Still on disk: .worktrees <MB> MB · open-cited promo output <MB> MB · demo tunnel / launchd agents running: <names | none>
 [if held or unmerged:] Branches waiting on you: <ref> — <reason>, … (merge, keep, or delete?)
 

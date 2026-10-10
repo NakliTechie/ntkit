@@ -61,6 +61,8 @@ first. Each finding has a `path`, `bytes`, `modified_days`, a `kind`, and a
 | `weights` (+ `copies_in_store`, `copies[]`) | `judge` | a directory holding model weight files |
 | `stale_archive` (+ `days`) | `judge` | an archive or disk image untouched 30+ days |
 
+**File-count pass.** Size alone misses a flood of tiny files. After the scan, count files per top-level directory (excluding `.git`, `node_modules`, `.venv`, `.build`) with `find <dir> -type f | wc -l`. Add a `judge`-tier finding of kind `file_flood` for any directory over 20,000 files, whatever its size, and rank it with the weights. These come from test, eval and diagnostic runs (SUBSTANCE.md §3.9); name the generating script in the finding when git history shows one.
+
 Findings never nest, and anything under `--store` is left out: the store is
 kept on purpose. Findings under 64 MB are not listed.
 

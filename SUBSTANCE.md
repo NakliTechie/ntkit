@@ -56,7 +56,7 @@ self-report.
 
 ## 6. Named reward-hacking patterns to refuse
 
-Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Eight that
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Ten that
 agent-driven work invites most — refuse them; §1–5 cover the rest:
 
 1. **Gate self-weakening** — editing the verifier so a failing check passes. The committed
@@ -104,6 +104,20 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
    fails on today's code is a bug report, not a deletion candidate. "The E2E suite would catch it"
    is a claim until the E2E test is named: E2E rarely reaches protocol, migration, or security
    contracts.
+9. **Unbounded evidence** — a test, eval or diagnostic run that writes one file per case, per
+   operator or per layer, until the disk holds hundreds of thousands of them (300K and 600K files
+   have been seen). Volume is not rigor. Every run writes generated data to **one** temp directory
+   with a stated budget (default: 5,000 files and 500 MB), prefers one aggregate file (JSONL,
+   archive, database) to many small ones, and deletes the directory on success, failure and
+   interrupt. A run that hits its budget stops and reports; it never raises the budget on its own.
+   Only a short summary, never the bulk output, enters `plan/` or the repo. Check with the file
+   count, not just bytes: `find . \( -name .git -o -name node_modules -o -name .venv -o -name .build \) -prune -o -type f -print | wc -l`.
+10. **Verification churn** — running tests, evals or diagnostics between implementation steps,
+    repeating an unchanged suite, or adding a new diagnostic script for every symptom. Build a
+    complete batch first. Run only the checks that cover the changed batch, once, at its boundary.
+    One diagnostic batch per failure; a second needs a written hypothesis the first batch ruled
+    out. For systems-level work the order is feature complete, benchmark, optimise, and
+    verification stays at the accuracy bar the project states, not at bit-equality with a reference.
 
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the

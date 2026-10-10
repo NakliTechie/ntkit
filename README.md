@@ -77,6 +77,7 @@ The convention: check the vault before the web. `/research-nt`, `/lab-nt`'s rese
 /walkthrough-nt         # anytime — drive each role in a real browser, fix bugs, leave a harness
 /ux-review-nt           # anytime — cold first-timer review, ranked onboarding/nav failures
 /reclaim-nt             # upkeep — find the GB in old weights, worktrees, archives; Trash only on apply
+/tidy-nt                # upkeep — clear what this session created; lists first, deletes by name
 /live-check-nt          # verifying → shipped — the real deployed runtime, machine evidence
 /harden-nt              # before "ready" — map a surface's paths, harden each in rounds
 /guide-nt               # anytime — walk each role, build a single-file searchable HTML guide

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `/traces-nt`: investigate your own Claude Code and Codex traces through the [tracelens](https://github.com/NakliTechie/tracelens) index. It clusters the five rule signals into findings, each with archive `file:line` evidence, a fix target from a closed set (`claude-md`, `playbook`, `skill`, `allow-rule`, `task-prompt`, `tool-bug`, `none`), the exact proposed change, and a measure. Writes only `plan/findings-<date>.md`; never applies a fix. `bin/cite_check.py` is its exit check (every pointer resolves in the archive, every finding has a target and a measure), with `tests/traces-cite-check.test.sh`. Eval case `traces-nt-refuses-without-archive`.
+
 ### Changed
 
 - Slimming pass 1: dropped incident counts and anecdotes that justify a rule without changing it (walkthrough boot, walk-and-fix, chaos; harden liveness; windup rescue-plan; forward-pass lenses) and the unused `VERBS` tuple in `research-nt/bin/check.py`. Every rule is kept.

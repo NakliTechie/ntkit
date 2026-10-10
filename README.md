@@ -72,6 +72,7 @@ Each repo keeps a gitignored `plan/` folder with three files: `history.md` (deci
 /ux-review-nt           # anytime: cold first-timer review, ranked onboarding and nav failures
 /reclaim-nt             # upkeep: find the GB in old weights, worktrees, archives; Trash only on apply
 /tidy-nt                # upkeep: clear what this session created; lists first, deletes by name
+/traces-nt              # upkeep: investigate your agent traces (tracelens); findings with fix targets
 /live-check-nt          # verifying to shipped: the real deployed runtime, machine evidence
 /harden-nt              # before "ready": map a surface's paths, harden each in rounds
 /guide-nt               # anytime: walk each role, build a single-file searchable HTML guide
@@ -97,7 +98,7 @@ tests/run.sh    # free, seconds: the scripts skills ship, and every eval check c
 evals/run.sh    # model runs: a fixture project, one prompt, a deterministic check
 ```
 
-Every skill states its contract in frontmatter (`entry`, `exit`, `writes`), so a run that cannot satisfy `entry` refuses, and `exit` names a check. The loop prints nothing when all 21 hold; [`AUTHORING.md`](AUTHORING.md) is the standard. A `/research-nt` report counts as verified only when `check.py gates` exits 0. `evals/run.sh` needs one login first: `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
+Every skill states its contract in frontmatter (`entry`, `exit`, `writes`), so a run that cannot satisfy `entry` refuses, and `exit` names a check. The loop prints nothing when all 22 hold; [`AUTHORING.md`](AUTHORING.md) is the standard. A `/research-nt` report counts as verified only when `check.py gates` exits 0. `evals/run.sh` needs one login first: `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
 
 ## License
 

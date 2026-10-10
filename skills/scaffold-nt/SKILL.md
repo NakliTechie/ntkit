@@ -49,6 +49,7 @@ Default, no question: the user's own account (`gh api user --jq .login`), **priv
 4. Write `plan/workplan.md`: one batch per handoff phase (first marked `(keystone)`), else Batch A with the top 3–5 Now items; tri-state checkboxes; `[test]` markers where runtime verification is owed. Unless the project is Throwaway tier, add two items to the keystone batch:
    - `[ ] Agent-first pass (ntkit DRIVER.md): run the driver's-seat meditation over the spec; write the project's agent contract as its §0` — runs once a spec draft exists, not now.
    - `[ ] Agent face (Build Doctrine, "two doors, one core"): declare a tool manifest for every UI-dispatchable command; mark non-delegable acts person-only explicitly, never by omission`.
+5. **Systems-level projects** (engines, servers, runtimes, kernels, compilers, protocols — anything where speed is a goal): order the batches **Feature complete → Benchmark → Optimise** (Chirag, 2026-10-10: get it working first, improve later). The Feature batch ends at parity with the named reference system, written as a matrix. Benchmark compares against that reference and tunes nothing. Optimise starts only after a benchmark number exists. Put every speed idea in `## Parked` under an `Optimise` label until then. Accuracy bars still apply in every phase; optimisation never trades them away.
 
 ## Phase 7 — Brief, then start
 

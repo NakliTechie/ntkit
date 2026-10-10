@@ -35,7 +35,7 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 
 ## Phase 1 — Order the work
 
-Skim the top of the repo's vision or roadmap doc, if any, so default decisions favour the product's direction. From a workplan or report, respect sequencing: keystone and depended-on batches first. From a prose goal, write the goal **verbatim** into this run's record as `## Goal`, then decompose it into a checkboxed queue **in that record**, never in `plan/workplan.md`. **Never edit the goal once the run starts.** Ticking your own queue is a status flip on an item this run authored; nothing else already written to the record is deleted or reworded. Front-load the items most likely to unblock others; defer the ones most likely to hit a stop-line.
+Skim the top of the repo's vision or roadmap doc, if any, so default decisions favour the product's direction. From a workplan or report, respect sequencing: keystone and depended-on batches first. For a systems-level workplan (engine, server, runtime, kernels), phases run Feature complete → Benchmark → Optimise: never start an Optimise item while a Feature item is open. From a prose goal, write the goal **verbatim** into this run's record as `## Goal`, then decompose it into a checkboxed queue **in that record**, never in `plan/workplan.md`. **Never edit the goal once the run starts.** Ticking your own queue is a status flip on an item this run authored; nothing else already written to the record is deleted or reworded. Front-load the items most likely to unblock others; defer the ones most likely to hit a stop-line.
 
 ## Phase 4 — The stop-lines (never cross these unattended)
 

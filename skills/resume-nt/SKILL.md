@@ -38,6 +38,7 @@ Name the repo's current state per ntkit's `STATES.md` (kit doctrine, not a file 
 - an audit report (`forward-pass` / `ux-review`) has open items but the workplan doesn't mention it — unexecuted findings
 - the latest summary claims a clean close but there's uncommitted work — dishonest windup, trust the tree
 - a HELD `autopilot/<date>` branch is waiting — reviewing it outranks the workplan
+- a systems-level workplan (engine, server, runtime, kernels) schedules Benchmark or Optimise items while Feature-complete items stay open — the build order is Feature complete → Benchmark → Optimise; flag the early optimisation work
 
 ## Step 3: Present the resumption brief
 
@@ -49,6 +50,7 @@ Resuming <project-name>.
 Folder: <absolute path>
 Branch: <branch> · <ahead/behind status> · <clean | N uncommitted files>
 State: <state from Step 2.5> · legal next: <the 2–3 moves that fit this state>
+Phase: <Feature complete | Benchmark | Optimise — only for a systems-level project whose workplan names phases>
 [if branches.sh listed any:] Branches: <N> merged, not swept (the next /windup-nt deletes them) · <M> waiting on a call: <oldest 2–3 refs>
 <⚠ one line per inconsistency found in Step 2.5, if any>
 

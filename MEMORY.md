@@ -42,6 +42,11 @@ mkdir -p plan
 leaves the plan in the store. A worktree links the main checkout's `plan`
 (`ln -s "$MAIN/plan" plan`); a link to a link resolves.
 
+**Search through the link.** `rg` and `find` do not follow a symlinked `plan` by default, so a
+search from the repo root silently skips every plan file. Use `rg -L`, `find -L`, or search
+`plan/` by name (`rg <term> plan/`). A "not found" from a search that skipped the link is
+not evidence of absence.
+
 ## 1. Two kinds of file
 
 Every file under `plan/` is exactly one of two kinds. The distinction is the whole

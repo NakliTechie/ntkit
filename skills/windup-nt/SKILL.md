@@ -29,6 +29,7 @@ On entering a step, read its Detail file first, then act; the Outcome column is 
 
 ```
 Wound up <project-name> for today.
+Try it: <command or URL that runs today's working build | "no runnable build yet: <why>">
 [if Step 0 fired:] Replanned first: <N> files folded · Replay: <clean | N orphans / M ghosts>
 [if unmerged:] Branch `<name>` pushed but NOT merged — <why>
 [if worktrees kept:] Worktrees kept: <path> — <what it holds>

@@ -56,7 +56,7 @@ self-report.
 
 ## 6. Named reward-hacking patterns to refuse
 
-Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Ten that
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Fourteen that
 agent-driven work invites most — refuse them; §1–5 cover the rest:
 
 1. **Gate self-weakening** — editing the verifier so a failing check passes. The committed
@@ -118,6 +118,28 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
     One diagnostic batch per failure; a second needs a written hypothesis the first batch ruled
     out. For systems-level work the order is feature complete, benchmark, optimise, and
     verification stays at the accuracy bar the project states, not at bit-equality with a reference.
+    "Check once per batch" assumes a bounded batch; item 11 is its other half.
+11. **Unbounded batch** — the opposite failure of item 10: thousands of lines built and never run,
+    because the boundary check keeps moving out. A batch is one capability family that one
+    boundary run can check, sized at roughly a day of work. Past that, close the batch early and
+    check it. Source that has never run is not progress, however much of it exists (a Quench batch
+    reached ~3,900 uncommitted lines across a dozen model families with zero checks run).
+12. **Scope by transcription** — copying a reference system's whole feature list into the parity
+    matrix and calling that "feature complete". The matrix inherits every product the reference
+    bundles (a text engine's matrix once held 117 rows of image, video and music generation), and
+    the phase can never close. The owner approves the matrix's scope before work starts; rows
+    outside the product's core job are waived by default; a matrix over ~100 rows, or with rows from
+    a different product category, gets a scope question first.
+13. **Periphery while blocked** — when the keystone waits on a decision, working whatever is open
+    instead of the next item in the stated order, and leaving the decision in a doc the owner
+    never sees. A blocked item moves on to the next item in order, never to the widest open
+    surface. The decision goes to the owner at once (`/notify-nt` plus the chat they are in), with
+    options and a default. A file in the repo is not a notification.
+14. **Invisible product** — stage reports that list tests, receipts and evidence files but never
+    say how to run the thing. A working build that the owner has not touched is not delivered.
+    Every stage handback ends with a **Try it** block: the exact command or URL for the current
+    working build, reachable from where the owner actually is (another machine, a phone on the
+    LAN), or "no runnable build yet: <why>".
 
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the

@@ -24,6 +24,7 @@ Tests changed (review before trusting green):
 Assumed (reversible calls I made):
   - <default taken, and why>
 
+Try it: <command or URL that runs the build this run left, reachable from where the owner is | "no runnable build: <why>">
 Ended because: <queue done | goal met | budget hit | systemic halt: <cause>>
 <if MERGED:> <default branch> is updated on the remote — pull it. Worktree left at .worktrees/<name>: git worktree remove .worktrees/<name>
 <if HELD:>   Review: git diff <default branch>...autopilot/<date> — merge or discard, then git worktree remove .worktrees/<name>

@@ -81,7 +81,7 @@ Existing items by judgment: actionable → `Now`, deferred but not abandoned →
 
 Regenerate `plan/workplan.md` from the new pending `Now`, in the shape `/windup-nt` produces: each chunk gets a short title, 2–5 items from Now, and a rough size estimate ("30 min", "half day", "1–2 hours"). Items that don't yet cluster go under `## Unbatched`.
 
-**Phase order for systems-level projects** (engine, server, runtime, kernels, compiler): order chunks Feature complete → Benchmark → Optimise. Never pull an optimisation chunk ahead of an open feature chunk. Speed ideas that arrive early go to `## Parked` labelled `Optimise`, and surface when the Benchmark phase closes.
+**Phase order for systems-level projects** (engine, server, runtime, kernels, compiler): order chunks Feature complete → Benchmark → Optimise. Feature includes width (architectures, formats, platforms), ordered core path first, then width, then peripheral surfaces; a parity matrix needs an owner-approved scope (SUBSTANCE item 12). Optimisation chunks are per architecture. Never pull an optimisation chunk ahead of an open feature chunk. Speed ideas that arrive early go to `## Parked` labelled `Optimise`, and surface when the Benchmark phase closes.
 
 **Preserve in-flight chunks:** if a chunk in the existing workplan still has all its items in pending Now, copy it through verbatim. The user may be mid-execution.
 

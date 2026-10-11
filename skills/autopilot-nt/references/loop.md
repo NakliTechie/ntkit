@@ -9,16 +9,18 @@ For each item, in order:
    - **A `T` item from `/forward-pass-nt`'s test-value lens** is the one sanctioned edit to existing tests (`D` delete, `C` consolidate, `F` fix the assertion; `SUBSTANCE.md` §6.8). The checker runs the `T` gate from `$SKILL/../forward-pass-nt/references/ranking-and-workplan.md`: one deliberate mutation of the guarded production code, the keeper (or the repaired test) shown red, the source restored byte for byte. A keeper that stays green parks the item `[~]`.
    - **A reshaping item** (Stray, or a refactor goal) gives the checker its end-state sentence and the list of deleted paths. The checker greps each deleted name for a remaining caller, then runs the flows the deletion touches: navigation, permissions, persisted state. A remaining caller fails verification.
    - **A `[Security]` item from `/forward-pass-nt`** needs the fix attacked, not only the input that found it. The checker runs the Verify round from `$SKILL/../harden-nt/references/rounds.md`: a known-good input that still reaches the guarded code and succeeds, plus at least three variants of the same defect that all fail. Fewer than three valid variants parks the item `[~]`.
-4. **Commit it** — one focused commit per item (or tight cluster), by path, never `git add -A`. Never push per item; the single push is Phase 5's.
+4. **Commit it** — one focused commit per item (or tight cluster), by path, never `git add -A`. Never push per item; the run branch is pushed at passing batch boundaries, and the default branch only in Phase 5.
 5. **Log it** — flip `[ ]` → `[x]` in the file the item came from (the source report, `plan/workplan.md`, or this run's own queue), and append a progress-log row to this run's record: **what changed · evidence · result**. Evidence is a resolvable pointer (commit SHA, `file:line`, a check's output), never prose. Result is the outcome state: `tests green` / `build clean` / `reverted` / `deferred: <why>` / `assumed: <why>`.
 
 Check the launch-contract budget (clock and item cap) between items; it is an exit, not a suggestion.
+
+**Back up at batch boundaries:** when a batch's boundary checks pass, `git push -u origin autopilot/<date>`: the run's own branch only, never the default branch, never force. It is a backup, not a ship. A rejected push is logged and the run continues. A batch past about a day of work closes early and gets its checks (SUBSTANCE item 11).
 
 **Fold at batch boundaries:** once the record and queue could restart the next batch from files alone, drop the finished batch from working context. Continue from the queue, the record and git, never from recall.
 
 ## Phase 3 — When you hit a wall, route around it
 
-- **Needs a human decision** (judgment call, ambiguous requirement, product choice): log it as `deferred: needs you — <question, with the context to answer it cold>`, mark the item `[~]` with what blocks it, and move to the next item. The report lists it under **Needs you**.
+- **Needs a human decision** (judgment call, ambiguous requirement, product choice): log it as `deferred: needs you — <question, with the context to answer it cold>`, mark the item `[~]` with what blocks it, and move to the next item **in the stated order**. A decision that blocks the keystone, or the next two items, fires `/notify-nt "<project>: needs you — <question> (default: <option>)"` at once; it does not wait for the report (SUBSTANCE item 13). The report lists it under **Needs you**.
 - **A fix won't land** — after two honest attempts to pass verification, `git restore` the item's uncommitted changes, mark it `[~]` with what you tried and where it failed, and move on.
 - **A stop-line** (Phase 4): never do it. Log it for the report's **Needs you** list and continue with everything else.
 - **Systemic failure** — three consecutive items failing verification for the same root cause (broken build, wrong shared dependency): halt. Revert the item in flight, write what broke, with the evidence, to the report, and end early.

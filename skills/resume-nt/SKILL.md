@@ -46,6 +46,9 @@ Name the repo's current state per ntkit's `STATES.md` (kit doctrine, not a file 
 - a HELD `autopilot/<date>` branch is waiting — reviewing it outranks the workplan
 - the file count above exceeds 20,000, or `git status --ignored` shows a generated-data directory with thousands of entries — unbounded evidence (SUBSTANCE.md §3.9); name the directory and propose cleanup by name before any new run
 - a systems-level workplan (engine, server, runtime, kernels) schedules Benchmark or Optimise items while Feature-complete items stay open — the build order is Feature complete → Benchmark → Optimise; flag the early optimisation work
+- a parity matrix over ~100 rows, or with rows from another product category, and no owner-approved scope on file — scope by transcription (SUBSTANCE item 12)
+- the keystone is blocked while commits land on later or peripheral chunks, or a decision waits in a doc but not in `pending.md` Open questions — periphery while blocked (item 13); surface the decision first
+- uncommitted changes or new untracked source that no check has run on, beyond about one batch, or local commits not pushed after a passing boundary — unbounded batch (item 11) and unbacked work; name the branch and the count
 
 ## Step 3: Present the resumption brief
 
@@ -61,6 +64,7 @@ Phase: <Feature complete | Benchmark | Optimise — only for a systems-level pro
 [if branches.sh listed any:] Branches: <N> merged, not swept (the next /windup-nt deletes them) · <M> waiting on a call: <oldest 2–3 refs>
 <⚠ one line per inconsistency found in Step 2.5, if any>
 
+Try it: <the command or URL that runs the current working build, from the README or the last handback, or "no runnable build documented">
 Verification: <the project's budget from workplan.md, or "no budget on file — default: check once per batch boundary, 5,000 files / 500 MB of generated data"> · generated files: <N>
 Last session (<date from latest summary, or "no summary on file">):
   Shipped: <one-line bullet, or "—">

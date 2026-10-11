@@ -1,15 +1,15 @@
 ---
 description: "Mid-session cleanup of what this session created: files, temp dirs, servers. Lists first, deletes by name."
-argument-hint: "[list | apply | log <path> <purpose>]"
+argument-hint: "[list | log <path> <purpose>]"
 allowed-tools: ["Bash", "Glob", "Read", "Write"]
 entry: "any state; run mid-session, after a long run, or before /windup-nt"
-exit: "this session's artifacts listed with size and file count; confirmed ones moved to the Trash by name; free space reported"
+exit: "this session's disposable artifacts deleted by name and reported with size and file count; free space reported"
 writes: "the session ledger only; deletes only items this session created"
 ---
 
 Clear out what **this session** made. `/reclaim-nt` sweeps a whole project for old weights and archives; this command knows only the current session's output. It never touches another project's files, a running app's profile, or a shared cache that predates the session.
 
-`$ARGUMENTS`: empty or `list` → inventory and propose. `apply` → delete the confirmed items. `log <path> <purpose>` → append one ledger line and stop.
+`$ARGUMENTS`: empty → inventory, delete the disposable items, report. It does not wait for confirmation, because it runs several times a day in a thread. `list` → inventory and propose only, delete nothing. `log <path> <purpose>` → append one ledger line and stop.
 
 ## The ledger
 
@@ -33,13 +33,13 @@ For each candidate record `path`, `bytes`, **file count** (`find <dir> -type f |
 - **Not mine** — birth date before the session start, another project's path, a shared cache another tool owns, anything under a running app's profile. Report with name and size. Never propose deletion.
 - **Flood** — over 20,000 files in one directory. Flag it first, whatever its size, and name the script that wrote it when `git log` shows one.
 
-## Step 3 — Propose, then delete by name
+## Step 3 — Delete by name
 
-Print one table: path · size · files · class · why. Then wait for the user to confirm `apply`. On `apply`:
+Print one table: path · size · files · class · why. With no argument, delete every **Mine, disposable** item straight away; do not ask. Leave **Mine, keep**, **Not mine** and **Flood** items alone. With `list`, stop after the table. Deletion rules:
 
 - Delete each confirmed item **by its exact path**. Use `rm` for files this session wrote, `rm -r` for a directory named in the table. Never loop "delete all" over a directory, an origin, a port, a cache folder or an HF folder.
 - Stop a server by its PID from the process list, never by name pattern.
-- Deleting another project's files, a model checkpoint, or anything git-tracked needs the user's explicit say-so for that item.
+- Another project's files, a model checkpoint, and anything git-tracked are never deleted automatically. Name them in the report; they need the user's explicit say-so for that item.
 
 ## Step 4 — Report
 

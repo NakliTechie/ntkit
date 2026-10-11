@@ -43,6 +43,10 @@ Short is not the same as clear. A message can obey every length and word rule an
 still leave the reader decoding it. These rules stop that. They bind every
 output, formal or not.
 
+- **Picture the reader: a senior executive, in plain high-school English.**
+  They are smart and busy, and they were not in the details. Write so they get
+  the point on one read. Technical names (files, commands, models, numbers) stay
+  exact, but each one comes with a plain word on what it is the first time.
 - **Write for a reader who was not watching.** Assume they have not read the plan
   files, the earlier turns, or the other agent's notes. Each message stands alone.
 - **Lead with what it means for them.** Open with what they can do now, what

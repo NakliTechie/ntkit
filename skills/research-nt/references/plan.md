@@ -2,7 +2,7 @@
 
 ## Phase 0: intake
 
-1. Take `--go` off `$ARGUMENTS`; the rest is the question, verbatim.
+1. `$ARGUMENTS` is the question, verbatim.
 2. No `plan/` → create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`. Never replace a symlinked `plan`.
 3. Slug: today's date plus 3–6 lowercase ASCII words from the question, kebab-case, e.g.
    `2026-09-30-deep-research-citation-checks`. If `plan/research/<slug>` exists, append `-2`, `-3`, ….
@@ -49,7 +49,7 @@ Run `check.py spec` again. Give the reviser at most one schema repair; another f
 Confirm every HP in `critique.md` has one outcome in `revision.md`, with a real unit id when accepted
 or a reason when rejected. Missing outcomes fail the plan phase. Do not loop the critic.
 
-Preserve `spec-before-critique.md` before revision. The stop shows the final spec and every HP outcome.
+Preserve `spec-before-critique.md` before revision. Phase 2 shows the final spec and every HP outcome.
 
 ### Planner brief
 
@@ -121,7 +121,7 @@ Return exactly one line: `CANDIDATE <w1|w2|w3> <n> units`.
 ```
 
 The run settings come from the defaults (`sections: 8`, `words: 5000`, `fetches_per_section: 15`,
-`tool_rounds: 20`). There is no flag to change them; the user edits them in `spec.md` at the stop.
+`tool_rounds: 20`). There is no flag to change them; the user edits them in `spec.md` and resumes with `go <slug>`.
 
 ## Judge brief
 

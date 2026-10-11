@@ -1,4 +1,4 @@
-# Phases 2 and 7: stop and close
+# Phases 2 and 7: show the plan and close
 
 ## run.md
 
@@ -46,17 +46,13 @@ Updated: <time>
 The Summary counts come from tool output, never from reading page text: `check.py spec` for the
 plan, `check.py section` per unit, `check.py gates` and `verify.json` for the result.
 
-## Phase 2: the stop (SPEC-READY)
-
-Skip this phase with `--go`.
+## Phase 2: show the plan (SPEC-READY)
 
 1. Write `run.md` with `State: SPEC-READY`. Summary: the `check.py spec` line, and the vault result
    from `vault.md` (notes used, nothing relevant, or skipped and why). Units table: every unit,
-   status `planned`. Next: `Read spec.md. Edit units, required entities or ## Run settings if
-   needed, then run /research-nt go <slug>.`
-2. `/notify-nt "<slug>: research spec ready, <n> units. /research-nt go <slug>"`.
-3. Tell the user: the spec path, the unit table with each unit's research questions (from
-   `spec.md`), and every HP outcome, and the `go` command. End the turn. Do not start Phase 3.
+   status `planned`. Next: `Researching. If the run dies, resume with /research-nt go <slug>.`
+2. Tell the user, in one message: the spec path, the unit table with each unit's research questions (from
+   `spec.md`), and every HP outcome. Do not wait for a reply and do not end the turn; start Phase 3 now.
 
 ## Phase 7: close
 

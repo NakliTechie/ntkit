@@ -4,7 +4,7 @@
 
 Read `$RUN/spec.md` for the unit ids and titles. Reading the spec is fine; it is not page text.
 
-- A first call with `--go`, or `go` on a SPEC-READY run: every unit.
+- A first call, or `go` on a SPEC-READY run: every unit.
 - `go` on a BUDGET run: only the units where `python3 $SKILL/bin/check.py section $RUN <id>` exits
   non-zero. A section that passes is kept as it is.
 

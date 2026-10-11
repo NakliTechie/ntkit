@@ -400,7 +400,8 @@ linter's word, never the agent's.
 - **Issue 0.3 change log (2026-10-11):** added the reader-first rules (ATTEST.md
   §0.2: plain descriptions over internal labels, no noun sandwiches, one term per
   thing, concrete names, keep the reasoning), which outrank the style rules.
-  Relaxed 3.5 and 3.15. Entry method: owner review of Issue 0.2 output, plus the
+  Relaxed 3.5 and 3.15. Removed the one-line compact register from ATTEST.md
+  §1a: every formal block is written out in full. Entry method: owner review of Issue 0.2 output, plus the
   Office of the Federal Register's "Principles of Clear Writing".
 - **Issue 0.2 change log (2026-09-23):** added the readability zone (§0, §3.5,
   3.15–3.17, §4.3–4.5, A-15–A-18, B-07). Entry method: maintainer directive plus

@@ -153,24 +153,20 @@ Rules:
 - A QUESTION always states its default action; never silently halt waiting for
   an answer.
 
-## 1a. Rendering within a qualifying formal output
+## 1a. Writing blocks within a qualifying formal output
 
-Apply section 0.1 before choosing a register. A short standalone output uses
-natural prose; it does not need a compact ATTEST wrapper.
+Apply section 0.1 first. A short standalone output uses natural prose; it never
+gets an ATTEST wrapper.
 
-Within a qualifying formal report:
+Within a qualifying formal report, write every block out in full: the claim as a
+plain sentence (with its reason when it has one), the evidence class, and the
+pointer on its own line. There is no one-line compressed form; squeezing a block
+into `RESULT (verified): claim — pointer` drops the meaning section 0.2 protects.
+BLOCKER, QUESTION, ESCALATION, BLOCKS-severity RISK and end-of-run handbacks also
+carry their structured fields: tried-trail, options and default, or severity and
+mitigation.
 
-- **Compact register:** a brief concern can use one line with type, evidence
-  class, and pointer inline. Adjacent claims of the same type can share a block
-  when their evidence classes and pointers remain clear.
-- **Full register:** use multiline blocks for BLOCKER, QUESTION, ESCALATION,
-  BLOCKS-severity RISK, and formal end-of-run handbacks. Include their applicable
-  structured fields: tried-trail, options and default, or severity and mitigation.
-- Choose the register by the information needed within the report. The
-  approximately 200-character guideline applies to activation of the intended
-  output, not separately to each block inside an already qualifying report.
-
-Sections 2–5 apply in both formal registers. The evidence standards in section 0
+Sections 2–5 apply to every formal block. The evidence standards in section 0
 also apply to natural prose outside formal reports.
 
 ## 2. Mark every factual claim with an evidence class
@@ -363,8 +359,8 @@ whole draft, not everything in one read.
 For a qualifying formal output (section 0.1), also run:
 
 - [ ] Every line lives inside one of the 8 block types
-- [ ] Brief concerns use compact blocks; BLOCKER / QUESTION / ESCALATION /
-      BLOCKS-RISK / formal handbacks use full blocks with their required fields
+- [ ] Every block is written out in full; BLOCKER / QUESTION / ESCALATION /
+      BLOCKS-RISK / formal handbacks carry their required fields
 - [ ] Every factual claim has exactly one evidence class
 - [ ] Every reserved word sits inside a `verified` claim with a resolving pointer
 - [ ] Every QUESTION has a default; every BLOCKER has a tried-trail
@@ -380,6 +376,7 @@ ATTEST-100 Issue 0.3 · operative subset · full spec: attest-100-spec-001.md
 · Issue 0.3 change (2026-10-11): added "Reader first" (section 0.2), which
 outranks the style rules; relaxed the sentence cap to a 25-word aim and a 40-word
 limit; allowed a sentence to carry its reason; retired the prose-exception tag;
-added anti-example 3 for compressed, label-heavy output.
+added anti-example 3 for compressed, label-heavy output; removed the one-line
+compact register (section 1a), so every formal block is written out in full.
 · Issue 0.2 change: split structure (threshold-gated) from style (always-on);
 added global sentence/paragraph caps; added the AI-tell blocklist (section 4.2).

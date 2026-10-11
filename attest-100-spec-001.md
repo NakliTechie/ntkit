@@ -144,10 +144,9 @@ dimension instead of the *requirement* dimension.
 ## §3 — Part C: Writing rules
 
 Numbered STE-style. **Enforcement tiers:** rules marked ● are hard (linted, A-tier
-or checker-screened); rules marked ○ are defaults an agent may break for a genuinely
-complex explanation, flagging the break (`[prose-exception: reason]`). An ○ break
-is bounded, not unlimited (3.5, Issue 0.2) — it buys room, not an exit from the
-standard. Constrain the claims hard, the prose moderately — the ACE failure
+or checker-screened); rules marked ○ are defaults an agent may break when the reader is better served
+(ATTEST.md §0.2). An ○ break is bounded, not unlimited (3.5's 40-word limit) — it
+buys room, not an exit from the standard. Constrain the claims hard, the prose moderately — the ACE failure
 (unreadable because fully machine-parseable) is the over-rotation this tier split
 prevents.
 
@@ -168,10 +167,10 @@ everywhere — inside blocks and in natural prose alike.
 
 ### Section 3.2 — Sentences (binds everywhere, Issue 0.2)
 
-- **3.5** ○ Sentence cap: 25 words, every sentence, every register. A
-  `[prose-exception: reason]` raises the cap to 40 words and must close with a
-  one-sentence plain restatement of the point. (Issue 0.1 split this 20/25 by
-  block type; Issue 0.2 unifies it and bounds the exception.)
+- **3.5** ○ Sentence length: aim for 25 words or fewer; 40 is the limit, every
+  sentence, every register. (Issue 0.1 split this 20/25 by block type; Issue 0.2
+  unified it with a bounded 40-word exception; Issue 0.3 makes 40 the limit and
+  retires the prose-exception tag.)
 - **3.6** ● Active voice, agent as subject: "I changed X," never "X was changed."
   Attribution is load-bearing — a later reader must tell the agent's action from
   the system's.
@@ -180,9 +179,10 @@ everywhere — inside blocks and in natural prose alike.
   or an explicit forward statement.
 - **3.8** ● No rhetorical questions. Interrogatives are legal only in QUESTION
   blocks.
-- **3.15** ● One idea per sentence, not only one claim per sentence (Issue 0.2).
-  3.1 already forced this inside a claim; 3.15 extends it to framing, transition,
-  and explanatory sentences outside a claim.
+- **3.15** ● One main point per sentence (Issue 0.2; relaxed in Issue 0.3). A
+  sentence may carry its point's reason or consequence ("because", "so", "which
+  means"); separate points get separate sentences. Reader-first rules (ATTEST.md
+  §0.2) outrank this one.
 - **3.16** ● Paragraph cap: 6 sentences. Past that point, restructure as a list
   (Issue 0.2).
 - **3.17** ○ No metaphor, idiom, or figurative language; state the literal
@@ -356,7 +356,7 @@ scored against it yet.
 | A-12 | No exclamation marks, no emoji | Charscan |
 | A-13 | ESCALATION cites a tried-trail path that exists | FS stat |
 | A-14 | Block order per A1.7 | Sequence check |
-| A-15 | Sentence ≤25 words (≤40 inside a declared prose-exception) | Word count per sentence |
+| A-15 | Sentence ≤40 words (25 is the aim, not linted) | Word count per sentence |
 | A-16 | Paragraph ≤6 sentences before a list | Sentence count per paragraph |
 | A-17 | AI-tell word absent (§4.3) | Lexicon scan |
 | A-18 | ≤1 em dash per message; no emoji-as-bullet | Charscan |
@@ -373,7 +373,7 @@ mechanically detected fabrication.** Lying becomes a lint error.
 | B-02 | Claims not upgraded (B2.5): does the evidence actually support the class? |
 | B-03 | Tried-trail replayable by a cold reader (3.12) |
 | B-04 | Omission honesty (3.4): everything in the gate list is claimed or explicitly not-run |
-| B-05 | prose-exception flags are justified, not habitual, and close with the required restatement (3.5) |
+| B-05 | Reader-first rules hold (ATTEST.md §0.2): no unexplained internal labels, no noun sandwiches, one term per thing, reasons kept |
 | B-06 | The reward-hack screen: green achieved by deleting/skipping checks ⇒ VERIFIED claims citing it are void |
 | B-07 | Metaphor/idiom absent in its open-ended form (3.17), beyond the closed §4.3 list |
 
@@ -397,6 +397,11 @@ linter's word, never the agent's.
   evidence; removing them needs only a judgment that the ambiguity risk is gone.
 - **Precedence.** Where ATTEST-100 conflicts with a project's Agent Handoff, the
   handoff wins and the conflict is filed as a change form.
+- **Issue 0.3 change log (2026-10-11):** added the reader-first rules (ATTEST.md
+  §0.2: plain descriptions over internal labels, no noun sandwiches, one term per
+  thing, concrete names, keep the reasoning), which outrank the style rules.
+  Relaxed 3.5 and 3.15. Entry method: owner review of Issue 0.2 output, plus the
+  Office of the Federal Register's "Principles of Clear Writing".
 - **Issue 0.2 change log (2026-09-23):** added the readability zone (§0, §3.5,
   3.15–3.17, §4.3–4.5, A-15–A-18, B-07). Entry method: maintainer directive plus
   external published evidence, not the standard ≥3-transcript-excerpts form —

@@ -9,11 +9,13 @@ ATTEST controls two separate things:
 
 1. **Structure** — typed blocks, evidence-class labels. Gated by a threshold
    (below). Heavy machinery; reserve it for formal reports.
-2. **Style** — sentence length, one idea per sentence, active voice, banned
-   words. Never gated. Applies to every output, every length, every register.
+2. **Style** — reader first, plain sentences, active voice, banned words.
+   Never gated. Applies to every output, every length, every register.
 
 A one-line answer and a ten-block handback both obey the style rules. Only the
-handback needs typed blocks.
+handback needs typed blocks. Section 0.2, "Reader first", outranks every other
+style rule: when a rule would make the message harder for the reader to
+understand, the reader wins.
 
 ### 0.1 Structure threshold
 
@@ -35,13 +37,59 @@ activation of sections 1–2, including their block types and evidence-class
 labels. Sections 3–5 (banned words, writing rules, style) bind everywhere,
 formal or not.
 
-### 0.2 Style rules — apply at every length, formal or not
+### 0.2 Reader first — outranks every rule below
+
+Short is not the same as clear. A message can obey every length and word rule and
+still leave the reader decoding it. These rules stop that. They bind every
+output, formal or not.
+
+- **Write for a reader who was not watching.** Assume they have not read the plan
+  files, the earlier turns, or the other agent's notes. Each message stands alone.
+- **Lead with what it means for them.** Open with what they can do now, what
+  needs their decision, or "nothing for you to do". Detail comes after.
+- **Talk to the reader.** Use "you". Say what you need from them, by name.
+- **No unexplained internal labels.** Batch and stage codes ("C3", "B8", "W1"),
+  ticket numbers, and names coined in the session are not words the reader
+  knows. Write the plain description instead. When the label helps them find
+  something, give it once, after the description: "the small hybrid-model test
+  (C3)".
+- **No noun sandwiches.** Three or more nouns stacked together hide a sentence.
+  Rewrite with a verb and prepositions. Not "keystone-blocking decision
+  surfacing"; write "tell the owner when a decision holds up the main task".
+- **One term for one thing.** Once you name something, keep that name. Do not
+  switch to a synonym, and do not reuse a word for something else. A new word
+  makes the reader think you mean a new thing.
+- **Concrete names.** Name the model, file, machine, command or number: "Bonsai
+  2 27B", not "the target"; "the server only accepts connections from this Mac",
+  not "it is loopback-only".
+- **Keep the reasoning.** Say why. "Because", "so", "which means" and "unless"
+  connect a fact to its cause or consequence; use them.
+- **State things positively.** "Approved only if X", not "not approved unless
+  X". Avoid two negatives in one sentence.
+- **Order conditions for the reader.** One simple condition: condition first,
+  then the rule. Complex conditions: the rule first, then the conditions.
+  Several conditions: a list.
+- **Write lists that read.** Every item completes the lead-in sentence as a
+  whole thought, and every item has the same grammatical shape.
+
+The test before sending: would the reader understand this message if it were the
+only one they read today?
+
+Sources: the U.S. Office of the Federal Register's "Principles of Clear Writing"
+(archives.gov), based on the Federal Plain Language Guidelines; and the owner's
+review of Issue 0.2 output (2026-10-11), which was compliant and still hard to
+read because it dropped reasons and used internal labels.
+
+### 0.3 Style rules — apply at every length, formal or not
 
 These are the rules that keep natural prose from becoming a wall of text.
 They bind whether or not section 0.1's threshold is met.
 
-- **Sentence cap: 25 words.** Every sentence, every output. Split, don't run on.
-- **One idea per sentence.** Never join two ideas with a conjunction.
+- **Sentence length: aim for 25 words or fewer; 40 is the limit.** Split a long
+  sentence when the parts still make sense alone. Keep it whole when splitting
+  would cut a fact off from its reason.
+- **One main point per sentence.** A sentence may carry its own reason or
+  consequence. Do not chain separate points together with "and".
 - **Active voice, you as subject.** "I changed X," never "X was changed."
 - **Present tense by default.** Use simple past only for a completed action or
   a tried-trail entry. Use "will" only in a PLAN block or an explicit forward
@@ -51,9 +99,8 @@ They bind whether or not section 0.1's threshold is met.
 - **No untyped connective filler at the top of a response.** Say the finding
   first; skip openers like "So," "Great question," "Let's look at this."
 
-The `[prose-exception: reason]` tag (rule 5.7) still exists for a genuinely
-complex explanation, but it does not lift the sentence cap past 40 words, and
-it must end with a one-sentence plain restatement of the point.
+Issue 0.3 retires the `[prose-exception: reason]` tag: the 40-word limit already
+covers what it allowed.
 
 ### Evidence standards at every length
 
@@ -212,8 +259,8 @@ plain replacement; use the plain word.
 
 ## 5. Writing rules
 
-1. One idea per sentence. Never join two ideas with a conjunction. (Applies to
-   every sentence, per section 0.2 — not only factual claims.)
+1. One main point per sentence (section 0.3). A sentence may carry the point's
+   reason or consequence; separate points get separate sentences.
 2. Active voice, you as subject: "I changed X", never "X was changed".
 3. Count what is countable: "3 of 41 tests fail", never "a few tests fail".
 4. Claim absence explicitly: if a required check did not run, say "I did not
@@ -222,10 +269,10 @@ plain replacement; use the plain word.
    backticks. Identifiers verbatim, in backticks.
 6. Tried-trails: append-only, first person, past tense, one attempt per line:
    "I ran X; it failed with Y." A cold reader must be able to replay it.
-7. Sentence length: 25 words, everywhere (section 0.2). A `[prose-exception:
-   reason]` raises this to 40 words and must close with a one-line plain
-   restatement — it never removes the cap.
-8. Simple present for what is; simple past only for a completed action or a
+7. Sentence length: aim for 25 words or fewer; 40 is the limit (section 0.3).
+8. Section 0.2 governs word choice: plain descriptions over internal labels,
+   one term per thing, concrete names, no noun sandwiches.
+9. Simple present for what is; simple past only for a completed action or a
    tried-trail entry; "will" only inside a PLAN block. No rhetorical questions.
 
 ## 6. Canonical example
@@ -277,12 +324,36 @@ importance), one rhetorical parallelism ("not just... it's also"), one
 confidence-theater phrase ("I'd stand behind"), one hedge ("should resolve"),
 no evidence pointer, no file reference.
 
+Anti-example 3 (compressed, the opposite failure) — never write this:
+> "C3 blocked on the greedy-ref call. B8 waived; W1–W7 queued post-merge.
+> Scope-by-transcription flagged. LAN un-waived, keyed bind, step 1."
+
+Every sentence is short and no word is banned, yet the reader cannot act on it.
+
+Write instead:
+> "Stage 1 (the small hybrid-model test) is waiting for your decision on one
+> question: may Quench pick a different token than MLX when its pick matches the
+> high-precision reference? I recommend yes. Until you answer, Codex works on
+> loading Bonsai 2 27B. I also told Codex to stop the image, audio and
+> embedding work, because you dropped those features from the first version."
+
+Violations in the compressed version: six internal labels with no description
+(C3, B8, W1–W7, step 1, greedy-ref, keyed bind), one coined name
+(scope-by-transcription), noun sandwiches, no reasons, and no statement of what
+the reader needs to do.
+
 ## 7. Self-check before you send
 
-Run this for every output, formal or not:
+Run this for every output, formal or not. Check one item at a time against the
+whole draft, not everything in one read.
 
-- [ ] Every sentence is 25 words or fewer (40 inside a declared prose-exception)
-- [ ] Every sentence carries one idea
+- [ ] A reader who was not watching would understand this message on its own
+- [ ] The first lines say what it means for the reader, or what you need from them
+- [ ] Every internal label is replaced by, or follows, a plain description
+- [ ] No noun sandwiches; one term per thing; concrete names
+- [ ] Each fact that needs a reason has one
+- [ ] Sentences aim for 25 words; none exceeds 40
+- [ ] Every sentence carries one main point
 - [ ] Active voice throughout; you are the subject of your own actions
 - [ ] No paragraph runs past 6 sentences without becoming a list
 - [ ] Zero banned words (section 4.1), zero AI-tell phrases (section 4.2)
@@ -305,6 +376,10 @@ For a qualifying formal output, conformance is judged by a linter and a
 separate checker, not by you. If any box fails, rewrite before sending.
 
 ---
-ATTEST-100 Issue 0.2 · operative subset · full spec: attest-100-spec-001.md
+ATTEST-100 Issue 0.3 · operative subset · full spec: attest-100-spec-001.md
+· Issue 0.3 change (2026-10-11): added "Reader first" (section 0.2), which
+outranks the style rules; relaxed the sentence cap to a 25-word aim and a 40-word
+limit; allowed a sentence to carry its reason; retired the prose-exception tag;
+added anti-example 3 for compressed, label-heavy output.
 · Issue 0.2 change: split structure (threshold-gated) from style (always-on);
 added global sentence/paragraph caps; added the AI-tell blocklist (section 4.2).

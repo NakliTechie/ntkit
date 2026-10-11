@@ -118,7 +118,8 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
     One diagnostic batch per failure; a second needs a written hypothesis the first batch ruled
     out. For systems-level work the order is feature complete, benchmark, optimise, and
     verification stays at the accuracy bar the project states, not at bit-equality with a reference.
-    "Check once per batch" assumes a bounded batch; item 11 is its other half.
+    "Check once per batch" assumes a bounded batch; item 11 is its other half. The one speed number
+    allowed before the Benchmark phase is one observed speed reading per stage boundary (one command, a few runs, the current build against the reference on the same machine), labelled "observed, not a benchmark" and reported in the handback. It informs; it never starts tuning and never gates.
 11. **Unbounded batch** — the opposite failure of item 10: thousands of lines built and never run,
     because the boundary check keeps moving out. A batch is one capability family that one
     boundary run can check, sized at roughly a day of work. Past that, close the batch early and

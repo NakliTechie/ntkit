@@ -3,7 +3,7 @@
 # downsample so the type is crisp. No npm deps: headless Chrome + sips (macOS).
 #
 # Usage:
-#   render-social-card.sh --name "ntkit" --tagline "The rigor layer for AI-assisted development." \
+#   render-social-card.sh --name "ntkit" --tagline "Software engineering for vibe coding." \
 #     --facts '<b>21 slash commands</b> &nbsp;&#183;&nbsp; every repo &nbsp;&#183;&nbsp; MIT' \
 #     --accent "#0891b2" --accent-text "#0e7490" --out ./assets/social.png
 #

@@ -15,7 +15,7 @@ Review the app **as a cold first-time user**, the person who wasn't there when e
 
 **No real-world side effects.** The flail never clicks an action that sends real mail, charges a card, or writes upstream. If a newcomer's misclick could trigger one, skip the flail, give the reason in the report, and log that exposure as a finding.
 
-Unlike `/walkthrough-nt` and `/guide-nt`, this command wipes state and never seeds, and it runs alone on CLI, TUI and native surfaces.
+Unlike `/walkthrough-nt` and `/guide-nt`, this command wipes state and never seeds, and it runs alone on native surfaces.
 
 **Rotate the eyes.** Before starting, read only the `Reviewer:` line of this command's latest report in the main checkout's `plan/`, never its findings. If that run used your model family, prefer another family's agent CLI on PATH (`codex`, `gemini`, checked with `which`), else another model of your family; never materially weaker eyes. Neither reachable → run as-is and write `rotation: unavailable` in the `Reviewer:` line. The report header says `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and notes when you are the family that built most of the code.
 

@@ -68,7 +68,7 @@ Each repo keeps a gitignored `plan/` folder with three files: `history.md` (deci
 /lab-nt                 # research: shape an idea into a falsifiable contract, run bounded legs
 /research-nt "<q>"      # research: a web question into a cited report, stops for plan approval
 /forward-pass-nt        # anytime: fresh-eyes whole-app audit, batched fix-workplan
-/walkthrough-nt         # anytime: drive each role in a real browser, fix bugs, leave a harness
+/walkthrough-nt         # anytime: drive each role (browser, CLI, TUI, API), fix bugs, leave a harness
 /ux-review-nt           # anytime: cold first-timer review, ranked onboarding and nav failures
 /reclaim-nt             # upkeep: find the GB in old weights, worktrees, archives; Trash only on apply
 /tidy-nt                # upkeep: clear what this session created; lists first, deletes by name

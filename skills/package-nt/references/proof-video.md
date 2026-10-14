@@ -49,8 +49,9 @@ recording, the honesty rules and the distribution steps.
 - **Sound (default on).** Name one music track in `BRIEF.md`, reused from the launch-video library the brag path
   ships: `package-nt/references/brag/assets/music/` (the ende.app "Happy Beats / Business Moves" tracks, with beat
   maps in `cues/<stem>.music-cues.json` and first-20-25 s planning in `<stem>.music-cues.md`). Pick by the cue preset,
-  not by ear alone. Draft one narration line per scene here too. The sound is built in Step 5b. A proof video can ship
-  silent — say so in the brief if that is what you want.
+  not by ear alone. Draft one narration line per scene here too; the default narration voice is a soft, warm female
+  voice (`af_heart`) kept low in the mix. The sound is built in Step 5b. A proof video can ship silent — say so in the
+  brief if that is what you want.
 - `marketing/` stays gitignored (`/marketing` in `.gitignore`).
 - **Mark the folder irreplaceable:** `touch marketing/<video-name>/.source`. The takes cannot be recorded again,
   so `/windup-nt`'s marketing sweep keeps any folder holding a `.source` file, cited in a plan item or not
@@ -119,9 +120,11 @@ per scene. Build it after Step 5, because each line is sized to its scene.
 
 **Narration.**
 - One line per scene, short enough to finish before the next scene starts.
-- Generate each line on its own, never in a batch: `npx hyperframes tts "<line>" --voice am_michael -s 1.0 -o assets/voice/s1.wav`.
-  The local Kokoro voice works when signed out of HeyGen. The batch engine (`media-use/audio/scripts/audio.mjs`) ran
-  Kokoro in parallel and 4 of 6 lines failed; each worked when run alone.
+- The default voice is a soft, warm female voice, `af_heart` (Kokoro's own default), kept low in the mix (see
+  "Mount and mix"). Generate each line on its own, never in a batch:
+  `npx hyperframes tts "<line>" --voice af_heart -s 1.0 -o assets/voice/s1.wav`. The local Kokoro voice works when
+  signed out of HeyGen. The batch engine (`media-use/audio/scripts/audio.mjs`) ran Kokoro in parallel and 4 of 6
+  lines failed; each worked when run alone.
 - Respell names the voice garbles, then confirm the rendered words with `npx hyperframes transcribe`: `Qwen` → `Chwen`,
   `gpt-oss` → `G P T O S S`, `llama.cpp` → `llama dot C P P`. Raise `-s` up to about 1.1 to fit a line into its scene.
 
@@ -134,7 +137,9 @@ per scene. Build it after Step 5, because each line is sized to its scene.
 
 **Mount and mix.**
 - Each sound is an `<audio id=…>` on the orchestrator (a scene never holds audio). Without an `id` the render is silent.
-- Set the music bed to `data-volume` about 0.35.
+- Keep the narration soft and low: `data-volume` about 0.7 on each voice `<audio>`.
+- Set the music bed below the voice: `data-volume` about 0.2, so the low narration still reads; the carve ducks it
+  further under each line.
 - Duck the bed under the narration: run the hyperframes-audio carve, `scripts/carve.mjs --comp index.html` (skill
   `/hyperframes-audio`). A volume duck alone does not finish the mix. The carve needs `@hyperframes/core` in the project
   (`npm i -D @hyperframes/core@<cli version>`). Re-run the carve after any voice change.

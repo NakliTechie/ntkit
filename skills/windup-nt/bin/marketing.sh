@@ -2,7 +2,7 @@
 # List the promo output /windup-nt's marketing sweep must clean. Changes nothing.
 # /package-nt writes heroes, cards and launch videos to marketing/ and leaves brag-output*/ behind
 # when a render fails. These are local and regenerable (gitignored), so windup clears them, by name.
-# One exception: a proof video (playbook ~/.claude/playbooks/proof-video.md) holds live recordings of
+# One exception: a proof video (playbook skills/package-nt/references/proof-video.md) holds live recordings of
 # the app that cannot be made again. Its folder carries a .source marker, and a marked folder is always
 # kept, cited or not, so an uncited proof folder is never silently deleted.
 # Prints one tab-separated line per file in marketing/ and per brag-output*/ folder, largest first:

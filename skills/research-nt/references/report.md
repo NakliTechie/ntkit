@@ -28,7 +28,7 @@ Updated: <time>
 <each HP and its accepted unit or rejection reason, from revision.md>
 
 ## Gates
-<final states only: the G1, G2, G2b, G4, G3 lines from `check.py gates`, with each problem>
+<final states only: the G2, G2b, G4, G3 lines from `check.py gates`, with each problem>
 
 ## Most-cited sources
 <final states only: the first 5 entries of verify.json `sources`, as `1. <title or url> — <url> (<n> citations)`>

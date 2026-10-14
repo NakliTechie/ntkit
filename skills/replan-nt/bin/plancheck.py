@@ -47,6 +47,14 @@ IMPACT_LINE = re.compile(
 )
 
 
+# One line per finding kind, printed once after the list so a reader never has to open this file.
+FIX = {
+    "orphan": "the item's [from:] names no record. Add the record, correct the slug, or tag the item [from: hand].",
+    "ghost": "a record declares an `add` impact and no derived item cites it. Add the item with [from: <record>], or change the impact line to `none`.",
+    "misquote": "the quoted words are not in the named record. Quote words that appear there, or drop the quote.",
+}
+
+
 @dataclass
 class Finding:
     kind: str          # orphan | ghost | misquote | untagged
@@ -280,6 +288,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Replay: {orphans} orphan(s) / {ghosts} ghost(s) / {misquotes} misquote(s)")
         for f in hard:
             print(f"  {f.kind:7} {f.where:28} {f.detail}")
+        for kind in sorted({f.kind for f in hard}):
+            print(f"  fix {kind}: {FIX[kind]}")
     if info:
         print(f"  untagged: {len(info)} item(s) with no provenance (treated as hand-written)")
     return 1 if hard else 0

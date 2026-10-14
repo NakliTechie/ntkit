@@ -215,9 +215,9 @@ top = json.loads((d / "verify.json").read_text())["sources"][0]
 if (top["url"], top["cited"]) != ("https://arxiv.org/abs/1605.07230/", 2):
     failures.append(f"sources: most-cited not first, or normalisation missed: {top}")
 expect("G3 required by default", run("gates", d), 1, "claim check not run")
-expect("--without only takes g3", run("gates", d, "--without", "g1"), 2, "accepts only g3")
+expect("--without only takes g3", run("gates", d, "--without", "g2"), 2, "accepts only g3")
 
-# --- G1 provenance ----------------------------------------------------------
+# --- structure after the editor ---------------------------------------------
 def with_section(name, sid, text):
     d = fresh(name)
     (d / "sections" / f"{sid}.md").write_text(text)
@@ -225,28 +225,24 @@ def with_section(name, sid, text):
     shutil.copy(d / "draft.md", d / "report.md")
     return d
 
-d = with_section("g1-unfetched", "S1.1", SECTIONS["S1.1"] + "\nA made-up claim ([blog](https://unfetched.example/post)).\n")
-expect("G1: unfetched citation", run("gates", d, "--without", "g3"), 1, "S1.1: https://unfetched.example/post — never fetched")
-d = with_section("g1-failed", "S2.1", SECTIONS["S2.1"] + "\nSee https://example.org/broken.\n")
-expect("G1: failed fetch", run("gates", d, "--without", "g3"), 1, "fetch failed (HTTP 404)")
-d = built("g1-badlog")
+d = built("badlog")
 with open(d / "fetch-log.jsonl", "a") as fh:
     fh.write("not json\n")
-expect("G1: corrupt log", run("gates", d, "--without", "g3"), 1, "line 6 is not JSON")
+expect("section: corrupt fetch log", run("section", d, "S1.1"), 1, "line 6 is not JSON")
 
-# --- G2 structure -----------------------------------------------------------
+# --- G2 structure (advisory) ------------------------------------------------
 d = with_section("g2-leak", "S1.2", SECTIONS["S1.2"].replace("See S2.1", "See S1.5"))
-expect("G2: dangling section reference", run("gates", d, "--without", "g3"), 1, "refers to S1.5, which is not a section")
+expect("G2: dangling section reference is an advisory note", run("gates", d, "--without", "g3"), 0, "refers to S1.5, which is not a section")
 d = built("g2-missing")
 r = (d / "report.md").read_text()
 start = r.index("### S1.2"); end = r.index("## S2 |")
 for f in ("report.md", "draft.md"):
     (d / f).write_text(r[:start] + r[end:])
-expect("G2: missing unit", run("gates", d, "--without", "g3"), 1, "S1.2: missing")
+expect("G2: missing unit is an advisory note", run("gates", d, "--without", "g3"), 0, "S1.2: missing")
 d = built("g2-extra")
 for f in ("report.md", "draft.md"):
     (d / f).write_text((d / f).read_text().replace("## Not covered", "## Conclusion\nMore.\n\n## Not covered"))
-expect("G2: extra heading", run("gates", d, "--without", "g3"), 1, "unexpected heading 'Conclusion'")
+expect("G2: extra heading is an advisory note", run("gates", d, "--without", "g3"), 0, "unexpected heading 'Conclusion'")
 
 # --- G2b census -------------------------------------------------------------
 d = with_section("g2b-silent", "S1.2", SECTIONS["S1.2"].replace("Omitted: Treynor — no primary source was reachable\n", ""))

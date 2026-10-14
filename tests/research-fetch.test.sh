@@ -1,7 +1,7 @@
 #!/bin/sh
 # research-nt fetch.py against a local HTTP server: text extraction, the log, the page store,
 # the address guard (direct and through a redirect), the fetch cap, --stdin, and a cited fetch
-# passing check.py's G1. The real guard refuses 127.0.0.1, so the test swaps the module's guard
+# passing check.py's section check. The real guard refuses 127.0.0.1, so the test swaps the module's guard
 # for one that allows only this server; nothing else reaches the network.
 set -eu
 command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
@@ -170,13 +170,13 @@ result = subprocess.run([sys.executable, str(cli / "fetch.py"), str(d), "--secti
 if result.returncode or (cli / "__pycache__").exists():
     failures.append("CLI mutated the installed helper directory or failed")
 
-# --- the log feeds G1 ----------------------------------------------------------
+# --- the log feeds the section check ----------------------------------------------------------
 ok = check.fetched_ok(log(d))
 for cited in (f"{base}/page.html?utm_source=newsletter", f"{base}/page.html/", f"{base}/to-page"):
     if check.normalize_url(cited) not in ok:
-        failures.append(f"G1 would not match a fetched page cited as {cited}")
+        failures.append(f"the section check would not match a fetched page cited as {cited}")
 if check.normalize_url(f"{base}/missing") in ok:
-    failures.append("G1 would accept a failed fetch")
+    failures.append("the section check would accept a failed fetch")
 
 srv.shutdown()
 if failures:

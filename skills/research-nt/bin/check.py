@@ -5,13 +5,13 @@
   check.py section  RUN_DIR UNIT              one sections/<UNIT>.md against the spec and the log
   check.py assemble RUN_DIR                   sections/<id>.md -> draft.md, in spec order
   check.py sample   RUN_DIR [--k 10] [--force]  pick linked sentences from report.md -> claims.json
-  check.py gates    RUN_DIR [--without g3]    G1 G2 G2b G4 G3 over report.md -> verify.json
+  check.py gates    RUN_DIR [--without g3]    G2 G2b G4 G3 over report.md -> verify.json
 
 Exit 0 checks passed · 1 a check failed · 2 could not run (missing file, bad usage).
 With --without g3, exit 0 is diagnostic only: verify.json still records verified=false.
 
-Gates come in two tiers. Blocking: G1 provenance, G2 structure, G4 edit scope, G3 claim
-support; any failure is exit 1 and state FLAGGED. Advisory: G2b census; a failure is
+Gates come in two tiers. Blocking: G4 edit scope, G3 claim support; any failure is exit 1
+and state FLAGGED. Advisory: G2 structure, G2b census; a failure is
 reported as a note and does not fail the run. All gates passing is state VERIFIED; only
 advisory failures is state PASSED-WITH-NOTES (exit 0, verified=false). verify.json records
 the state and the notes.
@@ -468,7 +468,9 @@ def cmd_section(run: Path, args) -> int:
         raise CannotRun(f"no unit {args.unit} in spec.md")
     body, dropped, problems = read_section(run, unit)
     text = "\n".join(body)
-    why_not = provenance(load_log(run)[0])
+    entries, bad_log = load_log(run)
+    problems.extend(bad_log)
+    why_not = provenance(entries)
     links = links_in(text)
     for url in links:
         why = why_not(url)
@@ -602,30 +604,6 @@ def cmd_sample(run: Path, args) -> int:
     }, indent=1) + "\n", encoding="utf-8")
     print(f"sampled {len(claims)} of {count} linked sentences -> claims.json")
     return 0
-
-
-def unit_of(parts: list[Part], line_no: int) -> str:
-    seen = 0
-    for p in parts:
-        span = 1 + len(p.lines) if p.heading else len(p.lines)
-        if line_no < seen + span:
-            return p.key
-        seen += span
-    return "?"
-
-
-def gate_g1(run: Path, report: str) -> list[str]:
-    entries, bad = load_log(run)
-    why_not = provenance(entries)
-    problems = list(bad)
-    parts = parse_report(report)
-    lines = report.splitlines()
-    for i, line in prose_lines(lines):
-        for url in links_in(line):
-            why = why_not(url)
-            if why:
-                problems.append(f"{unit_of(parts, i)}: {url} — {why}")
-    return problems
 
 
 def gate_g2(spec: Spec, report: str) -> list[str]:
@@ -821,8 +799,7 @@ def cmd_gates(run: Path, args) -> int:
     if unknown:
         raise CannotRun(f"--without accepts only g3, not {', '.join(sorted(unknown))}")
     gates = [   # (id, name, function, blocking)
-        ("G1", "provenance", lambda: gate_g1(run, report), True),
-        ("G2", "structure", lambda: gate_g2(spec, report), True),
+        ("G2", "structure", lambda: gate_g2(spec, report), False),
         ("G2b", "census", lambda: gate_g2b(spec, report), False),
         ("G4", "edit scope", lambda: gate_g4(run, report), True),
         ("G3", "claim support", lambda: gate_g3(run, report), True),

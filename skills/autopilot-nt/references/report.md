@@ -18,8 +18,9 @@ Parked — needs you:
   - <stop-lined action, why it needs a human>
   - <blocking question, with the context to answer it cold>
 
-Tests changed (review before trusting green):
-  - <test file · which item touched it · checker's note>        [or "none"]
+Tests changed (review before trusting green): existing tests only
+  - <test file · which item edited or deleted it · checker's note>        [or "none"]
+Tests added: <N cases in M files>        [or "none"]
 
 Assumed (reversible calls I made):
   - <default taken, and why>

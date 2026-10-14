@@ -40,7 +40,7 @@ Return only `EDITED <n> units` or `EDITED 0 units`.
 
 ## Coordinator gate
 
-Run `check.py gates $RUN --without g3` to check G1/G2/G2b/G4 before claim checking.
+Run `check.py gates $RUN --without g3` to check G2/G2b/G4 before claim checking.
 This diagnostic command cannot establish VERIFIED.
 
 If a gate fails or prints an advisory note, give the same editor one fix pass: its brief, plus the

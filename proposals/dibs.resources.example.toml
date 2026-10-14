@@ -1,0 +1,30 @@
+# ~/.ntkit/dibs/resources.toml — example for proposals/dibs.md
+# kind: exclusive | counted | rate (rate is version 2)
+
+[gpu]
+kind = "exclusive"
+ttl = "90m"                     # default time limit; a live process is never stolen from
+probe = "nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits"
+
+[vram]
+kind = "counted"
+capacity = 24                   # GB
+unit = "GB"
+
+[net]
+kind = "counted"
+capacity = 8                    # parallel download streams across all agents
+unit = "streams"
+probe = "netstat -ib | awk 'NR>1 && $1==\"en0\" {print $7}' | head -1"
+
+[chrome-cdp]
+kind = "exclusive"              # one remote-debugging connection per task
+ttl = "30m"
+
+[chrome-foreground]
+kind = "exclusive"              # WebGPU replay needs the foreground tab
+ttl = "20m"
+
+[studio]
+kind = "exclusive"
+adapter = "~/Code/infra/remote-studio/studio-lock.sh"

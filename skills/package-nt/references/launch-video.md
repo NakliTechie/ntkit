@@ -2,7 +2,7 @@
 
 Made by brag, vendored in [`brag/`](brag/VENDORED.md). You assemble the direction and take the output; brag owns the story, visuals, audio and render.
 
-> When the claim is "this works" and the proof is watching it work — a model answering in a browser tab, a tool finishing a job — build a proof video from real recorded footage instead of this brag launch video, following `package-nt/references/proof-video.md`. Numbers come from the recorded run, not a brag story. It is a hands-on hyperframes production, not this hands-off asset step, so it runs outside `/package-nt`. Its recordings cannot be made again: the recorder marks the folder with a `.source` file, and windup's marketing sweep keeps a marked folder even when no plan item cites it.
+> When the claim is "this works" and the proof is watching it work — a model answering in a browser tab, a tool finishing a job — build a proof video from real recorded footage instead of this brag launch video, following `package-nt/references/proof-video.md`. Numbers come from the recorded run, not a brag story. It is a hands-on hyperframes production, not this hands-off asset step, so it runs outside `/package-nt`. The footage is throwaway, deleted after you post, but you cannot re-record it mid-work: the recorder marks the folder with a `.source` file so windup's marketing sweep does not delete it before you post, cited in a plan item or not.
 
 ### Pick the mode: who watches it
 

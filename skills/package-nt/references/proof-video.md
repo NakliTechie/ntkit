@@ -6,8 +6,8 @@ recorded run. Distilled from the diskformer 80B video (2026-10-13; the author's 
 example to adapt, not a path to open). Two cuts, 16:9 and 9:16, were briefed, recorded, edited, rendered and staged
 on Reddit, LinkedIn and the README in about 1 h 45 min.
 
-Portability note: the recorder, the CDP daemon (`~/Code/infra/bin/chrome-cdpd.mjs`), the `chrome-cdp-persistent.md`
-playbook, and the external-SSD archive below are the author's own setup. The music library, `bake-poster.sh` and
+Portability note: the recorder, the CDP daemon (`~/Code/infra/bin/chrome-cdpd.mjs`) and the `chrome-cdp-persistent.md`
+playbook are the author's own setup. The music library, `bake-poster.sh` and
 `assets.md` referenced here ship with ntkit under `package-nt/references/`. Supply your own screen recorder and a
 Chrome you can drive if you do not have the author's infra; the honesty rules and the step order are what carry.
 
@@ -53,9 +53,10 @@ recording, the honesty rules and the distribution steps.
   voice (`af_heart`) kept low in the mix. The sound is built in Step 5b. A proof video can ship silent — say so in the
   brief if that is what you want.
 - `marketing/` stays gitignored (`/marketing` in `.gitignore`).
-- **Mark the folder irreplaceable:** `touch marketing/<video-name>/.source`. The takes cannot be recorded again,
-  so `/windup-nt`'s marketing sweep keeps any folder holding a `.source` file, cited in a plan item or not
-  (`skills/windup-nt/bin/marketing.sh`). This replaces the old "name it in an open plan item" safeguard.
+- **Mark the folder in-progress:** `touch marketing/<video-name>/.source`. The takes are throwaway, but you cannot
+  re-record them mid-work, so `/windup-nt`'s marketing sweep keeps any folder holding a `.source` file, cited in a plan
+  item or not (`skills/windup-nt/bin/marketing.sh`). The marker only stops a sweep from deleting the footage before you
+  post. After you post, delete the folder yourself (Step 9). This replaces the old "name it in an open plan item" safeguard.
 
 ### 1. Make the app recordable (15 min, once per app)
 The recorder waits on app state, not on sleeps. The app exposes a few globals the recorder can poll, for example
@@ -179,13 +180,12 @@ read it. Open `npx hyperframes preview` (Studio) for Chirag, and render only aft
   `plan/launch-drafts.md`, pick a thumbnail in the video settings, stop before Post.
 - Captions and text live in `plan/launch-drafts.md` (gitignored).
 
-### 9. Clean up and keep the source
+### 9. Clean up — the footage is throwaway
 - Delete the recording profile by name once both shapes are final; it holds full model copies (54 GB for three
   models in the reference run). Report it with its size.
-- Keep the project folder and `assets/` takes: the takes cannot be recorded again identically. The `.source` marker
-  from Step 0 keeps the folder through `/windup-nt`'s marketing sweep, cited in a plan item or not. After posting, move
-  the folder to an archive on the external SSD (for example `/Volumes/Models2/videos/<project>-<video-name>/`) to free
-  the working disk; the marker travels with it.
+- Keep the project folder and `assets/` takes only until you have posted. The takes are throwaway: once the video is
+  up, delete `marketing/<video-name>/` by name. There is no archive step. The `.source` marker from Step 0 only guards
+  the folder from `/windup-nt`'s sweep while the video is in progress; it is not a keep-forever flag.
 - Delete `footage/take-*/frames/` (thousands of JPEGs) once the mp4 takes are verified.
 
 ## Gotchas met so far

@@ -31,10 +31,11 @@ recording, the honesty rules and the distribution steps.
    leaves the text too small on a phone.
 7. **Stage, never post.** Uploads and drafts are fine; the final Post, Publish or Commit click on a public surface is
    Chirag's (the README video commit is the project's own repo, so it is ours).
-8. **Music is a bed, not a claim.** One track under the whole piece, kept low under every result hold so the numbers
-   stay readable (rule 4). No stinger or beat-drop lands on a number or a speed badge: the footage carries the proof,
-   and the music must not imply a result the run did not produce. Reuse a cleared launch-video track; the file stays
-   out of commits.
+8. **Sound serves the footage, never fakes it.** The music is a bed under the whole piece, kept low under every result
+   hold so the numbers stay readable (rule 4); no stinger or beat-drop lands on a number or a speed badge. Narration
+   says only what is true and on screen — confirm the rendered words with `npx hyperframes transcribe`, because the
+   voice garbles names. The footage carries the proof; sound must not imply a result the run did not produce. Reuse a
+   cleared launch-video track where you can; audio source files stay out of commits.
 
 ## Steps
 
@@ -45,10 +46,11 @@ recording, the honesty rules and the distribution steps.
 - `frame.md`: palette and fonts lifted from the app's CSS; the honesty markers; do and don't.
 - `STORYBOARD.md`: Hook (the claim in 3 short lines) → Setup (the app, real speed) → the slow part (sped up, badge +
   clock) → Proof (the result, held) → How (one diagram) → Close (name, URL, repo). Show it; build after approval.
-- **Music.** Name one track in `BRIEF.md`, reused from the launch-video library the brag path ships:
-  `package-nt/references/brag/assets/music/` (the ende.app "Happy Beats / Business Moves"
-  tracks, with beat maps in `cues/<stem>.music-cues.json` and first-20-25 s planning in `<stem>.music-cues.md`).
-  Pick by the cue preset, not by ear alone; mount it in Step 5. A proof video can also ship silent — say which in the brief.
+- **Sound (default on).** Name one music track in `BRIEF.md`, reused from the launch-video library the brag path
+  ships: `package-nt/references/brag/assets/music/` (the ende.app "Happy Beats / Business Moves" tracks, with beat
+  maps in `cues/<stem>.music-cues.json` and first-20-25 s planning in `<stem>.music-cues.md`). Pick by the cue preset,
+  not by ear alone. Draft one narration line per scene here too. The sound is built in Step 5b. A proof video can ship
+  silent — say so in the brief if that is what you want.
 - `marketing/` stays gitignored (`/marketing` in `.gitignore`).
 - **Mark the folder irreplaceable:** `touch marketing/<video-name>/.source`. The takes cannot be recorded again,
   so `/windup-nt`'s marketing sweep keeps any folder holding a `.source` file, cited in a plan item or not
@@ -108,11 +110,38 @@ frame for reading time: `-vf "tpad=stop_mode=clone:stop_duration=6"`. Check a ta
   counting real seconds at the segment's rate), a stats bar whose numbers are typed in from `events.json`, callouts.
 - Designed frames (hook, diagram, close) as sub-compositions in `compositions/`.
 - Write the numbers into the HTML by script from `events.json` rather than by hand, so a re-record updates them.
-- Music: one orchestrator-owned timed `<audio>` under the whole composition (hyperframes keeps audio on the
-  orchestrator, never in a scene). Proof footage from a browser tab is near-silent, so the bed plays clean. If a take
-  carries real sound, set `data-has-audio="true"` on that clip and duck the bed under it, then carve the bed with
-  `/hyperframes-audio` → `scripts/carve.mjs --comp index.html` (a volume duck alone does not finish the mix). Copy the
-  chosen mp3 into the video folder; it is gitignored with the rest of `marketing/`, so the track never commits.
+- Sound (the music bed and the narration) is added in Step 5b, after the visual segments are cut, so the narration
+  can be timed to the scenes.
+
+### 5b. Sound (default on)
+A proof video ships with sound unless the brief says silent: a music bed under the whole piece and one narration line
+per scene. Build it after Step 5, because each line is sized to its scene.
+
+**Narration.**
+- One line per scene, short enough to finish before the next scene starts.
+- Generate each line on its own, never in a batch: `npx hyperframes tts "<line>" --voice am_michael -s 1.0 -o assets/voice/s1.wav`.
+  The local Kokoro voice works when signed out of HeyGen. The batch engine (`media-use/audio/scripts/audio.mjs`) ran
+  Kokoro in parallel and 4 of 6 lines failed; each worked when run alone.
+- Respell names the voice garbles, then confirm the rendered words with `npx hyperframes transcribe`: `Qwen` → `Chwen`,
+  `gpt-oss` → `G P T O S S`, `llama.cpp` → `llama dot C P P`. Raise `-s` up to about 1.1 to fit a line into its scene.
+
+**Music.**
+- Default: reuse a cleared track from the launch-video library (Step 0), looped to length.
+- For a bespoke bed, generate one with local MusicGen through `media-use/audio/scripts/audio.mjs --only bgm`. It needs
+  `transformers torch soundfile numpy` in the system Python, and `torchvision` must match `torch` or the import fails
+  with `operator torchvision::nms does not exist`. It writes about 30 s; loop it to length with ffmpeg
+  `acrossfade=d=4`, then fade in and out.
+
+**Mount and mix.**
+- Each sound is an `<audio id=…>` on the orchestrator (a scene never holds audio). Without an `id` the render is silent.
+- Set the music bed to `data-volume` about 0.35.
+- Duck the bed under the narration: run the hyperframes-audio carve, `scripts/carve.mjs --comp index.html` (skill
+  `/hyperframes-audio`). A volume duck alone does not finish the mix. The carve needs `@hyperframes/core` in the project
+  (`npm i -D @hyperframes/core@<cli version>`). Re-run the carve after any voice change.
+- Audio source files stay out of commits (gitignored with `marketing/`).
+
+Worked example: the width promo (the author's run, `~/Code/diskformer.js/marketing/promo-width/` — `index.html`,
+`assets/voice/`, `assets/bgm/`), which you will not have; adapt its layout.
 
 ### 6. Check, preview, approve
 `npx hyperframes lint` while building, `npx hyperframes check` at the end. Snapshot sheet at each beat:
@@ -124,9 +153,10 @@ read it. Open `npx hyperframes preview` (Studio) for Chirag, and render only aft
 - 9:16: generate `vertical.html` from `index.html` with a script (viewport, overlay positions, camera aims, `v`-prefixed
   sub-compositions, the 9:16 takes), render with `-c vertical.html`, then delete `vertical.html` (two root files fail
   `check`). Reference: `make-vertical.py`.
-- Verify each render: `ffprobe` for size, fps, duration and, when a track was briefed, one audio stream
-  (`ffprobe -v error -show_entries stream=codec_type -of csv=p=0`), plus a frame sheet compared against `events.json`.
-  Confirm the 9:16 render carries the bed too, not only the 16:9 — the vertical generator must copy the `<audio>`.
+- Verify each render: `ffprobe` for size, fps, duration and an audio stream (sound is the default,
+  `ffprobe -v error -show_entries stream=codec_type -of csv=p=0`), plus a frame sheet compared against `events.json`.
+  Confirm the 9:16 render carries sound too, not only the 16:9 — the vertical generator must copy every `<audio>`, the
+  bed and each narration line.
 - Thumbnail: bake the strongest settled frame into frame 0 (`package-nt/references/bake-poster.sh <mp4> <seconds>`),
   because X, LinkedIn and Slack show frame 0. Optional stranger test as in `package-nt/references/assets.md`.
 

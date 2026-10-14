@@ -25,10 +25,10 @@ Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.
 - `done` → delete that folder's media by name, never the folder: `find <dir> -type f \( -name '*.webm' -o … \) -delete` with the same extension list. Keep the report, beat logs and JSON. List each in the day summary as `<dir> — <files> files, <MB> MB`.
 - `open` → keep; the fixer replays beats from it. Name it in the handoff with the item that holds it.
 
-**Promo-output sweep** (`/package-nt` output is local, gitignored and regenerable; losing it costs a re-render):
-- Run `sh $SKILL/bin/marketing.sh` from the repo root. It changes nothing. It prints `drop` or `keep` per file in `marketing/` and per `brag-output*/` folder, with its size in KB. `keep` means an open item (`[ ]` or `[~]`) names the file or folder.
+**Promo-output sweep** (`/package-nt` output is local, gitignored and regenerable; losing it costs a re-render — except a proof-video folder, whose live recordings cannot be remade, see below):
+- Run `sh $SKILL/bin/marketing.sh` from the repo root. It changes nothing. It prints `drop` or `keep` per file in `marketing/` and per `brag-output*/` folder, with its size in KB. `keep` means an open item (`[ ]` or `[~]`) names the file or folder, or the folder holds a `.source` marker — a proof video (`~/.claude/playbooks/proof-video.md`) whose recordings are irreplaceable, kept with no citation needed.
 - `drop` → delete that entry by name (`rm -rf <path>`), never a glob and never `marketing/` itself. List each in the day summary as `<path> — <MB> MB`.
-- `keep` → leave it, and name it in the handoff with the item that holds it.
+- `keep` → leave it, and name it in the handoff with the item that holds it (a `.source`-marked folder needs no citation; name it anyway so the next session knows what it is).
 - Confirm `/marketing` and `/brag-output*` are in `.gitignore` (`git check-ignore -q marketing`); add them if not, and `git rm -r --cached marketing` when files are tracked. A repo's existing card path (`assets/social.png`) is not promo output and stays.
 
 **Stray-branch sweep** (after the worktree sweep, so the branches it freed are counted):

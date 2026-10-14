@@ -2,6 +2,8 @@
 
 Made by brag, vendored in [`brag/`](brag/VENDORED.md). You assemble the direction and take the output; brag owns the story, visuals, audio and render.
 
+> When the claim is "this works" and the proof is watching it work — a model answering in a browser tab, a tool finishing a job — build a proof video from real recorded footage instead of this brag launch video, following `~/.claude/playbooks/proof-video.md`. Numbers come from the recorded run, not a brag story. It is a hands-on hyperframes production, not this hands-off asset step, so it runs outside `/package-nt`. Its recordings cannot be made again: the recorder marks the folder with a `.source` file, and windup's marketing sweep keeps a marked folder even when no plan item cites it.
+
 ### Pick the mode: who watches it
 
 | Mode | For | Length |

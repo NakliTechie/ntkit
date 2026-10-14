@@ -56,7 +56,7 @@ self-report.
 
 ## 6. Named reward-hacking patterns to refuse
 
-Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Fourteen that
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Fifteen that
 agent-driven work invites most — refuse them; §1–5 cover the rest:
 
 1. **Gate self-weakening** — editing the verifier so a failing check passes. The committed
@@ -141,6 +141,13 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
     Every stage handback ends with a **Try it** block: the exact command or URL for the current
     working build, reachable from where the owner actually is (another machine, a phone on the
     LAN), or "no runnable build yet: <why>".
+15. **Comment as patch** — a comment that explains a workaround, a surprise or a "do not remove"
+    rule, left in place of the fix. The comment is a defect report on our own code, so the work
+    item is the root-cause change, then the comment goes. A rule that matters gets encoded as a
+    type, assertion, test or lint rule. A comment about something outside the repo (a
+    third-party quirk, a protocol rule) stays, with the reason. Detected by
+    `/forward-pass-nt` (Comments as symptoms) and fixed by `/autopilot-nt`. Idea from Cursor's
+    `pstack` `no-comments`.
 
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the

@@ -10,6 +10,7 @@ Phase 2 reads the whole app. A pre-push review reads one change. Borrow its meth
 - Check the reviewer's answer with scripts, not by trusting it.
 - Completeness rule: a review is complete only when every stage ran, every scanner finding was raised or dropped with a reason, and every changed line reached the reviewer. Otherwise report "review incomplete" and name what is missing.
 - A suppression comment the change adds (`# nosec`) or a changed scanner settings file silences a scanner. Show each one and check it.
+- A comment the change adds that explains a workaround, a surprise or a "do not remove" rule is a defect report on the changed code. Raise it as a Stray finding with the root-cause fix, using the Comments-as-symptoms tests in `references/lenses.md`. A comment about something outside the repo stays, with the reason.
 - Report each finding under its line of code, with a verdict and one line per finding. Fix only the findings the user names.
 - A push gate warns by default and blocks only when a severity threshold is configured.
 - Limits to state in any report: the review needs a logged-in reviewer agent, takes one to three minutes, finds not everything, and queries an online vulnerability database unless run offline.

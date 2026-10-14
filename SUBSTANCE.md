@@ -149,6 +149,38 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
     `/forward-pass-nt` (Comments as symptoms) and fixed by `/autopilot-nt`. Idea from Cursor's
     `pstack` `no-comments`.
 
+## 7. Gates and fan-out: general principles
+
+Set 2026-10-14 from a measurement of 200 autopilot first checks (`plan/racing-measurement-2026-10-14.md`
+in the plans repo) and the owner's rule: too many gates cause failures and loops that only extend the
+build. Each principle binds every skill, present and future.
+
+1. **A gate earns its place by what it catches.** A new gate, check or review step names what it
+   catches, the measured rate at which it catches it, and the signal that would remove it. No
+   measurement, no gate. `/traces-nt` is the measuring tool.
+2. **Repair before adding a gate.** The cheapest fix for a failing check is a retry by the same maker.
+   In the measurement, one more patch after a first-check failure passed 9 of 10 times. Add a gate
+   only where a retry does not recover.
+3. **Retries are capped and end in a park, never a loop.** Two honest attempts, then park the item
+   with what was tried (`/autopilot-nt` already does this). A new step may not restart the count.
+4. **Check per batch, not per step** (§3 items 9 to 11). Every extra checkpoint adds wall time and
+   a chance of a false stop. Add one only where a failure would otherwise travel further.
+5. **Fan out reads and independent work by default.** Parallel reads, reviews and items with
+   non-overlapping paths cost little and find more.
+6. **Race competing attempts only on a trigger.** Racing needs three things: a scorer outside the
+   attempts, attempts that differ (another approach or another model family), and a trigger such as
+   a second failure or an item flagged as having more than one plausible approach. Racing every item
+   doubles the work to catch the 18% that fail, and the same-maker retry already catches most of those.
+7. **No attempt scores its own win.** The scorer, its inputs and the goal sit outside every attempt's
+   writable scope (the `/lab-nt` measurement lockbox). Pick the winner by a fixed rule: passes the
+   check, then the smaller diff, then fewer files touched. Add "self-scored race" to §6 when a
+   skill first implements racing.
+8. **Isolate what attempts touch.** Each parallel attempt gets its own worktree, branch and port.
+   Collisions in the archive were reused branch names and fixed ports, not shared files or the GPU.
+   Scarce shared resources get a claim (`proposals/dibs.md`, on branch `dibs-architecture`).
+9. **Gates are reviewed like code.** A gate that passes almost always, or whose failures are almost
+   always false stops, is removed. Re-measure after each ntkit release that adds or changes a gate.
+
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the
 report). Substance over ceremony; credit only for what runs.*

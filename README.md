@@ -66,7 +66,7 @@ Each repo keeps a gitignored `plan/` folder with three files: `history.md` (deci
 /soc-nt "<thought>"     # mid-build: raw thought; /replan-nt triages it later
 /autopilot-nt           # anytime: work a workplan or goal, unattended, in its own worktree
 /lab-nt                 # research: shape an idea into a falsifiable contract, run bounded legs
-/research-nt "<q>"      # research: a web question into a cited report, stops for plan approval
+/research-nt "<q>"      # research: a web question into a cited report; drafts the plan, then runs
 /forward-pass-nt        # anytime: fresh-eyes whole-app audit, batched fix-workplan
 /walkthrough-nt         # anytime: drive each role (browser, CLI, TUI, API), fix bugs, leave a harness
 /ux-review-nt           # anytime: cold first-timer review, ranked onboarding and nav failures

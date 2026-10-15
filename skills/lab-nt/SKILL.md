@@ -37,7 +37,7 @@ State these defaults rather than asking: critic every 5 experiments; 8 consecuti
 2. **Dedup** against the journal. Two consecutive rejections with nothing new inside the fence ⇒ **DRY-WELL**.
 3. **Run** inside the per-experiment cap. A blown cap is a failed experiment, never extended or retried with more time.
 4. **Measure** — the harness's number goes in the journal verbatim.
-5. **Keep or revert** — a gain larger than the noise floor commits (`lab <id>: <what> — <old → new>`); for a dataset metric, score candidate and best-so-far on the same items and keep only when the paired 95 % interval excludes zero. Anything else reverts clean. The branch tip is always the best-known state. A kept experiment adds no comment that explains a workaround; if the change needs one, fix the cause or leave the experiment reverted (`SUBSTANCE.md` §6.15).
+5. **Keep or revert** — a gain larger than the noise floor commits (`lab <id>: <what> — <old → new>`); for a dataset metric, score candidate and best-so-far on the same items and keep only when the paired 95 % interval excludes zero. A kept speed or cost gain names its limiter and rules out cached, skipped or failed work (`SUBSTANCE.md` §6.16). Anything else reverts clean. The branch tip is always the best-known state. A kept experiment adds no comment that explains a workaround; if the change needs one, fix the cause or leave the experiment reverted (`SUBSTANCE.md` §6.15).
 6. **Journal** the row and go on. Budgets and thresholds are the exits.
 
 Run from contract, journal and branch tip, not from recall of earlier experiments. At each critic point, confirm the journal is current enough to resume the leg from files alone, then fold finished-experiment detail out of context.

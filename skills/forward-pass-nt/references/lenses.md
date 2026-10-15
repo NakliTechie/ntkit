@@ -21,10 +21,11 @@ Hunt bugs by contract (from [SWE-sweep](https://swesweep.com/paper), Lieret et a
 
 **Stray code** — code no live path needs: dead or unused symbols, orphaned files, commented-out blocks, debug leftovers and test endpoints, stale flags and config, `TODO`/`FIXME` markers.
 
-Stray also covers live structure that no caller needs. Three structure tests (ideas from [jnsahaj/skills](https://github.com/jnsahaj/skills) `zero-tech-debt`, and adapted from [mattpocock/skills](https://github.com/mattpocock/skills) `codebase-design`, MIT):
+Stray also covers live structure that no caller needs. Four structure tests (ideas from [jnsahaj/skills](https://github.com/jnsahaj/skills) `zero-tech-debt`, and adapted from [mattpocock/skills](https://github.com/mattpocock/skills) `codebase-design`, MIT):
 - **No caller.** A mode, flag, option, parameter, route alias, wrapper, or fallback kept for compatibility that nothing in the repo calls or passes. Search for callers before you call it unused. A caller outside the repo counts: a published package export, a persisted data shape, a public URL or route, a documented CLI flag or config key. Name that caller, or state that none exists.
 - **Deletion.** Delete the module in thought. If its complexity disappears with it, it was a pass-through: Stray. If the same complexity would reappear in each caller, the module earns its place: no finding.
 - **Two adapters.** An interface, port, factory, or plugin point with one implementation and no test stand-in varies nothing: Stray. A test adapter counts as the second one (`references/test-value.md`, dependency categories).
+- **Parallel state** (idea from Cursor's `pstack` `model-the-domain`). Two flags or status fields that must stay in step, or the same branch over one kind of value repeated in two or more files. The fix is one structure that holds the rule: a state machine, an enum or tagged union, or a lookup table. One if/else chain in one place is no finding.
 
 A structure finding names the test it fails and the simpler shape as its fix: the layer removed, or one flow in place of mode flags.
 

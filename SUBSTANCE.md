@@ -56,8 +56,10 @@ self-report.
 
 ## 6. Named reward-hacking patterns to refuse
 
-Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Fifteen that
-agent-driven work invites most — refuse them; §1–5 cover the rest:
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Sixteen that
+agent-driven work invites most — refuse them; §1–5 cover the rest. A handback that cites a pattern
+or principle by name also names the decision it changed; a citation with no decision behind it is
+name-dropping, not applying (idea from Cursor's `pstack` principle names).
 
 1. **Gate self-weakening** — editing the verifier so a failing check passes. The committed
    `/walkthrough-nt` verifier *is* the gate; changing it to go green is tampering, not a fix.
@@ -148,6 +150,16 @@ agent-driven work invites most — refuse them; §1–5 cover the rest:
     third-party quirk, a protocol rule) stays, with the reason. Detected by
     `/forward-pass-nt` (Comments as symptoms) and fixed by `/autopilot-nt`. Idea from Cursor's
     `pstack` `no-comments`.
+16. **Unexplained number** — a speed, accuracy or cost number reported or acted on without knowing
+    what it measured. A number is evidence only with three things beside it: the run count and
+    spread; the limiter, meaning the resource or code path that stops it being twice as good (a
+    core, a lock, the disk, the network, the load generator), read from a profile or counters taken
+    during the run, never guessed from the code; and the other things it could be measuring, each
+    ruled out with evidence (errors, cached or skipped work, code that never ran, a reference left
+    on default settings, noise, a part too small to matter end to end). A saving larger than the
+    whole time the changed part used to take means the number measured something else. Applies to
+    the Benchmark and Optimise phases, `/lab-nt` keeps and eval results. Idea from Cursor's `pstack`
+    `explain-the-number`.
 
 ## 7. Gates and fan-out: general principles
 
@@ -163,6 +175,10 @@ build. Each principle binds every skill, present and future.
    only where a retry does not recover.
 3. **Retries are capped and end in a park, never a loop.** Two honest attempts, then park the item
    with what was tried (`/autopilot-nt` already does this). A new step may not restart the count.
+   The park note also names the one premise both attempts shared and the observation that would come
+   out differently if it were false. Two failures on one premise are evidence against it, so the next
+   attempt tests the premise before it tries a third fix (idea from Cursor's `pstack`
+   `attack-the-premise`).
 4. **Check per batch, not per step** (§3 items 9 to 11). Every extra checkpoint adds wall time and
    a chance of a false stop. Add one only where a failure would otherwise travel further.
 5. **Fan out reads and independent work by default.** Parallel reads, reviews and items with

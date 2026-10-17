@@ -1,5 +1,10 @@
 # Playbook: a proof video from a live recording of the app
 
+> **Opt-in only.** Use this playbook only when the user explicitly asks for real playback or recorded footage. The
+> default promo is quick: designed plates plus still screenshots of the live app, with no recording, no model loading
+> and no rebuilt screens (`launch-video.md`). Reason (Chirag, 2026-10-17): recorded promos were taking as long as the
+> work they announce. A Dynamic Weights proof video spent hours on recorder fixes, GPU contention and re-takes.
+
 How to make a short launch video that shows the real app doing the real thing, with every number taken from the
 recorded run. Distilled from the diskformer 80B video (2026-10-13; the author's reference run lived in
 `~/Code/diskformer.js/marketing/video-80b/`, which you will not have — treat its file names below as a worked
@@ -11,8 +16,8 @@ playbook are the author's own setup. The music library, `bake-poster.sh` and
 `assets.md` referenced here ship with ntkit under `package-nt/references/`. Supply your own screen recorder and a
 Chrome you can drive if you do not have the author's infra; the honesty rules and the step order are what carry.
 
-Use it when the claim is "this works" and the proof is watching it work: a model answering in a browser tab, a tool
-finishing a job. For an explainer with invented visuals, or a promo with no live footage, use `/package-nt`'s launch
+Use it when the user has asked for real playback and the claim is "this works" and the proof is watching it work: a
+model answering in a browser tab, a tool finishing a job. For an explainer with invented visuals, or a promo with no live footage, use `/package-nt`'s launch
 video (brag) or `/hyperframes` instead. This playbook sits under hyperframes' `general-video` workflow and adds the
 recording, the honesty rules and the distribution steps.
 

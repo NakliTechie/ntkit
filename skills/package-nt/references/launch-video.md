@@ -2,7 +2,17 @@
 
 Made by brag, vendored in [`brag/`](brag/VENDORED.md). You assemble the direction and take the output; brag owns the story, visuals, audio and render.
 
-> When the claim is "this works" and the proof is watching it work — a model answering in a browser tab, a tool finishing a job — build a proof video from real recorded footage instead of this brag launch video, following `package-nt/references/proof-video.md`. Numbers come from the recorded run, not a brag story. It is a hands-on hyperframes production, not this hands-off asset step, so it runs outside `/package-nt`. The footage is throwaway, deleted after you post, but you cannot re-record it mid-work: the recorder marks the folder with a `.source` file so windup's marketing sweep does not delete it before you post, cited in a plan item or not.
+> **Default: quick, clean and peppy.** A launch video or promo is designed plates plus static screenshots of the live
+> app: title, the claim, two or three screenshots with callouts, the URL. Do not record real playback, drive the app,
+> load models or rebuild real screens for a promo. Take still screenshots of the live page and animate around them.
+> Reason (Chirag, 2026-10-17): recorded promos were taking as long as the work they announce; a promo should take
+> minutes, not hours.
+>
+> **Only when the user explicitly asks for real playback** ("record it running", "real footage", "proof video"):
+> build a proof video from recorded footage instead, following `package-nt/references/proof-video.md`. That is a
+> hands-on hyperframes production that runs outside `/package-nt`; its numbers come from the recorded run. The footage
+> is throwaway, deleted after you post, but you cannot re-record it mid-work: the recorder marks the folder with a
+> `.source` file so windup's marketing sweep does not delete it before you post.
 
 ### Pick the mode: who watches it
 

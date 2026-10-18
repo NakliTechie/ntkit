@@ -15,7 +15,7 @@
   <img alt="account: none" src="https://img.shields.io/badge/account-none-0891b2?style=flat-square">
 </p>
 
-![ntkit workflow map: 21 Claude Code skills across five phases, a daily session loop, and the scholia knowledge vault used at every phase](assets/workflow.png)
+![ntkit workflow map: 23 Claude Code skills across five phases, a daily session loop, and the scholia knowledge vault used at every phase](assets/workflow.png)
 
 ## Install
 

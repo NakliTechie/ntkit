@@ -1,6 +1,6 @@
-# agent	global instruction file	extras file in agents/ (- for none)
-claude	~/.claude/CLAUDE.md	claude
-codex	~/.codex/AGENTS.md	-
+# agent	global instruction file	shadow file that makes the agent ignore it (- for none)
+claude	~/.claude/CLAUDE.md	-
+codex	$CODEX_HOME/AGENTS.md	$CODEX_HOME/AGENTS.override.md
 gemini	~/.gemini/GEMINI.md	-
 opencode	~/.config/opencode/AGENTS.md	-
 goose	~/.config/goose/.goosehints	-

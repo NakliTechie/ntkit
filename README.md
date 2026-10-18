@@ -1,7 +1,7 @@
 <h1 align="center">ntkit</h1>
 
 <p align="center">
-  <strong>Twenty-one Claude Code skills that give an agent the discipline it is missing: it keeps its decisions, audits the whole app, and reports "done" only behind a verifier.</strong>
+  <strong>Twenty-three Claude Code skills that give an agent the discipline it is missing: it keeps its decisions, audits the whole app, and reports "done" only behind a verifier.</strong>
 </p>
 
 <p align="center">
@@ -47,6 +47,10 @@ Each repo keeps a gitignored `plan/` folder with three files: `history.md` (deci
 
 `-nt` is a namespace (NakliTechie) so the commands do not collide with yours. Rename freely.
 
+## Carry your preferences across agents
+
+Every new agent asks again who you are, how you write and how you work. `/prefs-nt init` gathers the answers from the global files your agents already have into one folder of markdown you own. `/prefs-nt sync` writes the global file of each installed agent from that folder: Claude Code, Codex, Gemini CLI, opencode, goose and amp. Agents append what they learn to an inbox that reaches the others at the next sync, and `/prefs-nt fold` sorts it in. `plan/` keeps what one repo knows; this folder keeps what holds in every repo.
+
 ## Run it unattended
 
 `/autopilot-nt` works a workplan overnight in its own worktree. It merges a green gate to main and holds a red one on its own branch.
@@ -82,6 +86,7 @@ Each repo keeps a gitignored `plan/` folder with three files: `history.md` (deci
 /windup-nt              # end of session: day summary, pending, commit and push, tomorrow's handoff
 /replan-nt              # occasionally: fold accumulated files back into the three canonical ones
 /notify-nt              # after a run: desktop notification and optional phone push
+/prefs-nt               # any agent: one preferences folder, written into every agent's global file
 ```
 
 The knowledge vault is a separate tool, [scholia](https://github.com/NakliTechie/scholia): `/capture-nt <url|file>` saves a source and `/ask-nt <question>` answers only from the vault, with citations. `/research-nt`, `/lab-nt` and `/scaffold-nt` check it before the web. Without scholia they search the web and nothing else breaks.
@@ -98,7 +103,7 @@ tests/run.sh    # free, seconds: the scripts skills ship, and every eval check c
 evals/run.sh    # model runs: a fixture project, one prompt, a deterministic check
 ```
 
-Every skill states its contract in frontmatter (`entry`, `exit`, `writes`), so a run that cannot satisfy `entry` refuses, and `exit` names a check. The loop prints nothing when all 22 hold; [`AUTHORING.md`](AUTHORING.md) is the standard. A `/research-nt` report counts as verified only when `check.py gates` exits 0. `evals/run.sh` needs one login first: `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
+Every skill states its contract in frontmatter (`entry`, `exit`, `writes`), so a run that cannot satisfy `entry` refuses, and `exit` names a check. The loop prints nothing when all 23 hold; [`AUTHORING.md`](AUTHORING.md) is the standard. A `/research-nt` report counts as verified only when `check.py gates` exits 0. `evals/run.sh` needs one login first: `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
 
 ## License
 

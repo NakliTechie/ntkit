@@ -3,8 +3,8 @@ description: "One preferences folder you own; builds every coding agent's global
 argument-hint: "[init | sync | fold | schedule | unschedule] [dir=<path>] [--push]   e.g. init dir=~/Code/prefs"
 allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob"]
 entry: "init: no preferences folder yet. sync, fold, schedule: a preferences folder holding targets.tsv"
-exit: "init: `<folder>/targets.tsv` exists and `python3 $SKILL/bin/prefs_sync.py --dir <folder> --dry-run` exits 0. sync, fold: `python3 $SKILL/bin/prefs_sync.py --dir <folder> --check` exits 0. schedule: the job is listed and has run once with exit 0. unschedule: the job is no longer listed"
-writes: "the preferences folder; each installed agent's global file in its targets.tsv; fold only: a dated bullet appended to a named project's plan/pending.md; schedule only: one launchd plist or one tagged crontab line"
+exit: "init: `<folder>/targets.tsv` exists and `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --dry-run` exits 0. sync, fold: `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --check` exits 0. schedule: the job is listed and has run once with exit 0. unschedule: the job is no longer listed"
+writes: "the preferences folder; each installed agent's global file in its targets.tsv; fold only: a dated bullet appended to a named project's plan/pending.md; schedule and unschedule only: one launchd plist or one tagged crontab line, created or removed"
 ---
 
 Every new coding agent asks the same things again: who you are, how you write, how you work. This
@@ -45,7 +45,7 @@ file for the next run.
 | Mode | Outcome | Read |
 |---|---|---|
 | `init` | The folder exists, the agents' current global files are saved in `drift/`, and `core/` holds a draft built from them. Agent files are not yet overwritten | `references/init.md` |
-| `sync` | Every installed agent's global file matches the folder; hand edits are in the inbox | none: run `python3 $SKILL/bin/prefs_sync.py --dir <folder>` (add `--push` only when granted), report its output, and treat a non-zero exit as a failure to report |
+| `sync` | Every installed agent's global file matches the folder; hand edits are in the inbox | none: run `python3 "$SKILL/bin/prefs_sync.py" --dir <folder>` (add `--push` only when granted), report its output, and treat a non-zero exit as a failure to report |
 | `fold` | Inbox lines live in the right `core/` or `agents/` file, contradictions are listed for the owner, and a sync has run | `references/fold.md` |
 | `schedule` | A recurring job runs sync every 15 minutes | `references/schedule.md` |
 | `unschedule` | That job is removed | `references/schedule.md` |

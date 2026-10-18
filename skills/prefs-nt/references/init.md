@@ -3,7 +3,7 @@
 1. **Resolve the folder.** `dir=` if given, else `${NT_PREFS_DIR:-~/.agent-prefs}`, made absolute. If it
    holds `targets.tsv`, stop (guard). Announce the path, and say that `NT_PREFS_DIR` in the shell
    profile moves it. A folder inside another git repo works, but sync skips git there: say so.
-2. **Copy the template.** Copy `$SKILL/references/template/` into the folder. Rename `gitignore` to
+2. **Copy the template.** Copy `"$SKILL/references/template/"` into the folder. Rename `gitignore` to
    `.gitignore`. Create `drift/`.
 3. **Find each agent's real file.** For each row of `targets.tsv`, note whether its parent folder exists
    (the agent is installed) and whether the file exists, with its size. Drop no rows: an agent installed
@@ -28,7 +28,7 @@
    gets one line saying when to read it. Keep each generated file small: every agent loads it in every
    session. Codex reads its global file in full; its 32 KiB budget (`project_doc_max_bytes`) applies
    to the project `AGENTS.md` files it gathers, which share the context with this one.
-6. **Preview.** Run `python3 $SKILL/bin/prefs_sync.py --dir <folder> --dry-run` and show its output:
+6. **Preview.** Run `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --dry-run` and show its output:
    which files the first sync would write, and their sizes.
 7. **Offer git.** If the folder is not inside a git repo, run `git init` and make a first commit. Do
    not create a remote: that is outward-facing, so offer it as a command the owner runs.

@@ -88,13 +88,22 @@ def save_new(path, text):
     return path
 
 
-def atomic_write(path, text):
-    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.")
+def atomic_write(path, text, expected=None):
+    """Replace a file's content in one step. A symlink stays a link: its target is replaced.
+    With `expected`, give up (return False) when the file no longer holds it. The re-read sits
+    just before the replace, so only an edit inside that last moment can still be overwritten."""
+    real = path.resolve() if path.is_symlink() else path
+    fd, tmp = tempfile.mkstemp(dir=str(real.parent), prefix=f".{real.name}.")
     with os.fdopen(fd, "w") as f:
         f.write(text)
-    if path.exists():
-        os.chmod(tmp, path.stat().st_mode & 0o777)
-    os.replace(tmp, path)
+    if real.exists():
+        os.chmod(tmp, real.stat().st_mode & 0o777)
+    now = real.read_text() if real.exists() else None
+    if expected is not None and now != expected:
+        os.unlink(tmp)
+        return False
+    os.replace(tmp, real)
+    return True
 
 
 class Prefs:
@@ -104,8 +113,7 @@ class Prefs:
         inbox_p = root / "inbox.md"
         self.inbox_p = inbox_p
         self.inbox = inbox_p.read_text() if inbox_p.exists() else INBOX_HEAD
-        self.inbox_start = self.inbox
-        self.failed = False
+        self.new_entries = []
 
     def log(self, msg):
         print(f"{NOW:%Y-%m-%d %H:%M} prefs-sync: {msg}")
@@ -117,7 +125,12 @@ class Prefs:
                 continue
             cols = line.split("\t")
             agent, path = cols[0], expand(cols[1])
-            shadow = expand(cols[2]) if len(cols) > 2 and cols[2].strip() not in ("", "-") else None
+            col3 = cols[2].strip() if len(cols) > 2 else "-"
+            if col3 not in ("", "-") and not col3.startswith(("~", "$", "/")):
+                raise ValueError(f"targets.tsv row '{agent}': column 3 is a shadow-file path, not an "
+                                 f"extras name ('{col3}'). Extras now come from agents/{agent}.md; "
+                                 "put - in column 3")
+            shadow = expand(col3) if col3 not in ("", "-") else None
             rows.append((agent, path, shadow))
         return rows
 
@@ -172,6 +185,7 @@ class Prefs:
         self.log(f"{agent}: hand edit found, {len(blocks)} added block(s), {removed} removed line(s)")
         if out:
             self.inbox = self.inbox.rstrip("\n") + "\n" + "\n".join(out) + "\n"
+            self.new_entries += out
 
     def shadowed(self, shadow):
         return shadow is not None and shadow.is_file() and shadow.read_text().strip() != ""
@@ -207,8 +221,14 @@ class Prefs:
                 name = f"{agent}-before-adoption-{NOW:%Y-%m-%d}.md"
                 saved = save_new(self.root / "drift" / name, live) if self.write else Path(name)
                 self.log(f"{agent}: adopting existing file; original saved to drift/{saved.name}")
-        if self.write and self.inbox != self.inbox_start:
-            atomic_write(self.inbox_p, self.inbox)
+        if self.write and self.new_entries:
+            # Append, never rewrite: another agent may have added a line since we read the inbox.
+            if not self.inbox_p.exists():
+                self.inbox_p.write_text(INBOX_HEAD)
+            with self.inbox_p.open("a") as f:
+                if not self.inbox_p.read_text().endswith("\n"):
+                    f.write("\n")
+                f.write("\n".join(self.new_entries) + "\n")
         # Pass 2: write every installed agent's file.
         for agent, target, shadow in rows:
             if not target.parent.exists():
@@ -223,8 +243,9 @@ class Prefs:
                 continue
             if now != out:
                 self.log(f"{agent}: writing {tilde(target)} ({len(out.encode())} bytes)")
-                if self.write:
-                    atomic_write(target, out)
+                if self.write and not atomic_write(target, out, expected=now):
+                    self.log(f"{agent}: file changed during this sync; left alone until the next run")
+                    continue
             if self.write:
                 (self.state / f"{agent}.last").write_text(out)
 
@@ -235,6 +256,15 @@ def git(root, *a):
 
 def upstream(root):
     return git(root, "rev-parse", "--abbrev-ref", "@{u}").returncode == 0
+
+
+def push_remote(root):
+    """Git's own choice of remote for a first push: pushDefault, else the only remote, else origin."""
+    configured = git(root, "config", "--get", "remote.pushDefault").stdout.strip()
+    remotes = git(root, "remote").stdout.split()
+    if configured:
+        return configured
+    return remotes[0] if len(remotes) == 1 else "origin"
 
 
 def own_repo(root):
@@ -287,14 +317,20 @@ def main():
     prefs.sync()
     if not (write and repo):
         return 0
-    git(root, "add", "-A", "--", ".")
+    r = git(root, "add", "-A", "--", ".")
+    if r.returncode:
+        prefs.log(f"git add failed: {r.stderr.strip()}")
+        return 1
     if git(root, "diff", "--cached", "--quiet").returncode:
         r = git(root, "commit", "-q", "-m", f"prefs-sync {NOW:%Y-%m-%d %H:%M %Z}")
         if r.returncode:
             prefs.log(f"git commit failed: {r.stderr.strip() or r.stdout.strip()}")
             return 1
     if a.push and remote:
-        r = git(root, "push", "-q") if upstream(root) else git(root, "push", "-q", "-u", "origin", "HEAD")
+        if upstream(root):
+            r = git(root, "push", "-q")
+        else:
+            r = git(root, "push", "-q", "-u", push_remote(root), "HEAD")
         if r.returncode:
             prefs.log(f"git push failed: {r.stderr.strip()}")
             return 1

@@ -13,8 +13,8 @@
    `(conflicts with: "<short quote>", awaiting owner)` and list it in the report with your
    recommendation. Never pick a winner.
 4. Remove only the entries you placed. Keep the header and every entry you could not place.
-5. Run `python3 $SKILL/bin/prefs_sync.py --dir <folder>`, adding `--push` only when the owner granted
+5. Run `python3 "$SKILL/bin/prefs_sync.py" --dir <folder>`, adding `--push` only when the owner granted
    it for this run. A non-zero exit is a failure: report its output and stop.
-6. Run `python3 $SKILL/bin/prefs_sync.py --dir <folder> --check`; it must exit 0.
+6. Run `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --check`; it must exit 0.
 7. Report: how many entries went where, each contradiction with both quotes, what is left in the inbox
    and why, and the size of the largest generated file.

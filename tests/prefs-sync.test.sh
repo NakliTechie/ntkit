@@ -76,6 +76,19 @@ grep -q 'Prefer tabs.' "$HOME/cx/AGENTS.md" || fail "CODEX_HOME not honoured"
 (cd "$HOME" && run --dir prefs >/dev/null)
 grep -q '~/prefs/inbox.md' "$C" || fail "relative --dir leaked into the writeback path"
 
+# A symlinked agent file stays a link; its target gets the new content.
+mkdir -p "$HOME/dotfiles"; mv "$C" "$HOME/dotfiles/CLAUDE.md"; ln -s "$HOME/dotfiles/CLAUDE.md" "$C"
+cp "$HOME/prefs/.state/claude.last" "$HOME/dotfiles/CLAUDE.md"
+printf 'Prefer both.\n' > "$HOME/prefs/core/01-about.md"; sync >/dev/null
+[ -L "$C" ] || fail "symlink replaced by a regular file"
+grep -q 'Prefer both.' "$HOME/dotfiles/CLAUDE.md" || fail "symlink target not updated"
+
+# The old three-column format (an extras name in column 3) fails with a message naming the fix.
+cp "$HOME/prefs/targets.tsv" "$tmp/targets.keep"
+printf 'claude\t~/.claude/CLAUDE.md\tclaude\n' > "$HOME/prefs/targets.tsv"
+[ "$(rcof sync)" -eq 2 ] && grep -q 'agents/claude.md' "$tmp/out" || fail "old format not explained"
+cp "$tmp/targets.keep" "$HOME/prefs/targets.tsv"
+
 # A second sync while one holds the lock exits 3.
 python3 - "$skill/bin/prefs_sync.py" "$HOME/prefs" <<'EOF' || fail "concurrent sync was not refused"
 import fcntl, subprocess, sys
@@ -106,4 +119,12 @@ mv "$HOME/bare.git" "$HOME/gone.git"; printf 'Prefer neither.\n' > "$HOME/prefs/
 before=$(cat "$C")
 [ "$(rcof sync --push)" -eq 1 ] || fail "failed pull did not exit 1"
 [ "$before" = "$(cat "$C")" ] || fail "files were written after a failed pull"
+
+# A first push with no upstream uses Git's pushDefault remote, not a hard-coded origin.
+git -C "$HOME/prefs" remote remove origin
+git init -q --bare "$HOME/backup.git"; git -C "$HOME/prefs" remote add backup "$HOME/backup.git"
+git init -q --bare "$HOME/other.git"; git -C "$HOME/prefs" remote add other "$HOME/other.git"
+git -C "$HOME/prefs" config remote.pushDefault backup
+sync --push >/dev/null || fail "push to pushDefault failed"
+git -C "$HOME/backup.git" rev-parse -q --verify HEAD >/dev/null || fail "pushDefault remote not used"
 echo PASS

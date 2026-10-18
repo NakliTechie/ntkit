@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2.6.1] — 2026-10-18
+
+### Fixed
+
+- `/prefs-nt` frontmatter did not parse as YAML (double quotes inside the double-quoted `exit:` value), so Claude Code showed the body's first line in place of its description. `exit:` is now single-quoted. New `tests/frontmatter.test.sh` parses every skill's frontmatter as YAML and checks the `description`, `entry`, `exit` and `writes` keys.
+
 ## [2.6.0] — 2026-10-18
 
 ### Added

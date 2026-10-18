@@ -1,0 +1,7 @@
+# agent	global instruction file	extras file in agents/ (- for none)
+claude	~/.claude/CLAUDE.md	claude
+codex	~/.codex/AGENTS.md	-
+gemini	~/.gemini/GEMINI.md	-
+opencode	~/.config/opencode/AGENTS.md	-
+goose	~/.config/goose/.goosehints	-
+amp	~/.config/amp/AGENTS.md	-

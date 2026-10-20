@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Calling another model family** now has one reference, `skills/forward-pass-nt/references/other-families.md`: probe before relying on a CLI (`which` is not enough), name the model from the user's config, run with no stdin, a hard timeout and its own process group, run CLIs that share a local store one at a time, record `ok`/`empty`/`error`/`timeout`/`probe-failed`, and never send private code to a hosted free-tier model. `/forward-pass-nt`, `/ux-review-nt`, `/walkthrough-nt` (rotate the eyes), `/harden-nt` (roster) and `/autopilot-nt` (checker model) point to it. The rules come from scholia's `/panel-nt` runner, which implements the first five and is used when installed.
+- `/lab-nt`'s prior-art check names `/panel-nt --mine` for a measured slow spot, and the README names `/panel-nt` beside `/capture-nt` and `/ask-nt`.
+
 ## [2.6.1] — 2026-10-18
 
 ### Fixed

@@ -23,7 +23,7 @@ Work the idea with the user until it passes five gates, then write `plan/lab/<sl
 4. **Budget ladder** — per-experiment cap (one build+bench cycle, N minutes of training); per-leg (default 4 hours or 25 experiments); per-campaign odometer (default 5 legs; exhausted ⇒ RETIRED, extendable only via `/decide-nt`).
 5. **Noise floor** — before the first experiment, re-measure the unchanged baseline three times (or bootstrap its eval items) and write the spread into the contract. A gain inside the spread is noise: a +0.6 point move with a ±6 point interval is no result. When the metric is computed over a dataset, also split off a **confirmation set** the loop never reads; it joins the lockbox.
 
-State these defaults rather than asking: critic every 5 experiments; 8 consecutive experiments without improvement ⇒ STAGNANT. Run the **prior-art check** before any experiment: the vault first (`/ask-nt`, when scholia is installed), then the repo and its `plan/`, then the web. A question already answered ends the campaign at leg zero, GOAL-MET by citation.
+State these defaults rather than asking: critic every 5 experiments; 8 consecutive experiments without improvement ⇒ STAGNANT. Run the **prior-art check** before any experiment: the vault first (`/ask-nt`, when scholia is installed), then the repo and its `plan/`, then the web. A question already answered ends the campaign at leg zero, GOAL-MET by citation. When the question is a measured slow or costly spot, `/panel-nt --mine` (scholia, when installed) turns it into named techniques with checked citations and a benchmark spec, which become the first hypotheses; the spec's win condition is fixed before any run.
 
 ## Phase 0.5 — Isolate and instrument
 

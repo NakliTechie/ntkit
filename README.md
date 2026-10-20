@@ -89,7 +89,7 @@ Every new agent asks again who you are, how you write and how you work. `/prefs-
 /prefs-nt               # any agent: one preferences folder, written into every agent's global file
 ```
 
-The knowledge vault is a separate tool, [scholia](https://github.com/NakliTechie/scholia): `/capture-nt <url|file>` saves a source and `/ask-nt <question>` answers only from the vault, with citations. `/research-nt`, `/lab-nt` and `/scaffold-nt` check it before the web. Without scholia they search the web and nothing else breaks.
+The knowledge vault is a separate tool, [scholia](https://github.com/NakliTechie/scholia): `/capture-nt <url|file>` saves a source, `/ask-nt <question>` answers only from the vault, with citations, and `/panel-nt <question>` puts one question to several models and ranks their answers (`--mine` asks which published technique fits a slow spot). `/research-nt`, `/lab-nt` and `/scaffold-nt` check the vault before the web. The review skills (`/forward-pass-nt`, `/ux-review-nt`, `/walkthrough-nt`, `/harden-nt`) follow the same probe-first rules when they call another model family. Without scholia they search the web and nothing else breaks.
 
 ## Verify it yourself
 

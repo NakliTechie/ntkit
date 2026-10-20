@@ -9,7 +9,7 @@ State the plan back so the user can veto or amend it before they walk away:
 - **Default-decision policy** — at a reversible design fork, pick the option most consistent with the surrounding code and the decisions in `history.md`, record the assumption, and move on.
 - **Budget** — a wall-clock cap and/or item cap (default: the scoped batch or 6 hours, whichever ends first).
 - **Where it runs** — the worktree and branch (Phase 0.5); the user's own checkout stays untouched.
-- **Checker model** — default: same family, fresh context. Where the setup allows a different model family (an external CLI, another provider), name it as the available upgrade and use it if the user says so.
+- **Checker model** — default: same family, fresh context. Where the setup allows a different model family (an external CLI, another provider), name it as the available upgrade and use it if the user says so, called by the rules in `skills/forward-pass-nt/references/other-families.md` (probe first, no stdin, a timeout, and the privacy rule).
 
 ## Phase 0.5 — Isolate in a worktree
 

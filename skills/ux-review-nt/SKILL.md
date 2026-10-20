@@ -17,7 +17,7 @@ Review the app **as a cold first-time user**, the person who wasn't there when e
 
 Unlike `/walkthrough-nt` and `/guide-nt`, this command wipes state and never seeds, and it runs alone on native surfaces.
 
-**Rotate the eyes.** Before starting, read only the `Reviewer:` line of this command's latest report in the main checkout's `plan/`, never its findings. If that run used your model family, prefer another family's agent CLI on PATH (`codex`, `gemini`, checked with `which`), else another model of your family; never materially weaker eyes. Neither reachable → run as-is and write `rotation: unavailable` in the `Reviewer:` line. The report header says `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and notes when you are the family that built most of the code.
+**Rotate the eyes.** Before starting, read only the `Reviewer:` line of this command's latest report in the main checkout's `plan/`, never its findings. If that run used your model family, prefer another family's agent CLI on PATH (`codex`, `gemini`, checked with `which`, then one probe call), else another model of your family; never materially weaker eyes. Call it by the rules in `$SKILL/../forward-pass-nt/references/other-families.md` (probe, no stdin, timeout, privacy). Neither reachable → run as-is and write `rotation: unavailable` in the `Reviewer:` line. The report header says `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and notes when you are the family that built most of the code.
 
 Prior findings would contaminate the newcomer posture this command manufactures; do not read them at any phase.
 

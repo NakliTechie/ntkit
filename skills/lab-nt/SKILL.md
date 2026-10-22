@@ -32,7 +32,7 @@ Contract fields, each with its default, stated rather than asked:
 | merge | `none` | `auto` is a per-run grant, meta mode only |
 | usd cap | none, so no paid model calls | paid models only inside a cap the user names |
 
-`$SKILL/bin/lab.py` (anchored; `$SKILL` is this skill's base directory) holds every deterministic rule: lockbox hashes, fence, budget, child depth, keep decision, fork schedule. Its docstring is the contract; its verdict beats the loop's opinion.
+`python3 $SKILL/bin/lab.py` (anchored; `$SKILL` is this skill's base directory) enforces the rules a script can check: the sealed state file, lockbox hashes and new files in locked paths, the fence of the campaign and every ancestor, experiment budgets for legs, children and forks, child depth, the keep decision, the leg odometer, the STAGNANT and DRY-WELL resume refusal, and the merge grant. Its docstring is the contract; its verdict beats the loop's opinion. The critic, the stagnation count, the clock and the usd cap stay with the loop and its leg report.
 
 ## Phases
 
@@ -40,8 +40,8 @@ On entering a phase, read its file, then act. The Outcome column is the contract
 
 | Phase | Outcome | Detail |
 |---|---|---|
-| 0 Contract | five gates passed; `contract.md` written; `lab.py init` exit 0 | `references/contract.md` |
-| 0.5 Isolate | worktree on `lab/<slug>`; lockbox hashed; noise floor measured; journal opened | `references/contract.md` |
+| 0 Contract | five gates passed; `contract.md` written | `references/contract.md` |
+| 0.5 Isolate | worktree on `lab/<slug>`; noise floor measured; `lab.py init` exit 0; journal opened | `references/contract.md` |
 | 1 Leg loop | experiments journaled, kept ones committed under the joint gate; forks and children run by the rules | `references/loop.md` |
 | 2 End | first exit wins: GOAL-MET, BUDGET, STAGNANT, DRY-WELL, PARKED | `references/ending.md` |
 | 3 Re-arm | the leg report recommends CONTINUE or STOP; only a human resumes, through `lab.py leg` | `references/ending.md` |
@@ -52,9 +52,9 @@ On entering a phase, read its file, then act. The Outcome column is the contract
 
 `/autopilot-nt`'s stop-lines (no publishing, sending, deleting, credentials, money, destructive infra), plus:
 
-- Never modify the harness, the gates, the contract, `lab.json`'s locked entries, or past journal rows. `lab.py check` must exit 0 before any keep, fork selection, child return or merge; a violation reverts the experiment.
+- Never modify the harness, the gates, the contract, `lab.json`, or past journal rows. `lab.py check` must exit 0 before any keep, fork selection, child return or merge; a violation reverts the experiment.
 - Never spend outside the ladder: no new paid API, no bigger instance, no self-granted extra hour, nothing past the usd cap.
 - Never arm or schedule the next leg. Only a human starts another. A child runs one leg and returns.
 - A child never exceeds max depth, takes at most half its parent's remaining experiments, keeps its fence inside its parent's, and inherits every lock.
 - Meta mode edits only `skills/<skill>/references/`. It never edits a root `SKILL.md`, `bin/`, `tests/`, `evals/`, the suite, its split or its runner, and never reads private task content or per-task private results.
-- Merging is denied unless the contract records the user's `merge: auto` grant for this campaign. Even then: local merge only, after a private-suite win and `lab.py check` exit 0, revert command logged. Never push.
+- Merging is denied unless `lab.py merge-ok` confirms the user's `merge: auto` grant for this campaign. Even then: a local merge from the lab's own worktree, never the main checkout, after a private-suite win, `lab.py check` exit 0 and the repo's free tests, with the revert command logged. Never push.

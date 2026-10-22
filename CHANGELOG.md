@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.7.1] — 2026-10-22
+
+### Fixed
+
+- `/lab-nt` `bin/lab.py`, from a security review and a forward pass of v2.7.0 (two High findings, one shared):
+  - **The budget counter was not sealed.** v2.7.0 sealed only the fixed fields, so a hand edit of `spent` passed and `spend` then granted any budget; the v2.7.0 entry's claim that a hand edit to the budget is refused was false. Every save now seals the whole state file, written atomically.
+  - **A loop could grant itself a fresh campaign and a merge** by deleting `lab.json` and running `init --merge auto`. `init` now refuses a directory that has a seal or an `init` row in a new append-only ledger (`lab-seals/ledger.jsonl` in the git directory, one row per init, child, fork, end, leg and merge check), and `merge-ok` refuses unless the ledger shows exactly one init.
+  - `check` also refuses a changed `contract.md`, sees files hidden through `.git/info/exclude` or a global excludes file (only a committed `.gitignore` hides a file), and lists both paths of a rename. Ancestor states are read through their seals, so widening a parent's fence by hand is refused.
+  - `init` refuses a lock glob that matches no file. `keep` refuses a negative noise floor. `leg` refuses when the last leg has no recorded end. A child's fence must be contained in the parent's (equal, or under a parent glob ending in `**`). Glob expansion no longer follows symlinks below its base, so a symlink cycle cannot hang it.
+  - The docstring and `SKILL.md` now say what the seal is: tamper evidence, not prevention.
+- `tests/lab.test.sh` adds a case for each fix; every new case fails on the v2.7.0 code.
+
 ## [2.7.0] — 2026-10-22
 
 ### Added

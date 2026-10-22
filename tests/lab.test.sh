@@ -53,16 +53,29 @@ if "harness/.cfg" not in lab.expand(["harness/**"]):
 
 # init refusals and success
 expect("init without fence", run("init", D, "--lock", "harness/**", "--experiments", "25"), 1, "fence")
-expect("init with empty lockbox", run("init", D, "--fence", "src/**", "--lock", "nothing/**", "--experiments", "25"), 1, "lockbox is empty")
+expect("init with no lock", run("init", D, "--fence", "src/**", "--experiments", "25"), 1, "lockbox is empty")
+expect("init with an empty lock glob", run("init", D, "--fence", "src/**", "--lock", "nothing/**", "--experiments", "25"), 1, "match no file")
 expect("lock inside fence", run("init", D, "--fence", "src/**", "harness/**", "--lock", "harness/**", "--experiments", "25"), 1, "inside the fence")
 expect("init ok", run("init", D, "--fence", "src/**", "--lock", "harness/**", "--experiments", "25"), 0, "3 locked files")
-expect("init twice refused", run("init", D, "--fence", "src/**", "--lock", "harness/**", "--experiments", "25"), 1, "already holds")
+expect("init twice refused", run("init", D, "--fence", "src/**", "--lock", "harness/**", "--experiments", "25"), 1, "initialised before")
+expect("zero-match lock glob refused", run("init", "plan/lab/typo", "--fence", "src/**", "--lock", "harness/**", "harnes/*.py", "--experiments", "5"), 1, "match no file (typo?): harnes/*.py")
 
-# the seal: a hand edit to the state file is refused
+# the seal: a hand edit to any field is refused, including the budget counter
 st = Path(D, "lab.json"); orig = st.read_text()
 st.write_text(orig.replace('"merge": "none"', '"merge": "auto"'))
-expect("tampered state refused", run("check", D), 1, "does not match its seal")
+expect("tampered grant refused", run("check", D), 1, "does not match its seal")
+st.write_text(orig.replace('"spent": 0', '"spent": -100'))
+expect("tampered budget refused", run("spend", D, "--n", "50"), 1, "does not match its seal")
 st.write_text(orig)
+
+# deleting the state file and re-initialising with a merge grant is refused, twice over
+R = "plan/lab/reinit"
+run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "2")
+Path(R, "lab.json").unlink()
+expect("deleted state noticed", run("check", R), 1, "initialised before and its state file is gone")
+expect("re-init refused", run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "99", "--merge", "auto"), 1, "initialised before")
+seal = lab.seal_path(R); seal.unlink()
+expect("re-init refused by the ledger", run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "99", "--merge", "auto"), 1, "initialised before")
 
 # check: uncommitted and committed changes against the leg's start
 Path("src/kernel.metal").write_text("kernel v2\n")
@@ -77,6 +90,21 @@ Path("harness/new.py").write_text("x\n")
 expect("new file in locked glob", run("check", D), 1, "new file in a locked path: harness/new.py")
 Path("harness/new.py").unlink()
 expect("clean again", run("check", D), 0, "ok")
+# a file hidden through .git/info/exclude is still seen
+Path("outside.txt").write_text("x\n")
+with open(".git/info/exclude", "a") as f: f.write("outside.txt\n")
+expect("info/exclude does not hide a change", run("check", D), 1, "outside the fence: outside.txt")
+Path("outside.txt").unlink()
+# a rename from outside the fence into it shows both paths
+subprocess.run(["git", "mv", "README.md", "src/README.md"], check=True)
+expect("rename into fence refused", run("check", D), 1, "outside the fence: README.md")
+subprocess.run(["git", "mv", "src/README.md", "README.md"], check=True)
+# a changed contract is refused
+C = "plan/lab/con"
+Path(C).mkdir(parents=True); Path(C, "contract.md").write_text("metric: decode\n")
+run("init", C, "--fence", "src/**", "--lock", "harness/**", "--experiments", "3")
+Path(C, "contract.md").write_text("metric: something easier\n")
+expect("contract change refused", run("check", C), 1, "contract changed")
 
 # noise
 expect("noise needs 3", run("noise", "1", "2"), 1, "at least 3")
@@ -90,6 +118,7 @@ expect("noise required", run("keep", D, "--gate", "pass", "--base", "200", "--ca
 expect("paired gain", run("keep", D, "--gate", "pass", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"), 0, "KEEP")
 expect("paired mixed", run("keep", D, "--gate", "pass", "--paired", "1", "-2", "1.5", "-2.5", "1", "-2", "1", "-2", "1", "-2"), 4, "REVERT")
 expect("paired too few", run("keep", D, "--gate", "pass", "--paired", "0.0001"), 2, "at least 10")
+expect("negative noise refused", run("keep", D, "--noise", "-5", "--gate", "pass", "--base", "10", "--cand", "7"), 2, "cannot be negative")
 
 # lower is better flips the sign
 L = "plan/lab/lat"
@@ -134,7 +163,10 @@ Path(B, "contract.md").write_text("question v2, new fence\n")
 expect("leg ok after contract change", run("leg", B, "--experiments", "4"), 0, "leg 2 of 2 with 4")
 if json.loads(Path(B, "lab.json").read_text())["spent"] != 0:
     failures.append("leg did not reset the counter")
+expect("leg without an end refused", run("leg", B, "--experiments", "4"), 1, "no recorded end")
+run("end", B, "BUDGET")
 expect("odometer exhausted", run("leg", B, "--experiments", "4"), 1, "RETIRED")
+run("end", D, "BUDGET")
 Path("harness/gate.sh").write_text("changed\n")
 expect("leg parked on changed lock", run("leg", D, "--experiments", "4"), 1, "PARKED")
 subprocess.run(["git", "checkout", "-q", "harness/gate.sh"], check=True)
@@ -146,6 +178,16 @@ run("init", M, "--fence", "src/**", "--lock", "harness/**", "--experiments", "3"
 expect("grant", run("merge-ok", M), 0, "merge granted")
 expect("child has no grant", run("child", M, f"{M}/c1", "--experiments", "1"), 0, "")
 expect("child merge refused", run("merge-ok", f"{M}/c1"), 1, "no merge grant")
+
+# an ancestor's state is read through its seal: widening the parent's fence by hand is refused
+pj = Path(D, "lab.json"); before = pj.read_text()
+pj.write_text(before.replace('"src/**"', '"**"', 1))
+expect("tampered ancestor refused", run("check", f"{D}/child-1"), 1, "does not match its seal")
+pj.write_text(before)
+# every call left a ledger row
+rows = (lab.seal_dir() / "ledger.jsonl").read_text().splitlines()
+if not any('"event": "init"' in r for r in rows) or not any('"event": "child"' in r for r in rows):
+    failures.append("ledger missing init or child rows")
 
 if failures:
     print("\n\n".join(failures)); sys.exit(1)

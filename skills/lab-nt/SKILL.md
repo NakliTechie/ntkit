@@ -32,7 +32,7 @@ Contract fields, each with its default, stated rather than asked:
 | merge | `none` | `auto` is a per-run grant, meta mode only |
 | usd cap | none, so no paid model calls | paid models only inside a cap the user names |
 
-`python3 $SKILL/bin/lab.py` (anchored; `$SKILL` is this skill's base directory) enforces the rules a script can check: the sealed state file, lockbox hashes and new files in locked paths, the fence of the campaign and every ancestor, experiment budgets for legs, children and forks, child depth, the keep decision, the leg odometer, the STAGNANT and DRY-WELL resume refusal, and the merge grant. Its docstring is the contract; its verdict beats the loop's opinion. The critic, the stagnation count, the clock and the usd cap stay with the loop and its leg report.
+`python3 $SKILL/bin/lab.py` (anchored; `$SKILL` is this skill's base directory) enforces the rules a script can check: the sealed state file, lockbox hashes and new files in locked paths, the fence of the campaign and every ancestor, experiment budgets for legs, children and forks, child depth, the keep decision, the leg odometer, the STAGNANT and DRY-WELL resume refusal, and the merge grant. Its docstring is the contract; its verdict beats the loop's opinion. The seal and its ledger are tamper evidence, not prevention: they catch a hand edit, a deleted state file and a re-init, and an agent that rewrote them on purpose would be breaking the stop-lines below, with git history and the ledger showing it. The critic, the stagnation count, the clock and the usd cap stay with the loop and its leg report.
 
 ## Phases
 

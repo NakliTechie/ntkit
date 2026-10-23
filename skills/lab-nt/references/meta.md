@@ -26,10 +26,10 @@ Also record whether the user grants `merge: auto` for this campaign.
 
 `$LAB` is `python3 $SKILL/bin/lab.py`, as in `references/loop.md`.
 
-1. Edit the references (one idea per experiment). `$LAB spend plan/lab/meta-<skill>`, then `$LAB check plan/lab/meta-<skill> --base <best-so-far SHA>`.
+1. Edit the references (one idea per experiment). Predict its private score first, as in `references/loop.md` (`$LAB predict plan/lab/meta-<skill> <id> --proposer <who> --predicted <score>`). `$LAB spend plan/lab/meta-<skill>`, then `$LAB check plan/lab/meta-<skill> --base <best-so-far SHA>`.
 2. Run the public split. Read per-task public results to steer the next idea.
 3. Only when the public score beats the public noise floor does the candidate earn one private run. Read the aggregate number only.
-4. `$LAB keep plan/lab/meta-<skill> --gate pass --noise <private floor> --base <private baseline readings> --cand <private reading(s)>`. Exit 0 KEEP commits on `lab/meta-<skill>`; exit 4 reverts.
+4. `$LAB keep plan/lab/meta-<skill> --id <id> --gate pass --noise <private floor> --base <private baseline readings> --cand <private reading(s)>`. Exit 0 KEEP commits on `lab/meta-<skill>`; exit 4 reverts.
 5. Forks and children work as in `references/loop.md`; a child here is a narrower question about one reference file.
 
 ## When `lab-nt` is the subject

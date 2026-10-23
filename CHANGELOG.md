@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `/lab-nt` surprise ledger and proposer ledger (proposals S2 and I4 in `plan/2026-10-23-idea-intake-and-serendipity-proposals.md`). `bin/lab.py predict <dir> <id> --proposer P --predicted V` records who proposed an experiment (provider/model or vault note path) and the metric they expect, before it runs, in the sealed state file. `keep` now takes a required `--id` and refuses an experiment with no prediction or with a result already recorded; it records the outcome, the actual metric (mean of `--cand`, or `--actual`, required with `--paired`) and the surprise (actual − predicted, sign kept, absolute value printed). New `record` logs experiments that never reach `keep` (blown cap, scope violation). New `summary [--leg N]` prints the surprise rate and ideas · measured · kept · high surprise per proposer, over the campaign and every child and fork. High surprise is |surprise| above `init --surprise X` (metric units), default 10% of the prediction. `references/loop.md` adds the predict step and treats a high-surprise failure as a finding; `ending.md` adds Surprise and Proposers lines to the leg report. State files from 2.7.1 (no `ideas` key) still load, check and summarise; only new experiments need a prediction. `tests/lab.test.sh`: 59 → 89 cases.
+
 ## [2.7.1] — 2026-10-22
 
 ### Fixed

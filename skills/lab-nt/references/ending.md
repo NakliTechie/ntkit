@@ -31,11 +31,15 @@ Metric:       <start of leg> → <best>   (goal: <threshold | open-ended>; noise
 Best-so-far:  <SHA> — <re-measured clean, gates passing: harness output cited>
 Confirmation: <score on the confirmation set, read once | not read (no GOAL-MET) | none (scalar metric)>
 Spend:        <experiments used of budget> · <usd used of cap | no paid calls>
+Surprise:     <high-surprise count of measured> (<rate>) with <threshold rule> · mean |surprise| <x>   [from `lab.py summary <dir> --leg <n>`]
+Proposers:    <proposer — ideas · measured · kept · high surprise>, one per line   [same source]
 
 Kept (survived measurement):
   - <id> — <metric delta> — <SHA>
 Reverted (tried, honest, didn't hold):
   - <id> — <what the number said>
+High surprise (kept or not):
+  - <id> — predicted <p>, got <a>, surprise <±s> — <what it suggests>   [or "none"]
 Forks:        <fork point → winning fork or "tip kept">            [or "off" / "leg too short"]
 Children:     <c<n> — question — end state — best — merged or reverted>   [or "none"]
 Merged:       <meta auto-merge SHA + revert command>                [or "none"]
@@ -46,6 +50,8 @@ Needs you:    <parked decisions · fence question · the stagnation hypothesis>
 Re-arm:       <CONTINUE — try <next> | STOP — <why> | RETIRED (odometer)>
 Resume: /lab-nt resume <slug>   ·   Promote a finding: /capture-nt plan/lab/<slug>/<date>-leg.md
 ```
+
+`python3 $SKILL/bin/lab.py summary plan/lab/<slug> --leg <n>` gives the Surprise and Proposers lines for this leg, counting every child and fork; without `--leg` it covers the whole campaign, which is the per-proposer count to compare across campaigns. A proposer with zero kept ideas over 3 campaigns is a candidate to drop; say so under Needs you. A campaign begun before the surprise ledger prints "no predictions recorded" for its earlier legs; write `Surprise: none recorded` for those.
 
 Finish with `/notify-nt "<slug>: lab leg <n> — <state>, best <delta>"`. `/resume-nt` reads leg reports like autopilot reports.
 

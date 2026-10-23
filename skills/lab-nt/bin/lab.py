@@ -18,6 +18,15 @@ ledger and this script; that would break the skill's stop-lines, and the ledger 
   legs, max_legs, ended           leg odometer and how the last leg ended
   contract_sha                    sha256 of contract.md when the leg began; `check` refuses a changed contract
   higher_is_better, merge         metric direction; "none" or "auto" (the user's per-campaign merge grant)
+  surprise_threshold              |surprise| above this is HIGH; null means the default, 10% of |predicted|
+  ideas                           the surprise ledger: experiment id -> proposer, predicted (written before the run),
+                                  leg, and once measured: actual, surprise (actual - predicted, sign kept), outcome
+
+The surprise ledger. Every experiment is predicted before it runs (`predict`), and `keep` and `record` refuse an
+id with no prediction, the same way `keep` refuses a failed gate. Because the ledger sits in the sealed state file,
+a prediction cannot be changed after the result is known, and a recorded result cannot be rewritten. A state file
+written before the ledger existed has no `ideas` or `surprise_threshold` key; it loads, checks and summarises as
+"no predictions recorded", and only new experiments need a prediction.
 
 Globs: `*` and `?` stay inside one path segment, `**` spans any number of segments (including none), and hidden
 files match like any other. The same matcher expands lock globs and tests changed paths; symlinks are not followed
@@ -27,13 +36,24 @@ from ignored paths, such as a virtualenv, by glob.
 
 Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 REVERT):
   init  <dir> --fence G.. --lock G.. --experiments N [--max-depth 2] [--max-legs 5] [--lower-is-better] [--merge auto]
-                             every lock glob must match a file; refuses a directory initialised before
+        [--surprise X]       every lock glob must match a file; refuses a directory initialised before; X is the
+                             high-surprise threshold in metric units (default: 10% of |predicted|, per experiment)
   check <dir> [--base REF]   seal intact; locked files unchanged and none added; contract.md unchanged; every
                              change since --base (default: the leg's start) inside the fence of every ancestor
   noise <v> <v> <v>..        spread (max - min) and mean of re-measures of the unchanged baseline
-  keep  <dir> --gate pass|fail (--noise X --base v.. --cand v.. | --paired d..)
-                             exit 0 KEEP when the gate passed and the gain beats the noise (X >= 0), or the paired
-                             95% bootstrap interval over at least 10 items excludes zero; exit 4 REVERT otherwise
+  predict <dir> <id> --proposer P --predicted V
+                             before the run: who proposed the idea (provider/model or vault note path) and the
+                             metric value they expect; refuses an id that already has a prediction
+  keep  <dir> --id ID --gate pass|fail (--noise X --base v.. --cand v.. | --paired d.. --actual V) [--actual V]
+                             refused (exit 1) when ID has no prediction or already has a result; exit 0 KEEP when
+                             the gate passed and the gain beats the noise (X >= 0), or the paired 95% bootstrap
+                             interval over at least 10 items excludes zero; exit 4 REVERT otherwise. Records the
+                             outcome and surprise (actual defaults to the mean of --cand; a failed gate records no
+                             actual, because its metric does not count)
+  record <dir> <id> --outcome revert|fail [--actual V]
+                             the result of an experiment that never reached `keep` (blown cap, scope violation,
+                             crash); revert needs --actual; same refusals as keep
+  summary <dir> [--leg N]    surprise rate and kept ideas per proposer, over the campaign and every child and fork
   spend <dir> [--n 1]        book n experiments before running them; exit 3 (nothing booked) when they do not fit
   child <dir> <child-dir> --experiments N [--fence G..]   one level deeper, at most half the parent's remainder,
                              fence contained in the parent's (equal, or under a parent glob ending in **)
@@ -46,7 +66,7 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
   merge-ok <dir>             exit 0 only for a sealed top-level campaign holding the user's merge: auto grant, with
                              exactly one init in the ledger
 """
-import argparse, hashlib, json, os, random, re, subprocess, sys, time
+import argparse, hashlib, json, math, os, random, re, subprocess, sys, time
 from pathlib import Path
 
 STATE = "lab.json"
@@ -209,11 +229,14 @@ def cmd_init(a):
         print("refused: locked files sit inside the fence: " + ", ".join(overlap)); return 1
     if a.experiments < 1:
         print("refused: --experiments must be at least 1"); return 1
+    if a.surprise is not None and not (math.isfinite(a.surprise) and a.surprise >= 0):
+        print("refused: --surprise is a threshold in metric units and must be a finite number >= 0"); return 1
     s = {"kind": "campaign", "depth": 0, "max_depth": a.max_depth, "parent": None, "fence": a.fence,
          "lock_globs": a.lock, "locked": {f: sha_file(f) for f in files}, "experiments": a.experiments,
          "spent": 0, "children": [], "legs": 1, "max_legs": a.max_legs, "ended": None,
          "start": git("rev-parse", "HEAD"), "contract_sha": contract_sha(a.dir),
-         "higher_is_better": not a.lower_is_better, "merge": a.merge}
+         "higher_is_better": not a.lower_is_better, "merge": a.merge,
+         "surprise_threshold": a.surprise, "ideas": {}}
     save(a.dir, s)
     ledger("init", a.dir, merge=a.merge, experiments=a.experiments)
     print(f"ok: {len(files)} locked files, fence {a.fence}, {a.experiments} experiments, max depth {a.max_depth}")
@@ -251,6 +274,71 @@ def mean(v):
     return sum(v) / len(v)
 
 
+def threshold(s, predicted):
+    t = s.get("surprise_threshold")
+    return t if t is not None else 0.1 * abs(predicted)
+
+
+def surprise_text(s, row):
+    if row.get("actual") is None:
+        return "no surprise recorded (no metric that counts)"
+    sur = row["surprise"]
+    better = (sur > 0) == s["higher_is_better"]
+    high = abs(sur) > threshold(s, row["predicted"])
+    side = "as predicted" if sur == 0 else ("better than predicted" if better else "worse than predicted")
+    return f"surprise {sur:+.6g} (|{abs(sur):.6g}|, {side}{', HIGH' if high else ''})"
+
+
+def unrecorded(d, s, eid, actual=None):
+    """The idea row for eid when it has a prediction and no result yet; None (after printing why) otherwise."""
+    if actual is not None and not math.isfinite(actual):
+        print("refused: --actual must be a finite number"); return None
+    row = (s.get("ideas") or {}).get(eid)
+    if row is None:
+        print(f"refused: experiment {eid} has no prediction; run `lab.py predict {d} {eid} --proposer P --predicted V` before running it")
+        return None
+    if "outcome" in row:
+        print(f"refused: experiment {eid} already has a result ({row['outcome']}); past rows are never rewritten")
+        return None
+    return row
+
+
+def record(d, s, eid, row, outcome, actual):
+    row.update(outcome=outcome, recorded_at=time.strftime("%Y-%m-%dT%H:%M:%S%z"))
+    if actual is not None:
+        row.update(actual=actual, surprise=actual - row["predicted"])
+    save(d, s)
+    ledger("result", d, id=eid, outcome=outcome, actual=actual)
+    print(f"{eid}: predicted {row['predicted']:.6g} by {row['proposer']}; " + surprise_text(s, row))
+
+
+def cmd_predict(a):
+    s = load(a.dir)
+    if not a.id.strip() or not a.proposer.strip():
+        print("refused: the experiment id and the proposer cannot be empty"); return 1
+    if not math.isfinite(a.predicted):
+        print("refused: --predicted must be a finite number"); return 1
+    if a.id in (s.get("ideas") or {}):
+        print(f"refused: experiment {a.id} already has a prediction; past rows are never rewritten"); return 1
+    s.setdefault("ideas", {})[a.id] = {"proposer": a.proposer, "predicted": a.predicted, "leg": s["legs"],
+                                       "predicted_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                                       "head": git("rev-parse", "HEAD")}
+    save(a.dir, s)
+    ledger("predict", a.dir, id=a.id, proposer=a.proposer, predicted=a.predicted)
+    print(f"ok: {a.id} predicted {a.predicted:.6g} by {a.proposer}"); return 0
+
+
+def cmd_record(a):
+    s = load(a.dir)
+    if a.outcome == "revert" and a.actual is None:
+        print("usage: --outcome revert needs --actual, the harness number"); return 2
+    row = unrecorded(a.dir, s, a.id, a.actual)
+    if row is None:
+        return 1
+    record(a.dir, s, a.id, row, a.outcome, a.actual)
+    return 0
+
+
 def cmd_noise(a):
     if len(a.values) < 3:
         print("refused: measure the unchanged baseline at least 3 times"); return 1
@@ -260,26 +348,35 @@ def cmd_noise(a):
 def cmd_keep(a):
     s = load(a.dir)
     sign = 1 if s["higher_is_better"] else -1
+    row = unrecorded(a.dir, s, a.id, a.actual)
+    if row is None:
+        return 1
     if a.gate != "pass":
-        print("REVERT: the gate failed for this commit, so its metric does not count"); return 4
+        print("REVERT: the gate failed for this commit, so its metric does not count")
+        record(a.dir, s, a.id, row, "fail", None); return 4
     if a.paired:
         if len(a.paired) < 10:
             print("usage: a paired decision needs at least 10 items"); return 2
+        if a.actual is None:
+            print("usage: a paired decision needs --actual, the candidate's metric as the harness reports it"); return 2
         rng = random.Random(0)
         d = [sign * x for x in a.paired]
         means = sorted(mean([rng.choice(d) for _ in d]) for _ in range(2000))
         lo, hi = means[49], means[1949]
-        if lo > 0:
-            print(f"KEEP: paired gain 95% interval [{lo:.6g}, {hi:.6g}] over {len(d)} items"); return 0
-        print(f"REVERT: paired gain 95% interval [{lo:.6g}, {hi:.6g}] over {len(d)} items"); return 4
-    if not a.base or not a.cand or a.noise is None:
-        print("usage: keep needs --noise, --base and --cand, or --paired"); return 2
-    if a.noise < 0:
-        print("usage: --noise is a spread and cannot be negative"); return 2
-    gain = sign * (mean(a.cand) - mean(a.base))
-    if gain > a.noise:
-        print(f"KEEP: gain {gain:.6g} against noise {a.noise:.6g}"); return 0
-    print(f"REVERT: gain {gain:.6g} against noise {a.noise:.6g}"); return 4
+        verdict = "KEEP" if lo > 0 else "REVERT"
+        print(f"{verdict}: paired gain 95% interval [{lo:.6g}, {hi:.6g}] over {len(d)} items")
+        actual = a.actual
+    else:
+        if not a.base or not a.cand or a.noise is None:
+            print("usage: keep needs --noise, --base and --cand, or --paired"); return 2
+        if a.noise < 0:
+            print("usage: --noise is a spread and cannot be negative"); return 2
+        gain = sign * (mean(a.cand) - mean(a.base))
+        verdict = "KEEP" if gain > a.noise else "REVERT"
+        print(f"{verdict}: gain {gain:.6g} against noise {a.noise:.6g}")
+        actual = a.actual if a.actual is not None else mean(a.cand)
+    record(a.dir, s, a.id, row, verdict.lower(), actual)
+    return 0 if verdict == "KEEP" else 4
 
 
 def cmd_spend(a):
@@ -317,7 +414,8 @@ def carve(a, kind):
     t = {"kind": kind, "depth": depth, "max_depth": s["max_depth"], "parent": str(a.dir), "fence": fence,
          "lock_globs": s["lock_globs"], "locked": s["locked"], "experiments": a.experiments, "spent": 0,
          "children": [], "legs": 1, "max_legs": 1, "ended": None, "start": git("rev-parse", "HEAD"),
-         "contract_sha": contract_sha(a.target), "higher_is_better": s["higher_is_better"], "merge": "none"}
+         "contract_sha": contract_sha(a.target), "higher_is_better": s["higher_is_better"], "merge": "none",
+         "surprise_threshold": s.get("surprise_threshold"), "ideas": {}}
     save(a.target, t)
     ledger(kind, a.target, parent=str(Path(a.dir).resolve()), experiments=a.experiments)
     print(f"ok: {kind} at depth {depth} with {a.experiments} experiments; parent has {left - a.experiments} left")
@@ -368,6 +466,50 @@ def cmd_leg(a):
     print(f"ok: lockbox intact; leg {s['legs']} of {s['max_legs']} with {a.experiments} experiments"); return 0
 
 
+def cmd_summary(a):
+    s = load(a.dir)
+    root = Path(a.dir)
+    rows, todo, seen = [], [(a.dir, s)], 0
+    while todo:
+        d, st = todo.pop(0)
+        seen += 1
+        rel = Path(d).relative_to(root).as_posix() if Path(d) != root and Path(d).is_relative_to(root) else ""
+        for eid, row in (st.get("ideas") or {}).items():
+            if a.leg is None or row.get("leg") == a.leg:
+                rows.append((f"{rel}/{eid}" if rel else eid, st, row))
+        todo += [(c, load(c)) for c in st.get("children", [])]
+    scope = f"leg {a.leg}" if a.leg is not None else "all legs"
+    if not rows:
+        print(f"no predictions recorded in {a.dir} ({scope}, {seen} state files); state written before the surprise"
+              " ledger has none, and only new experiments need one"); return 0
+    measured = [(i, st, r) for i, st, r in rows if r.get("actual") is not None]
+    high = {i for i, st, r in measured if abs(r["surprise"]) > threshold(st, r["predicted"])}
+    t = s.get("surprise_threshold")
+    rule = f"|surprise| > {t:.6g}" if t is not None else "|surprise| > 10% of |predicted| (default)"
+    print(f"surprise ledger for {a.dir} ({scope}, {seen} state files): {len(rows)} predicted, "
+          f"{sum('outcome' in r for _, _, r in rows)} with a result, {len(measured)} measured")
+    if measured:
+        print(f"surprise rate: {len(high)} of {len(measured)} measured ({100 * len(high) / len(measured):.0f}%) with {rule}; "
+              f"mean |surprise| {mean([abs(r['surprise']) for _, _, r in measured]):.6g}")
+    else:
+        print(f"surprise rate: no measured results yet ({rule})")
+    per = {}
+    for i, st, r in rows:
+        p = per.setdefault(r["proposer"], [0, 0, 0, 0])
+        p[0] += 1
+        p[1] += r.get("actual") is not None
+        p[2] += r.get("outcome") == "keep"
+        p[3] += i in high
+    print("kept ideas per proposer (ideas · measured · kept · high surprise):")
+    for name, (n, m, k, h) in sorted(per.items(), key=lambda x: (-x[1][2], x[0])):
+        print(f"  {name} · {n} · {m} · {k} · {h}")
+    print("rows:")
+    for i, st, r in rows:
+        res = f"actual {r['actual']:.6g} · {surprise_text(st, r)}" if r.get("actual") is not None else "no metric that counts"
+        print(f"  {i} · {r['proposer']} · predicted {r['predicted']:.6g} · {res} · {r.get('outcome', 'pending')}")
+    return 0
+
+
 def cmd_merge_ok(a):
     s = load(a.dir)
     n = inits(a.dir)
@@ -387,9 +529,11 @@ def main(argv=None):
     i.add_argument("--experiments", type=int, required=True); i.add_argument("--max-depth", type=int, default=2)
     i.add_argument("--max-legs", type=int, default=5)
     i.add_argument("--lower-is-better", action="store_true"); i.add_argument("--merge", choices=["none", "auto"], default="none")
+    i.add_argument("--surprise", type=float)
     c = sub.add_parser("check"); c.add_argument("dir"); c.add_argument("--base")
     n = sub.add_parser("noise"); n.add_argument("values", type=float, nargs="+")
     k = sub.add_parser("keep"); k.add_argument("dir"); k.add_argument("--noise", type=float)
+    k.add_argument("--id", required=True); k.add_argument("--actual", type=float)
     k.add_argument("--gate", choices=["pass", "fail"], required=True)
     k.add_argument("--base", type=float, nargs="+"); k.add_argument("--cand", type=float, nargs="+")
     k.add_argument("--paired", type=float, nargs="+")
@@ -402,11 +546,17 @@ def main(argv=None):
     e = sub.add_parser("end"); e.add_argument("dir"); e.add_argument("state")
     lg = sub.add_parser("leg"); lg.add_argument("dir"); lg.add_argument("--experiments", type=int, required=True)
     m = sub.add_parser("merge-ok"); m.add_argument("dir")
+    pr = sub.add_parser("predict"); pr.add_argument("dir"); pr.add_argument("id")
+    pr.add_argument("--proposer", required=True); pr.add_argument("--predicted", type=float, required=True)
+    rc = sub.add_parser("record"); rc.add_argument("dir"); rc.add_argument("id")
+    rc.add_argument("--outcome", choices=["revert", "fail"], required=True); rc.add_argument("--actual", type=float)
+    su = sub.add_parser("summary"); su.add_argument("dir"); su.add_argument("--leg", type=int)
     a = p.parse_args(argv)
     if a.cmd in ("child", "fork"):
         return carve(a, a.cmd)
     return {"init": cmd_init, "check": cmd_check, "noise": cmd_noise, "keep": cmd_keep, "spend": cmd_spend,
-            "forks": cmd_forks, "end": cmd_end, "leg": cmd_leg, "merge-ok": cmd_merge_ok}[a.cmd](a)
+            "forks": cmd_forks, "end": cmd_end, "leg": cmd_leg, "merge-ok": cmd_merge_ok, "predict": cmd_predict,
+            "record": cmd_record, "summary": cmd_summary}[a.cmd](a)
 
 
 if __name__ == "__main__":

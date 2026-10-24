@@ -127,6 +127,20 @@ expect("paired too few", run("keep", D, "--id", "g7", "--gate", "pass", "--actua
 expect("paired needs actual", run("keep", D, "--id", "g7", "--gate", "pass", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"), 2, "needs --actual")
 expect("negative noise refused", run("keep", D, "--id", "g8", "--noise", "-5", "--gate", "pass", "--base", "10", "--cand", "7"), 2, "cannot be negative")
 
+# gate failures already on the start commit: recorded once, never block a keep; a new failure still reverts
+B = "plan/lab/base"
+Path(B).mkdir(parents=True); Path(B, "contract.md").write_text("metric: decode\n")
+run("init", B, "--fence", "src/**", "--lock", "harness/**", "--experiments", "6")
+for e in ("k1", "k2", "k3", "k4"):
+    run("predict", B, e, "--proposer", "claude-opus-5-5", "--predicted", "205")
+expect("known gate needs a baseline", run("keep", B, "--id", "k1", "--noise", "4", "--gate", "known", "--failures", "olmoe/p4", "--base", "200", "--cand", "210"), 1, "no baseline recorded")
+expect("baseline records start failures", run("baseline", B, "--failures", "olmoe/p4", "olmoe/p4"), 0, "1 start-commit gate failure")
+expect("known failure does not block", run("keep", B, "--id", "k1", "--noise", "4", "--gate", "known", "--failures", "olmoe/p4", "--base", "200", "--cand", "210"), 0, "KEEP")
+expect("new failure reverts", run("keep", B, "--id", "k2", "--noise", "4", "--gate", "known", "--failures", "olmoe/p4", "qwen/p1", "--base", "200", "--cand", "210"), 4, "not on the start commit: qwen/p1")
+expect("known gate needs failures", run("keep", B, "--id", "k3", "--noise", "4", "--gate", "known", "--base", "200", "--cand", "210"), 2, "needs --failures")
+expect("clean baseline", run("baseline", B), 0, "clean baseline")
+expect("known against clean baseline reverts", run("keep", B, "--id", "k3", "--noise", "4", "--gate", "known", "--failures", "olmoe/p4", "--base", "200", "--cand", "210"), 4, "not on the start commit")
+
 # surprise ledger: no prediction, no result; a prediction is written once; a result is written once
 expect("keep without prediction refused", run("keep", D, "--id", "nope", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "300"), 1, "has no prediction")
 expect("gate fail without prediction refused", run("keep", D, "--id", "nope", "--noise", "4", "--gate", "fail", "--base", "200", "--cand", "300"), 1, "has no prediction")

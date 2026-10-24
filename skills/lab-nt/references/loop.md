@@ -10,9 +10,29 @@
 4. **Book** it: `$LAB spend <dir>`. Exit 3 books nothing and means the budget is gone ⇒ **BUDGET**.
 5. **Run** inside the per-experiment cap. A blown cap is a failed experiment, never extended or retried with more time: `$LAB record <dir> <id> --outcome fail`.
 6. **Check scope**: `$LAB check <dir> --base <best-so-far SHA>`. A violation reverts the experiment and is journaled as such (`$LAB record <dir> <id> --outcome fail`, with `--actual` when a number was read).
-7. **Measure, then gate.** Read the harness number (interleaved with best-so-far on a shared device) and put it in the journal verbatim. When the gain beats the noise floor (the rule `$LAB keep` applies), run every contract gate on the same commit; a candidate that would revert anyway skips the gates, because slow gates are where a leg's hours go. A failed gate is a failed experiment: its metric does not count.
-8. **Keep or revert** by `$LAB keep <dir> --id <id> --gate pass|fail --noise <floor> --base <best readings> --cand <candidate readings>`, or `--paired <per-item gains> --actual <candidate metric>` (at least 10 items) for a dataset metric. Call it once per experiment, after the gates, because it records the result: the outcome, the actual metric (the mean of `--cand` unless `--actual` is given) and the surprise. Exit 0 KEEP commits `lab <id>: <what> — <old → new>`; exit 4 REVERT resets to the tip. A kept speed or cost gain names its limiter and rules out cached, skipped or failed work (`SUBSTANCE.md` §6.16). A passing gate counts only for the paths it executed: before a keep, show that the gate run reached every path the change touched (a dispatch log, coverage counter or trace from that run), and that it compared correctness with a reference outside the work, never with best-so-far, which may carry the same fault (`SUBSTANCE.md` §6.17). A touched path the gate never reached is a failed gate until the contract's gates are widened. The branch tip is always the best-known state. A kept experiment adds no comment that explains a workaround; if the change needs one, fix the cause or leave the experiment reverted (`SUBSTANCE.md` §6.15).
+7. **Measure, then gate.** Read the harness number (interleaved with best-so-far on a shared device) and put it in the journal verbatim. When the gain beats the noise floor (the rule `$LAB keep` applies), run every contract gate on the same commit; a candidate that would revert anyway skips the gates, because slow gates are where a leg's hours go. A failed gate is a failed experiment: its metric does not count, unless every failure is on the start commit's baseline (`--gate known`).
+8. **Keep or revert** by `$LAB keep <dir> --id <id> --gate pass|fail|known [--failures <id> ...] --noise <floor> --base <best readings> --cand <candidate readings>`, or `--paired <per-item gains> --actual <candidate metric>` (at least 10 items) for a dataset metric. Call it once per experiment, after the gates, because it records the result: the outcome, the actual metric (the mean of `--cand` unless `--actual` is given) and the surprise. Exit 0 KEEP commits `lab <id>: <what> — <old → new>`; exit 4 REVERT resets to the tip. A kept speed or cost gain names its limiter and rules out cached, skipped or failed work (`SUBSTANCE.md` §6.16). A passing gate counts only for the paths it executed: before a keep, show that the gate run reached every path the change touched (a dispatch log, coverage counter or trace from that run), and that it compared correctness with a reference outside the work, never with best-so-far, which may carry the same fault (`SUBSTANCE.md` §6.17). A touched path the gate never reached is a failed gate until the contract's gates are widened. The branch tip is always the best-known state. A kept experiment adds no comment that explains a workaround; if the change needs one, fix the cause or leave the experiment reverted (`SUBSTANCE.md` §6.15).
 9. **Journal** the row, copying proposer, prediction and the surprise line from `$LAB`'s output, and go on. Budgets and thresholds are the exits.
+
+## Blockers are work
+
+Whatever stops the loop is the next problem to solve, with the same discipline as an experiment: a hypothesis, one
+diagnostic batch, a journal row. A gate failing for a reason the candidate did not cause, a harness or device fault,
+and a decision outside the contract are all blockers. The loop explores them as it explores a surprise.
+
+1. **Classify at the first repeat.** A failure seen twice for one cause is diagnosed before anything reruns it.
+   Run the failing check on the start commit: the same failure there goes on the baseline (`$LAB baseline`) and the
+   loop goes on; a candidate-caused failure is fixed or reverted; a harness or device fault is fixed when the fix
+   lies outside the lockbox (environment, device, scripts the contract does not lock).
+2. **Fix within authority without asking:** anything inside the fence, the environment, the device, or a child
+   campaign for a sub-question the blocker exposes.
+3. **Only the owner can change a locked file, the contract, or spend.** Write one question with the evidence, the
+   options, a recommendation and a default, then keep going on `lab/<slug>-prov`: each provisional experiment is
+   measured against the previous provisional tip, its journal row is marked provisional, and nothing is kept. When the
+   answer arrives, the provisional chain becomes one experiment measured against the real tip; an approved change to
+   a locked file seals a successor campaign whose contract names its predecessor and carries its noise floor when the
+   timed path is unchanged.
+4. **PARKED** only when no path within authority remains and no provisional work makes sense.
 
 **Surprise is a result.** Surprise is actual minus predicted, sign kept; `$LAB` also prints its absolute value and marks it HIGH above the contract's threshold (default: 10% of the prediction). A HIGH-surprise experiment stays in the journal as a finding even when it reverts: write what the proposer expected, what happened instead, and what that suggests. A failure in a direction nobody predicted is worth more to the next idea than a near-miss that matched its prediction.
 

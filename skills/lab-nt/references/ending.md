@@ -7,7 +7,7 @@ First exit wins, named in the leg report:
 - **BUDGET** — clock, experiment, or usd cap reached (`spend` exit 3); best-so-far is already committed.
 - **STAGNANT** — the stagnation threshold or two "diminishing" verdicts; include the best hypothesis why.
 - **DRY-WELL** — nothing left inside the fence; report what widening it would mean and park the decision.
-- **PARKED** — a judgment call, a stop-line, or three consecutive experiments failing for the same infrastructure reason. Park and end; never idle-wait.
+- **PARKED** — a stop-line, or a blocker with no path within authority and no useful provisional work (`references/loop.md`, Blockers are work). A repeated failure is classified and routed before it can park a leg. Park and end; never idle-wait.
 
 Record the exit with `python3 $SKILL/bin/lab.py end <dir> <STATE>` before writing the report; the next `leg` reads it. A child campaign ends the same way and returns to its parent (`references/loop.md`); its end state never ends the parent's leg.
 
@@ -15,7 +15,8 @@ Record the exit with `python3 $SKILL/bin/lab.py end <dir> <STATE>` before writin
 
 - Every next leg is started by the user with `/lab-nt resume` after reading the leg report. Its `Re-arm` line recommends CONTINUE (what to try) or STOP (why), and says whether the gap is worth chasing: the distance to the goal measured in noise floors, and, when the last kept gains sat near the floor, how many more items or repeats would separate them (or that the gap is too small to chase with volume).
 - A resumed leg starts with `python3 $SKILL/bin/lab.py leg plan/lab/<slug> --experiments <n>`, which enforces the rest of this list: it re-checks every locked hash, resets the experiment counter, records the new start commit, and refuses a child or fork.
-- A locked file that changed between legs refuses the leg (PARKED for the human).
+- A locked file that changed between legs refuses the leg (PARKED for the human). When the owner approved the change, seal a successor campaign instead (`references/loop.md`, Blockers are work, item 3).
+- An owner question left unanswered at the next leg start takes its stated default when the default is reversible; otherwise the provisional branch continues.
 - Resuming a STAGNANT or DRY-WELL campaign with `contract.md` unchanged is refused; say what would have to change (fence, budget, or a new hypothesis from the human).
 - Odometer exhausted (`--max-legs`, default 5) ⇒ RETIRED, regardless of trend; extending it is a `/decide-nt` entry.
 
@@ -46,7 +47,7 @@ Merged:       <meta auto-merge SHA + revert command>                [or "none"]
 Critic said:  <verdicts, incl. anything flagged>        [or "no cadence point reached"]
 
 What stays:   <each surviving outside resource + the command that removes it | none>
-Needs you:    <parked decisions · fence question · the stagnation hypothesis>
+Needs you:    <each owner question: evidence · options · recommendation · default · provisional branch, or "nothing">
 Re-arm:       <CONTINUE — try <next> | STOP — <why> | RETIRED (odometer)>
 Resume: /lab-nt resume <slug>   ·   Promote a finding: /capture-nt plan/lab/<slug>/<date>-leg.md
 ```

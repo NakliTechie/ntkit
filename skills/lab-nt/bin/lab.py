@@ -19,6 +19,8 @@ ledger and this script; that would break the skill's stop-lines, and the ledger 
   contract_sha                    sha256 of contract.md when the leg began; `check` refuses a changed contract
   higher_is_better, merge         metric direction; "none" or "auto" (the user's per-campaign merge grant)
   surprise_threshold              |surprise| above this is HIGH; null means the default, 10% of |predicted|
+  baseline_failures               gate failures seen on the campaign's start commit (`baseline`); null = not yet
+                                  recorded, [] = clean. Carried across legs, because a kept tip fails no more.
   ideas                           the surprise ledger: experiment id -> proposer, predicted (written before the run),
                                   leg, and once measured: actual, surprise (actual - predicted, sign kept), outcome
 
@@ -44,9 +46,15 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
   predict <dir> <id> --proposer P --predicted V
                              before the run: who proposed the idea (provider/model or vault note path) and the
                              metric value they expect; refuses an id that already has a prediction
-  keep  <dir> --id ID --gate pass|fail (--noise X --base v.. --cand v.. | --paired d.. --actual V) [--actual V]
-                             refused (exit 1) when ID has no prediction or already has a result; exit 0 KEEP when
-                             the gate passed and the gain beats the noise (X >= 0), or the paired 95% bootstrap
+  baseline <dir> [--failures ID..]
+                             record the gate failures observed on the start commit (none: a clean start); an ID is
+                             the failure's own text, e.g. "olmoe/prompt 4/decode/6/layer-13"
+  keep  <dir> --id ID --gate pass|fail|known [--failures ID..] (--noise X --base v.. --cand v.. | --paired d..
+        --actual V) [--actual V]
+                             --gate known: the candidate's gate failures (--failures) are all in the recorded
+                             baseline, so they do not count against it; any other failure reverts; refused when no
+                             baseline is recorded. Refused (exit 1) when ID has no prediction or already has a
+                             result; exit 0 KEEP when the gate passed and the gain beats the noise (X >= 0), or the paired 95% bootstrap
                              interval over at least 10 items excludes zero; exit 4 REVERT otherwise. Records the
                              outcome and surprise (actual defaults to the mean of --cand; a failed gate records no
                              actual, because its metric does not count)
@@ -351,7 +359,18 @@ def cmd_keep(a):
     row = unrecorded(a.dir, s, a.id, a.actual)
     if row is None:
         return 1
-    if a.gate != "pass":
+    if a.gate == "known":
+        known = s.get("baseline_failures")
+        if known is None:
+            print("refused: no baseline recorded; run the gates on the start commit and `lab.py baseline <dir>` first"); return 1
+        if not a.failures:
+            print("usage: --gate known needs --failures, the candidate's gate failures"); return 2
+        new = [f for f in a.failures if f not in known]
+        if new:
+            print("REVERT: gate failures not on the start commit: " + "; ".join(new))
+            record(a.dir, s, a.id, row, "fail", None); return 4
+        print(f"gate: {len(a.failures)} failure(s), all on the start commit's baseline; they do not count")
+    elif a.gate != "pass":
         print("REVERT: the gate failed for this commit, so its metric does not count")
         record(a.dir, s, a.id, row, "fail", None); return 4
     if a.paired:
@@ -377,6 +396,16 @@ def cmd_keep(a):
         actual = a.actual if a.actual is not None else mean(a.cand)
     record(a.dir, s, a.id, row, verdict.lower(), actual)
     return 0 if verdict == "KEEP" else 4
+
+
+def cmd_baseline(a):
+    s = load(a.dir)
+    s["baseline_failures"] = sorted(set(a.failures or []))
+    save(a.dir, s)
+    ledger("baseline", a.dir, failures=s["baseline_failures"])
+    n = len(s["baseline_failures"])
+    print("ok: clean baseline, every gate passes on the start commit" if not n else
+          f"ok: {n} start-commit gate failure(s) recorded; candidates may fail these and only these"); return 0
 
 
 def cmd_spend(a):
@@ -534,7 +563,8 @@ def main(argv=None):
     n = sub.add_parser("noise"); n.add_argument("values", type=float, nargs="+")
     k = sub.add_parser("keep"); k.add_argument("dir"); k.add_argument("--noise", type=float)
     k.add_argument("--id", required=True); k.add_argument("--actual", type=float)
-    k.add_argument("--gate", choices=["pass", "fail"], required=True)
+    k.add_argument("--gate", choices=["pass", "fail", "known"], required=True); k.add_argument("--failures", nargs="+")
+    bl = sub.add_parser("baseline"); bl.add_argument("dir"); bl.add_argument("--failures", nargs="+")
     k.add_argument("--base", type=float, nargs="+"); k.add_argument("--cand", type=float, nargs="+")
     k.add_argument("--paired", type=float, nargs="+")
     sp = sub.add_parser("spend"); sp.add_argument("dir"); sp.add_argument("--n", type=int, default=1)
@@ -554,7 +584,7 @@ def main(argv=None):
     a = p.parse_args(argv)
     if a.cmd in ("child", "fork"):
         return carve(a, a.cmd)
-    return {"init": cmd_init, "check": cmd_check, "noise": cmd_noise, "keep": cmd_keep, "spend": cmd_spend,
+    return {"init": cmd_init, "check": cmd_check, "noise": cmd_noise, "keep": cmd_keep, "baseline": cmd_baseline, "spend": cmd_spend,
             "forks": cmd_forks, "end": cmd_end, "leg": cmd_leg, "merge-ok": cmd_merge_ok, "predict": cmd_predict,
             "record": cmd_record, "summary": cmd_summary}[a.cmd](a)
 

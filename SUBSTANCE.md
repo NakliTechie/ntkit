@@ -160,6 +160,17 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
     whole time the changed part used to take means the number measured something else. Applies to
     the Benchmark and Optimise phases, `/lab-nt` keeps and eval results. Idea from Cursor's `pstack`
     `explain-the-number`.
+17. **Unexecuted gate** — a check reported as passing on a change it never ran. A gate vouches only
+    for the code it executed and the reference it compared against. Two failure shapes: the gate's
+    inputs never reach the changed path (short prompts against a change that runs only on long
+    ones), and the gate compares the change with the previous build, which carries the same fault,
+    instead of with an outside reference. Before a pass counts, show that the gate executed every
+    changed path (a dispatch log, coverage counter or trace taken during the gate run), and compare
+    correctness with a reference outside the work (another engine, a high-precision run, a spec);
+    a path the gate cannot reach is reported as unverified, never as passing. Seen in Quench's
+    prefill lab (2026-10-23): three kept experiments changed kernels that only run on prompts over
+    256 tokens, the accuracy gate used shorter prompts, and one of them produced garbage for every
+    long prompt until a fresh-context fork compared long-prompt output with mlx_lm.
 
 ## 7. Gates and fan-out: general principles
 

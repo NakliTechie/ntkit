@@ -65,6 +65,12 @@ Coverage
   primary source found by search. A lead is never evidence until fetched.
 - Search snippets are leads, not evidence.
 - Prefer primary and authoritative sources. Date any claim that can go out of date.
+- When a claim rests on one paper's or one project's headline number, spend one search on independent
+  replications: the paper's id or title with "replication", "reproduce" or "reproduction", on GitHub,
+  OpenReview and the web. Fetch any you find and report its result next to the headline, attributed to
+  its author. If none exists, say "no independent replication found". (An outside replication of
+  TreeOPSD, arXiv:2610.23181, cut its +4.97-point lead over GRPO to +0.08 once the baseline had
+  standard clipping.)
 
 Writing
 - Write <abs $RUN>/sections/<id>.md. Its first line is exactly: ### <id> | <title>

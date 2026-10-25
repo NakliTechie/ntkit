@@ -115,7 +115,7 @@ expect("noise needs 3", run("noise", "1", "2"), 1, "at least 3")
 expect("noise spread", run("noise", "210", "214", "212"), 0, "noise 4 mean 212")
 
 # keep under the joint gate: KEEP exit 0, REVERT exit 4; every keep names a predicted experiment
-for e in ("g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8"):
+for e in ("g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8", "ct1", "ct2"):
     run("predict", D, e, "--proposer", "claude-opus-5-5", "--predicted", "205")
 expect("gate fail reverts", run("keep", D, "--id", "g1", "--noise", "4", "--gate", "fail", "--base", "200", "--cand", "300"), 4, "REVERT: the gate failed")
 expect("gain beats noise", run("keep", D, "--id", "g2", "--noise", "4", "--gate", "pass", "--base", "200", "202", "--cand", "210", "212"), 0, "KEEP")
@@ -126,6 +126,9 @@ expect("paired mixed", run("keep", D, "--id", "g6", "--gate", "pass", "--actual"
 expect("paired too few", run("keep", D, "--id", "g7", "--gate", "pass", "--actual", "1", "--paired", "0.0001"), 2, "at least 10")
 expect("paired needs actual", run("keep", D, "--id", "g7", "--gate", "pass", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"), 2, "needs --actual")
 expect("negative noise refused", run("keep", D, "--id", "g8", "--noise", "-5", "--gate", "pass", "--base", "10", "--cand", "7"), 2, "cannot be negative")
+# simple-fix control: a gain the plain fix also reaches reverts; a gain past the control keeps
+expect("control explains the gain", run("keep", D, "--id", "ct1", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "220", "--control", "218"), 4, "simple-fix control reaches it")
+expect("candidate beats the control", run("keep", D, "--id", "ct2", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "230", "--control", "210"), 0, "beats the simple-fix control by 20")
 
 # gate failures already on the start commit: recorded once, never block a keep; a new failure still reverts
 B = "plan/lab/base"

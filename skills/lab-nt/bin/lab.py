@@ -49,8 +49,11 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
   baseline <dir> [--failures ID..]
                              record the gate failures observed on the start commit (none: a clean start); an ID is
                              the failure's own text, e.g. "olmoe/prompt 4/decode/6/layer-13"
-  keep  <dir> --id ID --gate pass|fail|known [--failures ID..] (--noise X --base v.. --cand v.. | --paired d..
-        --actual V) [--actual V]
+  keep  <dir> --id ID --gate pass|fail|known [--failures ID..] (--noise X --base v.. --cand v.. [--control v..] |
+        --paired d.. --actual V) [--actual V]
+                             --control: readings of the simple-fix control (the cheapest standard fix for the same
+                             symptom, applied to best-so-far); a KEEP must also beat the control's mean by more than
+                             the noise, or it reverts because the plain fix explains the gain
                              --gate known: the candidate's gate failures (--failures) are all in the recorded
                              baseline, so they do not count against it; any other failure reverts; refused when no
                              baseline is recorded. Refused (exit 1) when ID has no prediction or already has a
@@ -393,6 +396,13 @@ def cmd_keep(a):
         gain = sign * (mean(a.cand) - mean(a.base))
         verdict = "KEEP" if gain > a.noise else "REVERT"
         print(f"{verdict}: gain {gain:.6g} against noise {a.noise:.6g}")
+        if verdict == "KEEP" and a.control:
+            over = sign * (mean(a.cand) - mean(a.control))
+            if over > a.noise:
+                print(f"control: beats the simple-fix control by {over:.6g} against noise {a.noise:.6g}")
+            else:
+                verdict = "REVERT"
+                print(f"REVERT: the simple-fix control reaches it (candidate leads the control by {over:.6g}, noise {a.noise:.6g})")
         actual = a.actual if a.actual is not None else mean(a.cand)
     record(a.dir, s, a.id, row, verdict.lower(), actual)
     return 0 if verdict == "KEEP" else 4
@@ -566,7 +576,7 @@ def main(argv=None):
     k.add_argument("--gate", choices=["pass", "fail", "known"], required=True); k.add_argument("--failures", nargs="+")
     bl = sub.add_parser("baseline"); bl.add_argument("dir"); bl.add_argument("--failures", nargs="+")
     k.add_argument("--base", type=float, nargs="+"); k.add_argument("--cand", type=float, nargs="+")
-    k.add_argument("--paired", type=float, nargs="+")
+    k.add_argument("--paired", type=float, nargs="+"); k.add_argument("--control", type=float, nargs="+")
     sp = sub.add_parser("spend"); sp.add_argument("dir"); sp.add_argument("--n", type=int, default=1)
     ch = sub.add_parser("child"); ch.add_argument("dir"); ch.add_argument("target")
     ch.add_argument("--experiments", type=int, required=True); ch.add_argument("--fence", nargs="+")

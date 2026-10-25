@@ -22,6 +22,8 @@ Record the exit with `python3 $SKILL/bin/lab.py end <dir> <STATE>` before writin
 
 ## Phase 4 — The leg report
 
+Before the report, run a **leave-one-out check** when the leg kept two or more ideas: revert each kept idea alone from the best-so-far and measure once. An idea whose removal costs less than the noise floor did not earn its place; list it under Kept with "removal costs < noise" and recommend dropping it in Re-arm. This costs one experiment per kept idea and is booked against the leg's budget; skip it, saying so, when the budget is spent.
+
 Tear down first. Stop or delete every outside resource this leg created (cloud instances, endpoints, volumes, tunnels, scheduled jobs, fork and child worktrees) unless the contract keeps it; never touch one the leg found running. Secrets and anything published are listed, not deleted. Then audit the trail: every kept experiment maps to a commit, every number to a harness output, every revert is in the story, and `python3 $SKILL/bin/lab.py check plan/lab/<slug>` (diffing against the leg's start) exits 0 on the best-so-far. Write `plan/lab/<slug>/<date>-leg.md`:
 
 ```

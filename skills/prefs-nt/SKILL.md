@@ -1,6 +1,6 @@
 ---
 description: "One preferences folder you own; builds every coding agent's global instruction file from it."
-argument-hint: "[init | sync | fold | schedule | unschedule] [dir=<path>] [--push]   e.g. init dir=~/Code/prefs"
+argument-hint: "[init | sync | fold | schedule | unschedule] [dir=<path>] [--push]   e.g. init dir=~/prefs"
 allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob"]
 entry: "init: no preferences folder yet. sync, fold, schedule: a preferences folder holding targets.tsv"
 exit: 'init: `<folder>/targets.tsv` exists and `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --dry-run` exits 0. sync, fold: `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --check` exits 0. schedule: the job is listed and has run once with exit 0. unschedule: the job is no longer listed'

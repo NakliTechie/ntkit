@@ -5,7 +5,7 @@ Made by brag, vendored in [`brag/`](brag/VENDORED.md). You assemble the directio
 > **Default: quick, clean and peppy.** A launch video or promo is designed plates plus static screenshots of the live
 > app: title, the claim, two or three screenshots with callouts, the URL. Do not record real playback, drive the app,
 > load models or rebuild real screens for a promo. Take still screenshots of the live page and animate around them.
-> Reason (Chirag, 2026-10-17): recorded promos were taking as long as the work they announce; a promo should take
+> Reason: recorded promos were taking as long as the work they announce; a promo should take
 > minutes, not hours.
 >
 > **Only when the user explicitly asks for real playback** ("record it running", "real footage", "proof video"):

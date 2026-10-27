@@ -59,6 +59,6 @@ Scope: since <date> · project <name|all> · signal <name|all> · index built <b
 ## Example
 
 ```
-cd ~/Code/tracelens
+cd <your tracelens data directory>
 /traces-nt since=2026-09-01 signal=approval_stall top=3
 ```

@@ -39,7 +39,7 @@ rest of the language stays open.
 readability zone did not go through that process — it was added by maintainer
 directive, backed by published external evidence (Wikipedia's "Signs of AI
 writing," arXiv word-frequency studies of GPT-family output) rather than
-Chirag's own transcripts. This is a logged exception to §7, not a silent one;
+the author's own transcripts. This is a logged exception to §7, not a silent one;
 see the Issue 0.2 entry there.
 
 **Scope.** Binds agent → human messages: status reports, handback summaries,

@@ -8,7 +8,7 @@
 #   drop  nothing open cites it: delete this entry by name.
 #   keep  an open item ([ ] or [~]) in plan/pending.md or plan/workplan.md names it: keep for the next session.
 #   older a scratchpad of an earlier session of the same project (a sibling under the same parent):
-#         list it and ask; delete by name only when Chirag says so.
+#         list it and ask; delete by name only when the user says so.
 # Never prints, and windup never deletes, anything outside the given scratchpad or its sibling sessions.
 # Usage: scratch.sh <scratchpad-dir> [plan-dir]
 set -eu

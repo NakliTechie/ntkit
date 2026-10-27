@@ -332,7 +332,7 @@ Every sentence is short and no word is banned, yet the reader cannot act on it.
 
 Write instead:
 > "Stage 1 (the small hybrid-model test) is waiting for your decision on one
-> question: may Quench pick a different token than MLX when its pick matches the
+> question: may the engine pick a different token than MLX when its pick matches the
 > high-precision reference? I recommend yes. Until you answer, Codex works on
 > loading Bonsai 2 27B. I also told Codex to stop the image, audio and
 > embedding work, because you dropped those features from the first version."

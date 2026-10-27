@@ -2,17 +2,17 @@
 
 > **Opt-in only.** Use this playbook only when the user explicitly asks for real playback or recorded footage. The
 > default promo is quick: designed plates plus still screenshots of the live app, with no recording, no model loading
-> and no rebuilt screens (`launch-video.md`). Reason (Chirag, 2026-10-17): recorded promos were taking as long as the
+> and no rebuilt screens (`launch-video.md`). Reason: recorded promos were taking as long as the
 > work they announce. A Dynamic Weights proof video spent hours on recorder fixes, GPU contention and re-takes.
 
 How to make a short launch video that shows the real app doing the real thing, with every number taken from the
-recorded run. Distilled from the diskformer 80B video (2026-10-13; the author's reference run lived in
-`~/Code/diskformer.js/marketing/video-80b/`, which you will not have — treat its file names below as a worked
-example to adapt, not a path to open). Two cuts, 16:9 and 9:16, were briefed, recorded, edited, rendered and staged
+recorded run. Distilled from the [diskformer](https://github.com/NakliTechie/diskformer.js) 80B video (2026-10-13; the
+author's working folder is not published, so treat the file names below as a worked example to adapt, not a path to
+open). Two cuts, 16:9 and 9:16, were briefed, recorded, edited, rendered and staged
 on Reddit, LinkedIn and the README in about 1 h 45 min.
 
-Portability note: the recorder, the CDP daemon (`~/Code/infra/bin/chrome-cdpd.mjs`) and the `chrome-cdp-persistent.md`
-playbook are the author's own setup. The music library, `bake-poster.sh` and
+Portability note: the recorder, a Chrome DevTools Protocol (CDP) daemon that holds one browser connection, and the
+notes on driving it are the author's own setup and do not ship. The music library, `bake-poster.sh` and
 `assets.md` referenced here ship with ntkit under `package-nt/references/`. Supply your own screen recorder and a
 Chrome you can drive if you do not have the author's infra; the honesty rules and the step order are what carry.
 
@@ -28,14 +28,14 @@ recording, the honesty rules and the distribution steps.
    readouts. No estimates, no rounding up ("80B parameters, 48 GB file", never "80 GB").
 3. **Sped-up footage says so.** Every segment faster than real time carries a speed badge (`10× speed`) and a clock
    showing real elapsed time. A segment at real speed says `real speed`. One constant rate per segment.
-4. **Hold on what people must read.** Give each answer or result 3-6 s at rest before cutting (Chirag's note on the
+4. **Hold on what people must read.** Give each answer or result 3-6 s at rest before cutting (the user's note on the
    first cut: "give a few moments for people to read the responses").
 5. **The video matches the app.** Take the palette and type from the live page into `frame.md`, so footage and
    designed frames read as one piece.
 6. **Each shape is recorded, not cropped.** The 9:16 cut gets its own takes in a phone viewport. Zooming a 16:9 take
    leaves the text too small on a phone.
 7. **Stage, never post.** Uploads and drafts are fine; the final Post, Publish or Commit click on a public surface is
-   Chirag's (the README video commit is the project's own repo, so it is ours).
+   the user's (the README video commit is the project's own repo, so the agent may make it).
 8. **Sound serves the footage, never fakes it.** The music is a bed under the whole piece, kept low under every result
    hold so the numbers stay readable (rule 4); no stinger or beat-drop lands on a number or a speed badge. Narration
    says only what is true and on screen — confirm the rendered words with `npx hyperframes transcribe`, because the
@@ -151,13 +151,13 @@ per scene. Build it after Step 5, because each line is sized to its scene.
   (`npm i -D @hyperframes/core@<cli version>`). Re-run the carve after any voice change.
 - Audio source files stay out of commits (gitignored with `marketing/`).
 
-Worked example: the width promo (the author's run, `~/Code/diskformer.js/marketing/promo-width/` — `index.html`,
-`assets/voice/`, `assets/bgm/`), which you will not have; adapt its layout.
+Worked example: the author's width promo for diskformer (`index.html`, `assets/voice/`, `assets/bgm/`; the working
+folder is not published); adapt its layout.
 
 ### 6. Check, preview, approve
 `npx hyperframes lint` while building, `npx hyperframes check` at the end. Snapshot sheet at each beat:
 `npx hyperframes snapshot --at 2.6,6.9,... --no-end --describe false -o .hyperframes/snap` then tile with ffmpeg and
-read it. Open `npx hyperframes preview` (Studio) for Chirag, and render only after his yes.
+read it. Open `npx hyperframes preview` (Studio) for the user, and render only after their yes.
 
 ### 7. Render both shapes
 - 16:9: `npx hyperframes render -o renders/<name>-16x9.mp4 --fps 30 --quality delivery`.
@@ -178,7 +178,7 @@ read it. Open `npx hyperframes preview` (Studio) for Chirag, and render only aft
   `curl -sL -o /dev/null -w "%{http_code} %{content_type} %{size_download}"` returns `200 video/mp4` at the file's
   exact byte count. Put the link on its own line under the heading. Watch the editor: the upload inserts text, so
   replace the editor content with the committed README plus the new link, then pull and diff afterwards.
-- **Reddit:** through the CDP daemon (`~/Code/infra/bin/chrome-cdpd.mjs`, playbook `chrome-cdp-persistent.md`),
+- **Reddit:** through your own CDP connection to a signed-in browser (one connection per task),
   since Claude-in-Chrome refuses reddit.com. A video in the body makes it a media post. Lead with the result, not the
   project (repeat self-promotion is frowned on in r/LocalLLaMA). Stop before Post. Kill the daemon after.
 - **LinkedIn / X:** Claude-in-Chrome, upload the 16:9 (LinkedIn) or the 9:16 (Shorts, Reels), fill the text from

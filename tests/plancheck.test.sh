@@ -90,7 +90,7 @@ t="$work/standing"; base "$t"
 printf '# Pending\n## Now\n- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]\n' >"$t/plan/pending.md"
 cat >"$t/plan/standing.md" <<'EOF'
 # Standing questions
-## What is waiting on Chirag?
+## What is waiting on the owner?
 - The Postgres decision at 10k rows  [from: 2026-09-10-summary "parked until usage passes 10k rows"]
 ## What did we ship last?
 - A trigram index  [from: 2026-09-09-summary "trigram"]

@@ -125,7 +125,7 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
 11. **Unbounded batch** — the opposite failure of item 10: thousands of lines built and never run,
     because the boundary check keeps moving out. A batch is one capability family that one
     boundary run can check, sized at roughly a day of work. Past that, close the batch early and
-    check it. Source that has never run is not progress, however much of it exists (a Quench batch
+    check it. Source that has never run is not progress, however much of it exists (an inference-engine batch
     reached ~3,900 uncommitted lines across a dozen model families with zero checks run).
 12. **Scope by transcription** — copying a reference system's whole feature list into the parity
     matrix and calling that "feature complete". The matrix inherits every product the reference
@@ -167,7 +167,7 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
     instead of with an outside reference. Before a pass counts, show that the gate executed every
     changed path (a dispatch log, coverage counter or trace taken during the gate run), and compare
     correctness with a reference outside the work (another engine, a high-precision run, a spec);
-    a path the gate cannot reach is reported as unverified, never as passing. Seen in Quench's
+    a path the gate cannot reach is reported as unverified, never as passing. Seen in an inference engine's
     prefill lab (2026-10-23): three kept experiments changed kernels that only run on prompts over
     256 tokens, the accuracy gate used shorter prompts, and one of them produced garbage for every
     long prompt until a fresh-context fork compared long-prompt output with mlx_lm.

@@ -24,7 +24,7 @@ right for a real folder.
 **Create it only when it is missing.** If `NT_PLAN_STORE` is set (default: unset), the
 folder is made in the store and linked in, so every plan lives in one place a single job
 can back up. The path inside the store mirrors the repo's path under the store's parent
-directory (`~/Code/plans` + `~/Code/research/pith` → `~/Code/plans/research/pith/plan`):
+directory (`<store>` + `<repos>/research/pith` → `<store>/research/pith/plan`):
 
 ```bash
 if [ -L plan ] && [ ! -e plan ]; then
@@ -204,7 +204,7 @@ next. A repo can keep answers to more questions current in an optional `plan/sta
 ```markdown
 # Standing questions
 
-## What is waiting on Chirag?
+## What is waiting on the owner?
 - The Postgres decision at 10k rows  [from: 2026-09-10-summary "parked until usage passes 10k rows"]
 
 ## What did the last live check find?

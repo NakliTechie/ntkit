@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.8.0] — 2026-10-29
+
 ### Added
 
 - Three run guards from TandemLLM's conductor and chat runner (ideas only). `SUBSTANCE.md` §6 grows to twenty patterns: **18 Stall** (four checks in a row on one target with the same masked result, edits inside three files or fewer: write two to four hypotheses and test the cheapest with a minimal reproduction; a second stall parks the item), **19 Repeated call** (the same call with the same arguments a third time with nothing changed between), **20 Claim past its evidence** (a check vouches only for files not edited after it ran). `/autopilot-nt` Phase 3 and `/lab-nt`'s blocker rules act on the first two; `/autopilot-nt`'s progress log and `/windup-nt`'s Verified section apply the third. AUTHORING §11 cites TandemLLM's measurement that injected skill text doubled one model's run time for no score gain.

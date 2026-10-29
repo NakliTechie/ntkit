@@ -140,6 +140,16 @@ two costs:
   own Claude config dir, because a skill in `~/.claude/skills/` loads in every run and
   beats a project skill of the same name. Log that dir in once:
   `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login`.
+- **`evals/run.sh --runs N --without <path>`** asks whether a rule changes behaviour. It
+  runs each case N times as checked out and N times with one change: a file or folder
+  under `skills/` deleted, or a `.patch` applied, so one paragraph can be switched off.
+  The report gives each arm's pass rate, the cases that flipped either way, and mean
+  turns, tokens, time and cost. Read the transcript of every flipped case before you
+  trust the rates. A rule that leaves the pass rate flat and cuts turns or tokens still
+  earns its place; one that raises the rate by breaking a must-not-break check does not.
+  `--dry-run` prints the cost ceiling first, and a ceiling over `NT_EVAL_MAX_USD` ($25 by
+  default) is refused. Measure a new rule or skill this way before it ships when the
+  question is "does it help", not "does it run".
 
 A case is `evals/cases/<name>/` holding `prompt`, `setup.sh`, `check.sh`, and optional
 `budget` (USD, default 5) and `timeout` (seconds, default 1800). The rules:

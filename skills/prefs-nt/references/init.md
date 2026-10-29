@@ -1,7 +1,6 @@
 # init — create the folder and draft core/ from what the agents already have
 
-1. **Resolve the folder.** `dir=` if given, else `${NT_PREFS_DIR:-~/.agent-prefs}`, made absolute. If it
-   holds `targets.tsv`, stop (guard). Announce the path, and say that `NT_PREFS_DIR` in the shell
+1. **Resolve the folder.** `dir=` if given, else `${NT_PREFS_DIR:-~/.agent-prefs}`, made absolute. Announce the path, and say that `NT_PREFS_DIR` in the shell
    profile moves it. A folder inside another git repo works, but sync skips git there: say so.
 2. **Copy the template.** Copy `"$SKILL/references/template/"` into the folder. Rename `gitignore` to
    `.gitignore`. Create `drift/`.

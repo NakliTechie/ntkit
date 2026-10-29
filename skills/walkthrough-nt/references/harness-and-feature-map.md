@@ -23,4 +23,4 @@ Commit it to the repo, not `plan/`. Give it a real `--help`, error messages that
 - **If `make verify` already means a static gate, add yours beside it** (`make walk`, `make doctor`) and document both as required; never replace it.
 - **The repo's own lint applies to the harness.** Fix the harness to satisfy a rule (e.g. a storage-API screen that rejects a `showDirectoryPicker` stub); never exempt it.
 - **Pin chaos findings.** Every confirmed Phase 5 finding enters as a regression case under its feature area, named by finding ID: the replayed action prefix, asserting the invariant now holds.
-- **Arm the Phase 3 floor set (all seven) on every harness run.** An `INV-SILENT` breach is logged as a lead, not a failure; the other six fail the run.
+- **Arm the Phase 3 floor set (all six) on every harness run.** Every breach fails the run.

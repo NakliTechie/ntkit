@@ -2,7 +2,7 @@
 
 **Write `plan/walkthrough-YYYY-MM-DD.md`** per ATTEST, in this order:
 
-1. **Header**: date, scope (roles × journeys covered), counts *found / fixed / deferred*, the **armed invariant set** (the seven floor invariants plus any repo-specific ones), the chaos seed, and the `Reviewer:` line.
+1. **Header**: date, scope (roles × journeys covered), counts *found / fixed / deferred*, the **armed invariant set** (the six floor invariants plus any repo-specific ones), the chaos seed, and the `Reviewer:` line.
 2. **Role inventory + coverage map**: each role and the journeys walked, and **what was not reached** (roles you couldn't authenticate, flows you couldn't drive, states you couldn't reach).
 3. **Issues** by ID, Critical → High → Medium → Low. Each: role · journey step · symptom · root cause · the action index it replays from · then **FIXED: `path:line` + verification evidence** or **DEFERRED: why + what unblocks** (`→ /decide-nt`). Mark each as scripted walk or chaos leg.
 3b. **Chaos leg**: budget spent (actions and minutes, per role), yield, and the **unreproduced** list, each with its action prefix, counted separately from findings. If skipped, the reason.

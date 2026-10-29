@@ -12,6 +12,7 @@
 
 ### Changed
 
+- First real run of the terminal walkthrough (a CLI knowledge-vault tool: 16 findings, 11 fixed, harness 65/65 cold). `INV-SILENT` leaves the floor set of `/walkthrough-nt` and `/ux-review-nt` after its third null run (44 fires across three apps, 0 findings); the browser floor set is now six, and `INV-SILENT` stays available as an opt-in repo invariant. `references/terminal-and-service.md` takes the run's fixes: drive `HOME`, config and data live in a scratch folder under `$TMPDIR`, never under `plan/` (tools that sync `plan/` folders adopt what lands there), and a seed holds no folder named `plan/`; temp-file calls get explicit paths; `INV-EXIT` compares each step against an exit code written down before it runs; `INV-DURABLE` waits for the tool's own freshness signal; `INV-STRAY` snapshots the repo and the session's folders instead of shared temp folders; invocations append to one `invocations.jsonl`; `Ctrl-C` mid-write is sent only once the write is under way. `/prefs-nt`: the existing-folder guard lives only in `SKILL.md`; `references/init.md` no longer repeats it (an A/B eval run showed the duplicate hides the line from measurement).
 - Shipped files no longer name local paths, private projects or people: the video playbooks, `scaffold-nt`, `traces-nt`, `prefs-nt`, `windup-nt`, `MEMORY.md`, `SUBSTANCE.md`, `ATTEST.md`, the ATTEST spec and this changelog now use generic wording.
 
 ## [2.7.1] — 2026-10-22

@@ -8,7 +8,7 @@ Write `plan/<date>-summary.md` from:
 
 Sections, in this order:
 - **Shipped** — what landed (PRs, commits, deploys), each with its commit SHA
-- **Verified** — how it was checked (tests / typecheck / build / manual) and what verification is still owed
+- **Verified** — how it was checked (tests / typecheck / build / manual) and what verification is still owed. A check counts only when it ran after the last edit to the files it covers; a file edited since its check is listed as owed (`SUBSTANCE.md` §6.20)
 - **Decisions** — what was chosen and why
 - **Tried then rolled back** — dead ends worth not repeating
 - **Open questions** — surfaced today, unresolved

@@ -21,6 +21,8 @@ Whatever stops the loop is the next problem to solve, with the same discipline a
 diagnostic batch, a journal row. A gate failing for a reason the candidate did not cause, a harness or device fault,
 and a decision outside the contract are all blockers. The loop explores them as it explores a surprise.
 
+**Stalls and repeated calls are blockers too** (`SUBSTANCE.md` §6.18 and §6.19): four checks in a row on one target with the same result, or one call repeated a third time with the same arguments and nothing changed between. Write two to four hypotheses as journal rows and test the cheapest with a minimal reproduction before the next edit.
+
 1. **Classify at the first repeat.** A failure seen twice for one cause is diagnosed before anything reruns it.
    Run the failing check on the start commit: the same failure there goes on the baseline (`$LAB baseline`) and the
    loop goes on; a candidate-caused failure is fixed or reverted; a harness or device fault is fixed when the fix

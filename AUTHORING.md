@@ -149,7 +149,8 @@ two costs:
   earns its place; one that raises the rate by breaking a must-not-break check does not.
   `--dry-run` prints the cost ceiling first, and a ceiling over `NT_EVAL_MAX_USD` ($25 by
   default) is refused. Measure a new rule or skill this way before it ships when the
-  question is "does it help", not "does it run".
+  question is "does it help", not "does it run": in TandemLLM's runs, injected skill text
+  doubled one model's run time for no score gain.
 
 A case is `evals/cases/<name>/` holding `prompt`, `setup.sh`, `check.sh`, and optional
 `budget` (USD, default 5) and `timeout` (seconds, default 1800). The rules:

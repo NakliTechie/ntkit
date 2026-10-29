@@ -56,7 +56,7 @@ self-report.
 
 ## 6. Named reward-hacking patterns to refuse
 
-Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Sixteen that
+Naming a hack makes it catchable (the value ATTEST's banned-words list gives, too). Twenty that
 agent-driven work invites most — refuse them; §1–5 cover the rest. A handback that cites a pattern
 or principle by name also names the decision it changed; a citation with no decision behind it is
 name-dropping, not applying (idea from Cursor's `pstack` principle names).
@@ -171,6 +171,23 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
     prefill lab (2026-10-23): three kept experiments changed kernels that only run on prompts over
     256 tokens, the accuracy gate used shorter prompts, and one of them produced garbage for every
     long prompt until a fresh-context fork compared long-prompt output with mlx_lm.
+18. **Stall** — checking again and again with nothing moving. The signal: four checks in a row on
+    the same target return the same result once numbers are masked, while the edits between them
+    stay inside three files or fewer. Each check alone looks diligent; together they are a loop.
+    First response: stop editing, write two to four hypotheses for why the check does not move,
+    and test the cheapest with a minimal reproduction. A second stall on the same target ends the
+    attempt: park it with the tried-trail (§7.3). One agent run spent 37 steps tuning lighting
+    when the defect was the material colours; a repeated-call guard never fired, because each
+    call differed slightly.
+19. **Repeated call** — the same tool call with the same arguments, issued a third time with no
+    change in between (no file written, no new input). The third call returns what the first two
+    did. Stop and change the approach. One runaway call wrote the same 97-character row 12,866
+    times.
+20. **Claim past its evidence** — "done", "fixed" or "passing" said about files edited after the
+    check that is cited for them. A check vouches only for the state it ran on, so the claim cites
+    a check run after the last write to every file it covers; otherwise it is reported as
+    unverified. Item 17 is the same rule for the paths a gate never reached. Items 18 to 20 are
+    ideas from TandemLLM's conductor and chat runner (ideas only).
 
 ## 7. Gates and fan-out: general principles
 

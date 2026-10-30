@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `/walkthrough-nt map`, after its first real run (a CLI knowledge-vault tool: 12 features, outcome changed, one crash found). The source pass can run on another family's CLI when the rotate-the-eyes rule picks one. Reconcile reproduces a failure the source pass cites on a path the harness cannot reach, and fixes drift that repeats across feature files once in the index. A clear product regression is fixed in its own commit after the map commit, with a harness step that fails on the old code; one that needs a design call is still reported.
+
 ## [2.8.0] — 2026-10-29
 
 ### Added

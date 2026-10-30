@@ -21,7 +21,7 @@ Drive the **running app the way its users do, one user role at a time**, walking
 
 ## Map mode — `/walkthrough-nt map`
 
-A light pass that keeps the harness and `verify/features/` honest between full walkthroughs. It reads each feature from source, drives every feature live through the harness, and corrects the map and harness only. It never edits product code: a feature that no longer behaves as the map says is either map drift (fix the map) or a product regression (report it for the next full walkthrough). It ends **clean** (nothing to change), **changed** (one local commit of proven corrections) or **blocked** (what stopped it). With no `verify/features/`, it stops and points at a full `/walkthrough-nt`. Read `references/map-mode.md` and follow it instead of the phases below.
+A light pass that keeps the harness and `verify/features/` honest between full walkthroughs. It reads each feature from source, drives every feature live through the harness, and corrects the map and harness. Its map commit never touches product code: a feature that no longer behaves as the map says is either map drift (fix the map) or a product regression (a clear fix goes in a separate commit with a harness step that pins it; one that needs a design call is reported). It ends **clean** (nothing to change), **changed** (one local commit of proven corrections) or **blocked** (what stopped it). With no `verify/features/`, it stops and points at a full `/walkthrough-nt`. Read `references/map-mode.md` and follow it instead of the phases below.
 
 Example: `/walkthrough-nt map` after a week of feature work, before `/release-nt`.
 

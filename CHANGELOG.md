@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `/traces-nt` reads the ten signals of tracelens 0.2.0: the five within-session rules plus `recurring_failure` (a failure an earlier session already hit), `recurring_action` (one long command in 3+ sessions of a project), `no_progress_streak`, `repeated_args` and `loop_cost_outlier`. Findings are ranked by the spend behind them (the summed recorded cost of their sessions, or their turns where the agent records no cost) times sessions, and each carries a `Spend:` line. Each new signal has a usual fix target. `references/queries.md` adds query 7 (spend per cluster) and keys the shape signals by their masked error or command. Ideas from TokenEconomizer's offline cost analysis and TandemLLM's conductor (ideas only; no runtime controller).
+
 ## [2.8.1] — 2026-10-30
 
 ### Changed

@@ -7,7 +7,7 @@ exit: "`python3 ~/.claude/skills/traces-nt/bin/cite_check.py plan/findings-<date
 writes: "plan/findings-<date>.md only"
 ---
 
-Find what keeps going wrong in your own Claude Code and Codex sessions, and name the change that would stop it. [tracelens](https://github.com/NakliTechie/tracelens) holds the evidence: an archive of every transcript, a DuckDB index, and five rule signals (`repeated_failure`, `approval_stall`, `edit_without_read`, `unverified_claim`, `user_correction`), each row citing `file:line`. This command reads that index with SQL, clusters signal rows into findings, and writes them to `plan/`. It changes nothing else.
+Find what keeps going wrong in your own Claude Code and Codex sessions, and name the change that would stop it. [tracelens](https://github.com/NakliTechie/tracelens) holds the evidence: an archive of every transcript, a DuckDB index, and ten rule signals (from tracelens 0.2.0), each row citing `file:line`: within a session `repeated_failure`, `approval_stall`, `edit_without_read`, `unverified_claim`, `user_correction`, `no_progress_streak`, `repeated_args`; across sessions `recurring_failure` (a failure an earlier session already hit), `recurring_action` (one long command in 3+ sessions of a project) and `loop_cost_outlier` (a looping session far longer than its project's median). This command reads that index with SQL, clusters signal rows into findings, and writes them to `plan/`. It changes nothing else.
 
 ## Inputs (defaults announced at the start of the run)
 
@@ -15,7 +15,7 @@ Find what keeps going wrong in your own Claude Code and Codex sessions, and name
 |---|---|---|
 | `since=` | 28 days before today | only signal rows with `ts >= since` |
 | `project=` | all projects | only rows whose `project` matches |
-| `signal=` | all five | only that signal |
+| `signal=` | all ten | only that signal |
 | `top=` | 5 | at most this many findings |
 | `$TRACELENS_HOME` | the cwd, if it holds `archive/` | where `archive/` and `tracelens.duckdb` live |
 
@@ -33,8 +33,8 @@ Transcripts hold pasted tokens and personal data. Quote at most 160 characters o
    - No `plan/` in the cwd → stop: "no plan/ here; run from a project with plan/". Write nothing.
    - `next` is `tracelens index` or `tracelens signals` → run it (local, idempotent, atomic), then re-read status.
 2. **Measure.** Run `tracelens report --json --top 10`, then the scoped queries in [`references/queries.md`](references/queries.md): weekly rate per signal, top clusters per signal, scheduled-task attribution. Keep the numbers; they go in the findings.
-3. **Cluster.** Group rows that share one cause: same tool and error prefix, same command shape, same scheduled task, same reserved word in the same project. A cluster needs at least 3 rows or 2 sessions. Rank by rows × sessions, recent weeks first. For each cluster read at most 3 cited lines (`sed -n '<line>p' archive/<file> | cut -c1-400`) to confirm the cause.
-4. **Name the fix.** Each finding gets one target from a closed set: `claude-md` · `playbook` · `skill` · `allow-rule` · `task-prompt` · `tool-bug` · `none`. Write the proposed change as the exact text or rule. Write the measure: the SQL filter whose weekly count should fall, and to what. If an earlier `plan/findings-*.md` proposed the same target and the signal has not fallen, say so and cite it.
+3. **Cluster.** Group rows that share one cause: same tool and error prefix, same command shape, same scheduled task, same reserved word in the same project. A cluster needs at least 3 rows or 2 sessions. Rank by the spend behind it: the summed `cost_usd` of its sessions, or their turns where the agent records no cost, times sessions (query 7), recent weeks first, so the expensive problems come first. Give each finding its spend line. For each cluster read at most 3 cited lines (`sed -n '<line>p' archive/<file> | cut -c1-400`) to confirm the cause.
+4. **Name the fix.** Each finding gets one target from a closed set: `claude-md` · `playbook` · `skill` · `allow-rule` · `task-prompt` · `tool-bug` · `none`. The usual target per signal: `recurring_failure` → `claude-md` (write the lesson once where every session reads it); `recurring_action` → `skill` or `claude-md` (write the repeated command once); `no_progress_streak`, `repeated_args` and `loop_cost_outlier` → `playbook` (the user's own stall or supervision rule, wherever their setup keeps it). Write the proposed change as the exact text or rule. Write the measure: the SQL filter whose weekly count should fall, and to what. If an earlier `plan/findings-*.md` proposed the same target and the signal has not fallen, say so and cite it.
 5. **Write and check.** Write `plan/findings-<YYYY-MM-DD>.md` in the format below, then run `python3 ~/.claude/skills/traces-nt/bin/cite_check.py plan/findings-<date>.md`. Fix every failure it lists and re-run until it exits 0. A finding whose citations cannot resolve is dropped, not kept.
 6. **Report.** Natural prose: scope, how many findings, the top 3 with their fix targets, the file path, and the check result.
 
@@ -46,6 +46,7 @@ Scope: since <date> · project <name|all> · signal <name|all> · index built <b
 
 ## F1 — <one-line cause>
 - Signal: <name> · rows: <n> · sessions: <n> · weeks: <first>..<last>
+- Spend: $<cost> over <n> sessions with a recorded cost · <turns> turns
 - Evidence: `<agent>/<archive-relative path>.jsonl:<line>`, `<…>:<line>`
 - Cause (<observed|inferred>): <one or two sentences>
 - Fix target: <type> — <file, rule or task name>

@@ -16,10 +16,13 @@ GROUP BY ALL ORDER BY week, signal;
 ## 2. Clusters inside one signal
 
 `detail` starts with the tool, the waiting time, the reserved word or the human's words, so its
-first words are a usable cluster key. Read the top rows, then refine the key by hand.
+first words are a usable cluster key. The four shape signals end their `detail` with ` · shape: ` and the
+masked error or command, which is their key. Read the top rows, then refine the key by hand.
 
 ```sql
-SELECT signal, project, regexp_extract(detail, '^(\S+(\s+\S+){0,2})', 1) AS key,
+SELECT signal, project, CASE WHEN signal IN ('recurring_failure', 'recurring_action', 'no_progress_streak', 'repeated_args')
+            THEN left(regexp_extract(detail, ' · shape: (.*)$', 1), 100)
+            ELSE regexp_extract(detail, '^(\S+(\s+\S+){0,2})', 1) END AS key,
        count(*) AS rows, count(DISTINCT file) AS sessions,
        min(ts)::DATE AS first, max(ts)::DATE AS last,
        arg_min(file || ':' || line, ts) AS first_cite, arg_max(file || ':' || line, ts) AS last_cite
@@ -70,4 +73,29 @@ Pick the finding's `Measure:` filter and compare the weeks before and after the 
 SELECT ts >= <fix_date> AS after_fix, count(*) AS rows,
        count(*) / greatest(1, count(DISTINCT date_trunc('week', ts))) AS rows_per_week
 FROM signals WHERE <measure filter> GROUP BY 1;
+```
+
+## 7. Spend behind each cluster (the ranking)
+
+Cost is the summed `cost_usd` of the distinct sessions a cluster fired in; agents that record no
+cost (Codex) count by turns. This is spend that sat behind the problem, not spend it caused.
+
+```sql
+WITH g AS (
+  SELECT signal, project, CASE WHEN signal IN ('recurring_failure', 'recurring_action', 'no_progress_streak', 'repeated_args')
+            THEN left(regexp_extract(detail, ' · shape: (.*)$', 1), 100)
+            ELSE regexp_extract(detail, '^(\S+(\s+\S+){0,2})', 1) END AS key, file, line, ts
+  FROM signals
+  WHERE ts >= <since> AND (<project> IS NULL OR project = <project>) AND (<signal> IS NULL OR signal = <signal>)),
+c AS (
+  SELECT signal, project, key, count(*) AS rows, count(DISTINCT file) AS sessions,
+         arg_min(file || ':' || line, ts) AS first_cite
+  FROM g GROUP BY ALL HAVING count(*) >= 3 OR count(DISTINCT file) >= 2),
+spend AS (
+  SELECT d.signal, d.project, d.key, round(sum(s.cost_usd), 2) AS cost_usd, sum(s.n_turns) AS turns
+  FROM (SELECT DISTINCT signal, project, key, file FROM g) d JOIN sessions s USING (file)
+  GROUP BY ALL)
+SELECT * FROM c JOIN spend USING (signal, project, key)
+ORDER BY coalesce(cost_usd, 0) * sessions DESC, turns * sessions DESC
+LIMIT 20;
 ```

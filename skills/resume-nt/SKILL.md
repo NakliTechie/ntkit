@@ -73,6 +73,8 @@ Last session (<date from latest summary, or "no summary on file">):
   Decisions: <one-line bullet, or "—">
   Open questions: <bullet, or "—">
   Parked (<count>): <top 2–3 deferred items, or "—"> — not abandoned, still waiting
+  Pick up: <the summary's Next action, or "—"> · last error: <its Last error, or "—">
+  Transcript: <the summary's Transcript path, or "not kept"> · search: rg -n '<term>' <path>
 [if an open lab campaign:]
 Lab: <slug> — leg <n> ended <state> · Re-arm: <CONTINUE … | STOP …>
 
@@ -102,7 +104,7 @@ No `workplan.md`, or an empty one, but `pending.md` has items → show the top 3
 
 ## Verification discipline (applies to the chunk this brief starts)
 
-When the next chunk is underway, hold to the verification budget: build the whole batch, check it once at its boundary, run only the checks that cover that batch, keep generated test data in one capped temp directory, and take one diagnostic batch per failure. Do not run tests or evals between steps. A suite that already passed on unchanged code does not run again. State in the brief which checks the chunk owes and when, so the next session runs those and no others.
+When the next chunk is underway, hold to the verification budget: build the whole batch, check it once at its boundary, run only the checks that cover that batch, keep generated test data in one capped temp directory, and take one diagnostic batch per failure that tests two to four written hypotheses at once. Do not run tests or evals between steps. A suite that already passed on unchanged code does not run again. State in the brief which checks the chunk owes and when, so the next session runs those and no others.
 
 ## Step 4: Hand off — `go` or one open-ended question
 
@@ -120,4 +122,4 @@ When a **HELD** autopilot run is on file, ask this instead:
 
 Start executing only after the user picks a direction, and follow their pick, not necessarily the top chunk.
 
-**When the question is about the past** ("when did we decide X", "why did we drop Y"), search the records instead of guessing from the canonical files: `scholia history <terms> --plan .` ranks every entry under `plan/`, `_archive/` included, with its date ([MEMORY.md §8](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#8-recall-over-the-records)). No scholia → `rg -n <terms> plan/`.
+**When the question is about the past** ("when did we decide X", "why did we drop Y"), search the records instead of guessing from the canonical files: `scholia history <terms> --plan .` ranks every entry under `plan/`, `_archive/` included, with its date ([MEMORY.md §8](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#8-recall-over-the-records)). No scholia → `rg -n <terms> plan/`. When the question needs an exact error text, path or number from the last session, search its `Transcript:` file with `rg -n` before answering from the summary, because the summary keeps the state and drops the detail.

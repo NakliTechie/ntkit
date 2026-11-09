@@ -1,51 +1,57 @@
 <h1 align="center">ntkit</h1>
 
 <p align="center">
-  <strong>Twenty-three Claude Code skills that give an agent the discipline it is missing: it keeps its decisions, audits the whole app, and reports "done" only behind a verifier.</strong>
+  <strong>Give your coding agent 23 skills to remember decisions, audit your project, and check that fixes work.</strong>
 </p>
 
 <p align="center">
-  Plain markdown. No account, no server, no config file.
+  The skills are Markdown files. Installing them requires no ntkit account or server.
 </p>
 
 <p align="center">
   <a href="../../releases/latest"><img alt="latest release" src="https://img.shields.io/github/v/release/NakliTechie/ntkit?style=flat-square&color=0891b2"></a>
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-0891b2?style=flat-square"></a>
-  <img alt="install: copy-paste" src="https://img.shields.io/badge/install-copy--paste-0891b2?style=flat-square">
+  <img alt="install: shell" src="https://img.shields.io/badge/install-shell-0891b2?style=flat-square">
   <img alt="account: none" src="https://img.shields.io/badge/account-none-0891b2?style=flat-square">
 </p>
 
-![ntkit workflow map: 23 Claude Code skills across five phases, a daily session loop, and the scholia knowledge vault used at every phase](assets/workflow.png)
+![ntkit workflow map: 23 coding agent skills across five phases, a daily session loop, and the scholia knowledge vault used at every phase](assets/workflow.png)
 
 ## Install
 
-| | |
-|---|---|
-| **All your projects** | `cp -r ntkit/skills/* ~/.claude/skills/` |
-| **One project** | `cp -r ntkit/skills/* <project>/.claude/skills/` |
+Clone ntkit, then run the install command for your agent from the checkout.
 
-```bash
+```sh
 git clone https://github.com/NakliTechie/ntkit && cd ntkit
-cp -r skills/* ~/.claude/skills/
 ```
 
-The folder name is the command name: `skills/forward-pass-nt/` becomes `/forward-pass-nt`. The next Claude Code session in any repo sees every command. Run `/forward-pass-nt` first, on the repo you are in. It is read-only and writes nothing until you ask. No config file, no account, no restart.
+| Agent | Install for your user account |
+|---|---|
+| Codex | `./install.sh "$HOME/.agents/skills"` |
+| Claude Code | `./install.sh --claude "$HOME/.claude/skills"` |
+| OpenCode | `./install.sh "${XDG_CONFIG_HOME:-$HOME/.config}/opencode/skills"` |
+
+For another agent that loads [Agent Skills](https://agentskills.io/specification), pass its skills directory to `./install.sh`. The Claude option adds autocomplete hints. For upgrades, move any differing installed copies aside and rerun the installer.
+
+Try a read-only project review. Open the project in your agent and ask for this skill. It reports findings with file locations and a proposed work plan.
+
+```text
+Use the forward-pass-nt skill to review this project.
+```
+
+You can also type `$forward-pass-nt` in Codex, `/forward-pass-nt` in Claude Code or `@forward-pass-nt` in OpenCode v2. The examples below use Claude’s slash notation. Browser and independent review steps require those capabilities in your agent.
+
+To try ntkit in just one project, pass an absolute path inside that project to the same installer. Use `.agents/skills` for Codex, `.claude/skills` with `--claude` for Claude Code, or `.opencode/skills` for OpenCode.
 
 ## Why
 
-Your agent forgets what it decided yesterday. It reviews the diff and never the app around it. It calls a fix "done" when nothing ran to check, and it starts cold every session because nothing wrote down where the last one stopped. When it does run checks, it can run them for hours and leave hundreds of thousands of test files behind, with no feature built.
-
-ntkit adds the missing discipline. A `plan/` folder in each repo holds the decisions and the work. A cold whole-app audit returns a fix-workplan. A report format rejects "done" without a verifier behind it. Verification runs once per finished batch, into a capped temp directory, and `/tidy-nt` clears what a session made.
-
-For systems work (engines, servers, runtimes, kernels) the build order is fixed: feature complete, then benchmark, then optimise. [SUBSTANCE.md](SUBSTANCE.md) states the rules.
-
-**Use a single `CLAUDE.md`** if one file of standing instructions is your whole project. **Use [pi-workflows](https://github.com/osolmaz/pi-workflows)** for the six-point authoring standard alone; [`AUTHORING.md`](AUTHORING.md) borrows its shape. **Use your agent's own memory** if you need continuity inside one session only.
+When you switch agents or start a new session, you can lose the reason for a decision and the list of unfinished work. ntkit keeps both in your repository. Its review skills can inspect the whole app and name the check that proves a fix works.
 
 ## Pick up where you stopped
 
 Each repo keeps a gitignored `plan/` folder with three files: `history.md` (decisions, log, dead ends), `pending.md` (now, parked, open questions) and `workplan.md` (chunked, checkboxed work). Set `NT_PLAN_STORE` to keep every plan in one backed-up folder ([MEMORY.md §0](MEMORY.md#0-where-plan-lives)). `/windup-nt` writes them at the end of a session. `/resume-nt` reads them at the start and names the state.
 
-`-nt` is a namespace (NakliTechie) so the commands do not collide with yours. Rename freely.
+The `-nt` suffix keeps the skill names distinct from other installed commands.
 
 ## Carry your preferences across agents
 
@@ -54,6 +60,8 @@ Every new agent asks again who you are, how you write and how you work. `/prefs-
 ## Run it unattended
 
 `/autopilot-nt` works a workplan overnight in its own worktree. It merges a green gate to main and holds a red one on its own branch.
+
+The example uses the Claude Code CLI. Other hosts need their own non-interactive runner and permissions.
 
 ```cron
 0 2 * * *  cd ~/code/myproject && timeout 6h claude -p "/autopilot-nt" --dangerously-skip-permissions >> ~/.ntkit-cron.log 2>&1
@@ -94,19 +102,14 @@ The knowledge vault is a separate tool, [scholia](https://github.com/NakliTechie
 ## Verify it yourself
 
 ```bash
-for f in skills/*/SKILL.md; do
-  for k in description entry exit writes; do
-    grep -q "^$k:" "$f" || echo "missing $k: $f"
-  done
-done
-tests/run.sh    # free, seconds: the scripts skills ship, and every eval check can fail
-evals/run.sh    # model runs: a fixture project, one prompt, a deterministic check
+tests/run.sh
+evals/run.sh --dry-run decide-nt-appends-one-line   # preview one model evaluation and its budget
 ```
 
-Every skill states its contract in frontmatter (`entry`, `exit`, `writes`), so a run that cannot satisfy `entry` refuses, and `exit` names a check. The loop prints nothing when all 23 hold; [`AUTHORING.md`](AUTHORING.md) is the standard. A `/research-nt` report counts as verified only when `check.py gates` exits 0. `evals/run.sh` needs one login first: `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login` ([AUTHORING §11](AUTHORING.md#11-test-it)).
+The local suite checks the skill files, both install formats, bundled scripts and evaluation fixtures. For model-based checks, the evaluation runner uses Claude Code and requires a separate login. See [the evaluation instructions](AUTHORING.md#11-test-it).
 
 ## License
 
-MIT © Chirag Patnaik. `/reclaim-nt` scans with a fork of [disktree](https://github.com/tobi/disktree) by Tobias Lütke (MIT). `/research-nt` adapts prompts from [LongCat-DeepResearch](https://github.com/meituan-longcat/LongCat-DeepResearch) by Meituan's LongCat team (MIT). `/package-nt` renders its launch video with [brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), vendored with its license. The diff-review method and scanner list in `/forward-pass-nt` come from [OpenQodex](https://github.com/openqodex/openqodex) by the OpenQodex team (Apache-2.0).
+MIT © Chirag Patnaik. The skill authoring standard draws on [pi-workflows](https://github.com/osolmaz/pi-workflows). `/reclaim-nt` scans with a fork of [disktree](https://github.com/tobi/disktree) by Tobias Lütke (MIT). `/research-nt` adapts prompts from [LongCat-DeepResearch](https://github.com/meituan-longcat/LongCat-DeepResearch) by Meituan's LongCat team (MIT). `/package-nt` renders its launch video with [brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), vendored with its license. The diff-review method and scanner list in `/forward-pass-nt` come from [OpenQodex](https://github.com/openqodex/openqodex) by the OpenQodex team (Apache-2.0).
 
 [AUTHORING](AUTHORING.md) · [STATES](STATES.md) · [ATTEST](ATTEST.md) · [SUBSTANCE](SUBSTANCE.md) · [MEMORY](MEMORY.md) · [DRIVER](DRIVER.md) · [CHANGELOG](CHANGELOG.md) · [github.com/NakliTechie](https://github.com/NakliTechie)

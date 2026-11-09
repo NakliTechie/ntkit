@@ -381,9 +381,14 @@ def load_log(run: Path) -> tuple[list[dict], list[str]]:
         if not line.strip():
             continue
         try:
-            entries.append(json.loads(line))
+            row = json.loads(line)
         except json.JSONDecodeError:
             bad.append(f"fetch-log.jsonl line {n} is not JSON")
+            continue
+        if isinstance(row, dict):
+            entries.append(row)
+        else:
+            bad.append(f"fetch-log.jsonl line {n} is not a JSON object")
     return entries, bad
 
 
@@ -515,8 +520,9 @@ def cmd_assemble(run: Path, _args) -> int:
         first = next((ln.strip() for ln in question_path.read_text(encoding="utf-8").splitlines()
                       if ln.strip()), "")
         title = first.lstrip("# ").strip() or title
-    why_not = provenance(load_log(run)[0])
-    problems, omitted = [], []
+    entries, bad_log = load_log(run)
+    why_not = provenance(entries)
+    problems, omitted = list(bad_log), []
     out = [f"# {title}", ""]
     mains = dict(spec.mains)
     current_main = None
@@ -808,6 +814,12 @@ def cmd_gates(run: Path, args) -> int:
     spec = load_spec(run)
     if spec.errors:
         print("cannot check: spec.md is invalid; run `check.py spec` for the list")
+        return 1
+    bad_log = load_log(run)[1]
+    if bad_log:   # provenance rests on the log: a row that does not parse blocks every gate
+        print(f"cannot check: fetch-log.jsonl has {len(bad_log)} malformed row(s)")
+        for p in bad_log:
+            print(f"  - {p}")
         return 1
     without = {w.strip().lower() for w in (args.without or "").split(",") if w.strip()}
     unknown = without - {"g3"}

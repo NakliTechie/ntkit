@@ -11,7 +11,7 @@ A model is a Python file that defines:
 Usage: statecheck.py MODEL.py [--break-guards] [--max-states N] [--json]
   Walks every reachable state breadth-first, so a broken rule is reported with its shortest path.
   --break-guards  for each guard, switch it off alone and report how many steps break a rule
-Exit 0 every rule holds · 1 a rule fails (or the state limit was hit) · 2 bad model or usage.
+Exit 0 every rule holds · 1 a rule fails, or any walk hit the state limit · 2 bad model or usage.
 Standard library only.
 """
 import argparse
@@ -54,8 +54,12 @@ def explore(mod, off=frozenset(), limit=1_000_000):
     for s in mod.init():
         k = freeze(s)
         if k not in parent:
+            if len(parent) >= limit:
+                return len(parent), 0, None, seen_guards, True
             parent[k], depth[k] = None, 0
             queue.append(k)
+    if not parent:
+        raise ValueError("init() yields no starting state")
     longest = 0
     while queue:
         k = queue.popleft()
@@ -86,6 +90,9 @@ def main():
     p.add_argument("--max-states", type=int, default=1_000_000)
     p.add_argument("--json", action="store_true")
     a = p.parse_args()
+    if a.max_states < 1:
+        print("statecheck: --max-states must be at least 1", file=sys.stderr)
+        return 2
     try:
         mod = load(a.model)
         n, longest, broken, guards, capped = explore(mod, limit=a.max_states)
@@ -129,7 +136,8 @@ def main():
             else:
                 print(f"  without {r['guard']}: every rule still holds — another guard covers it, "
                       f"or this guard is dead")
-    return 1 if (broken or capped) else 0
+    guard_capped = any(r["capped"] for r in out["guards"])
+    return 1 if (broken or capped or guard_capped) else 0
 
 
 if __name__ == "__main__":

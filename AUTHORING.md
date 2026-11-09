@@ -155,8 +155,9 @@ two costs:
 - **`evals/run.sh`** makes one model run per case, in a scratch project built from a
   fixture (`evals/fixtures/`) with this checkout's skills installed. It runs under its
   own Claude config dir, because a skill in `~/.claude/skills/` loads in every run and
-  beats a project skill of the same name. Log that dir in once:
-  `CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login`.
+  beats a project skill of the same name. Each run gets a throwaway `HOME` and a copy of
+  that dir. Create a token once (`CLAUDE_CONFIG_DIR=~/.ntkit-eval claude setup-token`) and
+  export it as `NT_EVAL_OAUTH_TOKEN`; without it the run refuses.
 - **`evals/run.sh --runs N --without <path>`** asks whether a rule changes behaviour. It
   runs each case N times as checked out and N times with one change: a file or folder
   under `skills/` deleted, or a `.patch` applied, so one paragraph can be switched off.

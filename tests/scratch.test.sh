@@ -10,6 +10,11 @@ mkdir -p "$sp/capture" "$sp/comp" "$sp/.hidden" "$old" "$empty" "$t/plan"
 head -c 8192 /dev/zero >"$sp/capture/a.png"; head -c 4096 /dev/zero >"$sp/comp/index.html"; echo x >"$sp/probe.json"; echo y >"$sp/.hidden/h"
 head -c 2048 /dev/zero >"$old/x"; find "$proj/sess-old" -exec touch -t 202001010000 {} +   # idle for years
 live=$proj/sess-live/scratchpad; mkdir -p "$live"; echo z >"$live/render.log"            # written just now
+paused=$proj/sess-paused/scratchpad; mkdir -p "$paused"; echo p >"$paused/p"   # scratch idle, transcript fresh
+find "$proj/sess-paused" -exec touch -t 202001010000 {} +
+mkdir -p "$t/transcripts/proj"; echo '{}' >"$t/transcripts/proj/sess-paused.jsonl"
+echo '{}' >"$t/transcripts/proj/sess-old.jsonl"; touch -t 202001010000 "$t/transcripts/proj/sess-old.jsonl"
+export NT_TRANSCRIPTS=$t/transcripts
 printf '%s\n' '- [x] done item names probe.json' >"$t/plan/workplan.md"
 printf '%s\n' '## Now' '- [~] re-cut the video from scratchpad comp/ tomorrow' >"$t/plan/pending.md"
 out=$(sh "$script" "$sp" "$t/plan"); bad=0
@@ -20,6 +25,7 @@ expect drop "$sp/.hidden"
 expect keep "$sp/comp"               # an open item names it
 expect older "$old"
 expect recent "$live"                # a sibling written today may be a live session: never offered for deletion
+expect recent "$paused"              # idle scratch but a fresh transcript: the session may resume
 printf '%s\n' "$out" | grep -q "sess-empty" && { echo "FAIL: an empty earlier session is listed"; bad=1; }
 # ext4 (Linux) reports 4 KB for an empty folder where APFS reports 0; an empty session stays unlisted there too.
 mkdir "$t/bin"; realdu=$(command -v du)

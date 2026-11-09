@@ -45,12 +45,20 @@ cat >"$t/bin/claude" <<'EOF'
 #!/bin/sh
 [ "$1" = auth ] && { echo '{"loggedIn": true}'; exit 0; }
 printf '%s' "$HOME" >seen-home; mkdir -p "$HOME/.claude" && : >"$HOME/.claude/touched"
+mkdir -p "$HOME/Library/Keychains" && : >"$HOME/Library/Keychains/touched"
+: >"$CLAUDE_CONFIG_DIR/touched"; [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || exit 9
 echo '{"result": "ok", "total_cost_usd": 0, "num_turns": 1, "usage": {}}'
 EOF
 chmod +x "$t/bin/claude"
-HOME=$t/realhome PATH="$t/bin:$PATH" NT_EVAL_CONFIG_DIR=$t/cfg sh "$t/h/evals/run.sh" home-probe \
+mkdir -p "$t/realhome/Library/Keychains" "$t/cfg"; : >"$t/cfg/orig"
+HOME=$t/realhome PATH="$t/bin:$PATH" NT_EVAL_CONFIG_DIR=$t/cfg NT_EVAL_OAUTH_TOKEN=tok sh "$t/h/evals/run.sh" home-probe \
   >"$t/o" 2>&1 || { echo "FAIL: stubbed run failed:"; sed 's/^/  | /' "$t/o"; bad=1; }
-[ -z "$(ls -A "$t/realhome")" ] || { echo "FAIL: the eval wrote under the caller's HOME"; bad=1; }
+[ "$(cd "$t/realhome" && find . -mindepth 1 | sort | tr '\n' ' ')" = "./Library ./Library/Keychains " ] \
+  || { echo "FAIL: the eval wrote under the caller's HOME or keychain"; bad=1; }
+[ "$(ls -A "$t/cfg")" = orig ] || { echo "FAIL: the eval wrote into the real config dir"; bad=1; }
+# with no token and no keychain opt-in, the run refuses before any model call
+rc=0; HOME=$t/realhome PATH="$t/bin:$PATH" NT_EVAL_CONFIG_DIR=$t/cfg sh "$t/h/evals/run.sh" home-probe >"$t/o2" 2>&1 || rc=$?
+[ "$rc" -eq 2 ] && grep -q 'claude setup-token' "$t/o2" || { echo "FAIL: no-token run was not refused (exit $rc)"; bad=1; }
 
 tab=$(printf '\t')
 {

@@ -128,6 +128,43 @@ if len(log(d)) != before + 1:
 port = srv.server_address[1]
 expect("connects to the checked address", run(d, f"http://rebind.test:{port}/notes.txt", "--section", "S3.4"), 0, "Line two.")
 
+# --- proxy variables are ignored: a proxy would receive the unchecked target URL ----------
+proxied = []
+class Proxy(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+    def do_GET(self):
+        proxied.append(self.path)
+        body = b"PROXIED " + self.path.encode()
+        self.send_response(200); self.send_header("Content-Type", "text/plain")
+        self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+psrv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Proxy)
+threading.Thread(target=psrv.serve_forever, daemon=True).start()
+proxy_url = f"http://127.0.0.1:{psrv.server_address[1]}"
+proxy_keys = ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY",
+              "http_proxy", "https_proxy", "all_proxy", "no_proxy")
+saved_env = {k: os.environ.pop(k, None) for k in proxy_keys}
+os.environ["HTTP_PROXY"] = os.environ["HTTPS_PROXY"] = proxy_url
+try:
+    expect("proxy set: private http target refused", run(d, "http://10.255.255.1/secret", "--section", "S4.1"),
+           1, "non-public address (10.255.255.1)")
+    expect("proxy set: private https target refused", run(d, "https://10.255.255.1/secret", "--section", "S4.1"),
+           1, "non-public address (10.255.255.1)")
+    expect("proxy set: redirect to a private address refused", run(d, f"{base}/to-private", "--section", "S4.1"),
+           1, "non-public address (10.255.255.1)")
+    got = run(d, f"{base}/notes.txt", "--section", "S4.2")
+    expect("proxy set: local test server still fetched directly", got, 0, "Line two.")
+    if "PROXIED" in got[1]:
+        failures.append("proxy set: the page came from the proxy\n" + got[1])
+finally:
+    for k in proxy_keys:
+        os.environ.pop(k, None)
+        if saved_env[k] is not None:
+            os.environ[k] = saved_env[k]
+    psrv.shutdown()
+if proxied:
+    failures.append(f"the proxy received requests: {proxied}")
+
 # --- the real guard ----------------------------------------------------------
 for host in ("127.0.0.1", "localhost", "169.254.169.254", "10.0.0.1", "192.168.1.1", "::1",
              "100.100.100.100", "100.64.0.1", "224.0.0.1", "::ffff:127.0.0.1"):

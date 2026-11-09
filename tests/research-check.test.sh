@@ -242,6 +242,16 @@ d = built("badlog")
 with open(d / "fetch-log.jsonl", "a") as fh:
     fh.write("not json\n")
 expect("section: corrupt fetch log", run("section", d, "S1.1"), 1, "line 6 is not JSON")
+d = built("badlog-object")
+with open(d / "fetch-log.jsonl", "a") as fh:
+    fh.write("[1]\n")
+expect("section: fetch-log row that is not an object", run("section", d, "S1.1"), 1, "line 6 is not a JSON object")
+d = fresh("assemble-badlog")
+with open(d / "fetch-log.jsonl", "a") as fh:
+    fh.write("not json\n")
+expect("assemble: corrupt fetch log", run("assemble", d), 1, "fetch-log.jsonl line 6 is not JSON")
+if (d / "draft.md").exists():
+    failures.append("assemble wrote draft.md despite a corrupt fetch log")
 
 # --- G2 structure (advisory) ------------------------------------------------
 d = with_section("g2-leak", "S1.2", SECTIONS["S1.2"].replace("See S2.1", "See S1.5"))
@@ -414,6 +424,10 @@ expect("false removal rejected", run("gates", d), 1, "sentence remains")
 review["claims"][0].update(verdict="supported", note="reviewed against fixture")
 (d / "repair-review.json").write_text(json.dumps(review))
 expect("reviewed repair passes", run("gates", d), 0, "VERIFIED")
+with open(d / "fetch-log.jsonl", "a") as fh:
+    fh.write("not json\n")
+expect("gates: corrupt fetch log blocks VERIFIED", run("gates", d), 1, "fetch-log.jsonl line 6 is not JSON")
+expect("gates --without g3: corrupt fetch log still blocks", run("gates", d, "--without", "g3"), 1, "fetch-log.jsonl line 6 is not JSON")
 
 # --- could not run ----------------------------------------------------------
 expect("missing run dir", run("gates", work / "nope"), 2, "not found")

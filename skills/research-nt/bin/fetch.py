@@ -13,6 +13,7 @@ Rules it enforces, not the agent:
 - http and https only; hosts that resolve to any address that is not global unicast
   (private, loopback, link-local, carrier-grade NAT, reserved, multicast) are refused, redirects
   included. The host is resolved once per connection and the socket goes to the checked address;
+  proxy environment variables are ignored, so no connection goes to an unchecked host;
 - a per-section fetch cap: `fetches_per_section` from RUN_DIR/spec.md (default 15), and
   3x that for `--section plan`. Every attempt counts, failed or not. A per-section lock
   covers counting, fetching and logging, including the shared planning budget;
@@ -211,7 +212,10 @@ def pdf_to_text(raw: bytes) -> str:
 
 def download(url: str) -> dict:
     check_url(url)
-    opener = urllib.request.build_opener(GuardedRedirect, GuardedHTTPHandler, GuardedHTTPSHandler)
+    # An empty ProxyHandler: proxy variables are ignored. Through a proxy the guard would check
+    # the proxy's address while the proxy fetched the unchecked target.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), GuardedRedirect,
+                                         GuardedHTTPHandler, GuardedHTTPSHandler)
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"})
     try:
         with opener.open(req, timeout=TIMEOUT) as resp:

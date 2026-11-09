@@ -24,19 +24,21 @@ ledger and this script; that would break the skill's stop-lines, and the ledger 
   ideas                           the surprise ledger: experiment id -> proposer, predicted (written before the run),
                                   leg, and once measured: actual, surprise (actual - predicted, sign kept), outcome;
                                   a planted judge case carries judge: true and is left out of `summary`
-  no_judge, judged, judge         init --no-judge; whether the judge is sealed; the planted cases (name, expect, got,
-                                  match). A child or fork copies its parent's judged status when it is carved. A state
+  no_judge, judged, judge         init --no-judge; whether the judge is sealed; the planted cases (name = the planted
+                                  experiment id, expect, got = its recorded outcome, match). A child or fork copies its parent's judged status when it is carved. A state
                                   file with no `judged` key predates the judge and counts as judged.
 
 The judge. Before experiment 1 the agent plants known changes (a no-op, a planted gain, a wrong output, an edit to a
 locked file, ...) on a throwaway branch, runs each through the normal harness and `keep` path under an id predicted
-with `predict --judge`, and records what `keep` returned with `judge --case`. `judge --done` seals it once at least 3
-cases are recorded and all match; until then `predict` refuses ordinary experiments. A mismatch is PARKED (exit 5).
+with `predict --judge`, and records the case with `judge --case <id> --expect V`; the verdict it got is read from that
+id's recorded outcome, never typed in. `judge --done` seals it once at least 3 cases are recorded, all match, and
+together they got each of keep, revert and fail at least once; until then `predict` refuses ordinary experiments. A mismatch is PARKED (exit 5).
 Judge runs spend no experiment budget.
 
 The keep decision runs `check` itself, against the leg's start commit, before any verdict: a violation is a REVERT
 recorded as fail. A KEEP whose surprise is HIGH (|actual - predicted| above the threshold) counts only when fresh
-confirmation runs, alternated with best-so-far, reproduce the gain (`--confirm`, or `--confirm-paired` in paired mode).
+confirmation runs, alternated with best-so-far, reproduce the gain (`--confirm-base` with `--confirm`, or
+`--confirm-paired` in paired mode).
 
 The surprise ledger. Every experiment is predicted before it runs (`predict`), and `keep` and `record` refuse an
 id with no prediction, the same way `keep` refuses a failed gate. Because the ledger sits in the sealed state file,
@@ -56,10 +58,12 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
                              every lock glob must match a file; refuses a directory initialised before; X is the
                              high-surprise threshold in metric units (default: 10% of |predicted|, per experiment);
                              --no-judge skips the judge (only with the owner's say-so)
-  judge <dir> --case NAME --expect V --got V | --done
-                             V is keep, revert or fail. Records one planted case (refuses a repeated name, a child or
-                             fork, a --no-judge campaign, a sealed judge); exit 5 PARKED when got differs from expect.
-                             --done seals the judge: exit 5 PARKED when any case mismatched, refused under 3 cases
+  judge <dir> --case ID --expect V | --done
+                             V is keep, revert or fail. Records one planted case: ID is an experiment predicted with
+                             `predict --judge`, and got is its recorded outcome (refuses an ID with no such row or no
+                             outcome yet, a repeated ID, a child or fork, a --no-judge campaign, a sealed judge);
+                             exit 5 PARKED when got differs from expect. --done seals the judge: exit 5 PARKED when
+                             any case mismatched; refused under 3 cases or when keep, revert or fail is never got
   check <dir> [--base REF]   seal intact; locked files unchanged and none added; contract.md unchanged; every
                              change since --base (default: the leg's start) inside the fence of every ancestor
   noise <v> <v> <v>..        spread (max - min) and mean of re-measures of the unchanged baseline
@@ -72,13 +76,15 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
                              record the gate failures observed on the start commit (none: a clean start); an ID is
                              the failure's own text, e.g. "olmoe/prompt 4/decode/6/layer-13"
   keep  <dir> --id ID --gate pass|fail|known [--failures ID..] (--noise X --base v.. --cand v.. [--control v..]
-        [--confirm v..] | --paired d.. --actual V [--confirm-paired d..]) [--actual V]
+        [--confirm-base v.. --confirm v..] | --paired d.. --actual V [--confirm-paired d..])
                              first runs `check` against the leg's start: any problem prints
                              "REVERT: lab.py check fails: ...", records fail and exits 4
-                             --confirm / --confirm-paired: a KEEP with HIGH surprise is refused (exit 1, nothing
-                             recorded) without them; with them it keeps only if sign*(mean(confirm) - mean(base)) >
-                             noise, or the paired interval over the confirm gains (at least 10) excludes zero, and
-                             reverts otherwise. Results that are not HIGH-surprise KEEPs ignore them
+                             --confirm-base / --confirm / --confirm-paired: a KEEP with HIGH surprise is refused
+                             (exit 1, nothing recorded) without them. --confirm-base and --confirm are fresh readings
+                             of best-so-far and the candidate, taken alternately (at least 3 each, counts differing by
+                             at most 1); it keeps only if sign*(mean(confirm) - mean(confirm-base)) > noise, or the
+                             paired interval over the confirm gains (at least 10) excludes zero, and reverts
+                             otherwise. Results that are not HIGH-surprise KEEPs ignore them
                              --control: readings of the simple-fix control (the cheapest standard fix for the same
                              symptom, applied to best-so-far); a KEEP must also beat the control's mean by more than
                              the noise, or it reverts because the plain fix explains the gain
@@ -87,8 +93,9 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
                              baseline is recorded. Refused (exit 1) when ID has no prediction or already has a
                              result; exit 0 KEEP when the gate passed and the gain beats the noise (X >= 0), or the paired 95% bootstrap
                              interval over at least 10 items excludes zero; exit 4 REVERT otherwise. Records the
-                             outcome and surprise (actual defaults to the mean of --cand; a failed gate records no
-                             actual, because its metric does not count)
+                             outcome and surprise (actual is the mean of --cand, and --actual with --cand is a usage
+                             error, so HIGH surprise cannot be hidden; --actual is the paired-mode metric; a failed
+                             gate records no actual, because its metric does not count)
   record <dir> <id> --outcome revert|fail [--actual V]
                              the result of an experiment that never reached `keep` (blown cap, scope violation,
                              crash); revert needs --actual; same refusals as keep
@@ -107,6 +114,7 @@ import argparse, hashlib, json, math, os, random, re, subprocess, sys, time
 from pathlib import Path
 
 STATE = "lab.json"
+VERDICTS = ["keep", "revert", "fail"]
 ENDS = ["GOAL-MET", "BUDGET", "STAGNANT", "DRY-WELL", "PARKED"]
 SKIP_DIRS = {".git", ".worktrees", ".build", "node_modules", "__pycache__"}
 
@@ -368,7 +376,7 @@ def cmd_predict(a):
         print("refused: the judge is sealed (or not used); --judge marks a planted case, which only runs before experiment 1"); return 1
     if not a.judge and not judged(s):
         print(f"refused: the judge is not sealed; run the planted cases (`lab.py predict {a.dir} <id> --judge`, `lab.py keep`), "
-              f"record each with `lab.py judge {a.dir} --case <name> --expect <verdict> --got <verdict>`, "
+              f"record each with `lab.py judge {a.dir} --case <id> --expect <verdict>`, "
               f"then `lab.py judge {a.dir} --done`"); return 1
     row = {"proposer": a.proposer, "predicted": a.predicted, "leg": s["legs"],
            "predicted_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "head": git("rev-parse", "HEAD")}
@@ -396,30 +404,41 @@ def cmd_judge(a):
         print("refused: the judge is already sealed; its cases are never rewritten"); return 1
     cases = s.setdefault("judge", [])
     if a.done:
-        if a.case or a.expect or a.got:
-            print("usage: judge --done takes no --case, --expect or --got"); return 2
+        if a.case or a.expect:
+            print("usage: judge --done takes no --case or --expect"); return 2
         bad = [c for c in cases if not c["match"]]
         if bad:
             c = bad[0]
             print(f"PARKED: the judge returned {c['got']} for {c['name']}, expected {c['expect']}; fix the harness or the gates, never the loop"); return 5
         if len(cases) < 3:
             print(f"refused: the judge needs at least 3 planted cases; {len(cases)} recorded"); return 1
+        missing = [v for v in VERDICTS if not any(c["got"] == v for c in cases)]
+        if missing:
+            print("refused: the planted cases must cover every verdict (keep, revert, fail); none got " + ", ".join(missing)); return 1
         s["judged"] = True
         save(a.dir, s)
         ledger("judge-done", a.dir, cases=len(cases))
         print(f"ok: judge sealed, {len(cases)} of {len(cases)} planted cases got their expected verdict; experiment 1 may be predicted")
         return 0
-    if not (a.case and a.case.strip() and a.expect and a.got):
-        print("usage: judge needs --case NAME --expect V --got V, or --done"); return 2
+    if not (a.case and a.case.strip() and a.expect):
+        print("usage: judge needs --case ID --expect V, or --done"); return 2
     if any(c["name"] == a.case for c in cases):
         print(f"refused: judge case {a.case} is already recorded; past rows are never rewritten"); return 1
-    match = a.expect == a.got
-    cases.append({"name": a.case, "expect": a.expect, "got": a.got, "match": match})
+    row = (s.get("ideas") or {}).get(a.case)
+    if row is None or not row.get("judge"):
+        print(f"refused: {a.case} is not a planted experiment; run `lab.py predict {a.dir} {a.case} --judge ...` "
+              "and the keep path first"); return 1
+    got = row.get("outcome")
+    if got not in VERDICTS:
+        print(f"refused: planted experiment {a.case} has no recorded outcome yet; run it through `lab.py keep` "
+              "(or `lab.py record`) first"); return 1
+    match = a.expect == got
+    cases.append({"name": a.case, "expect": a.expect, "got": got, "match": match})
     save(a.dir, s)
-    ledger("judge", a.dir, case=a.case, expect=a.expect, got=a.got, match=match)
+    ledger("judge", a.dir, case=a.case, expect=a.expect, got=got, match=match)
     if not match:
-        print(f"PARKED: the judge returned {a.got} for {a.case}, expected {a.expect}; fix the harness or the gates, never the loop"); return 5
-    print(f"ok: judge case {a.case} got {a.got} as expected; {len(cases)} recorded"); return 0
+        print(f"PARKED: the judge returned {got} for {a.case}, expected {a.expect}; fix the harness or the gates, never the loop"); return 5
+    print(f"ok: judge case {a.case} got {got} as expected; {len(cases)} recorded"); return 0
 
 
 def cmd_record(a):
@@ -445,6 +464,8 @@ def cmd_keep(a):
     row = unrecorded(a.dir, s, a.id, a.actual)
     if row is None:
         return 1
+    if a.cand and a.actual is not None:
+        print("usage: with --cand the recorded actual is the mean of --cand; drop --actual (it is only for --paired)"); return 2
     problems, _ = check_problems(a.dir, s)
     if problems:
         print("REVERT: lab.py check fails: " + "; ".join(problems))
@@ -487,7 +508,7 @@ def cmd_keep(a):
             else:
                 verdict = "REVERT"
                 print(f"REVERT: the simple-fix control reaches it (candidate leads the control by {over:.6g}, noise {a.noise:.6g})")
-        actual = a.actual if a.actual is not None else mean(a.cand)
+        actual = mean(a.cand)
     if verdict == "KEEP" and abs(actual - row["predicted"]) > threshold(s, row["predicted"]):
         # a HIGH-surprise win counts only when fresh runs, alternated with best-so-far, reproduce it
         if a.paired:
@@ -498,9 +519,14 @@ def cmd_keep(a):
             lo, hi = paired_interval(sign, a.confirm_paired)
             held, what = lo > 0, f"paired 95% interval [{lo:.6g}, {hi:.6g}] over {len(a.confirm_paired)} items"
         else:
-            if not a.confirm:
-                print("refused: a HIGH-surprise win needs --confirm, readings from fresh runs alternated with best-so-far; nothing recorded"); return 1
-            gain = sign * (mean(a.confirm) - mean(a.base))
+            if not a.confirm or not a.confirm_base:
+                print("refused: a HIGH-surprise win needs --confirm-base and --confirm, fresh readings of best-so-far and the "
+                      "candidate taken alternately; nothing recorded"); return 1
+            if len(a.confirm) < 3 or len(a.confirm_base) < 3:
+                print("usage: --confirm-base and --confirm need at least 3 readings each"); return 2
+            if abs(len(a.confirm) - len(a.confirm_base)) > 1:
+                print("usage: --confirm-base and --confirm are taken alternately, so their counts differ by at most 1"); return 2
+            gain = sign * (mean(a.confirm) - mean(a.confirm_base))
             held, what = gain > a.noise, f"{gain:.6g} against noise {a.noise:.6g}"
         if held:
             print(f"confirm: the HIGH-surprise gain held on fresh runs ({what})")
@@ -679,9 +705,9 @@ def main(argv=None):
     k.add_argument("--base", type=float, nargs="+"); k.add_argument("--cand", type=float, nargs="+")
     k.add_argument("--paired", type=float, nargs="+"); k.add_argument("--control", type=float, nargs="+")
     k.add_argument("--confirm", type=float, nargs="+"); k.add_argument("--confirm-paired", type=float, nargs="+")
-    verdicts = ["keep", "revert", "fail"]
+    k.add_argument("--confirm-base", type=float, nargs="+")
     jd = sub.add_parser("judge"); jd.add_argument("dir"); jd.add_argument("--case")
-    jd.add_argument("--expect", choices=verdicts); jd.add_argument("--got", choices=verdicts)
+    jd.add_argument("--expect", choices=VERDICTS)
     jd.add_argument("--done", action="store_true")
     sp = sub.add_parser("spend"); sp.add_argument("dir"); sp.add_argument("--n", type=int, default=1)
     ch = sub.add_parser("child"); ch.add_argument("dir"); ch.add_argument("target")

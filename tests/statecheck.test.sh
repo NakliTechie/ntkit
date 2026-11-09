@@ -50,6 +50,21 @@ printf 'def init():\n    yield 1\ndef actions(s, g):\n    return []\nRULES = {"x
 [ "$(rcof bad.py)" -eq 2 ] || fail "a non-dict state was not a model error"
 grep -q 'bad model: TypeError' out || fail "bad model message missing"
 ! grep -q Traceback out || fail "bad model raised a traceback"
+printf 'def init():\n    return iter(())\ndef actions(s, g):\n    return []\nRULES = {"x": lambda s: True}\n' > none.py
+[ "$(rcof none.py)" -eq 2 ] || fail "a model with no starting state passed"
+grep -q 'no starting state' out || fail "no-start message missing"
+[ "$(rcof refund.py --max-states 0)" -eq 2 ] || fail "--max-states 0 was accepted"
+# a guard whose removal opens an unbounded walk: the guard-off run hits the limit, so the run fails
+cat > grow.py <<'PY'
+def init():
+    yield {"n": 0}
+def actions(s, g):
+    if g("cap", s["n"] < 3):
+        yield "step", {"n": s["n"] + 1}
+RULES = {"n stays small": lambda s: s["n"] < 1000}
+PY
+[ "$(rcof grow.py --break-guards --max-states 50)" -eq 1 ] || fail "a capped guard-off walk passed"
+grep -q 'without cap: stopped at the state limit' out || fail "capped guard-off walk not reported"
 printf 'x = 1\n' > empty.py
 [ "$(rcof empty.py)" -eq 2 ] || fail "a model with no init was accepted"
 echo "statecheck: ok"

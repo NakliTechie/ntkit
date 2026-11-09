@@ -61,8 +61,8 @@ def resolve(root, rel, start, end, cache, contained=False):
     """
     full = os.path.join(root, os.path.expanduser(rel))
     if contained:
-        top = os.path.abspath(root)
-        if os.path.commonpath([top, os.path.abspath(full)]) != top:
+        top = os.path.realpath(root)    # realpath, so a symlink inside cannot point outside
+        if os.path.commonpath([top, os.path.realpath(full)]) != top:
             return "outside", None
     if not os.path.isfile(full):
         return "missing", None

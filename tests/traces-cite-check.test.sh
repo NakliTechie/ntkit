@@ -57,6 +57,9 @@ expect "missing archive is a usage error" 2 "no archive at" "$work/clean.md" --h
 echo '{"n":1}' >"$work/home/outside.jsonl"
 { finding 1 '`claude/../../outside.jsonl:1`' skill; } >"$work/escape.md"
 expect "pointer leaving the archive fails" 1 "path leaves the archive" "$work/escape.md"
+ln -s "$work/home/outside.jsonl" "$work/home/archive/claude/link.jsonl"
+{ finding 1 '`claude/link.jsonl:1`' skill; } >"$work/symlink.md"
+expect "symlink leaving the archive fails" 1 "path leaves the archive" "$work/symlink.md"
 
 expect "missing findings file is a usage error" 2 "no findings file at" "$work/absent.md"
 expect "--home without a value is a usage error" 2 "Usage:" "$work/clean.md" --home

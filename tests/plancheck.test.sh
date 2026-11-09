@@ -18,6 +18,13 @@ expect() { # expect <description> <exit code> <substring> <plan dir> [plancheck 
     echo "FAIL $desc: output lacks '$want'"; printf '%s\n' "$out" | sed 's/^/     | /'; bad=1 ;;
   esac
 }
+reject() { # reject <description> <substring> <plan dir> [plancheck args...]: output must lack it
+  desc=$1; unwanted=$2; dir=$3; shift 3
+  set +e; out=$(python3 "$PC" "$dir" "$@" 2>&1); set -e
+  case $out in *"$unwanted"*)
+    echo "FAIL $desc: output has '$unwanted'"; printf '%s\n' "$out" | sed 's/^/     | /'; bad=1 ;;
+  esac
+}
 base() { # base <dir>: records every case shares
   mkdir -p "$1/plan/_archive"
   cat >"$1/plan/2026-09-10-summary.md" <<'EOF'
@@ -140,6 +147,47 @@ cat >"$p/plan/pending.md" <<'EOF'
 - First follow-up  [from: 2026-09-12-summary]
 EOF
 expect "two uncited adds of three are two ghosts" 1 "2 ghost(s)" "$p"
+# An unquoted citation cannot say which add it answers: one finding names every candidate line.
+expect "an unquoted citation leaves all three adds as candidates" 1 "2026-09-12-summary.md:4,5,6" "$p"
+
+# 14. a quoted citation answers the add whose text holds its words; the other adds are the ghosts.
+q="$work/quoted-impact"; base "$q"
+cp "$p/plan/2026-09-12-summary.md" "$q/plan/"
+cat >"$q/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- Third follow-up  [from: 2026-09-12-summary "third follow-up"]
+EOF
+expect "a quoted citation leaves exactly the other adds as ghosts" 1 "2 ghost(s)" "$q"
+expect "the first uncited add is a ghost" 1 "2026-09-12-summary.md:4 " "$q"
+expect "the second uncited add is a ghost" 1 "2026-09-12-summary.md:5 " "$q"
+reject "the quoted add is not a ghost" "2026-09-12-summary.md:6" "$q"
+
+# 15. quoted and unquoted together: the quote is matched first, the count covers the rest.
+x="$work/mixed-impact"; base "$x"
+cp "$p/plan/2026-09-12-summary.md" "$x/plan/"
+cat >"$x/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- Second follow-up  [from: 2026-09-12-summary "second follow-up"]
+- Some follow-up  [from: 2026-09-12-summary]
+EOF
+expect "one add missing of two candidates is one ghost" 1 "1 ghost(s)" "$x"
+expect "the ghost names both unquoted candidates" 1 "2026-09-12-summary.md:4,6" "$x"
+
+# 16. an add line that names another source with its own [from:] tag is that source's to cite,
+# not this record's: its item cites [from: hand], and no ghost is reported.
+h="$work/handtag"; base "$h"
+printf '# Summary 2026-09-13\n\n## Impact\n- pending.md/Now — add: write the release notes  [from: hand]\n' >"$h/plan/2026-09-13-summary.md"
+cat >"$h/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- [ ] Write the release notes  [from: hand]
+EOF
+expect "an add tagged with another source is not this record's ghost" 0 "Replay: clean" "$h"
 
 # 11. /research-nt reports under plan/research/ are records: a flat file by its stem,
 # a run folder by its folder name.

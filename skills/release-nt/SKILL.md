@@ -1,17 +1,19 @@
 ---
+name: release-nt
 description: "Cut a release: semver, CHANGELOG, tag, push, GitHub release, verify the deploy live."
-argument-hint: "[major | minor | patch | x.y.z]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent"]
-entry: "verifying with gate green — no failing verifier, no open fix-workplan items; refuse otherwise (override via /decide-nt)"
-exit: "tag + GitHub release + CHANGELOG landed and the deploy verified live, or an explicit refusal naming the guard"
-writes: "CHANGELOG.md, version bump, git tag"
+allowed-tools: Bash Glob Grep Read Edit Write Agent
+metadata:
+  argument-hint: "[major | minor | patch | x.y.z]"
+  entry: "verifying with gate green — no failing verifier, no open fix-workplan items; refuse otherwise (override via /decide-nt)"
+  exit: "tag + GitHub release + CHANGELOG landed and the deploy verified live, or an explicit refusal naming the guard"
+  writes: "CHANGELOG.md, version bump, git tag"
 ---
 
 Cut a versioned release: suggest the bump, write the CHANGELOG and release notes, then — **only after the user confirms** — commit, tag, push, create the GitHub release, and verify the deploy live. `/package-nt` drafts the announcement; this does the mechanics.
 
-`$SKILL` is this skill's base directory, printed when the skill loads; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
+`$SKILL` is the directory containing this skill's loaded `SKILL.md`; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
 
-`$ARGUMENTS` (optional): `major` / `minor` / `patch` or an explicit version. Empty → suggest one from the commits (conventional-commit prefixes when the repo uses them).
+Optional input: `major` / `minor` / `patch` or an explicit version. Empty → suggest one from the commits (conventional-commit prefixes when the repo uses them).
 
 Not in a git repo → ask which project; this command tags and pushes.
 
@@ -42,7 +44,7 @@ A push is not a deploy. Against the deployed URL:
 - Re-check what only fails in production: hosts serve `index.html` for a missing file, so `/robots.txt`, `/llms.txt`, redirects and 404s need the right status **and** `content-type` from the live host.
 - Confirm the response headers the repo claims (cache-control, security headers) are applied.
 
-**Social card.** If this release changed the repo's social card image, re-upload it through Claude-in-Chrome and verify it by hash, per `$SKILL/../package-nt/references/social-preview.md`.
+**Social card.** If this release changed the repo's social card image, use a signed-in browser with file upload support (or hand the user the card), then verify the uploaded image by hash, per `$SKILL/../package-nt/references/social-preview.md`.
 
 ## Phase 4 — Handoff
 

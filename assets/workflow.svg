@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 990" role="img">
 <title>ntkit — when to use what</title>
-<desc>A light-mode workflow map of ntkit's 23 Claude Code skills across five phases, plus a daily session loop and a knowledge vault used at every phase.</desc>
+<desc>A light-mode workflow map of ntkit's 23 coding agent skills across five phases, plus a daily session loop and a knowledge vault used at every phase.</desc>
 <style>
 text{font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 .h1{fill:#1f2328;font-size:58px;font-weight:800}

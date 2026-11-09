@@ -1,19 +1,21 @@
 ---
+name: demo-nt
 description: "Boot the app on the demo seed, open a feature explorer, optionally host it publicly."
-argument-hint: "[focus: seed | explorer | launch | host | probe] [host=<demo-hostname>] [files=<storage-hostname>]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent", "mcp__claude-in-chrome__*", "mcp__Claude_Browser__*"]
-entry: "app boots with the shared demo seed; hosted mode also needs host=<hostname> in a zone the user named"
-exit: "live-app and explorer links handed to the presenter; hosted: every public hostname refused the anonymous probe first"
-writes: "plan/demo-protocol.md (created or updated in place)"
+allowed-tools: Bash Glob Grep Read Edit Write Agent mcp__claude-in-chrome__* mcp__Claude_Browser__*
+metadata:
+  argument-hint: "[focus: seed | explorer | launch | host | probe] [host=<demo-hostname>] [files=<storage-hostname>]"
+  entry: "app boots with the shared demo seed; hosted mode also needs host=<hostname> in a zone the user named"
+  exit: "live-app and explorer links handed to the presenter; hosted: every public hostname refused the anonymous probe first"
+  writes: "plan/demo-protocol.md (created or updated in place)"
 ---
 
-A presenter's launcher for live demos: boot the real app **seeded and ready**, build an **interactive explorer** of what's been built (features, connections, dependencies, inline search), and hand over **clickable links to both**. Drive the browser with Claude in Chrome (a real GPU browser) or the built-in browser pane; Playwright runs through Bash.
+A presenter's launcher for live demos: boot the real app **seeded and ready**, build an **interactive explorer** of what's been built (features, connections, dependencies, inline search), and hand over **clickable links to both**. Use the host’s browser driver or Playwright. For GPU features, choose a browser with GPU access.
 
 If the project has no runnable surface, say so.
 
 ## Inputs and defaults
 
-- **Focus** (`$ARGUMENTS`, optional): `seed` runs Phase 1 only, `explorer` runs Phase 4, `launch` runs Phases 3 and 8 (boot the seeded app, hand over the links). `host` runs Phases 5–7 against an app that already boots; `probe` runs Phase 6 alone. Default: every phase that applies.
+- **Focus** (optional): `seed` runs Phase 1 only, `explorer` runs Phase 4, `launch` runs Phases 3 and 8 (boot the seeded app, hand over the links). `host` runs Phases 5–7 against an app that already boots; `probe` runs Phase 6 alone. Default: every phase that applies.
 - **`host=<hostname>`** (default: unset → **local-only mode**, the demo runs on `127.0.0.1` and nothing is published). Setting it selects **hosted mode**: a public URL served from this machine through a named Cloudflare tunnel. Its registered domain is the only zone the run may touch.
 - **`files=<hostname>`** (default: unset). A second public hostname for object storage, needed only when the app hands browsers presigned storage URLs. Must sit in the same zone as `host=`.
 - **Persona sign-in**: built when the app has accounts; skipped when it has none. Announced either way.

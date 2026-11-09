@@ -5,7 +5,7 @@ Manufacture a genuine newcomer, recipe by surface.
 **Web:**
 - **Wipe everything**: a fresh browser context with no localStorage, sessionStorage, IndexedDB, cookies, cache, service workers, OPFS or picked folders. A new Playwright context is cold by default; in a persistent browser, clear site data first. **Do not seed**; empty is the thing under test.
 - **Serve a production build** on `127.0.0.1` and a known-free port. A zero-build single-file app is served as shipped; say so. **If the build writes into the repo** (an asset-assembly target, a generated `site/`), replicate it into a scratch directory outside the repo and serve from there.
-- **Headless Chromium has no WebGPU.** Walk model-loading beats in real Chrome (`claude-in-chrome`), or capture the pre-model first run and list the model beats as blind spots.
+- **Check WebGPU in the test browser.** Walk model-loading beats in a browser with GPU access, or capture the pre-model first run and list the model beats as blind spots.
 - **Approach from the canonical entry** (the landing URL or repo), with no deep-link shortcuts.
 
 **CLI:**

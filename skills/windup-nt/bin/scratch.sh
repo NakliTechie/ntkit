@@ -1,6 +1,6 @@
 #!/bin/sh
 # List the session scratch /windup-nt must clean on exit. Changes nothing.
-# Claude's session scratchpad (the path its system prompt names) holds intermediate files:
+# The session scratchpad (the directory supplied by the caller) holds intermediate files:
 # captures, renders, clones, probe output. It is session-private, so windup clears it, by name.
 # Prints one tab-separated line per top-level entry, largest first:
 #   <class> <path> <KB> <detail>

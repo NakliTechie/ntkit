@@ -1,10 +1,12 @@
 ---
+name: prefs-nt
 description: "One preferences folder you own; builds every coding agent's global instruction file from it."
-argument-hint: "[init | sync | fold | schedule | unschedule] [dir=<path>] [--push]   e.g. init dir=~/prefs"
-allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob"]
-entry: "init: no preferences folder yet. sync, fold, schedule: a preferences folder holding targets.tsv"
-exit: 'init: `<folder>/targets.tsv` exists and `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --dry-run` exits 0. sync, fold: `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --check` exits 0. schedule: the job is listed and has run once with exit 0. unschedule: the job is no longer listed'
-writes: "the preferences folder; each installed agent's global file in its targets.tsv; fold only: a dated bullet appended to a named project's plan/pending.md; schedule and unschedule only: one launchd plist or one tagged crontab line, created or removed"
+allowed-tools: Bash Read Write Edit Glob
+metadata:
+  argument-hint: "[init | sync | fold | schedule | unschedule] [dir=<path>] [--push]   e.g. init dir=~/prefs"
+  entry: "init: no preferences folder yet. sync, fold, schedule: a preferences folder holding targets.tsv"
+  exit: 'init: `<folder>/targets.tsv` exists and `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --dry-run` exits 0. sync, fold: `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --check` exits 0. schedule: the job is listed and has run once with exit 0. unschedule: the job is no longer listed'
+  writes: "the preferences folder; each installed agent's global file in its targets.tsv; fold only: a dated bullet appended to a named project's plan/pending.md; schedule and unschedule only: one launchd plist or one tagged crontab line, created or removed"
 ---
 
 Every new coding agent asks the same things again: who you are, how you write, how you work. This
@@ -14,14 +16,14 @@ Agents write back through an append-only inbox, so a preference one agent learns
 the next sync. Project facts stay in each repo's `plan/` folder; this folder holds what is true in every
 repo.
 
-`$SKILL` below is this skill's base directory, printed when the skill loads. Use it for every script and
+`$SKILL` below is the directory containing this skill's loaded `SKILL.md`. Use it for every script and
 template path, so a project install runs its own copy.
 
 ## Inputs (defaults announced at the start of the run)
 
 | Input | Default | Effect |
 |---|---|---|
-| mode (`$ARGUMENTS`) | `sync` | `init`, `sync`, `fold`, `schedule` or `unschedule`; see the phases below |
+| mode (invocation text) | `sync` | `init`, `sync`, `fold`, `schedule` or `unschedule`; see the phases below |
 | `dir=<path>` | `$NT_PREFS_DIR`, else `~/.agent-prefs` | The preferences folder; pass it to the script as `--dir`. Set `NT_PREFS_DIR` in your shell profile to keep the folder in a backed-up repo |
 | `--push` (sync and schedule) | off | Pull, then push the folder's git repo. Pushing is outward-facing, so it is granted per run. Git runs only when the folder is the root of its own repo |
 

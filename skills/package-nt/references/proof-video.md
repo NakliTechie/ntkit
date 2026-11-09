@@ -178,10 +178,9 @@ read it. Open `npx hyperframes preview` (Studio) for the user, and render only a
   `curl -sL -o /dev/null -w "%{http_code} %{content_type} %{size_download}"` returns `200 video/mp4` at the file's
   exact byte count. Put the link on its own line under the heading. Watch the editor: the upload inserts text, so
   replace the editor content with the committed README plus the new link, then pull and diff afterwards.
-- **Reddit:** through your own CDP connection to a signed-in browser (one connection per task),
-  since Claude-in-Chrome refuses reddit.com. A video in the body makes it a media post. Lead with the result, not the
+- **Reddit:** use a supported signed-in browser with file upload access. A video in the body makes it a media post. Lead with the result, not the
   project (repeat self-promotion is frowned on in r/LocalLLaMA). Stop before Post. Kill the daemon after.
-- **LinkedIn / X:** Claude-in-Chrome, upload the 16:9 (LinkedIn) or the 9:16 (Shorts, Reels), fill the text from
+- **LinkedIn / X:** in a supported signed-in browser, upload the 16:9 (LinkedIn) or the 9:16 (Shorts, Reels), fill the text from
   `plan/launch-drafts.md`, pick a thumbnail in the video settings, stop before Post.
 - Captions and text live in `plan/launch-drafts.md` (gitignored).
 

@@ -15,19 +15,20 @@ per [`SUBSTANCE.md`](SUBSTANCE.md). This file binds how a command is *written*.
 
 Non-negotiable — it is STATES guard #1. Every command's frontmatter carries:
 
+- `name` matches the skill directory. Use the [Agent Skills format](https://agentskills.io/specification) so clients can discover the same files.
 - `description` — **15 words or fewer**: the trigger (when to reach for it) and its side effect (read-only? drafts only? pushes?). Every installed skill's description sits in context every session under a shared budget; a long one crowds the others.
-- `argument-hint` — the shape of `$ARGUMENTS`, with an example.
-- `allowed-tools` — the smallest set the command actually uses. A read-only command lists no `Write`.
-- `entry` — the state + artifacts it requires. If they are absent the command says so and stops; it never proceeds politely.
-- `exit` — the **machine-checkable** condition that means it finished. Not "did the work" — the check that proves it.
-- `writes` — every `plan/` file it touches, or `nothing`.
+- `metadata.argument-hint` — the expected invocation text, with an example.
+- `allowed-tools` — a space-separated string with the smallest set the command actually uses. A read-only command lists no `Write`.
+- `metadata.entry` — the state + artifacts it requires. If they are absent the command says so and stops; it never proceeds politely.
+- `metadata.exit` — the **machine-checkable** condition that means it finished. Not "did the work" — the check that proves it.
+- `metadata.writes` — every `plan/` file it touches, or `nothing`.
 
 `entry` / `exit` / `writes` are what make the state table enforceable instead of
 decorative. A command that cannot state its exit as a check does not have one yet.
 
 ## 2. Document every input that changes behavior
 
-For each input — in `$ARGUMENTS` or an env var — that affects **scope, authority,
+For each input — in the invocation or an environment variable — that affects **scope, authority,
 safety, routing, or completion**, name it in the body with its **default**. An
 input whose default the reader cannot find is a trap. Prefer a safe default the
 command *announces and logs* over an input it *polls the user* for (guard #4).
@@ -160,7 +161,7 @@ A case is `evals/cases/<name>/` holding `prompt`, `setup.sh`, `check.sh`, and op
 - `setup.sh` generates secrets and other scanner bait at run time. A key-shaped string never lands in ntkit's history.
 
 **Anchor every script path.** A skill runs its own scripts by absolute path: `$SKILL/bin/x.py`
-(the base directory printed when the skill loads) or `~/.claude/skills/<name>/bin/x.py`. Never
+where `$SKILL` is the absolute directory containing the loaded `SKILL.md`. Never
 `bin/x.py`, `./bin/x.py`, or `$(dirname "$0")/...`. The command runs inside someone else's repo,
 so a relative path runs whatever that repo put there; and `$0` in an agent's shell names the shell
 (`/bin/zsh`), not the skill. `tests/anchoring.test.sh` holds every skill to this. (Borrowed from
@@ -168,7 +169,7 @@ so a relative path runs whatever that repo put there; and `$0` in an agent's she
 
 ## Checklist
 
-- [ ] Frontmatter: `description` · `argument-hint` · `allowed-tools` (minimal) · `entry` · `exit` (a check) · `writes`
+- [ ] Frontmatter includes the skill name, description, tool list and the workflow contract under `metadata`.
 - [ ] Every scope / authority / safety / routing / completion input documented with a default
 - [ ] Outward-facing authority defaults to denied; reversible work assumed
 - [ ] Anything created outside the repo is torn down at the end, or named in a "what stays" list with its removal command
@@ -182,4 +183,4 @@ so a relative path runs whatever that repo put there; and `$0` in an agent's she
 - [ ] Description is 15 words or fewer, trigger first; a body over ~1,000 words is a router over `references/`
 - [ ] Earns its place against minimal-tooling — extend before you add
 - [ ] A shipped script has a test in `tests/`; a stop-line or refusal has an eval case in `evals/cases/`
-- [ ] Every script the skill runs is called by an anchored path (`$SKILL/...` or `~/.claude/skills/...`)
+- [ ] Every script the skill runs is called by an anchored path under the loaded skill directory (`$SKILL/...`)

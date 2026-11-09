@@ -1,15 +1,17 @@
 ---
+name: harden-nt
 description: "Map an agent-facing surface's paths and harden each with independent multi-model agents; fixes code."
-argument-hint: "[surface, e.g. \"the public API\" | budget, e.g. \"6 rounds\" | resume]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent"]
-entry: "a surface whose contract can be stated — an agent-facing API, an MCP server, a CLI other tools depend on, a public app boundary. Paths that only exist at runtime need a real reachable instance (live-check-nt's trigger test decides); paths that don't, don't"
-exit: "every path in the map is hardened — carries a check that has been shown to go red against the defect it guards — OR the budget is exhausted with an honest uncovered list"
-writes: "plan/harden-<date>.md; verify/neuter-matrix.md rows; status flips on existing workplan items it completes"
+allowed-tools: Bash Glob Grep Read Edit Write Agent
+metadata:
+  argument-hint: "[surface, e.g. \"the public API\" | budget, e.g. \"6 rounds\" | resume]"
+  entry: "a surface whose contract can be stated — an agent-facing API, an MCP server, a CLI other tools depend on, a public app boundary. Paths that only exist at runtime need a real reachable instance (live-check-nt's trigger test decides); paths that don't, don't"
+  exit: "every path in the map is hardened — carries a check that has been shown to go red against the defect it guards — OR the budget is exhausted with an honest uncovered list"
+  writes: "plan/harden-<date>.md; verify/neuter-matrix.md rows; status flips on existing workplan items it completes"
 ---
 
 `/harden-nt` makes a surface harder than it was, and produces the evidence. It works from a **path map** — what the surface claims to support — and drives that map with independent agents from **different model families**, two ways at once: **constructively**, showing a claimed path holds, and **adversarially**, finding the paths the map forgot. Nothing counts as covered until the check guarding it has been **proven able to fail**.
 
-`$ARGUMENTS` (optional): the surface (a URL, an API base, "the CLI"), and/or a budget (default: **6 rounds or 4 hours, whichever ends first**). `resume` continues the most recent open `plan/harden-*.md`.
+Optional input: the surface (a URL, an API base, "the CLI"), and/or a budget (default: **6 rounds or 4 hours, whichever ends first**). `resume` continues the most recent open `plan/harden-*.md`.
 
 Not in a git repo → ask which project; this command commits fixes.
 

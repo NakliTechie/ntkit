@@ -1,21 +1,23 @@
 ---
+name: forward-pass-nt
 description: "Cold whole-codebase audit for bugs, security, stray code, stubs, test value, agent-readiness; ranked fix-workplan. Read-only."
-argument-hint: "[path or focus, e.g. src/api | security] [fix]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Agent", "Write"]
-entry: "briefed or later; a codebase to read"
-exit: "batched workplan with stable finding IDs written; `bin/cite-check.py` exits 0 on the report"
-writes: "plan/forward-pass-<date>.md"
+allowed-tools: Bash Glob Grep Read Agent Write
+metadata:
+  argument-hint: "[path or focus, e.g. src/api | security] [fix]"
+  entry: "briefed or later; a codebase to read"
+  exit: "batched workplan with stable finding IDs written; `bin/cite-check.py` exits 0 on the report"
+  writes: "plan/forward-pass-<date>.md"
 ---
 
 Do a **fresh-eyes forward pass**: a cold read of the whole app, hunting six things: **bugs**, **security issues**, **stray code**, **stubs masquerading as done**, **low-value tests**, and **agent-readiness gaps**. `/code-review` and `/security-review` review a diff or a named target; this command audits the whole app cold. For the diff-time review method and the 22-scanner list, see `references/diff-review.md`.
 
-`$SKILL` is this skill's base directory, printed when the skill loads; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
+`$SKILL` is the directory containing this skill's loaded `SKILL.md`; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
 
 **Read-only.** Report, rank, and plan; never edit code, never auto-fix.
 
 **Rotate the eyes.** Before starting, read only the `Reviewer:` line of this command's latest report in the main checkout's `plan/`, never its findings. If that run used your model family, prefer another family's agent CLI on PATH (`codex`, `gemini`, checked with `which`, then one probe call), else another model of your family; never materially weaker eyes. Call it by the rules in `references/other-families.md` (probe, no stdin, timeout, privacy). Neither reachable → run as-is and write `rotation: unavailable` in the `Reviewer:` line. The report header says `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and notes when you are the family that built most of the code. Prior findings come back in Phase 3, after your own are ranked.
 
-`$ARGUMENTS` (optional): a path to scope the pass (e.g. `src/api`), a focus hint (e.g. `security`), and/or `fix`. Empty: the whole app, all six lenses. With `fix`, the report is written first and the keystone batch then goes to `/autopilot-nt`, a separate pass with its own verification.
+Optional input: a path to scope the pass (e.g. `src/api`), a focus hint (e.g. `security`), and/or `fix`. Empty: the whole app, all six lenses. With `fix`, the report is written first and the keystone batch then goes to `/autopilot-nt`, a separate pass with its own verification.
 
 ## The run
 

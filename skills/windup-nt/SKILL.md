@@ -1,10 +1,12 @@
 ---
+name: windup-nt
 description: "End of session: day summary, pending, commit and push non-plan work, resume handoff."
-argument-hint: "(none)"
-allowed-tools: ["Bash", "Glob", "Read", "Write", "Edit"]
-entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
-exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, clean closes merged to main, stray worktrees, merged branches, review media, promo output and scratch swept, resume handoff printed"
-writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/standing.md (answers only, if it exists), plan/_archive/"
+allowed-tools: Bash Glob Read Write Edit
+metadata:
+  argument-hint: "(none)"
+  entry: "any state — warns when closing from building (uncommitted work / verifier not green) and records that state in the handoff"
+  exit: "summary + pending + workplan updated (consolidated first if plan/ had accumulated), non-plan work pushed, clean closes merged to main, stray worktrees, merged branches, review media, promo output and scratch swept, resume handoff printed"
+  writes: "plan/<date>-summary.md, plan/pending.md, plan/workplan.md; via the implicit replan: plan/history.md, plan/standing.md (answers only, if it exists), plan/_archive/"
 ---
 
 Wind up the current project for today, in the project's repo root, steps 0–6 in order. Not in a git repo → ask which project; this command commits and pushes. First, create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`.

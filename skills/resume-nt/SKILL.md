@@ -1,15 +1,17 @@
 ---
+name: resume-nt
 description: "Read plan/ and brief the current state, then pause; `go` starts the top chunk."
-argument-hint: "[go — brief, then start the top chunk immediately]"
-allowed-tools: ["Bash", "Glob", "Read"]
-entry: "any state; plan/ preferred, degrades to git-only"
-exit: "brief printed naming the current state and its legal next moves; paused for direction"
-writes: "nothing"
+allowed-tools: Bash Glob Read
+metadata:
+  argument-hint: "[go — brief, then start the top chunk immediately]"
+  entry: "any state; plan/ preferred, degrades to git-only"
+  exit: "brief printed naming the current state and its legal next moves; paused for direction"
+  writes: "nothing"
 ---
 
 Brief the user on where to pick up, from what `/windup-nt` left in `plan/`.
 
-**Read-only briefing.** Never write to `plan/`; never invoke `/windup-nt` or `/replan-nt`. Present the brief. Then, with `go` in `$ARGUMENTS` and a clean picture (no HELD autopilot branch, no ⚠ inconsistency from Step 2.5), announce and start the top chunk; otherwise pause for direction.
+**Read-only briefing.** Never write to `plan/`; never invoke `/windup-nt` or `/replan-nt`. Present the brief. Then, with `go` in the invocation and a clean picture (no HELD autopilot branch, no ⚠ inconsistency from Step 2.5), announce and start the top chunk; otherwise pause for direction.
 
 ## Step 1: Locate context files
 

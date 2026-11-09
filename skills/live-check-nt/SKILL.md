@@ -1,17 +1,19 @@
 ---
+name: live-check-nt
 description: "Replay a flow on the real deployed surface for machine evidence; code stays read-only."
-argument-hint: "[flow to verify, e.g. voice-clone | ocr | the feature just changed]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Agent", "mcp__claude-in-chrome__*"]
-entry: "a change deployed or runnable on the real surface; the real runtime reachable (prod URL, or a real browser with the model/state cached)"
-exit: "a live-check report of verified RESULTs (or a BLOCKER) written; the feature's honest state moved to shipped, or held"
-writes: "plan/live-check-<date>.md"
+allowed-tools: Bash Glob Grep Read Write Agent mcp__claude-in-chrome__*
+metadata:
+  argument-hint: "[flow to verify, e.g. voice-clone | ocr | the feature just changed]"
+  entry: "a change deployed or runnable on the real surface; the real runtime reachable (prod URL, or a real browser with the model/state cached)"
+  exit: "a live-check report of verified RESULTs (or a BLOCKER) written; the feature's honest state moved to shipped, or held"
+  writes: "plan/live-check-<date>.md"
 ---
 
 Prove the **deployed thing actually runs**, end to end, with machine evidence read from the real runtime. Until this run passes, the honest state of a change on a path the dev preview can't exercise is *"implemented, not yet verified"*, never `shipped`.
 
 **READ-ONLY on source.** It drives the app and reads evidence; it never edits code. A failure hands off: a bug → `/walkthrough-nt`; a design or UX gap → `/ux-review-nt` or `/decide-nt`; a code defect → a separate fix pass with its own verification.
 
-`$ARGUMENTS` (optional): the flow to verify (e.g. `voice-clone`, `ocr`, `search`). If empty, verify the feature that changed most recently (from `git log` or the latest `plan/` summary).
+Optional input: the flow to verify (e.g. `voice-clone`, `ocr`, `search`). If empty, verify the feature that changed most recently (from `git log` or the latest `plan/` summary).
 
 If the project has no runnable surface (a pure library with full deterministic tests), say so: live-check doesn't apply, and the test suite is the verifier.
 
@@ -32,7 +34,7 @@ Name the trigger(s) that fired in the report header.
 ## Phase 1 — Reach the real runtime
 
 - **Prod, if it auto-deploys.** Confirm the deploy landed in the browser: a CDN edge or `curl` can serve a stale copy for minutes after the browser sees the new one. Check for a marker unique to the change in the loaded page (an element id, a string).
-- **A real browser where the model is cached (Chrome via claude-in-chrome).** Headless Chromium has no WebGPU, and the built-in browser pane starts with an empty cache; the user's Chrome has the multi-GB model on disk.
+- **A browser with WebGPU and the model cache.** Check both in the browser profile you drive. Use the host’s browser integration if it can access that profile.
 
 Confirm the prerequisites before testing behaviour:
 - the project's harness `doctor` (left by `/walkthrough-nt`), if any, reports green;
@@ -68,7 +70,7 @@ Write `plan/live-check-<date>.md` in ATTEST form:
 
 ## Playbook hook
 
-If the user's config (CLAUDE.md / memory) or the project names a live-check or replay playbook for this kind of surface, read it before Phase 1.
+If the user's config (such as AGENTS.md, CLAUDE.md or saved preferences) or the project names a live-check or replay playbook for this kind of surface, read it before Phase 1.
 
 ## Impact declaration
 

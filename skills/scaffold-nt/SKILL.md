@@ -1,10 +1,12 @@
 ---
+name: scaffold-nt
 description: "Bootstrap a new project: folder, git, remote repo, seeded plan/, first-move brief."
-argument-hint: "[name | parent/name]  (attach md/zip OR describe inline)"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Agent"]
-entry: "fresh — no repo yet; handoff materials attached"
-exit: "repo + remote exist, plan/ seeded, brief printed, top chunk underway"
-writes: "plan/history.md, plan/pending.md, plan/workplan.md, git"
+allowed-tools: Bash Glob Grep Read Write Agent
+metadata:
+  argument-hint: "[name | parent/name]  (attach md/zip OR describe inline)"
+  entry: "fresh — no repo yet; handoff materials attached"
+  exit: "repo + remote exist, plan/ seeded, brief printed, top chunk underway"
+  writes: "plan/history.md, plan/pending.md, plan/workplan.md, git"
 ---
 
 Bootstrap a new project from the handoff the user gave this session. End state: local folder, remote repo, seeded `plan/`, and a `/resume-nt`-style brief on the first move.
@@ -13,13 +15,13 @@ Bootstrap a new project from the handoff the user gave this session. End state: 
 
 ## Phase 1 — The handoff
 
-The handoff is attached files (md, zip, or both), an inline description in `$ARGUMENTS` or the surrounding prose, or both (files primary; put the prose in the initial commit body and a `## Context` section of the README). A bare name slug (`myapp`, `research/myapp`) is a name, not a description. No files and no description → ask: *"Give me a handoff — drag md/zip into chat, or describe the project in a sentence or two."*
+The handoff is attached files (md, zip, or both), an inline description in the invocation or the surrounding prose, or both (files primary; put the prose in the initial commit body and a `## Context` section of the README). A bare name slug (`myapp`, `research/myapp`) is a name, not a description. No files and no description → ask: *"Give me a handoff — drag md/zip into chat, or describe the project in a sentence or two."*
 
 **Check the vault first.** If scholia's `/ask-nt` is installed, run it on the handoff's domain, stack and hard problem. Fold anything found into the Phase 7 brief as prior art, with the note slug.
 
 ## Phase 2 — Name and location
 
-Empty `$ARGUMENTS` → derive the name from the handoff (H1, "Project:" line, README-like filename), announce it, proceed. `myapp` → `$ROOT/myapp/`; `parent/myapp` → `$ROOT/parent/myapp/`. If the target exists and isn't empty, suffix `-2`, `-3`, and announce it.
+Empty input → derive the name from the handoff (H1, "Project:" line, README-like filename), announce it, proceed. `myapp` → `$ROOT/myapp/`; `parent/myapp` → `$ROOT/parent/myapp/`. If the target exists and isn't empty, suffix `-2`, `-3`, and announce it.
 
 ## Phase 3 — Materialize the folder
 

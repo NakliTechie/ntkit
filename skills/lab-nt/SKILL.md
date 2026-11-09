@@ -1,10 +1,12 @@
 ---
+name: lab-nt
 description: "Turn an idea into a measured contract, then run bounded experiment legs; can self-improve skills."
-argument-hint: "[idea, e.g. \"can QAT recover fp16 quality at int4 in-browser\" | resume [<slug>] | status | meta <skill>]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent", "WebSearch", "WebFetch"]
-entry: "an idea in $ARGUMENTS or the conversation, an open campaign in plan/lab/ to resume, or `meta <skill>` in the repo holding skills/<skill>/; never re-armed at an unchanged wall"
-exit: "leg ended GOAL-MET (verified) | BUDGET | STAGNANT | DRY-WELL | PARKED, journal + leg report written, `lab.py check` exit 0 on the best-so-far; never a silent end"
-writes: "its own worktrees, plan/lab/<slug>/ (contract.md, lab.json, journal.md, <date>-leg.md, child-<n>/); in meta mode with `merge: auto` granted, a local merge commit on the default branch"
+allowed-tools: Bash Glob Grep Read Edit Write Agent WebSearch WebFetch
+metadata:
+  argument-hint: "[idea, e.g. \"can QAT recover fp16 quality at int4 in-browser\" | resume [<slug>] | status | meta <skill>]"
+  entry: "an idea in the invocation or the conversation, an open campaign in plan/lab/ to resume, or `meta <skill>` in the repo holding skills/<skill>/; never re-armed at an unchanged wall"
+  exit: "leg ended GOAL-MET (verified) | BUDGET | STAGNANT | DRY-WELL | PARKED, journal + leg report written, `lab.py check` exit 0 on the best-so-far; never a silent end"
+  writes: "its own worktrees, plan/lab/<slug>/ (contract.md, lab.json, journal.md, <date>-leg.md, child-<n>/); in meta mode with `merge: auto` granted, a local merge commit on the default branch"
 ---
 
 `/lab-nt` answers what isn't known yet. It shapes an idea with the user into a contract with a falsifiable finish line, then runs the `autoresearch` loop: smallest experiment → measure → keep or revert → journal → next. It searches an unknown space under a budget, and the honest exit is often "best so far". Every leg is bounded, the best-so-far is always committed, and continuing is earned, never assumed.
@@ -15,7 +17,7 @@ It is recursive in two directions. **Downward:** a leg forks fresh-context branc
 
 ## Inputs and defaults
 
-`$ARGUMENTS`: an **idea** (Phase 0) · **resume** (newest open campaign, or `resume <slug>`) · **status** (read-only: campaigns, children, leg count, best-so-far, end state) · **meta \<skill>** (Phase 0 in meta mode, `references/meta.md`). Meta mode refuses, writing nothing, when `skills/<skill>/references/` does not exist: that folder is its whole fence, and splitting a skill into a router is a human's edit.
+Input: an **idea** (Phase 0) · **resume** (newest open campaign, or `resume <slug>`) · **status** (read-only: campaigns, children, leg count, best-so-far, end state) · **meta \<skill>** (Phase 0 in meta mode, `references/meta.md`). Meta mode refuses, writing nothing, when `skills/<skill>/references/` does not exist: that folder is its whole fence, and splitting a skill into a router is a human's edit.
 
 Contract fields, each with its default, stated rather than asked:
 

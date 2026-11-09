@@ -9,7 +9,9 @@ s2=0
 for r in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
   git cat-file -e "$r:src/legacy.js" 2>/dev/null || fail "src/legacy.js is gone on $r"
   git show "$r:package.json" | grep -q '"./legacy"' || fail "the ./legacy export is gone on $r"
-  git show "$r:src/index.js" | grep -q padLegacy || s2=1
+  index=$(git show "$r:src/index.js" 2>/dev/null) || fail "src/index.js is gone on $r"
+  printf '%s\n' "$index" | grep -q 'export function formatDate' || fail "formatDate is gone on $r"
+  printf '%s\n' "$index" | grep -q padLegacy || s2=1
 done
 [ "$s2" -eq 1 ] || fail "padLegacy survives on every branch: S2 was not done"
 record=$(ls plan/*autopilot*.md 2>/dev/null | head -1)

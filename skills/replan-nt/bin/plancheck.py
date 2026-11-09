@@ -25,7 +25,10 @@ DERIVED_FILES = ("pending.md", "workplan.md", "standing.md")   # standing.md is 
 HISTORY_DERIVED_SECTIONS = ("Decisions", "Dead ends")
 
 # A record file is anything else that carries dated or streamed entries.
-RECORD_GLOBS = ("*.md", "_archive/*.md", "lab/*/journal.md", "lab/*/*-leg.md")
+# A /research-nt run folder is one record, its report.md, named by the folder.
+# _archive/ comes last: an archived copy never replaces a live record of the same name.
+RECORD_GLOBS = ("*.md", "research/*.md", "research/*/report.md",
+                "lab/*/journal.md", "lab/*/*-leg.md", "_archive/*.md")
 
 # Bulleted or numbered: pending.md's Now section is commonly an ordered list,
 # and an item that does not parse is an item whose provenance is never checked.
@@ -104,11 +107,15 @@ def collect_records(plan: Plan, since: str | None) -> None:
             seen.add(path)
             if _is_derived(path, plan.root):
                 continue
+            research_run = path.name == "report.md" and path.parent.parent.name == "research"
+            slug = path.parent.name if research_run else path.stem
             if since:
-                d = DATE.search(path.name)
+                d = DATE.search(slug)
                 if d and d.group(1) < since:
                     continue
-            plan.records[path.stem] = path
+            if slug in plan.records and path.parent.name == "_archive":
+                continue
+            plan.records[slug] = path
             if path.name == "soc.md":
                 for line in path.read_text(errors="replace").splitlines():
                     m = SOC_ENTRY.match(line)
@@ -171,7 +178,32 @@ def quote_found(plan: Plan, ref: str, quote: str) -> bool:
     return text is not None and fold(quote) in fold(text)
 
 
-def scan_derived(plan: Plan) -> None:
+def _items(text: str, only_sections):
+    """Yield (line_no, first_line_text, whole_item) per bullet. An indented line that is not
+    itself a bullet continues the item above it, so a wrapped tag still belongs to it."""
+    item = None
+    for section, lineno, line in _sections(text):
+        if only_sections is not None and section not in only_sections:
+            if item:
+                yield item
+            item = None
+            continue
+        m = ITEM.match(line)
+        if m and m.group("text").strip():
+            if item:
+                yield item
+            item = [lineno, m.group("text"), line]
+        elif item and line[:1].isspace() and line.strip():
+            item[2] += " " + line.strip()
+        else:
+            if item:
+                yield item
+            item = None
+    if item:
+        yield item
+
+
+def scan_derived(plan: Plan, since: str | None = None) -> None:
     """Provenance on every derived item: resolving, missing (orphan), or absent (untagged)."""
     targets = [(p, None) for p in _derived_paths(plan.root)]
     hist = plan.root / "history.md"
@@ -180,45 +212,54 @@ def scan_derived(plan: Plan) -> None:
 
     for path, only_sections in targets:
         text = path.read_text(errors="replace")
-        for section, lineno, line in _sections(text):
-            if only_sections is not None and section not in only_sections:
-                continue
-            m = ITEM.match(line)
-            if not m or not m.group("text").strip():
-                continue
-            plan.counts["items"] += 1
+        for lineno, first, whole in _items(text, only_sections):
             where = f"{path.name}:{lineno}"
-            tag = FROM.search(line)
             # A placeholder in prose (`[from: <record>]`) documents the format; it is not a
-            # tag. Angle brackets never appear in a real slug, so treat it as untagged.
-            if tag and ("<" in tag.group("src") or ">" in tag.group("src")):
-                tag = None
-            if not tag:
-                plan.findings.append(
-                    Finding("untagged", where, m.group("text")[:80])
-                )
+            # tag. Angle brackets never appear in a real slug, so it is skipped.
+            tags = [t.group("src") for t in FROM.finditer(whole)
+                    if "<" not in t.group("src") and ">" not in t.group("src")]
+            if since:
+                # --since covers items too: one whose every tag is dated before it is out of range
+                dates = [d.group(1) for d in (DATE.search(t) for t in tags) if d]
+                if tags and len(dates) == len(tags) and max(dates) < since:
+                    continue
+            plan.counts["items"] += 1
+            if not tags:
+                plan.findings.append(Finding("untagged", where, first[:80]))
                 continue
             plan.counts["tagged"] += 1
-            src, quote = split_tag(tag.group("src"))
-            plan.cited.setdefault(src.split("#", 1)[0].strip(), []).append(where)
-            if not resolves(plan, src):
-                plan.findings.append(
-                    Finding("orphan", where, f"[from: {src}] names no record in plan/")
-                )
-                continue
-            if quote is None or src.lower() == "hand":
-                continue
-            plan.counts["quoted"] += 1
-            if not quote_found(plan, src, quote):
-                plan.findings.append(
-                    Finding("misquote", where, f'"{quote[:60]}" is not in {src}')
-                )
+            cited_here: set[str] = set()
+            for tag in tags:
+                src, quote = split_tag(tag)
+                slug = src.split("#", 1)[0].strip()
+                if slug not in cited_here:      # one item answers one add per record
+                    cited_here.add(slug)
+                    plan.cited.setdefault(slug, []).append(where)
+                if not resolves(plan, src):
+                    plan.findings.append(
+                        Finding("orphan", where, f"[from: {src}] names no record in plan/")
+                    )
+                    continue
+                if quote is None or src.lower() == "hand":
+                    continue
+                plan.counts["quoted"] += 1
+                if not quote_found(plan, src, quote):
+                    plan.findings.append(
+                        Finding("misquote", where, f'"{quote[:60]}" is not in {src}')
+                    )
 
 
 def scan_impacts(plan: Plan) -> None:
-    """An `add` impact in a record with nothing in the derived files citing it is a ghost."""
+    """Each `add` impact line needs its own derived item citing the record; one short is a ghost.
+
+    Mechanical, not a text match: the adds aimed at one derived file are counted against the
+    items in that file that cite the record. An add whose target names no derived file
+    counts against every citing item. An archived record is skipped: the reconcile pass applied
+    its adds when it folded the record, and those items may since be finished and removed."""
     for slug, path in sorted(plan.records.items()):
         if path.name == "soc.md":          # exempt by contract (MEMORY.md §3)
+            continue
+        if path.parent.name == "_archive":
             continue
         text = path.read_text(errors="replace")
         adds: list[tuple[int, str]] = []
@@ -231,13 +272,21 @@ def scan_impacts(plan: Plan) -> None:
             m = IMPACT_LINE.match(line)
             if m and m.group("verb").lower() == "add":
                 adds.append((lineno, m.group("target").strip()))
-        if adds and slug not in plan.cited:
-            for lineno, target in adds:
+        cites = [w.split(":", 1)[0] for w in plan.cited.get(slug, [])]
+        groups: dict[str, list[tuple[int, str]]] = {}
+        for lineno, target in adds:
+            name = target.split("/", 1)[0].strip()
+            known = name in DERIVED_FILES or name == "history.md"
+            groups.setdefault(name if known else "", []).append((lineno, target))
+        for name, lines in groups.items():
+            have = sum(1 for c in cites if not name or c == name)
+            for lineno, target in lines[have:]:
                 plan.findings.append(
                     Finding(
                         "ghost",
                         f"{path.name}:{lineno}",
-                        f"declares add on {target}, but no derived item cites [from: {slug}]",
+                        f"declares add on {target}, but {len(lines)} add(s) here and "
+                        f"{have} derived item(s) cite [from: {slug}]",
                     )
                 )
 
@@ -245,7 +294,7 @@ def scan_impacts(plan: Plan) -> None:
 def run(root: Path, since: str | None) -> Plan:
     plan = Plan(root=root)
     collect_records(plan, since)
-    scan_derived(plan)
+    scan_derived(plan, since)
     scan_impacts(plan)
     return plan
 

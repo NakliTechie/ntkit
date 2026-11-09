@@ -1,6 +1,7 @@
 #!/bin/sh
 # evals/run.sh --runs/--without: argument checks and the cost ceiling (via --dry-run, no
-# model call), and evals/summary.py's pass rates, flips and per-arm means.
+# model call), the throwaway HOME (via a stub claude), and evals/summary.py's pass rates,
+# flips and per-arm means.
 set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)
 run=$root/evals/run.sh; summary=$root/evals/summary.py
@@ -32,6 +33,24 @@ cp "$root/$some" "$t/edited"; echo "extra line" >>"$t/edited"
 diff -u "$root/$some" "$t/edited" | sed "1s|.*|--- a/$some|; 2s|.*|+++ b/$some|" >"$t/ok.patch" || true
 out=$(sh "$run" --dry-run --without "$t/ok.patch" "$case1") || { echo "FAIL: valid patch refused"; bad=1; }
 printf '%s\n' "$out" | grep -q "arm B: patch" || { echo "FAIL: patch arm line: $out"; bad=1; }
+
+# a run never writes under the caller's HOME: a stub claude writes to ~/.claude, and the
+# real HOME must stay empty. A copy of the harness keeps results/ out of the checkout.
+mkdir -p "$t/h/evals/cases/home-probe" "$t/h/skills/probe" "$t/bin" "$t/realhome"
+cp "$run" "$summary" "$t/h/evals/"; printf -- '---\nname: probe\n---\n' >"$t/h/skills/probe/SKILL.md"
+printf '/probe\n' >"$t/h/evals/cases/home-probe/prompt"
+printf 'git init -q\n' >"$t/h/evals/cases/home-probe/setup.sh"
+printf '[ "$(cat seen-home)" != "%s" ]\n' "$t/realhome" >"$t/h/evals/cases/home-probe/check.sh"
+cat >"$t/bin/claude" <<'EOF'
+#!/bin/sh
+[ "$1" = auth ] && { echo '{"loggedIn": true}'; exit 0; }
+printf '%s' "$HOME" >seen-home; mkdir -p "$HOME/.claude" && : >"$HOME/.claude/touched"
+echo '{"result": "ok", "total_cost_usd": 0, "num_turns": 1, "usage": {}}'
+EOF
+chmod +x "$t/bin/claude"
+HOME=$t/realhome PATH="$t/bin:$PATH" NT_EVAL_CONFIG_DIR=$t/cfg sh "$t/h/evals/run.sh" home-probe \
+  >"$t/o" 2>&1 || { echo "FAIL: stubbed run failed:"; sed 's/^/  | /' "$t/o"; bad=1; }
+[ -z "$(ls -A "$t/realhome")" ] || { echo "FAIL: the eval wrote under the caller's HOME"; bad=1; }
 
 tab=$(printf '\t')
 {

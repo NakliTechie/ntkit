@@ -42,5 +42,19 @@ with tempfile.TemporaryDirectory() as temp:
     try: b.score(out)
     except ValueError: pass
     else: raise AssertionError('changed report accepted')
+    rubrics = out / 'judge' / pair['id'] / 'rubrics.json'
+    (out / 'judge' / pair['id'] / '1.md').write_text('Report body.')
+    original_rubrics = rubrics.read_text()
+    rubrics.write_text(original_rubrics.replace('"weight": -2', '"weight": 0'))
+    try: b.score(out)
+    except ValueError as e: assert 'rubrics changed' in str(e), e
+    else: raise AssertionError('changed rubrics accepted')
+    rubrics.write_text(original_rubrics)
+    for bad_rows in (rows[:4], rows[:4] + [dict(rows[4], sample_id='not-preregistered')]):
+        prompts.write_text(json.dumps(bad_rows))
+        try: b.prepare(prompts, source, d / 'other')
+        except ValueError as e: assert 'preregistered' in str(e), e
+        else: raise AssertionError('non-preregistered sample IDs accepted')
+        assert not (d / 'other').exists(), 'prepare wrote output for rejected IDs'
 print('research benchmark: all cases pass')
 PY

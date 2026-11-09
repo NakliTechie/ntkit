@@ -12,7 +12,7 @@ Do not silently replace a missing baseline with another workflow. Obtain authori
 
 ## Produce reports
 
-A = the identified baseline, B = `/research-nt "<verbatim prompt>" --go`.
+A = the identified baseline, B = `/research-nt "<verbatim prompt>"`.
 Use a fresh coordinator and fresh role contexts for each run. Pass only the prompt and the relevant skill.
 Do not pass the rubrics to the generators. Preserve each run's artifacts and measured agent count,
 wall time, report word count, and available token usage. Missing cost information is unknown, not zero.

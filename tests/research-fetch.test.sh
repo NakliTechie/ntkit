@@ -8,7 +8,7 @@ command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
 BIN=$(cd "$(dirname "$0")/.." && pwd)/skills/research-nt/bin
 work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
 PYTHONDONTWRITEBYTECODE=1 BIN="$BIN" WORK="$work" python3 - <<'PY'
-import contextlib, http.server, io, json, os, shutil, subprocess, sys, threading
+import contextlib, http.server, io, json, os, shutil, subprocess, sys, threading, traceback
 from pathlib import Path
 sys.path.insert(0, os.environ["BIN"])
 import check, fetch
@@ -25,6 +25,7 @@ PAGES = {
     "/notes.txt": ("text/plain", b"Plain notes.\nLine two."),
     "/empty.html": ("text/html", b"<html><body><script>render()</script></body></html>"),
     "/image.png": ("image/png", b"\x89PNG\r\n"),
+    "/bogus-charset.txt": ("text/plain; charset=x-no-such-charset", b"Bogus charset text."),
 }
 
 class Handler(http.server.BaseHTTPRequestHandler):
@@ -45,7 +46,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
 srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 base = f"http://127.0.0.1:{srv.server_address[1]}"
-fetch.address_guard = lambda host: None if host == "127.0.0.1" else fetch.real_address_guard(host)
+# The guard returns the checked addresses the connection must use. `rebind.test` has no DNS
+# record: it is fetchable only if the connection goes to the address the guard checked.
+fetch.address_guard = lambda host: (["127.0.0.1"] if host in ("127.0.0.1", "rebind.test")
+                                    else fetch.real_address_guard(host))
 
 store = work / "store"
 def run(*argv, stdin=None):
@@ -55,7 +59,11 @@ def run(*argv, stdin=None):
         sys.stdin = io.StringIO(stdin)
     try:
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
-            rc = fetch.main([str(a) for a in argv] + ["--store", str(store)])
+            try:
+                rc = fetch.main([str(a) for a in argv] + ["--store", str(store)])
+            except Exception:
+                rc = "crash"
+                traceback.print_exc(file=out)
     finally:
         sys.stdin = old_stdin
     return rc, out.getvalue()
@@ -103,8 +111,26 @@ if log(d)[-1]["status"] != "refused":
     failures.append(f"refusal not logged as refused: {log(d)[-1]}")
 expect("file scheme", run(d, "file:///etc/passwd", "--section", "S1.2"), 1, "only http and https")
 
+# --- untrusted input never crashes the run; every attempt is logged ---------------
+expect("bogus server charset", run(d, f"{base}/bogus-charset.txt", "--section", "S3.1"), 0, "Bogus charset text.")
+before = len(log(d))
+got = run(d, "http://[bad/x", "http://" + "a" * 300 + ".example/", f"{base}/notes.txt", "--section", "S3.2")
+expect("malformed URLs are logged and the rest still run", got, 1, "Line two.")
+tail = log(d)[before:]
+if [e["status"] for e in tail] != ["refused", "refused", "ok"]:
+    failures.append(f"malformed URLs not logged as attempts: {tail}")
+before = len(log(d))
+expect("--stdin with a malformed URL", run(d, "--section", "S3.3", "--stdin", "--url", "http://[bad/x", stdin="x"), 1, "malformed URL")
+if len(log(d)) != before + 1:
+    failures.append("--stdin malformed URL not logged as an attempt")
+
+# --- the connection goes to the address the guard checked -------------------------
+port = srv.server_address[1]
+expect("connects to the checked address", run(d, f"http://rebind.test:{port}/notes.txt", "--section", "S3.4"), 0, "Line two.")
+
 # --- the real guard ----------------------------------------------------------
-for host in ("127.0.0.1", "localhost", "169.254.169.254", "10.0.0.1", "192.168.1.1", "::1"):
+for host in ("127.0.0.1", "localhost", "169.254.169.254", "10.0.0.1", "192.168.1.1", "::1",
+             "100.100.100.100", "100.64.0.1", "224.0.0.1", "::ffff:127.0.0.1"):
     try:
         fetch.real_address_guard(host)
         failures.append(f"real guard let {host} through")

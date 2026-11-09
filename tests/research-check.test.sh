@@ -6,7 +6,7 @@ command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
 BIN=$(cd "$(dirname "$0")/.." && pwd)/skills/research-nt/bin
 work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
 PYTHONDONTWRITEBYTECODE=1 BIN="$BIN" WORK="$work" python3 - <<'PY'
-import contextlib, hashlib, io, json, os, shutil, sys
+import contextlib, hashlib, io, json, os, shutil, sys, traceback
 from pathlib import Path
 sys.path.insert(0, os.environ["BIN"])
 import check
@@ -17,7 +17,11 @@ failures = []
 def run(*argv):
     out = io.StringIO()
     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
-        rc = check.main([str(a) for a in argv])
+        try:
+            rc = check.main([str(a) for a in argv])
+        except Exception:
+            rc = "crash"
+            traceback.print_exc(file=out)
     return rc, out.getvalue()
 
 def expect(desc, got, want_rc, want_text=""):
@@ -149,6 +153,7 @@ bad_specs = {
     "unknown setting": (SPEC.replace("- sections: 4", "- sectons: 4"), "unknown key 'sectons'"),
     "no title": (SPEC.replace("# ResearchSpec", "# Plan"), "must start with '# ResearchSpec'"),
     "main without units": (SPEC + "\n## S3 | Empty\n", "S3: main section has no units"),
+    "non-ASCII digit setting": (SPEC.replace("- sections: 4", "- sections: 4\n- words: \u00b2"), "'words' must be a positive whole number"),
 }
 for desc, (text, want) in bad_specs.items():
     d = fresh("spec-bad")
@@ -196,6 +201,14 @@ expect("assemble: added unit heading", run("assemble", d), 1, "adds a heading ab
 d = fresh("assemble-wrong-id")
 (d / "sections" / "S1.1.md").write_text(SECTIONS["S1.1"].replace("### S1.1 |", "### S1.2 |"))
 expect("assemble: wrong id in file", run("assemble", d), 1, "must open with '### S1.1 | <title>'")
+d = fresh("assemble-unfetched")
+(d / "sections" / "S1.1.md").write_text(SECTIONS["S1.1"] + "\nA claim ([blog](https://unfetched.example/post)).\n")
+expect("assemble: unit citing an unfetched page", run("assemble", d), 1, "https://unfetched.example/post — never fetched")
+if (d / "draft.md").exists():
+    failures.append("assemble wrote draft.md despite an unfetched citation")
+d = fresh("assemble-failed-fetch")
+(d / "sections" / "S2.1.md").write_text(SECTIONS["S2.1"] + "\nSee https://example.org/broken.\n")
+expect("assemble: unit citing a failed fetch", run("assemble", d), 1, "fetch failed (HTTP 404)")
 
 # --- gates: the clean run ---------------------------------------------------
 d = built("clean")
@@ -257,7 +270,18 @@ expect("G2b: plural key word passes", run("gates", d, "--without", "g3"), 0, "CH
 d = with_section("g2b-split", "S1.2", SECTIONS["S1.2"].replace("The Security Market Line relates", "The security market moves. A line relates"))
 expect("G2b: key words split across sentences do not count", run("gates", d, "--without", "g3"), 0, "advisory notes: G2b")
 d = with_section("g2b-alias", "S1.1", SECTIONS["S1.1"].replace("The efficient frontier traces", "The frontier of efficient portfolios traces"))
-expect("G2b: alias counts", run("gates", d, "--without", "g3"), 0, "VERIFIED")
+expect("G2b: alias counts", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 skipped by --without; not VERIFIED)")
+# Names match whole words only, and every alias drops its own trailing note.
+for name, text, want in (("RAG", "Firms leverage data.", False), ("RAG", "RAG pipelines help.", True),
+                         ("Go", "A good result.", False), ("llama.cpp", "We use llama.cpp.", True),
+                         ("LongCat (Meituan) / LC-DR", "LongCat ships a model.", True),
+                         ("LongCat (Meituan) / LC-DR", "LC-DR ships a model.", True)):
+    if check.entity_covered(name, check.fold(text), []) != want:
+        failures.append(f"G2b census: {name!r} in {text!r} should be {want}")
+if check.entity_names("LongCat (Meituan) / LC-DR") != ["LongCat", "LC-DR"]:
+    failures.append(f"alias parsing: {check.entity_names('LongCat (Meituan) / LC-DR')}")
+if check.entity_covered("RAG", check.fold("Nothing here."), [(check.fold("Leverage"), "no source")]):
+    failures.append("G2b census: an Omitted name matched an entity by substring")
 
 # --- G4 edit scope ----------------------------------------------------------
 d = built("g4-noplan")
@@ -267,7 +291,7 @@ expect("G4: edit without a plan", run("gates", d, "--without", "g3"), 1, "differ
 d = built("g4-directed")
 (d / "edit-plan.md").write_text("# Global Editorial Plan\n## Ownership Decisions\n- CAPM detail → S1.2\n## S1.1\n- **DELETE**: the repeated trade-off sentence\n")
 (d / "report.md").write_text((d / "report.md").read_text().replace(" The efficient frontier traces the best trade-offs.", " The efficient frontier traces them."))
-expect("G4: directed edit passes", run("gates", d, "--without", "g3"), 0, "VERIFIED")
+expect("G4: directed edit passes", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 skipped by --without; not VERIFIED)")
 (d / "report.md").write_text((d / "report.md").read_text().replace("It learns weights directly", "It learns the weights directly"))
 expect("G4: undirected edit", run("gates", d, "--without", "g3"), 1, "S2.1: changed, but edit-plan.md has no")
 
@@ -282,7 +306,7 @@ r = (d / "report.md").read_text()
 (d / "report.md").write_text(r.replace(", as the [survey](https://en.wikipedia.org/wiki/Portfolio_(finance)) notes", ""))
 expect("G4: URL removed without DELETE", run("gates", d, "--without", "g3"), 1, "Portfolio_(finance): removed without a DELETE directive")
 (d / "edit-plan.md").write_text("## S2.1\n- DELETE: the survey link https://en.wikipedia.org/wiki/Portfolio_(finance)\n")
-expect("G4: URL removed with DELETE", run("gates", d, "--without", "g3"), 0, "VERIFIED")
+expect("G4: URL removed with DELETE", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 skipped by --without; not VERIFIED)")
 
 d = built("g4-url-added")
 (d / "edit-plan.md").write_text("## S1.2\n- MOVE: CAPM detail from S1.2 to S2.1\n")
@@ -292,7 +316,16 @@ expect("G4: editor added a URL", run("gates", d, "--without", "g3"), 1, "added b
 d = built("g4-move-target")
 (d / "edit-plan.md").write_text("## S1.2\n- MOVE: the CAPM aside from S1.2 to S2.1\n")
 (d / "report.md").write_text((d / "report.md").read_text().replace("It learns weights directly", "It learns the weights directly"))
-expect("G4: MOVE target may change", run("gates", d, "--without", "g3"), 0, "VERIFIED")
+expect("G4: MOVE target may change", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 skipped by --without; not VERIFIED)")
+
+# A duplicated heading cannot hide an edited copy of a unit from the edit-scope check.
+d = built("g4-duplicate")
+(d / "edit-plan.md").write_text("## S2.1\n- DELETE: the survey aside\n")
+r = (d / "report.md").read_text()
+start = r.index("### S1.1"); end = r.index("### S1.2")
+edited = r[start:end].replace("best trade-offs", "only trade-offs worth making")
+(d / "report.md").write_text(r[:start] + edited + r[start:])
+expect("G4: duplicated heading is refused", run("gates", d, "--without", "g3"), 1, "S1.1: heading appears 2 times in report.md")
 
 # Repairs can disclose a required entity omitted after unsupported text is removed.
 d = built("g4-repair-omission")

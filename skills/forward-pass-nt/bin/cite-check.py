@@ -9,7 +9,8 @@ entry (`**H3** [Security] ...`) cites no `path:line` at all. It checks that the
 place exists, not what the code there does.
 
 Exit 0: every pointer resolves. Exit 1: failures, one per line. Exit 2: usage.
-Stdlib only.
+Stdlib only. traces-nt's cite_check.py imports resolve() and line_count() from here, so both
+skills hold a pointer to one rule.
 """
 
 import argparse
@@ -32,11 +33,13 @@ CODE_EXT = {
     "lua", "md", "mjs", "php", "py", "rb", "rs", "scala", "sh", "sql", "svelte",
     "swift", "tf", "toml", "ts", "tsx", "txt", "vue", "xml", "yaml", "yml", "zig",
 }
+BARE_NAME = re.compile(r"\.\w.*|[A-Z][A-Za-z]*file|LICENSE|README|CODEOWNERS|NOTICE|VERSION")
 
 
 def looks_like_path(token, exists):
-    """A token is checked when it has a slash, exists, or ends in a known extension."""
-    if "/" in token or exists:
+    """A token is checked when it has a slash, exists, ends in a known extension, or is a
+    dotfile or a known extensionless file name (Dockerfile, Makefile, LICENSE)."""
+    if "/" in token or exists or BARE_NAME.fullmatch(token):
         return True
     _, ext = os.path.splitext(token)
     return ext[1:].lower() in CODE_EXT
@@ -47,6 +50,26 @@ def line_count(path, cache):
         with open(path, "rb") as fh:
             cache[path] = sum(1 for _ in fh)
     return cache[path]
+
+
+def resolve(root, rel, start, end, cache, contained=False):
+    """Check that rel:start[-end] names lines that exist in a file under root.
+
+    Returns (problem, total): problem is None when it resolves, else "outside" (contained
+    is set and the path leaves root), "missing" (no such file) or "range" (a line before 1
+    or past the end); total is the file's line count when known.
+    """
+    full = os.path.join(root, os.path.expanduser(rel))
+    if contained:
+        top = os.path.abspath(root)
+        if os.path.commonpath([top, os.path.abspath(full)]) != top:
+            return "outside", None
+    if not os.path.isfile(full):
+        return "missing", None
+    total = line_count(full, cache)
+    if start < 1 or (end or start) > total:
+        return "range", total
+    return None, total
 
 
 def check(report, root):
@@ -62,19 +85,16 @@ def check(report, root):
             for m in POINTER.finditer(word):
                 token, start, end = m.group(1), int(m.group(2)), m.group(3)
                 token = token.rstrip(".")
-                full = os.path.join(root, os.path.expanduser(token))
-                exists = os.path.isfile(full)
+                exists = os.path.isfile(os.path.join(root, os.path.expanduser(token)))
                 if not looks_like_path(token, exists):
                     continue
                 found += 1
                 checked += 1
                 pointer = f"{token}:{m.group(2)}" + (f"-{end}" if end else "")
-                if not exists:
+                problem, total = resolve(root, token, start, int(end) if end else None, counts)
+                if problem == "missing":
                     failures.append(f"{report}:{n}: {pointer} - no such file")
-                    continue
-                last = int(end) if end else start
-                total = line_count(full, counts)
-                if start < 1 or last > total:
+                elif problem == "range":
                     failures.append(f"{report}:{n}: {pointer} - file has {total} lines")
         if found == 0 and FINDING.match(text):
             failures.append(f"{report}:{n}: finding cites no path:line")

@@ -13,6 +13,8 @@ Prove the **deployed thing actually runs**, end to end, with machine evidence re
 
 **READ-ONLY on source.** It drives the app and reads evidence; it never edits code. A failure hands off: a bug → `/walkthrough-nt`; a design or UX gap → `/ux-review-nt` or `/decide-nt`; a code defect → a separate fix pass with its own verification.
 
+**No real-world side effects.** Drive a test account or scratch tenant, never a real customer's identity or data. Never trigger an action that sends real mail or messages, charges or pays, deletes real data, or publishes. If the flow under check needs one, stop at the step before it and report that step `not exercised`.
+
 Optional input: the flow to verify (e.g. `voice-clone`, `ocr`, `search`). If empty, verify the feature that changed most recently (from `git log` or the latest `plan/` summary).
 
 If the project has no runnable surface (a pure library with full deterministic tests), say so: live-check doesn't apply, and the test suite is the verifier.

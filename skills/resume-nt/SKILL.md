@@ -5,7 +5,7 @@ allowed-tools: Bash Glob Read
 metadata:
   argument-hint: "[go — brief, then start the top chunk immediately]"
   entry: "any state; plan/ preferred, degrades to git-only"
-  exit: "brief printed naming the current state and its legal next moves; paused for direction"
+  exit: "the brief contains a `State: <one of the six STATES.md states> · legal next: …` line; `git status --short` is unchanged by the run (it writes nothing)"
   writes: "nothing"
 ---
 

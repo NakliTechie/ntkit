@@ -5,7 +5,7 @@ allowed-tools: Bash Read Write Edit
 metadata:
   argument-hint: <short rationale, e.g., "Chose JWT for stateless validation">
   entry: "any state"
-  exit: "dated one-line decision appended"
+  exit: "`grep -m1 '^- ' plan/history.md` prints `- <today> <decision text>` (Decisions is the first section, newest first)"
   writes: "plan/history.md"
 ---
 

@@ -5,7 +5,7 @@ allowed-tools: Bash Glob Grep Read Edit Write Agent mcp__claude-in-chrome__* mcp
 metadata:
   argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
   entry: "at least one surface is runnable (dev server, CLI binary, or built .app); guide generator committed (or created this run)"
-  exit: "single-file HTML guide regenerated from the generator — never hand-edited"
+  exit: "`guide/regenerate.sh` exits 0 and its `guide/index.html` is committed: `git status --short guide/` prints nothing"
   writes: "guide generator + output"
 ---
 

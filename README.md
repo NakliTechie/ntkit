@@ -33,7 +33,7 @@ git clone https://github.com/NakliTechie/ntkit && cd ntkit
 
 For another agent that loads [Agent Skills](https://agentskills.io/specification), pass its skills directory to `./install.sh`. The Claude option adds autocomplete hints. For upgrades, move any differing installed copies aside and rerun the installer.
 
-Try a read-only project review. Open the project in your agent and ask for this skill. It reports findings with file locations and a proposed work plan.
+Try a project review that changes no code. Open the project in your agent and ask for this skill. It writes its findings, with file locations and a proposed work plan, to `plan/forward-pass-<date>.md`.
 
 ```text
 Use the forward-pass-nt skill to review this project.

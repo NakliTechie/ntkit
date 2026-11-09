@@ -26,5 +26,5 @@ the `.gitignore` there keeps them out of commits. The SFX are Kenney, CC0, and s
 
 **Updating.** Copy upstream `skills/brag/` at the new commit over this folder with the same
 mapping and exclusion, read the diff, then regenerate the hashes:
-`find . -type f ! -name 'VENDORED*' ! -path './assets/music/.gitignore' | sed 's#^\./##' | sort | xargs shasum -a 256 > VENDORED.sha256`
+`find . -type f ! -name 'VENDORED*' ! -path './assets/music/.gitignore' ! -name '*.mp3' ! -name '.DS_Store' | sed 's#^\./##' | sort | xargs shasum -a 256 > VENDORED.sha256`
 and update the commit above.

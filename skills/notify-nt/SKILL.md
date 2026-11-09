@@ -19,8 +19,16 @@ If the input is non-empty, that's the message — use it verbatim. If empty, wri
 
 ## Step 2 — Deliver, best-effort, every configured channel
 
-- **Desktop** — macOS: `osascript -e 'display notification "<msg>" with title "ntkit"'` (or `terminal-notifier` if installed). Linux: `notify-send "ntkit" "<msg>"`. Skip silently if neither exists.
-- **Phone** — if `$NTFY_TOPIC` is set: `curl -fsS -m 10 -d "<msg>" "ntfy.sh/$NTFY_TOPIC"`.
+The message is untrusted text: never paste it inside a command's quotes. Read it once into a variable through a quoted heredoc, then pass only `"$msg"`:
+
+```sh
+IFS= read -r msg <<'EOF'
+<msg>
+EOF
+```
+
+- **Desktop** — macOS: `osascript -e 'on run argv' -e 'display notification (item 1 of argv) with title "ntkit"' -e 'end run' "$msg"`. Linux: `notify-send -- "ntkit" "$msg"`. Skip silently if neither exists.
+- **Phone** — if `$NTFY_TOPIC` is set: `printf '%s' "$msg" | curl -fsS -m 10 --data-binary @- "https://ntfy.sh/$NTFY_TOPIC"`.
 
 Wrap every delivery so a failure is swallowed (`|| true`).
 

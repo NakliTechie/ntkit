@@ -5,7 +5,7 @@ allowed-tools: Bash Glob Grep Read Edit Write Agent SendUserFile mcp__Claude_Bro
 metadata:
   argument-hint: "[role or flow to focus, e.g. admin | checkout] | map"
   entry: "app boots with the shared demo seed; map mode also needs verify/features/"
-  exit: "every role walked in a real browser; the invariant set armed before the first click and every breach logged; the chaos leg run to its budget or declared skipped with a reason; fixes committed; verification harness + feature map created or extended; report written. Map mode: every feature file read from source and driven live, outcome clean / changed / blocked, report written"
+  exit: "`plan/walkthrough-<date>.md` exists with a coverage row per role on the walked surface (browser, terminal or service), the armed invariant set, the chaos budget or its skip reason, and `## Impact`; the harness `doctor` exits 0; `git status --short` prints nothing outside `plan/` (fixes committed). Map mode: `plan/walkthrough-map-<date>.md` exists and marks every `verify/features/` file clean, changed or blocked"
   writes: "code, the committed verification harness + feature map, plan/walkthrough-<date>.md, plan/walkthrough-<date>-run/ (recording or transcript + action log). Map mode: the harness and map only, plan/walkthrough-map-<date>.md"
 ---
 

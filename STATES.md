@@ -40,15 +40,19 @@ whatever state the repo is in. The state survives the session; that's the point.
 | State | Legal | Illegal (refuse or warn) |
 | --- | --- | --- |
 | `fresh` | `/scaffold-nt` | Everything that reads `plan/` |
-| `briefed` | audits, `/autopilot-nt` (if a report is open), `/lab-nt` (new or resumed campaign), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
+| `briefed` | audits (`/forward-pass-nt`, `/ux-review-nt`, `/walkthrough-nt`), `/guide-nt`, `/demo-nt`, `/autopilot-nt` (if a report is open), `/lab-nt` (new or resumed campaign), start a chunk, `/replan-nt` | `/release-nt` with nothing verified |
 | `building` | `/decide-nt`, `/soc-nt`, `/windup-nt` (warns), `/autopilot-nt`, `/harden-nt` (if the surface's paths are reachable) | `/release-nt`, `/package-nt` |
-| `verifying` | `/live-check-nt` (the replay gate), `/harden-nt` (iterated, before an agent surface is called ready), `/autopilot-nt`, `/walkthrough-nt`, `/forward-pass-nt` | `/release-nt` with open items |
+| `verifying` | `/live-check-nt` (the replay gate), `/harden-nt` (iterated, before an agent surface is called ready), `/autopilot-nt`, `/walkthrough-nt`, `/forward-pass-nt`, `/ux-review-nt` | `/release-nt` with open items |
 | `blocked` | `/resume-nt`, `/decide-nt` (unblock), `/replan-nt` | `/autopilot-nt` at the same wall; `/lab-nt resume` at an unchanged wall |
-| `shipped` | `/package-nt`, `/release-nt` (next) | — |
+| `shipped` | `/package-nt`, `/release-nt` (next), `/guide-nt`, `/demo-nt` | — |
 
 Always legal, any state: `/resume-nt`, `/decide-nt`, `/soc-nt`,
 `/notify-nt`, and the vault pair (`/capture-nt`, `/ask-nt`) — they read, log, or
-live outside the repo entirely.
+live outside the repo entirely. So are the upkeep and research commands, because
+none of them reads or changes the three canonical `plan/` files: `/tidy-nt`
+(deletes only this session's artifacts), `/reclaim-nt` (moves to the Trash only on
+`apply`), `/traces-nt` and `/research-nt` (each writes only its own `plan/` report),
+and `/prefs-nt` (works on the preferences folder outside the repo).
 
 ## Guards
 

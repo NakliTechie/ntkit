@@ -2,7 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- `package-nt/references/check-video.py`: measures a rendered video and prints one PASS, FAIL or INFO line per check with the measured value: size, frame rate, length, frame count, audio stream, black stretches of 0.5 s or more, still stretches over 3 s (a `--hold START-END` excuses a planned hold), integrated loudness against -14 LUFS ± 1, and true peak at or below -1 dBTP. One decode pass. The launch-video steps run it in place of the length-only `ffprobe` check. `tests/check-video.test.sh` covers a passing clip and one fault per check. Ideas from raea's quality floor and SenseNova's Code2Video skill (ideas only).
+- `prefs-nt`: each generated instruction file is measured against a size budget (`NT_PREFS_MAX_LINES`, default 200; `NT_PREFS_MAX_BYTES`, default 25000). Over budget still writes the file and logs a warning naming the three largest sources, because agents follow a long always-loaded file less closely (Anthropic, "The components of agent memory").
+- `MEMORY.md` writer rule **W6**: sessions or subagents running at once each append to their own dated record and never edit a shared list; the next reconcile pass folds them. Anthropic's test kept 41 of 57 facts in one shared table against 57 of 57 with one page per agent.
+- `windup-nt` day summaries end with a **Pick up here** block: the exact next action, the last error verbatim, and the path of the session's transcript when the host keeps one. `resume-nt` prints it with an `rg -n` search line, and searches the transcript for exact errors, paths and numbers before answering from the summary. Idea from Mainplane's restart-by-retrieval and the REMORY paper's finding that restored attribution, not more summary text, is what helped.
+
 ### Changed
+
+- One diagnostic batch now names two to four hypotheses before it runs and tests them all; a second batch needs a hypothesis the first did not cover (`SUBSTANCE.md` §3.10, `scaffold-nt` budget item (d), `resume-nt`). From Thorsten Ball's "give me four theories, then check all four".
+- AUTHORING §7 states the review brief: exactly the diff, the requirement and the check commands with their real output, never the maker's conversation or self-assessment; no requirement means stop and report; findings carry problem, `path:line`, reason and severity. `autopilot-nt`'s verifier follows it and returns an item with no what + why unverified. Pattern from the MiniMax Code team's `independent-review` skill (idea only).
 
 - `/traces-nt` reads the ten signals of tracelens 0.2.0: the five within-session rules plus `recurring_failure` (a failure an earlier session already hit), `recurring_action` (one long command in 3+ sessions of a project), `no_progress_streak`, `repeated_args` and `loop_cost_outlier`. Findings are ranked by the spend behind them (the summed recorded cost of their sessions, or their turns where the agent records no cost) times sessions, and each carries a `Spend:` line. Each new signal has a usual fix target. `references/queries.md` adds query 7 (spend per cluster) and keys the shape signals by their masked error or command. Ideas from TokenEconomizer's offline cost analysis and TandemLLM's conductor (ideas only; no runtime controller).
 

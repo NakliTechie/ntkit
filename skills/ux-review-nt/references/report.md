@@ -20,7 +20,7 @@ Per ATTEST, in this order:
 8. **Coverage / blind spots**: what couldn't be reached cold.
 9. **`## Workplan`**: the ranked findings as a fix-workplan, the same shape as `/forward-pass-nt`'s. Themed batches, the keystone first and marked `## Batch A — <theme>  (keystone)`; each item `- [ ] **H2** <fix> (<location>). <one-line why>.`, where the location is the beat and screen, or `path:line` when known. Structural items end `→ /decide-nt`; bugs and invariant breaches end `→ /walkthrough-nt`. `/release-nt` and `/autopilot-nt` read the open `[ ]` items.
 
-Create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`. If today's report exists, suffix `-2`.
+Create or check `plan/` as `/decide-nt` step 2 does ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); a broken `plan` symlink stops the run. If today's report exists, suffix `-2`.
 
 ### Hand back the recording
 
@@ -28,6 +28,6 @@ Send each recording from `plan/ux-review-<date>-run/` using the host’s file at
 
 ### Media lifecycle
 
-The recordings and screenshots are working evidence, not the record; the report is the record. Keep them while findings are open: the fixer replays beats from them. Once the fixes land and the gates pass, `/windup-nt`'s media sweep deletes the run directory's media by name (or do it then yourself) (`*.webm`, `*.mp4`, `*.cast`, `*.png`, `*.jpg`), report each deletion with its size, and keep the report, the beat logs and the JSON. Video stays out of a synced plan store (`*.webm` and `*.mp4` ignored there), since a run's media runs to 40–110 MB.
+The recordings and screenshots are working evidence, not the record; the report is the record. Keep them while findings are open: the fixer replays beats from them. Once the fixes land and the gates pass, `/windup-nt`'s media sweep deletes the run directory's media by name (or do it then yourself) (`*.webm`, `*.mp4`, `*.cast`, `*.png`, `*.jpg`), report each deletion with its size, and keep the report, the beat logs and the JSON. Video stays out of a synced plan store (`*.webm` and `*.mp4` ignored there).
 
 **Print to chat:** the worst friction beats, the ranked findings, the flail's yield, the audit results, and the headline of the ideal sequence. Point structural items at `/decide-nt` and bugs and invariant breaches at `/walkthrough-nt`; `/replan-nt` folds the report into `pending.md`/`workplan.md`.

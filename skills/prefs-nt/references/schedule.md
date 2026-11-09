@@ -28,8 +28,7 @@ no longer shows the label.
 `schedule`: add one crontab line tagged `# ntkit prefs-sync`, every argument in single quotes, with
 each `'` inside a path written as `'\''`, and the variables from the list above in front:
 `*/15 * * * * CODEX_HOME='<dir>' '<python>' '<script>' --dir '<folder>' >> /tmp/prefs-sync.log 2>&1 # ntkit prefs-sync`.
-Then run that command once by hand and check it exits 0, because cron gives no feedback until the
-first run.
+Then run that command once by hand and check it exits 0.
 
 `unschedule`: remove only the line carrying that tag, and check `crontab -l` no longer shows it.
 

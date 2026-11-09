@@ -9,15 +9,11 @@ metadata:
   writes: "plan/reclaim-<date>.md; moves to the Trash only on explicit `apply <id>`, logged with bytes moved"
 ---
 
-Projects quietly grow hundred-MB-to-multi-GB artifacts — a downloaded model
-checkpoint, a training run's output, a sample dataset, a one-off archive
-someone unzipped and forgot. `.gitignore` hides them from git, not from disk,
-and over dozens of projects that's real space. A deterministic scanner sorts
-the space into two tiers: the *regenerable* tier (build output, `node_modules`,
-caches) that a tool writes again, and the *judge* tier (weights, worktrees,
-old archives, stale experiments) that might be someone's only copy. The
-judgment goes only to the second tier, which this skill proposes and never
-assumes.
+Find large artifacts `.gitignore` hides from git but not from disk. A
+deterministic scanner sorts them into two tiers: *regenerable* (build output,
+`node_modules`, caches) that a tool writes again, and *judge* (weights,
+worktrees, old archives, stale experiments) that might be someone's only copy.
+Judgment goes only to the judge tier, which this skill proposes and never assumes.
 
 **READ-ONLY by default.** Finds, ranks, and writes a workplan. Removes nothing
 without a per-item `apply <id>` naming the exact finding, and then only to the
@@ -29,11 +25,9 @@ Input: a path to scope the sweep (default: current repo root). `apply
 
 ## Phase 0 — The scanner
 
-The sweep runs on **`disktree-cli`**, the headless side of
-[disktree](https://github.com/NakliTechie/disktree), the build with the
-weights, archive and store findings this skill needs. It measures what deleting gives back (`st_blocks`, hardlinks once,
-hidden folders included, one volume), knows what a directory *is*, and
-removes only through tested guards, and only to the trash.
+The sweep runs on **`disktree-cli`**, the headless side of disktree. It
+measures what deleting gives back and removes only through tested guards, and
+only to the trash.
 
 ```bash
 command -v disktree-cli || cargo install --git https://github.com/NakliTechie/disktree disktree-cli --root ~/.local
@@ -75,8 +69,7 @@ The `regenerable` tier needs no judgment beyond one check: if the path is
 it. `marketing/` and `brag-output*/` (`/package-nt` output) belong to this tier even when the scanner lists them as something else, unless an open item in `plan/` names them. Everything else in that tier goes in the report as **Regenerable**,
 with its `reason`.
 
-Spend the judgment on the `judge` tier. Check, in order of how much
-confidence each buys:
+Spend the judgment on the `judge` tier. Check, strongest signal first:
 
 - **Copy in the store** — a `weights` finding with `copies_in_store` equal
   to its `files` is drift: every weight file already sits in `~/Models`
@@ -91,9 +84,8 @@ confidence each buys:
   (`plan/history.md`'s latest dated entry, or `git log -1 --format=%cd`).
   90+ days untouched is a stronger candidate than this week's run output.
 
-Rank confidence **High / Medium / Low** from these signals. Don't collapse
-them into a single score; list which signals fired so the report is
-checkable.
+Rank confidence **High / Medium / Low** from these signals, listing which
+fired; no single score.
 
 ## Phase 3 — Rank and write the report
 
@@ -130,11 +122,10 @@ If `check` puts the path under `plan.blocked`, stop and quote the `reason`.
 Never fall back to `rm`. The move is recoverable until the Trash is emptied;
 say that the space returns only then, and that emptying the Trash is the
 user's step. Record `available_before` / `available_after` from the `trash`
-output (macOS can lag, see the diskspace README; report a lag, not a
-failure), and append the result to the report under `## Applied`: ID, path,
+output (macOS can lag; report a lag, not a failure), and append the result to the report under `## Applied`: ID, path,
 bytes moved, timestamp. No `apply-all`; each removal is a separate,
 deliberate call naming its ID.
 
 ## Impact declaration
 
-`plan/reclaim-<date>.md` is a record: append-only. End it with an `## Impact` section, one line per change it implies for `pending.md`, `workplan.md` or `history.md`'s indexes (`- pending.md/Now — add: …`), or `- none — <reason>`. Declare it; never add, drop or reword items in `pending.md` or `workplan.md` yourself (a status flip on an existing item is allowed). `/replan-nt` applies it ([MEMORY.md §3](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#3-declared-impact)). A High-confidence finding left un-applied at the end of the run is worth an add line so it isn't lost between sessions.
+`plan/reclaim-<date>.md` is a record: append-only. End it with `## Impact`: one line per change it implies for `pending.md`, `workplan.md` or `history.md` (`- pending.md/Now — add: …`, `- workplan.md/B2#3 — status: [ ] → [x], verified by …`), or `- none — <reason>`. Never add, drop or reword items there yourself; a status flip on an existing item is allowed. `/replan-nt` applies the rest ([MEMORY.md §3](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#3-declared-impact)). A High-confidence finding left un-applied at the end of the run gets an add line.

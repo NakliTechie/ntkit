@@ -3,11 +3,11 @@
 
 The campaign state lives in <dir>/lab.json (<dir> is plan/lab/<slug>, or a child or fork under it). Every save
 seals the whole state: its digest goes outside plan/, into the repo's git directory (lab-seals/), and every call
-refuses a state file that no longer matches. Each init, child, fork, leg, end and merge check is also appended to
+refuses a state file that no longer matches. Each init, child, fork, leg and end is also appended to
 lab-seals/ledger.jsonl, and a directory that was ever initialised cannot be initialised again.
 
 What the seal is: tamper evidence. It catches a hand edit to lab.json, a deleted state file, and a re-init that
-would reset the budget or add a merge grant. It does not stop an agent that deliberately rewrites the seal, the
+would reset the budget. It does not stop an agent that deliberately rewrites the seal, the
 ledger and this script; that would break the skill's stop-lines, and the ledger and git history show it.
 
   kind, depth, max_depth, parent  "campaign" | "child" | "fork"; a child is one level deeper, a fork the same depth
@@ -17,7 +17,7 @@ ledger and this script; that would break the skill's stop-lines, and the ledger 
   experiments, spent, children    this leg's budget, what is used, and the children and forks carved from it
   legs, max_legs, ended           leg odometer and how the last leg ended
   contract_sha                    sha256 of contract.md when the leg began; `check` refuses a changed contract
-  higher_is_better, merge         metric direction; "none" or "auto" (the user's per-campaign merge grant)
+  higher_is_better                metric direction
   surprise_threshold              |surprise| above this is HIGH; null means the default, 10% of |predicted|
   baseline_failures               gate failures seen on the campaign's start commit (`baseline`); null = not yet
                                   recorded, [] = clean. Carried across legs, because a kept tip fails no more.
@@ -37,7 +37,7 @@ below a glob's literal base. Untracked files count as changes unless a committed
 from ignored paths, such as a virtualenv, by glob.
 
 Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 REVERT):
-  init  <dir> --fence G.. --lock G.. --experiments N [--max-depth 2] [--max-legs 5] [--lower-is-better] [--merge auto]
+  init  <dir> --fence G.. --lock G.. --experiments N [--max-depth 2] [--max-legs 5] [--lower-is-better]
         [--surprise X]       every lock glob must match a file; refuses a directory initialised before; X is the
                              high-surprise threshold in metric units (default: 10% of |predicted|, per experiment)
   check <dir> [--base REF]   seal intact; locked files unchanged and none added; contract.md unchanged; every
@@ -74,8 +74,6 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
   leg   <dir> --experiments N  start a resumed leg of a top-level campaign: refuses children and forks, a leg with
                              no recorded end, an exhausted odometer, a changed lock, and a STAGNANT or DRY-WELL end
                              with contract.md unchanged
-  merge-ok <dir>             exit 0 only for a sealed top-level campaign holding the user's merge: auto grant, with
-                             exactly one init in the ledger
 """
 import argparse, hashlib, json, math, os, random, re, subprocess, sys, time
 from pathlib import Path
@@ -246,10 +244,10 @@ def cmd_init(a):
          "lock_globs": a.lock, "locked": {f: sha_file(f) for f in files}, "experiments": a.experiments,
          "spent": 0, "children": [], "legs": 1, "max_legs": a.max_legs, "ended": None,
          "start": git("rev-parse", "HEAD"), "contract_sha": contract_sha(a.dir),
-         "higher_is_better": not a.lower_is_better, "merge": a.merge,
+         "higher_is_better": not a.lower_is_better,
          "surprise_threshold": a.surprise, "ideas": {}}
     save(a.dir, s)
-    ledger("init", a.dir, merge=a.merge, experiments=a.experiments)
+    ledger("init", a.dir, experiments=a.experiments)
     print(f"ok: {len(files)} locked files, fence {a.fence}, {a.experiments} experiments, max depth {a.max_depth}")
     return 0
 
@@ -453,7 +451,7 @@ def carve(a, kind):
     t = {"kind": kind, "depth": depth, "max_depth": s["max_depth"], "parent": str(a.dir), "fence": fence,
          "lock_globs": s["lock_globs"], "locked": s["locked"], "experiments": a.experiments, "spent": 0,
          "children": [], "legs": 1, "max_legs": 1, "ended": None, "start": git("rev-parse", "HEAD"),
-         "contract_sha": contract_sha(a.target), "higher_is_better": s["higher_is_better"], "merge": "none",
+         "contract_sha": contract_sha(a.target), "higher_is_better": s["higher_is_better"],
          "surprise_threshold": s.get("surprise_threshold"), "ideas": {}}
     save(a.target, t)
     ledger(kind, a.target, parent=str(Path(a.dir).resolve()), experiments=a.experiments)
@@ -549,17 +547,6 @@ def cmd_summary(a):
     return 0
 
 
-def cmd_merge_ok(a):
-    s = load(a.dir)
-    n = inits(a.dir)
-    ok = s["kind"] == "campaign" and s["merge"] == "auto" and n == 1
-    ledger("merge-ok", a.dir, granted=ok)
-    if ok:
-        print("ok: merge granted for this campaign"); return 0
-    reason = f"the ledger shows {n} inits for this directory" if s["merge"] == "auto" and s["kind"] == "campaign" else "no merge grant for this campaign"
-    print(f"refused: {reason}"); return 1
-
-
 def main(argv=None):
     p = argparse.ArgumentParser(prog="lab.py", description=__doc__.split("\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -567,7 +554,7 @@ def main(argv=None):
     i.add_argument("--fence", nargs="+", default=[]); i.add_argument("--lock", nargs="+", default=[])
     i.add_argument("--experiments", type=int, required=True); i.add_argument("--max-depth", type=int, default=2)
     i.add_argument("--max-legs", type=int, default=5)
-    i.add_argument("--lower-is-better", action="store_true"); i.add_argument("--merge", choices=["none", "auto"], default="none")
+    i.add_argument("--lower-is-better", action="store_true")
     i.add_argument("--surprise", type=float)
     c = sub.add_parser("check"); c.add_argument("dir"); c.add_argument("--base")
     n = sub.add_parser("noise"); n.add_argument("values", type=float, nargs="+")
@@ -585,7 +572,6 @@ def main(argv=None):
     f = sub.add_parser("forks"); f.add_argument("dir"); f.add_argument("--k", type=int, default=3)
     e = sub.add_parser("end"); e.add_argument("dir"); e.add_argument("state")
     lg = sub.add_parser("leg"); lg.add_argument("dir"); lg.add_argument("--experiments", type=int, required=True)
-    m = sub.add_parser("merge-ok"); m.add_argument("dir")
     pr = sub.add_parser("predict"); pr.add_argument("dir"); pr.add_argument("id")
     pr.add_argument("--proposer", required=True); pr.add_argument("--predicted", type=float, required=True)
     rc = sub.add_parser("record"); rc.add_argument("dir"); rc.add_argument("id")
@@ -595,7 +581,7 @@ def main(argv=None):
     if a.cmd in ("child", "fork"):
         return carve(a, a.cmd)
     return {"init": cmd_init, "check": cmd_check, "noise": cmd_noise, "keep": cmd_keep, "baseline": cmd_baseline, "spend": cmd_spend,
-            "forks": cmd_forks, "end": cmd_end, "leg": cmd_leg, "merge-ok": cmd_merge_ok, "predict": cmd_predict,
+            "forks": cmd_forks, "end": cmd_end, "leg": cmd_leg, "predict": cmd_predict,
             "record": cmd_record, "summary": cmd_summary}[a.cmd](a)
 
 

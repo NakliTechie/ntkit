@@ -40,7 +40,7 @@ Show the version, the CHANGELOG diff, the notes and the exact commands, then **p
 
 A push is not a deploy. Against the deployed URL:
 - Fetch a marker that exists only in this release. Missing → still propagating or failed; don't report success.
-- Re-fetch with a cache-busting query and `Cache-Control: no-cache` before concluding a rollout is half-done; the first read after a deploy is often stale.
+- Re-fetch with a cache-busting query and `Cache-Control: no-cache` before concluding a rollout is half-done.
 - Re-check what only fails in production: hosts serve `index.html` for a missing file, so `/robots.txt`, `/llms.txt`, redirects and 404s need the right status **and** `content-type` from the live host.
 - Confirm the response headers the repo claims (cache-control, security headers) are applied.
 

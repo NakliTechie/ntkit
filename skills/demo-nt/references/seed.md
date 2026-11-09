@@ -8,7 +8,7 @@ The demo data is **one canonical asset, `demo/seed/`**, that `/walkthrough-nt`, 
 
 When the app has a server and a database, the seed is a script, not a data dump.
 
-- **Create the minimum by direct insert, the rest through the API.** Insert only what has no API path: the fictional people, their roles, a session per person, and a credential where the app needs one. Everything a user makes (lists, content, approvals, sends, RSVPs, replies) goes through the running app's own endpoints, as the persona who would make it, so the seed hits real validation, audit and side effects and breaks loudly when an API changes.
+- **Create the minimum by direct insert, the rest through the API.** Insert only what has no API path: the fictional people, their roles, a session per person, and a credential where the app needs one. Everything a user makes goes through the running app's own endpoints, as the persona who would make it.
 - **Signed actions are signed, never bypassed.** If an action needs a signature (a passkey approval, a signed webhook), the seed generates a key pair per persona, registers the public half as that persona's credential, and signs the real challenge the app issues, for the demo's own `ORIGIN` and `RP_ID`. Never add a "skip signature in demo" branch to the app.
 - **Fictional and stable.** Invented names, outlets and organisations; `example.*` or reserved domains for email; phone numbers in an unused range. The same personas on every reset. Nothing copied from production.
 - **Tell the story in data.** Seed each state the demo will show: something published, something waiting for approval, a draft, an overdue item, a pending verification. An empty column is a gap in the seed.

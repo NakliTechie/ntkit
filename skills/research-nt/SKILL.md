@@ -42,13 +42,13 @@ Example: `/research-nt "how do open deep-research harnesses verify citations"`. 
 
 ## Guards
 
-- **Legal states:** any. The command never reads the project's code. No `plan/` → create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore` (a symlinked `plan` is fine; never replace it).
+- **Legal states:** any. The command never reads the project's code. No `plan/` → create or check `plan/` as `/decide-nt` step 2 does ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); a broken `plan` symlink stops the run. A symlinked `plan` is fine; never replace it.
 - **Refuse, writing nothing,** when: the input is empty; `go <slug>` names no run; the run's `State:` is not SPEC-READY or BUDGET (SPEC-READY means the run died after planning); `python3 $SKILL/bin/check.py spec $RUN` fails on `go` (show its problem list — the user's edit broke the spec).
 - **Fold at seams** (AUTHORING §8). Subagents return one status line; the files hold the rest. Re-read a file rather than carry its content.
 
 ## The run
 
-On entering a phase, read its Detail file first, then act. The Outcome column is the contract. Do not read ahead.
+On entering a phase, read its Detail file first, then act. Do not read ahead.
 
 | Phase | Outcome | Detail |
 |---|---|---|
@@ -62,5 +62,3 @@ On entering a phase, read its Detail file first, then act. The Outcome column is
 | 7 Close | run.md records the state, gate table, claim counts, model substitutions and top sources | `references/report.md` |
 
 End states, first match wins: **SPEC-READY** (planned; in progress, or the run died before Phase 3 finished) · **BLOCKED** (the spec still fails `check.py spec` after one repair, or 3 researchers could not search or fetch at all) · **BUDGET** (after its repair pass, a unit still has no section `check.py assemble` accepts; finished sections stay, and `go <slug>` researches only the units whose section fails `check.py section`) · **VERIFIED** (all gates pass without bypass and any repair review passes) · **PASSED-WITH-NOTES** (every blocking gate passes; an advisory gate, G2b, does not) · **FLAGGED** (a report exists and a blocking gate still fails).
-
-Prompts adapt `longcat_deepresearch/prompts.py` (MIT, © 2026 LongCat); licence in `references/LICENSE-longcat`.

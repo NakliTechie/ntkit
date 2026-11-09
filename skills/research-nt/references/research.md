@@ -10,7 +10,7 @@ Read `$RUN/spec.md` for the unit ids and titles. Reading the spec is fine; it is
 
 ## Launch
 
-`mkdir -p $RUN/sections` (it does not exist before this phase). Then one research subagent per unit using the model policy in SKILL.md, in parallel within host capacity. Queue excess units; never combine owners into one context. Each gets the researcher brief below with every `<…>` filled:
+`mkdir -p $RUN/sections`. Then one research subagent per unit using the model policy in SKILL.md, in parallel within host capacity. Queue excess units; never combine owners into one context. Each gets the researcher brief below with every `<…>` filled:
 
 - `<fetch cap>` = `fetches_per_section`; `<rounds>` = `tool_rounds`;
 - `<target words>` = `words` ÷ number of units, rounded down.
@@ -68,9 +68,7 @@ Coverage
 - When a claim rests on one paper's or one project's headline number, spend one search on independent
   replications: the paper's id or title with "replication", "reproduce" or "reproduction", on GitHub,
   OpenReview and the web. Fetch any you find and report its result next to the headline, attributed to
-  its author. If none exists, say "no independent replication found". (An outside replication of
-  TreeOPSD, arXiv:2610.23181, cut its +4.97-point lead over GRPO to +0.08 once the baseline had
-  standard clipping.)
+  its author. If none exists, say "no independent replication found".
 
 Writing
 - Write <abs $RUN>/sections/<id>.md. Its first line is exactly: ### <id> | <title>

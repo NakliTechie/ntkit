@@ -9,4 +9,4 @@ After the scripted walk, from the states it reached:
 
 **The finding class is recoverability, not crashes**: dead ends, lost work, unrecoverable state, traps, errors that don't say what to do. Crashes belong to the Phase 1 invariant set wherever they fire.
 
-**Budget: ~30 interactions for the flail, plus up to 10 more to produce a clean repro of anything it surfaces.** Report both numbers. Expect 20-30 minutes, because each misclick needs a screenshot read and a follow-up probe to rule out a harness artifact. Declare the budget and yield, or the skip reason under the SKILL.md side-effect stop-line, whether or not it found anything.
+**Budget: ~30 interactions for the flail, plus up to 10 more to produce a clean repro of anything it surfaces.** Report both numbers. Declare the budget and yield, or the skip reason under the SKILL.md side-effect stop-line, whether or not it found anything.

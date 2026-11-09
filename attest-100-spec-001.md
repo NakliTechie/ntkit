@@ -3,6 +3,13 @@
 **Agent-To-human Technical English with Evidence and STatus**
 Standard for coding-agent communication with humans.
 
+This file holds the parts of ATTEST-100 that ATTEST.md does not: the spec's
+metadata and lineage, the posture and rationale, scope detail, conformance
+levels, rule IDs with enforcement tiers, clauses that extend single ATTEST.md
+rules, extra reserved-word replacements, a RISK block example, the
+`attest-lint` rule table, governance and the change log, and the adoption path.
+ATTEST.md is the operative standard; read it first.
+
 | Field | Value |
 |---|---|
 | Issue | 0.2 |
@@ -14,7 +21,7 @@ Standard for coding-agent communication with humans.
 
 ---
 
-## §0 — Posture and scope
+## §0 — Posture and scope (extends ATTEST.md §0)
 
 **Posture.** An agent's report is not prose; it is a claim-bearing instrument. The
 failure mode this standard exists to prevent: an agent that says "done" when no
@@ -30,9 +37,9 @@ lexicon usable only with machine evidence, and a banned lexicon with no legal us
 **The second zone, Issue 0.2.** A claim-zone-only standard still let natural
 prose run long and unreadable, because nothing gated sentence length or word
 choice outside a claim. Issue 0.2 adds a **readability zone**: sentence and
-paragraph caps, and a banned lexicon of documented AI-writing tells (§4.3),
-that apply to every sentence, not only claims. Two zones are now closed; the
-rest of the language stays open.
+paragraph caps, and a banned lexicon of documented AI-writing tells (ATTEST.md
+§4.2), that apply to every sentence, not only claims. Two zones are now closed;
+the rest of the language stays open.
 
 **Governance note on the readability zone.** §7's change-form process requires
 ≥3 transcript excerpts before a word enters a controlled list. The Issue 0.2
@@ -58,228 +65,137 @@ No session has been scored against either level yet; `attest-lint` is unbuilt
 
 ---
 
-## §1 — Part A: Message types
+## §1 — Message types (extends ATTEST.md §1)
 
-Every agent turn is composed of one or more **typed blocks**. Eight types; the set
-is closed. Content outside a typed block is a violation (rule A-01). Pleasantries,
-apologies, and enthusiasm have no legal container and are therefore structurally
-banned.
+Pleasantries, apologies, and enthusiasm have no legal container and are
+therefore structurally banned. The block syntax is line-oriented and grep-able,
+with no JSON ceremony.
 
-This section binds only above the structure threshold that `ATTEST.md` §0.1
-defines. Below that threshold, a message is natural prose and §1's block types
-do not apply — but §3's writing rules and §4's dictionary still do (§0 above).
+### 1.1 Optional fields per type
 
-Block syntax (line-oriented, grep-able, no JSON ceremony):
+ATTEST.md §1 lists the required fields. Each type may also carry:
 
-```
-[RESULT verified]
-Claim text.
-evidence: <pointer>
-```
+| Type | Optional fields |
+|---|---|
+| RESULT | scope note |
+| STATUS | per-step evidence |
+| PLAN | budget estimate |
+| BLOCKER | severity; the tried-trail may be given as a pointer |
+| QUESTION | deadline for default |
+| RISK | evidence class |
+| DIFF | migration note |
+| ESCALATION | recommendation |
 
-### 1.1 Type registry
+### 1.2 Type rules: IDs and added clauses
 
-| Type | Purpose | Required fields | Optional fields |
-|---|---|---|---|
-| RESULT | Outcome of attempted work | claim · evidence class (header) · evidence pointer | scope note |
-| STATUS | Position in a plan | step/milestone ref · state ∈ {complete, in-progress, not-started, blocked} | per-step evidence |
-| PLAN | Intended next actions | numbered steps · per-step verifier | budget estimate |
-| BLOCKER | Progress stopped | what stopped · tried-trail (or pointer) · what is needed | severity |
-| QUESTION | Decision needed | options · **default if unanswered** · what is blocked meanwhile | deadline for default |
-| RISK | Hazard flag | severity ∈ {BLOCKS, DEGRADES, COSMETIC} (leads the block) · trigger condition · mitigation | evidence class |
-| DIFF | What changed | files touched (path:line ranges) · behavior delta · invariants affected | migration note |
-| ESCALATION | Loop exit | exit reason ∈ {no-progress, budget, locked-decision} · tried-trail pointer | recommendation |
-
-### 1.2 Type rules
-
-- **A1.1** — Every line of an agent message lives inside a typed block.
-- **A1.2** — One block, one concern. A RESULT that also asks a question is two blocks.
-- **A1.3** — A turn that reports work MUST contain ≥1 RESULT or STATUS block.
-- **A1.4** — A QUESTION block MUST state the default action and when it triggers.
-  An unanswered question never silently halts the loop.
-- **A1.5** — A RISK block's first word is its severity word (STE warning rule,
-  transplanted).
-- **A1.6** — An ESCALATION block MUST point at a written tried-trail; the trail
-  itself lives in external state (state file), not only in the message.
-- **A1.7** — Block order in a turn: RISK (BLOCKS) → RESULT/STATUS → BLOCKER →
-  QUESTION → DIFF → PLAN → RISK (lower) → ESCALATION. Bad news travels first.
+| ID | Rule (full text in ATTEST.md §1 unless an added clause follows) |
+|---|---|
+| A1.1 | Every line lives inside a typed block. |
+| A1.2 | One block, one concern. |
+| A1.3 | A turn that reports work contains ≥1 RESULT or STATUS block. |
+| A1.4 | A QUESTION states its default action. Added clause: it also states **when the default triggers**. |
+| A1.5 | A RISK block's first word is its severity word. Added rationale: this is the STE warning rule, transplanted. |
+| A1.6 | An ESCALATION points at a written tried-trail. Added clause: the trail itself lives in external state (a state file), not only in the message. |
+| A1.7 | Block order: RISK (BLOCKS) → RESULT/STATUS → BLOCKER → QUESTION → DIFF → PLAN → RISK (lower) → ESCALATION. |
 
 ---
 
-## §2 — Part B: Evidence classes
+## §2 — Evidence classes (extends ATTEST.md §2)
 
-Every factual claim carries exactly one evidence marker. Five classes, strictly
-ordered by entitlement. This is the RFC 2119 move applied to the *evidence*
+The five classes are strictly ordered by entitlement: VERIFIED, OBSERVED,
+INFERRED, ASSUMED, REPORTED. This is the RFC 2119 move applied to the *evidence*
 dimension instead of the *requirement* dimension.
 
-| Marker | Meaning | Entitlement (what the claim MUST cite) |
-|---|---|---|
-| **VERIFIED** | A deterministic check ran and passed | The check: literal command + exit code, test id, or gate-artifact path |
-| **OBSERVED** | Agent executed something and saw output; no formal check | What ran (literal command) and what was seen |
-| **INFERRED** | Concluded from reading code/docs/config; nothing executed | The source read (path:line or doc ref) |
-| **ASSUMED** | Taken as true without evidence | What check would confirm or refute it |
-| **REPORTED** | Relayed from an external source | The source (doc, issue, human instruction, upstream changelog) |
+Added clauses to the class table:
 
-### 2.1 Class rules
+- INFERRED covers conclusions from reading code, docs, or config.
+- REPORTED sources include a doc, an issue, a human instruction, or an upstream
+  changelog.
 
-- **B2.1** — One claim, one class. A sentence may not carry two factual claims
-  (see C-rule 3.1); therefore a sentence carries at most one marker.
-- **B2.2** — The class is declared in the block header (`[RESULT verified]`) when
-  uniform, or inline per sentence (`(observed)`) when mixed. Uniform-header is the
-  default; inline is the exception.
-- **B2.3** — **The success vocabulary is reserved to VERIFIED** (§4.1). An agent
-  that has not run the verifier cannot say "done" without producing a lintable
-  violation.
-- **B2.4** — Evidence pointers MUST resolve: a cited test exists in the repo; a
-  cited command appears in the session transcript; a cited artifact exists at the
-  path. Unresolvable pointers are fabrications (rule A-10) — the linguistic layer
-  of the reward-hacking screen.
-- **B2.5** — Downgrading is always legal; upgrading never is. When unsure between
-  OBSERVED and VERIFIED, the claim is OBSERVED.
-- **B2.6** — An ASSUMED claim that gates further work MUST also appear in a
-  QUESTION or RISK block.
+| ID | Rule (full text in ATTEST.md §2 unless an added clause follows) |
+|---|---|
+| B2.1 | One claim, one class. Added clause: a sentence may not carry two factual claims (rule 3.1), so a sentence carries at most one marker. |
+| B2.2 | Header class when uniform, inline when mixed. Added clause: uniform-header is the default; inline is the exception. |
+| B2.3 | The success vocabulary is reserved to VERIFIED. An agent that has not run the verifier cannot say "done" without producing a lintable violation. |
+| B2.4 | Evidence pointers resolve; an unresolvable pointer is a fabrication (rule A-10). Added rationale: this is the linguistic layer of the reward-hacking screen. |
+| B2.5 | Downgrading is always legal; upgrading never is. |
+| B2.6 | An ASSUMED claim that gates further work also appears in a QUESTION or RISK block. |
 
 ---
 
-## §3 — Part C: Writing rules
+## §3 — Writing rules: IDs and enforcement tiers (extends ATTEST.md §0.3 and §5)
 
-Numbered STE-style. **Enforcement tiers:** rules marked ● are hard (linted, A-tier
-or checker-screened); rules marked ○ are defaults an agent may break when the reader is better served
-(ATTEST.md §0.2). An ○ break is bounded, not unlimited (3.5's 40-word limit) — it
-buys room, not an exit from the standard. Constrain the claims hard, the prose moderately — the ACE failure
-(unreadable because fully machine-parseable) is the over-rotation this tier split
-prevents.
+**Enforcement tiers.** Rules marked ● are hard (linted, A-tier or
+checker-screened); rules marked ○ are defaults an agent may break when the
+reader is better served (ATTEST.md §0.2). An ○ break is bounded, not unlimited
+(3.5's 40-word limit) — it buys room, not an exit from the standard. Constrain
+the claims hard, the prose moderately — the ACE failure (unreadable because
+fully machine-parseable) is the over-rotation this tier split prevents.
 
-**Scope, Issue 0.2.** Sections 3.1–3.4 bind only inside typed blocks (above the
-structure threshold). Section 3.5 (sentences) and 3.6 (readability) bind
+**Scope, Issue 0.2.** Rules 3.1–3.4 bind only inside typed blocks (above the
+structure threshold). The sentence rules and readability rules bind
 everywhere — inside blocks and in natural prose alike.
 
-### Section 3.1 — Claims
-
-- **3.1** ● One claim per sentence. No conjunction joins two factual claims; each
-  needs its own evidence class.
-- **3.2** ● Every claim of class VERIFIED/OBSERVED/INFERRED/REPORTED carries its
-  pointer per §2.
-- **3.3** ● Numbers over adjectives: "3 of 41 tests fail," never "a few tests
-  fail." Countable things are counted.
-- **3.4** ● Absence is claimed explicitly: "I did not run the e2e suite" — never
-  implied by omission when the handoff's gate lists it.
-
-### Section 3.2 — Sentences (binds everywhere, Issue 0.2)
-
-- **3.5** ○ Sentence length: aim for 25 words or fewer; 40 is the limit, every
-  sentence, every register. (Issue 0.1 split this 20/25 by block type; Issue 0.2
-  unified it with a bounded 40-word exception; Issue 0.3 makes 40 the limit and
-  retires the prose-exception tag.)
-- **3.6** ● Active voice, agent as subject: "I changed X," never "X was changed."
-  Attribution is load-bearing — a later reader must tell the agent's action from
-  the system's.
-- **3.7** ○ Simple present for what is; simple past only for a completed action
-  or a tried-trail entry (3.12); simple future ("will") only inside PLAN blocks
-  or an explicit forward statement.
-- **3.8** ● No rhetorical questions. Interrogatives are legal only in QUESTION
-  blocks.
-- **3.15** ● One main point per sentence (Issue 0.2; relaxed in Issue 0.3). A
-  sentence may carry its point's reason or consequence ("because", "so", "which
-  means"); separate points get separate sentences. Reader-first rules (ATTEST.md
-  §0.2) outrank this one.
-- **3.16** ● Paragraph cap: 6 sentences. Past that point, restructure as a list
-  (Issue 0.2).
-- **3.17** ○ No metaphor, idiom, or figurative language; state the literal
-  mechanism (Issue 0.2). The closed instances in §4.3 are A-tier lintable; the
-  open-ended form of this rule is B-tier, checker-screened judgment.
-
-### Section 3.3 — References
-
-- **3.9** ● File references are `path:line` or `path:line-range`. Never "the auth
-  file."
-- **3.10** ● Command references are the literal command in backticks. Never "I ran
-  the tests" without the invocation.
-- **3.11** ● Identifiers (tests, migrations, feature flags, env vars) appear
-  verbatim, backticked.
-
-### Section 3.4 — Trails and questions
-
-- **3.12** ● The tried-trail is append-only, first-person, past tense, one attempt
-  per entry: "I ran X; it failed with Y." Replayable by a cold reader.
-- **3.13** ● A QUESTION presents its options as a closed list with the agent's
-  recommendation marked. Open-ended "what do you think?" is a violation.
-- **3.14** ○ A BLOCKER names the *smallest* thing that unblocks, not the largest.
+| ID | Tier | Rule | ATTEST.md home | Added clause |
+|---|---|---|---|---|
+| 3.1 | ● | One claim per sentence. No conjunction joins two factual claims; each needs its own evidence class. | §2, §0.3 | This rule is about factual claims, not only main points. |
+| 3.2 | ● | Every VERIFIED/OBSERVED/INFERRED/REPORTED claim carries its pointer. | §2 | — |
+| 3.3 | ● | Numbers over adjectives; count what is countable. | §5.3 | — |
+| 3.4 | ● | Claim absence explicitly. | §5.4 | Applies when the handoff's gate lists the check. |
+| 3.5 | ○ | Sentence length: aim for 25 words; 40 is the limit. | §0.3, §5.7 | — |
+| 3.6 | ● | Active voice, agent as subject. | §0.3, §5.2 | Attribution is load-bearing: a later reader must tell the agent's action from the system's. |
+| 3.7 | ○ | Tense: simple present; past for completed actions and tried-trails; "will" only in PLAN or an explicit forward statement. | §0.3, §5.9 | — |
+| 3.8 | ● | No rhetorical questions. | §5.9 | Interrogatives are legal only in QUESTION blocks. |
+| 3.9 | ● | File references are `path:line` or `path:line-range`. Never "the auth file." | §5.5 | — |
+| 3.10 | ● | Command references are the literal command in backticks. Never "I ran the tests" without the invocation. | §5.5 | — |
+| 3.11 | ● | Identifiers appear verbatim, backticked. | §5.5 | Identifiers include tests, migrations, feature flags, and env vars. |
+| 3.12 | ● | Tried-trail: append-only, first person, past tense, one attempt per entry, replayable. | §5.6 | — |
+| 3.13 | ● | A QUESTION presents a closed list of options with the recommendation marked. | §1 | Open-ended "what do you think?" is a violation. |
+| 3.14 | ○ | A BLOCKER names the *smallest* thing that unblocks, not the largest. | §1 | — |
+| 3.15 | ● | One main point per sentence; a sentence may carry its reason. Reader-first rules outrank this one. | §0.3, §5.1 | — |
+| 3.16 | ● | Paragraph cap: 6 sentences, then a list. | §0.3 | — |
+| 3.17 | ○ | No metaphor, idiom, or figurative language. | §0.3 | The closed instances in the AI-tell list (ATTEST.md §4.2) are A-tier lintable; the open-ended form of this rule is B-tier, checker-screened judgment. |
 
 ---
 
-## §4 — Part D: Dictionary (Issue 0.2)
+## §4 — Dictionary (extends ATTEST.md §3 and §4)
 
-The complete controlled zone: claim zone (§4.1–4.2) plus readability zone (§4.3–4.4,
-Issue 0.2). Everything not listed is unrestricted technical English. The claim-zone
-lists grow only via change form (§7); the readability zone grows from published
-evidence of AI-writing patterns, logged the same way (§7, Issue 0.2 entry).
+The dictionary is the complete controlled zone: the claim zone (reserved and
+banned words) plus the readability zone (AI-tell words and formatting tells,
+Issue 0.2). Everything not listed is unrestricted technical English. The
+claim-zone lists grow only via change form (§7); the readability zone grows from
+published evidence of AI-writing patterns, logged the same way (§7, Issue 0.2
+entry).
 
-### 4.1 Reserved lexicon — legal only in claims marked VERIFIED
+### 4.1 Reserved lexicon additions (extends ATTEST.md §3)
+
+Added words: completed, passes, ship-ready. Added replacements when the claim is
+not VERIFIED:
 
 | Word/phrase | If not VERIFIED, write instead |
 |---|---|
 | done, complete, completed | "implemented, not yet verified" (OBSERVED/INFERRED) |
-| fixed, resolved | "changed; fix unconfirmed" |
 | passing, passes, green | state which check and its actual status |
-| works, working | "ran without error on <input>" (OBSERVED) |
 | correct | "matches spec at <ref>" (INFERRED) |
 | safe, secure | name the specific property checked |
 | verified, confirmed, proven | (definitionally reserved) |
-| no regressions | "suite <id> passed" or downgrade |
 | production-ready, ship-ready | never available below VERIFIED; even then cite the gate |
 
-### 4.2 Banned lexicon — confidence and sentiment — no legal use in any block
+### 4.2 Banned lexicon additions (extends ATTEST.md §4.1)
 
-| Category | Words |
-|---|---|
-| Predictive hedges | should work, probably, likely, hopefully, seems to, appears to (for own work), I believe, I think (prefix to a claim — use the evidence class instead) |
-| Minimizers | just, simply, basically, straightforward, trivial, quick fix |
-| Success theater | great, perfect, excellent, awesome, all set, good to go, 🎉 and all emoji |
-| Social filler | great question, happy to, of course, certainly, as requested |
-| Apology loop | sorry, apologies, my mistake (state the error and the correction; contrition is not information) |
-| Vague quantity | a few, some, several, most, many (when the count is knowable) |
-| Confidence theater | I'd stand behind this, rest assured, you can trust that, I'm confident that — cite the evidence class instead |
-| Punctuation | exclamation marks |
+- Social filler also includes "as requested".
+- "appears to" is banned when it describes the agent's own work.
 
-**Note on "should."** Banned only as prediction ("this should work"). Legal as
-normative citation inside REPORTED claims quoting a spec ("RFC 9110 says the
-server SHOULD…").
+### 4.4 Severity words (extends ATTEST.md §1, RISK)
 
-### 4.3 AI-tell lexicon — readability zone, no legal use in any block (Issue 0.2)
-
-Sourced from Wikipedia's "Signs of AI writing" checklist and arXiv word-frequency
-studies of GPT-family output (§0 governance note — logged exception to the §7
-change-form process). Each entry has a plain replacement.
-
-| Category | Banned | Write instead |
-|---|---|---|
-| Significance inflation | stands as, serves as (for "is"), is a testament to, underscores, plays a crucial/pivotal/vital role, reflects broader, symbolizes, sets the stage for | state the fact; drop the significance claim unless citable |
-| Copula avoidance | boasts, features, represents, marks, functions as, operates as (replacing "is"/"are") | is, are, has |
-| Promotional adjectives | vibrant, rich, robust, seamless, cutting-edge, groundbreaking, renowned, meticulous(ly), intricate, comprehensive, holistic, transformative, innovative, revolutionary | the specific property, or nothing |
-| Inflated verbs | delve (into), dive into, unpack, navigate, harness, leverage, foster, cultivate, garner, bolster, elevate, unlock, empower, supercharge | use, help, get, raise, add |
-| Vague attribution | industry reports, some critics/observers argue, experts say, studies show (no named source) | name the source, or drop the claim |
-| Rhetorical parallelism | not just X but Y; not only X but also Y; it's not X, it's Y | state the one true thing |
-| Canned openers/closers | in today's fast-paced/ever-evolving world, let's dive in, in conclusion, at the end of the day, ultimately, in essence, to sum up, it's worth noting that, it goes without saying | delete; start with the finding |
-| Fake friendliness | I hope this helps, feel free to reach out, let me know if you have any questions | delete, or state what happens next |
-| Faux-technical metaphor | falls out of, boils down to, comes down to, at its core, under the hood | state the mechanism directly |
-| Wordy connectors | in order to, with respect to, on the basis of, due to the fact that, a large number of | to, for/about, from, because, the count |
-
-### 4.4 Severity words (RISK blocks, closed set)
-
-BLOCKS · DEGRADES · COSMETIC. No synonyms ("critical," "minor," "P1") — one scale,
-three words.
-
-### 4.5 Formatting tells — readability zone (Issue 0.2)
-
-- At most one em dash per message; prefer a period or comma.
-- No emoji used as a bullet or section marker.
-- No title-case headings inside prose; sentence case only.
-- Bold marks a defined term or a literal value, not emphasis for its own sake.
+BLOCKS · DEGRADES · COSMETIC is a closed set. No synonyms ("critical," "minor,"
+"P1") — one scale, three words.
 
 ---
 
-## §5 — Canonical example
+## §5 — RISK block example (extends ATTEST.md §6)
+
+ATTEST.md §6 has no RISK block. This one shows the severity-first form:
 
 ```
 [RISK]
@@ -287,46 +203,13 @@ BLOCKS: `crate` v1 API surface changes if step 3 of the plan proceeds.
 trigger: renaming `vault.open()` breaks the frozen ESM contract.
 mitigation: step 3 rewritten to extend, not rename. (inferred)
 evidence: crate/API.md:12-40
-
-[RESULT verified]
-Grant-scope check passes for all 3 roles.
-evidence: `npm test -- grant.spec.js` exit 0, 17/17, artifact tests/logs/run-0142.txt
-
-[RESULT observed]
-The demo page loads and issues a scoped token in Chrome 126.
-evidence: `python3 -m http.server` + manual load; token visible in console log
-
-[BLOCKER]
-I cannot test the Firefox path.
-tried: I installed firefox-esr; headless launch fails with `GLIBC_2.36 not found`.
-tried: I pinned firefox 115; same failure.
-needed: a container image with GLIBC ≥ 2.36, or waiver of the Firefox gate.
-
-[QUESTION]
-Options: (a) waive Firefox for M1 and gate it at M2 — recommended; (b) swap base image now.
-default: (a), applied if unanswered at next session start.
-blocked meanwhile: nothing; M1 gate minus Firefox is satisfiable.
 ```
 
-Anti-example 1, block violations: *"Great news! Everything's done and working
-perfectly — fixed the auth bug, tests should all be passing now. Just a small
-tweak was needed!"* — untyped block (A1.1), banned words ×5, reserved words ×4
-without VERIFIED, passive-adjacent attribution, no pointers, no counts.
+A VERIFIED evidence line may also cite the run artifact:
 
-Anti-example 2, readability-zone violations in natural prose (Issue 0.2): *"So I
-took a look at the auth flow, and it's worth noting that the codebase boasts a
-fairly intricate permissions system that plays a pivotal role in how requests are
-handled — it's not just validating tokens, it's also enforcing scope, and this
-underscores the importance of getting the middleware order right, which I've now
-addressed, and at the end of the day this should resolve the 403s you were
-seeing, though I'd stand behind the fix given the tests I ran."* — one 70-word
-sentence holding five ideas (3.5, 3.15), three AI-tell phrases from §4.3
-(boasts, plays a pivotal role, underscores the importance), one rhetorical
-parallelism, one confidence-theater phrase (§4.2), one predictive hedge
-("should resolve"), no evidence pointer, no file reference.
-
-Write instead: *"The middleware ran in the wrong order. I fixed the order in
-`src/auth.ts:42`. `npm test -- auth.spec.js` passes, 8/8."*
+```
+evidence: `npm test -- grant.spec.js` exit 0, 17/17, artifact tests/logs/run-0142.txt
+```
 
 ---
 
@@ -343,11 +226,11 @@ scored against it yet.
 | ID | Rule | Check |
 |---|---|---|
 | A-01 | All content inside typed blocks | Parse: no orphan lines |
-| A-02 | Block type ∈ registry (§1.1) | Token match |
+| A-02 | Block type ∈ registry (ATTEST.md §1) | Token match |
 | A-03 | Required fields present per type | Schema |
 | A-04 | Evidence class ∈ {verified, observed, inferred, assumed, reported} | Token match |
 | A-05 | Reserved word ⇒ enclosing claim is VERIFIED | Lexicon scan × class |
-| A-06 | Banned word absent (§4.2) | Lexicon scan |
+| A-06 | Banned word absent (ATTEST.md §4.1, plus §4.2 here) | Lexicon scan |
 | A-07 | RISK first word ∈ {BLOCKS, DEGRADES, COSMETIC} | Token match |
 | A-08 | QUESTION contains `default:` | Field presence |
 | A-09 | VERIFIED claim has `evidence:` field | Field presence |
@@ -358,7 +241,7 @@ scored against it yet.
 | A-14 | Block order per A1.7 | Sequence check |
 | A-15 | Sentence ≤40 words (25 is the aim, not linted) | Word count per sentence |
 | A-16 | Paragraph ≤6 sentences before a list | Sentence count per paragraph |
-| A-17 | AI-tell word absent (§4.3) | Lexicon scan |
+| A-17 | AI-tell word absent (ATTEST.md §4.2) | Lexicon scan |
 | A-18 | ≤1 em dash per message; no emoji-as-bullet | Charscan |
 
 A-10 is the deepest check and the point of the standard: **a VERIFIED claim citing
@@ -375,7 +258,7 @@ mechanically detected fabrication.** Lying becomes a lint error.
 | B-04 | Omission honesty (3.4): everything in the gate list is claimed or explicitly not-run |
 | B-05 | Reader-first rules hold (ATTEST.md §0.2): no unexplained internal labels, no noun sandwiches, one term per thing, reasons kept |
 | B-06 | The reward-hack screen: green achieved by deleting/skipping checks ⇒ VERIFIED claims citing it are void |
-| B-07 | Metaphor/idiom absent in its open-ended form (3.17), beyond the closed §4.3 list |
+| B-07 | Metaphor/idiom absent in its open-ended form (3.17), beyond the closed AI-tell list |
 
 ### Exit condition for adopting a tool/session
 
@@ -411,6 +294,9 @@ linter's word, never the agent's.
   to a single 25-word cap with a bounded 40-word exception. Moved this file from
   `~/Downloads` into `ntkit/`, alongside `ATTEST.md`, so the footer's "full spec"
   pointer resolves.
+- **Slimming (2026-11):** cut this file to the parts ATTEST.md lacks, on owner
+  approval. Section references in the Issue 0.2 entry above name the pre-cut
+  layout; the readability-zone lists now live in ATTEST.md §4.2–4.3.
 
 ---
 

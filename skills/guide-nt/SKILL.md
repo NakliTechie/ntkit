@@ -27,13 +27,13 @@ Optional input: a role (`admin`) or feature (`checkout`) to scope the capture to
 
 ## The run
 
-On entering a phase, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead.
+On entering a phase, read its Detail file first, then act. Do not read ahead.
 
 | Phase | Outcome | Detail |
 |---|---|---|
 | 1 Surfaces | The app classified as `browser` · `cli` · `native-macos` · `mixed`. The backend decides the route-plan shape and the capture path. | `references/surfaces-and-routes.md` |
-| 2 Roles + routes | Roles per surface (always the anonymous visitor and the first-run user; a single-role app drops the role wrapper) and an ordered route-plan `(NN, slug, backend, target, wait_ms)` per role — derived from `verify/features/` when it exists, with drift written back to the map. One `HERO_FLOW` names the 2–3 captures that show entry → key action → result; `/package-nt` films it. | `references/surfaces-and-routes.md` |
+| 2 Roles + routes | Roles per surface and an ordered route-plan per role, derived from `verify/features/` when it exists, plus one `HERO_FLOW` of 2–3 captures (entry → key action → result) that `/package-nt` films. | `references/surfaces-and-routes.md` |
 | 3 Generator | Exists → update its data (route rows, captions, sections) and preserve every hand-written caption. Missing → scaffold `guide/capture.*`, `guide/build_index.py`, `guide/regenerate.sh`. | `references/generator.md` |
-| 4 Capture | Per backend: `browser` (production build, readiness wait that includes finished animations, retina shots, blank-capture guard, console log per route), `cli` (raw transcripts with exit codes; TUIs through `tmux`), `native-macos` (computer-use, access requested once per app, not unattended). `update` re-shoots only changed routes. A blank or failing route is a bug for `/walkthrough-nt`, not something to paper over. | `references/capture.md` |
-| 5 Build | One self-contained `index.html`: TOC, role sections, image cards with a keyboard-and-swipe lightbox, terminal cards with ANSI rendered, theme taken from the app's own CSS tokens, inline search (`/` focuses, `Esc` clears), responsive on a phone. | `references/build.md` |
-| 6 Verify | Serve the guide and look at it: captures load, search filters, lightbox keys and swipes, phone viewport. Print coverage, capture counts, blind spots, and the path. Commit the guide; do not push. | `references/verify.md` |
+| 4 Capture | Every route captured with its backend's readiness wait and blank-capture guard; `update` re-shoots only changed routes. A blank or failing route is a bug for `/walkthrough-nt`, not something to paper over. A native macOS app is not unattended: say so before the run starts. | `references/capture.md` |
+| 5 Build | One self-contained, searchable `index.html` themed from the app's own CSS tokens and usable on a phone. | `references/build.md` |
+| 6 Verify | The served guide checked at desktop and phone width; coverage, capture counts, blind spots and the path printed. Commit the guide; do not push. | `references/verify.md` |

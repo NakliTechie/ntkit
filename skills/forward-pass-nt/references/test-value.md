@@ -1,8 +1,6 @@
 # Test-value lens — hunting classes and the retention bar
 
-Adapted from openclaw's `test-audit` skill (`.agents/skills/test-audit/` in
-[openclaw/openclaw](https://github.com/openclaw/openclaw)), paraphrased. Its campaign found 9 real
-coverage gaps behind cuts that looked safe, so this lens recommends and never deletes.
+This lens recommends and never deletes.
 
 Read the whole test and the code it claims to cover, including how CI routes it. Judge a test by its assertions, not its name: a test named for clearing a window can assert the window was *not* cleared.
 
@@ -30,8 +28,7 @@ Read the whole test and the code it claims to cover, including how CI routes it.
 
 ## Dependency categories — which stand-in a test may use
 
-Adapted from [mattpocock/skills](https://github.com/mattpocock/skills) `codebase-design/DEEPENING.md`,
-MIT. The category of what the code under test depends on decides the legitimate stand-in.
+The category of what the code under test depends on decides the legitimate stand-in.
 
 1. **In-process** — pure computation, in-memory state, no I/O. Run the real code; no stand-in.
 2. **Local-substitutable** — a dependency with a local stand-in: SQLite or PGlite for a database,

@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+## [2.10.0] — 2026-11-09
+
+A first-principles slim. Skill text had grown from 42,832 to 65,144 words since the 2026-10-01 trim with almost none of it measured. Two independent reviews (a Fable subagent and Codex `gpt-6-astra`) agreed on the cuts; three fresh checkers compared every changed file against v2.9.1 and found no lost rule, and their nine fixes for weakened rules are applied. Skill text is now 57,672 words (−11%), not counting the vendored brag tool.
+
+### Removed
+
+- `/lab-nt` meta mode (`/lab-nt meta <skill>`) and the `merge: auto` grant it alone used, including `lab.py merge-ok` and the `--merge` flag. No recorded campaign used it. It is kept on the branch `parked/lab-meta-mode`. `/lab-nt` never merges; merging the best-so-far is the human's step.
+- `package-nt/references/proof-video.md`, the real-playback video playbook. It ran outside `/package-nt` and depended on a recorder the kit does not ship. `/package-nt` still points real-playback requests outside the kit.
+- The second copy of `security-classes.md`. `/harden-nt` reads `forward-pass-nt/references/security-classes.md`, and its adversarial-round rules moved into `harden-nt/references/rounds.md`. `tests/security-classes-sync.test.sh` is gone with it.
+
+### Changed
+
+- Source credits and run anecdotes leave skill text for the new `CREDITS.md`, which also carries the Apache-2.0 and MIT notices for adapted passages. The README links to it.
+- One copy of each repeated rule: the Impact paragraph, the `plan/` setup recipe (in full only in `/decide-nt`, `/soc-nt` and `/windup-nt`), the rotate-the-eyes procedure (now `forward-pass-nt/references/other-families.md` § Rotation) and the systems-level build order (in full in `/scaffold-nt`).
+- Skill roots are routers again: phase rows state outcomes and name their reference files; stop-lines stay in the roots. `/lab-nt` forks and child campaigns move to `references/recursion.md`, read at a fork point or a child.
+- `attest-100-spec-001.md` keeps only what `ATTEST.md` lacks (3,892 → 2,902 words). `ATTEST.md` is unchanged.
+
+### Added
+
+- AUTHORING §10 admission rule: a new default rule replaces existing text or ships with a measured `evals/run.sh --without` change; it lives in one file with at most one pointer sentence elsewhere; credits go in `CREDITS.md`. `tests/lean.test.sh` fails on a credit phrase inside `skills/`.
+
 ## [2.9.1] — 2026-11-09
 
 ### Changed

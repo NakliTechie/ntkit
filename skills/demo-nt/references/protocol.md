@@ -2,9 +2,9 @@
 
 The repo's `demo/` holds the mechanics; the protocol file holds the playbook for showing this project from this machine. Write it on the first run and update it in place on later runs, so it matches what the run just booted and probed.
 
-**Where it lives.** Addresses and machine paths may go here only because `plan/` is private. Create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore` (a folder or a symlink; never replace a link), and confirm `git ls-files plan` is empty.
+**Where it lives.** Addresses and machine paths may go here only because `plan/` is private. Create or check `plan/` as `/decide-nt` step 2 does ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); a broken `plan` symlink stops the run. Never replace a link, and confirm `git ls-files plan` is empty.
 
-**What kind of file it is.** A working document owned by `/demo-nt`, like `/package-nt`'s launch drafts. It holds no work items, so the record and derived-file rules in `MEMORY.md` do not bind it. A demo gap the run finds (a missing seed state, a broken flow) goes in the run's final reply, not into `pending.md`.
+**What kind of file it is.** A working document owned by `/demo-nt`; the record and derived-file rules in `MEMORY.md` do not bind it. A demo gap the run finds (a missing seed state, a broken flow) goes in the run's final reply, not into `pending.md`.
 
 **Never in it:** a secret, a token, a credential file's contents, or a real person's contact detail. Name where secrets live (`~/.config/<project>-demo/env`, `~/.cloudflared/`), never their values.
 

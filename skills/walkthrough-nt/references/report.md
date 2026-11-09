@@ -10,7 +10,7 @@
 5. **Verification reality**: what the browser could and couldn't exercise, and what was stubbed.
 6. **Progress log**: one dated entry, `- YYYY-MM-DD: walkthrough complete — N roles, M journeys; X fixed, Y deferred; chaos N actions, Z found.`
 
-Create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`. If today's report exists, suffix `-2`. Don't overwrite `workplan.md`; this report carries its own deferred items.
+Create or check `plan/` as `/decide-nt` step 2 does ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); a broken `plan` symlink stops the run. If today's report exists, suffix `-2`. Don't overwrite `workplan.md`; this report carries its own deferred items.
 
 **Stale captures.** A fix that changes how a surface looks stales committed screenshots and guides. Run the repo's regenerator (`make screens`, `make guide`, a capture script) and commit the result, or name the stale captures and their regenerator in the report. Zero changed files can be correct (gitignored captures, a text-only guide); confirm which case you are in.
 

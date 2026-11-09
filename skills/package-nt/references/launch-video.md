@@ -9,8 +9,8 @@ Made by brag, vendored in [`brag/`](brag/VENDORED.md). You assemble the directio
 > minutes, not hours.
 >
 > **Only when the user explicitly asks for real playback** ("record it running", "real footage", "proof video"):
-> build a proof video from recorded footage instead, following `package-nt/references/proof-video.md`. That is a
-> hands-on hyperframes production that runs outside `/package-nt`; its numbers come from the recorded run. The footage
+> build a proof video from recorded footage instead. That is a hands-on production that runs outside `/package-nt`
+> and outside this kit; its numbers come from the recorded run. The footage
 > is throwaway, deleted after you post, but you cannot re-record it mid-work: the recorder marks the folder with a
 > `.source` file so windup's marketing sweep does not delete it before you post.
 
@@ -74,6 +74,6 @@ Both paths write `brag-output/` (or `brag-output-<timestamp>/` when that exists)
 1. Copy `brag.mp4` → `marketing/launch.mp4` and `brag.jpg` → `marketing/launch.jpg`.
 2. Copy `share-copy.txt` → `plan/launch-caption.txt` and `brag-plan.md` → `plan/launch-video-plan.md`. Phase 3 starts its caption from the first.
 3. Run `"$SKILL/references/bake-poster.sh" marketing/launch.mp4 marketing/launch.jpg`.
-4. Measure the file: `python3 "$SKILL/references/check-video.py" marketing/launch.mp4 --duration 15-25` for `demo`, or `--duration 35-45 --audio yes` for a narrated `promo`; add `--hold START-END` for each hold the plan marks. It prints one line per check with the measured value: size, frame rate, length, frame count, audio stream, black stretches of 0.5 s or more, still stretches over 3 s, integrated loudness against -14 LUFS ± 1, and true peak at or below -1 dBTP. A FAIL line is fixed and the file re-rendered before Phase 3; quote the lines in the summary. The loudness and peak targets come from raea's quality floor and the file check from SenseNova's Code2Video skill (ideas only).
+4. Measure the file: `python3 "$SKILL/references/check-video.py" marketing/launch.mp4 --duration 15-25` for `demo`, or `--duration 35-45 --audio yes` for a narrated `promo`; add `--hold START-END` for each hold the plan marks. It prints one line per check with the measured value: size, frame rate, length, frame count, audio stream, black stretches of 0.5 s or more, still stretches over 3 s, integrated loudness against -14 LUFS ± 1, and true peak at or below -1 dBTP. A FAIL line is fixed and the file re-rendered before Phase 3; quote the lines in the summary.
 5. Delete the `brag-output*/` folder. On any failed render, delete it too and say so; windup's marketing sweep also catches a leftover.
 6. Over 25 MB, re-encode the video at `-crf 23`, then run step 3 again.

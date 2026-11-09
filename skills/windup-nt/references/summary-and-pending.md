@@ -13,7 +13,7 @@ Sections, in this order:
 - **Tried then rolled back** — dead ends worth not repeating
 - **Open questions** — surfaced today, unresolved
 - **Deferred / parked** — raised today but consciously not done now (skipped, "later", out of scope, not abandoned); seeds `## Parked` in pending.md
-- **Pick up here** — three lines: `Next action:` the exact next step (a command, a `path:line` to edit, or the decision to ask for); `Last error:` the last failing command and its error text verbatim, or `none`; `Transcript:` the path of this session's transcript file when the host keeps one (Claude Code: the newest `.jsonl` under `~/.claude/projects/<project-slug>/`; Codex: the newest file under `~/.codex/sessions/`), else `not kept`. The transcript keeps exact error text, paths and numbers the summary drops, so the next session can search it instead of guessing
+- **Pick up here** — three lines: `Next action:` the exact next step (a command, a `path:line` to edit, or the decision to ask for); `Last error:` the last failing command and its error text verbatim, or `none`; `Transcript:` the path of this session's transcript file when the host keeps one (Claude Code: the newest `.jsonl` under `~/.claude/projects/<project-slug>/`; Codex: the newest file under `~/.codex/sessions/`), else `not kept`
 
 ## 2. Pending items
 

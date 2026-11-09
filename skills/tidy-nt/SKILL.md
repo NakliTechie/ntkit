@@ -9,13 +9,13 @@ metadata:
   writes: "the session ledger only; deletes only items this session created"
 ---
 
-Clear out what **this session** made. `/reclaim-nt` sweeps a whole project for old weights and archives; this command knows only the current session's output. It never touches another project's files, a running app's profile, or a shared cache that predates the session.
+Clear out what **this session** made. It never touches another project's files, a running app's profile, or a shared cache that predates the session.
 
-Input: empty → inventory, delete the disposable items, report. It does not wait for confirmation, because it runs several times a day in a thread. `list` → inventory and propose only, delete nothing. `log <path> <purpose>` → append one ledger line and stop.
+Input: empty → inventory, delete the disposable items, report. It does not wait for confirmation. `list` → inventory and propose only, delete nothing. `log <path> <purpose>` → append one ledger line and stop.
 
 ## The ledger
 
-A JSONL file at `<scratchpad>/ledger.jsonl` (the session scratchpad directory; if none, `${TMPDIR:-/tmp}/ntkit-ledger-<project>.jsonl`). One line per artifact: `{"path": "...", "bytes": N, "files": N, "purpose": "...", "keep_until": "..."}`. Any step that creates something over 50 MB or 1,000 files appends a line when it creates it: a downloaded model, a copied profile, a build directory, a temp test-data directory, a worktree, a started server. The ledger is the primary signal. The checks below find what it missed.
+A JSONL file at `<scratchpad>/ledger.jsonl` (the session scratchpad directory; if none, `${TMPDIR:-/tmp}/ntkit-ledger-<project>.jsonl`). One line per artifact: `{"path": "...", "bytes": N, "files": N, "purpose": "...", "keep_until": "..."}`. Any step that creates something over 50 MB or 1,000 files appends a line when it creates it: a downloaded model, a copied profile, a build directory, a temp test-data directory, a worktree, a started server.
 
 ## Step 1 — Inventory
 
@@ -24,9 +24,9 @@ Collect candidates from four signals and merge them by path:
 1. **Ledger lines** with a path that still exists.
 2. **Files newer than the session start** in known roots: the scratchpad and any temporary project directory the active session actually used, the project's git-ignored directories (`git status --ignored --short`), and tool output folders the session ran (`snapshots/`, `renders/`, `.artifacts/`, `tmp/`).
 3. **Processes started this session**: preview servers, dev servers, background tasks, launchd agents (`pgrep -fl`, `/tasks`).
-4. **Work folders touched by background agents.** Re-list every folder a subagent wrote to after they finish. A stale worker can recreate a deleted file.
+4. **Work folders touched by background agents.** Re-list every folder a subagent wrote to after it finishes.
 
-For each candidate record `path`, `bytes`, **file count** (`find <dir> -type f | wc -l`), birth date (`stat -f %SB`), and source signal. Count files as well as bytes: 600,000 small files hide under a byte threshold.
+For each candidate record `path`, `bytes`, **file count** (`find <dir> -type f | wc -l`), birth date (`stat -f %SB`), and source signal.
 
 ## Step 2 — Classify
 

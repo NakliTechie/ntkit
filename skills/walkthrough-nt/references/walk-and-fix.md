@@ -9,7 +9,7 @@ For each role, drive each journey and repeat per step:
    - **A search miss is not evidence of absence.** `grep` on a file containing a NUL byte prints nothing and exits 1; use `rg` or `grep -a`.
    - **Read back each edit** to confirm it landed on the line and file you meant (not an earlier match, not a generated file's source without regenerating, not another worktree).
    - **Re-verify in the browser**: re-walk that exact step and confirm no new console error. After an HMR reload or restart, re-establish the role's session and seed first.
-   - **When you made two changes, run the isolation matrix**: each alone, then both. One run's harness change alone went green for the wrong reason, leaving the defect latent.
+   - **When you made two changes, run the isolation matrix**: each alone, then both.
    - **Commit it**: one focused commit for the fix, by path, local only.
 4. **Continue** the journey from where you were.
 

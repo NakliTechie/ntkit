@@ -2,8 +2,6 @@
 
 A tunnel publishes whatever listens on the local port, with the local port's trust model: a service safe on `127.0.0.1` is open to the internet once a hostname points at it. Probe each public hostname as a stranger with no cookie, no key and no signature, **before** the link goes to anyone.
 
-Incident: a local S3 stand-in run with no identities accepted anonymous list, get and put; through the tunnel, anyone could have listed, read and written the bucket. The fix was an identities file giving the app's own key full rights and nobody else any.
-
 ### What to run, per hostname
 
 Record each command and its status code. Use a probe object name that cannot collide (`ntkit-probe-<random>.txt`).

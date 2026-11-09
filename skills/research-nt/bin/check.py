@@ -3,7 +3,8 @@
 
   check.py spec     RUN_DIR                   validate spec.md
   check.py section  RUN_DIR UNIT              one sections/<UNIT>.md against the spec and the log
-  check.py assemble RUN_DIR                   sections/<id>.md -> draft.md, in spec order
+  check.py assemble RUN_DIR                   sections/<id>.md -> draft.md, in spec order;
+                                              refuses a unit that cites a page fetch.py did not fetch
   check.py sample   RUN_DIR [--k 10] [--force]  pick linked sentences from report.md -> claims.json
   check.py gates    RUN_DIR [--without g3]    G2 G2b G4 G3 over report.md -> verify.json
 
@@ -31,9 +32,9 @@ draft.md, edit-plan.md, report.md, claims.json. The spec is Markdown:
   #### Source leads                    list items: `https://... — what it may establish`, or `- none`
   #### Presentation                    optional
 
-A required entity passes G2b when one of its names (the text before any ` (`, ` — ` or `: `,
-split on ` / `) appears in its unit's text, or when the unit's section file drops it with
-`Omitted: <name> — <reason>`, which assemble moves to the report's `## Not covered` list.
+A required entity passes G2b when one of its names (the text before any ` — ` or `: `, split
+on ` / `, each without a trailing `(note)`) appears as whole words in its unit's text, or when
+the unit's section file drops it with `Omitted: <name> — <reason>`, which assemble moves to the report's `## Not covered` list.
 A name of two or more key words also passes when every key word appears in one sentence
 of the unit, in any order, a plural `s`/`es` allowed: "llama.cpp HIP backend" matches
 "the llama.cpp HIP and Vulkan backends". Stop words do not count as key words.
@@ -165,7 +166,7 @@ def parse_settings(lines: list[str], errors: list[str]) -> dict[str, int]:
         key = key.strip().lower().replace(" ", "_")
         if key not in SETTINGS_DEFAULTS:
             errors.append(f"run settings: unknown key '{key}'")
-        elif not value.strip().isdigit() or int(value) < 1:
+        elif not value.strip().isdecimal() or int(value) < 1:
             errors.append(f"run settings: '{key}' must be a positive whole number")
         else:
             settings[key] = int(value)
@@ -235,8 +236,6 @@ def parse_spec(text: str) -> Spec:
                 errors.append(f"{where}: {m.group(1)} sits under {parent}")
             elif m.group(1) != want:
                 errors.append(f"{where}: unit {m.group(1)} out of order; expected {want}")
-            if any(u.id == m.group(1) for u in units):
-                errors.append(f"{where}: duplicate unit id {m.group(1)}")
             unit = Unit(m.group(1), m.group(2).strip(), start + 1)
             units.append(unit)
             mode = "unit"
@@ -282,8 +281,8 @@ def parse_spec(text: str) -> Spec:
 
 def entity_names(entity: str) -> list[str]:
     name = re.split(r"\s+(?:—|–|--)\s+|:\s+", entity, maxsplit=1)[0]
-    name = re.sub(r"\s*\([^)]*\)\s*$", "", name).strip()
-    return [n.strip() for n in name.split(" / ") if n.strip()]
+    names = (re.sub(r"\s*\([^)]*\)\s*$", "", n).strip() for n in name.split(" / "))
+    return [n for n in names if n]
 
 
 def fold(text: str) -> str:
@@ -312,12 +311,17 @@ def words_together(names: list[str], text: str) -> bool:
     return False
 
 
+def named_in(name: str, text: str) -> bool:
+    """`name` appears in `text` as whole words: "rag" is not in "leverage"."""
+    return bool(name) and re.search(rf"(?<!\w){re.escape(name)}(?!\w)", text) is not None
+
+
 def entity_covered(entity: str, text: str, dropped: list[tuple[str, str]]) -> bool:
     """Named in the folded unit text (exactly, or as co-occurring key words), or dropped with a reason."""
     names = [fold(n) for n in entity_names(entity)]
-    if any(n and n in text for n in names) or words_together(names, text):
+    if any(named_in(n, text) for n in names) or words_together(names, text):
         return True
-    return any(reason and any(n and n in what for n in names) for what, reason in dropped)
+    return any(reason and any(named_in(n, what) for n in names) for what, reason in dropped)
 
 
 # --- report -----------------------------------------------------------------
@@ -377,9 +381,14 @@ def load_log(run: Path) -> tuple[list[dict], list[str]]:
         if not line.strip():
             continue
         try:
-            entries.append(json.loads(line))
+            row = json.loads(line)
         except json.JSONDecodeError:
             bad.append(f"fetch-log.jsonl line {n} is not JSON")
+            continue
+        if isinstance(row, dict):
+            entries.append(row)
+        else:
+            bad.append(f"fetch-log.jsonl line {n} is not a JSON object")
     return entries, bad
 
 
@@ -511,7 +520,9 @@ def cmd_assemble(run: Path, _args) -> int:
         first = next((ln.strip() for ln in question_path.read_text(encoding="utf-8").splitlines()
                       if ln.strip()), "")
         title = first.lstrip("# ").strip() or title
-    problems, omitted = [], []
+    entries, bad_log = load_log(run)
+    why_not = provenance(entries)
+    problems, omitted = list(bad_log), []
     out = [f"# {title}", ""]
     mains = dict(spec.mains)
     current_main = None
@@ -522,6 +533,8 @@ def cmd_assemble(run: Path, _args) -> int:
             out += [f"## {main_id} | {mains[main_id]}", ""]
         body, dropped, found = read_section(run, u)
         problems += found
+        problems += [f"{u.id}: {url} — {why}" for url in links_in("\n".join(body))
+                     if (why := why_not(url))]
         omitted += [f"- {u.id} · {name}: {reason}" for name, reason in dropped]
         out += [f"### {u.id} | {u.title}", ""] + body + [""]
     out += [f"## {NOT_COVERED}", ""] + (omitted or ["- none"]) + [""]
@@ -691,9 +704,17 @@ def gate_g4(run: Path, report: str) -> list[str]:
     if not plan_path.is_file():
         return [] if draft == report else ["report.md differs from draft.md and there is no edit-plan.md"]
     allowed, deletes = parse_edit_plan(plan_path.read_text(encoding="utf-8"))
+    problems = []
+    for name, text in (("draft.md", draft), ("report.md", report)):
+        keys = [p.key for p in parse_report(text)]
+        for key in sorted({k for k in keys if keys.count(k) > 1}):
+            label = key[1:] if key.startswith("?") else key
+            problems.append(f"{label}: heading appears {keys.count(key)} times in {name}; "
+                            "edit scope cannot be checked")
+    if problems:
+        return problems
     before = {p.key: p.heading + "\n" + body_text(p) for p in parse_report(draft)}
     after = {p.key: p.heading + "\n" + body_text(p) for p in parse_report(report)}
-    problems = []
     for key in sorted(set(before) | set(after)):
         if before.get(key) == after.get(key):
             continue
@@ -793,6 +814,12 @@ def cmd_gates(run: Path, args) -> int:
     spec = load_spec(run)
     if spec.errors:
         print("cannot check: spec.md is invalid; run `check.py spec` for the list")
+        return 1
+    bad_log = load_log(run)[1]
+    if bad_log:   # provenance rests on the log: a row that does not parse blocks every gate
+        print(f"cannot check: fetch-log.jsonl has {len(bad_log)} malformed row(s)")
+        for p in bad_log:
+            print(f"  - {p}")
         return 1
     without = {w.strip().lower() for w in (args.without or "").split(",") if w.strip()}
     unknown = without - {"g3"}

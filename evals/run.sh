@@ -18,6 +18,8 @@
 # Env:    NT_EVAL_MODEL       model alias for claude -p (default: opus)
 #         NT_EVAL_CONFIG_DIR  the Claude config dir evals run under (default: ~/.ntkit-eval)
 #         NT_EVAL_KEEP=1      keep passing cases' scratch dirs too (default: kept on fail only)
+#         NT_EVAL_OAUTH_TOKEN token from `claude setup-token`; each run gets only copies
+#         NT_EVAL_KEYCHAIN=1  fall back to the real keychain and config dir (see below)
 #         NT_EVAL_MAX_USD     refuse a run whose ceiling (runs x arms x each case's budget)
 #                             exceeds this (default 25)
 #
@@ -26,6 +28,14 @@
 # copy would shadow the checkout under test. The eval dir has no skills, no CLAUDE.md,
 # no hooks, so each run sees only the scratch project's .claude/skills. Log it in once:
 #   CLAUDE_CONFIG_DIR=~/.ntkit-eval claude auth login
+# Each run also gets its own throwaway HOME and its own copy of the config dir next to the
+# scratch project, so a skill under test that writes under ~ (agent files, ~/.cloudflared,
+# git config) or into the config dir touches only those copies. Authenticate with a
+# long-lived token so no real credential store is reachable:
+#   CLAUDE_CONFIG_DIR=~/.ntkit-eval claude setup-token   then   export NT_EVAL_OAUTH_TOKEN=...
+# Without the token the run refuses, unless NT_EVAL_KEYCHAIN=1: that links the real
+# ~/Library/Keychains into each throwaway HOME and uses the real config dir, both writable
+# by the skill under test, so use it only for a skill you trust.
 #
 # A case is evals/cases/<name>/ with:
 #   prompt    the one prompt, usually a slash command
@@ -87,14 +97,37 @@ fi
 [ "$dry" -eq 0 ] || exit 0
 
 # A clean environment: no parent Claude session's variables (they break auth when this
-# runs inside a Claude Code session) and no NT_PLAN_STORE (it would put the scratch
-# project's plan/ into the real plan store).
-clean() { env -i HOME="$HOME" USER="${USER:-}" LOGNAME="${LOGNAME:-}" PATH="$PATH" \
-  LANG="${LANG:-en_US.UTF-8}" TMPDIR="${TMPDIR:-/tmp}" TERM=dumb CLAUDE_CONFIG_DIR="$cfg" "$@"; }
+# runs inside a Claude Code session), no NT_PLAN_STORE (it would put the scratch
+# project's plan/ into the real plan store), and HOME set to the run's throwaway $ehome.
+clean() { env -i HOME="$ehome" USER="${USER:-}" LOGNAME="${LOGNAME:-}" PATH="$PATH" \
+  LANG="${LANG:-en_US.UTF-8}" TMPDIR="${TMPDIR:-/tmp}" TERM=dumb CLAUDE_CONFIG_DIR="$rcfg" \
+  ${token:+"CLAUDE_CODE_OAUTH_TOKEN=$token"} "$@"; }
+# mkhome DIR: a throwaway HOME that can still reach the eval login.
+mkhome() {
+  mkdir -p "$1"
+  printf '[user]\n\tname = eval\n\temail = eval@example.invalid\n' >"$1/.gitconfig"
+  if [ -z "$token" ] && [ -d "$HOME/Library/Keychains" ]; then
+    mkdir -p "$1/Library" && ln -s "$HOME/Library/Keychains" "$1/Library/Keychains"
+  fi
+}
 
 command -v claude >/dev/null || { echo "claude CLI not on PATH" >&2; exit 2; }
-clean claude auth status 2>/dev/null | grep -q '"loggedIn": true' || {
-  echo "no login for $cfg; run once in a terminal: CLAUDE_CONFIG_DIR=$cfg claude auth login" >&2; exit 2; }
+token=${NT_EVAL_OAUTH_TOKEN:-}
+if [ -z "$token" ] && [ "${NT_EVAL_KEYCHAIN:-0}" != 1 ]; then
+  echo "no NT_EVAL_OAUTH_TOKEN: run once in a terminal: CLAUDE_CONFIG_DIR=$cfg claude setup-token," >&2
+  echo "then export NT_EVAL_OAUTH_TOKEN=<token>. (NT_EVAL_KEYCHAIN=1 uses the real keychain instead.)" >&2
+  exit 2
+fi
+# mkcfg DIR: with a token, a private copy of the config dir; without one, the real one.
+mkcfg() { if [ -n "$token" ]; then mkdir -p "$1"; [ -d "$cfg" ] && cp -R "$cfg/." "$1/"; rcfg=$1; else rcfg=$cfg; fi; }
+# keychain mode checks the login up front; a bad token shows on the first case's result
+if [ -z "$token" ]; then
+  ehome=$(mktemp -d); mkhome "$ehome"; mkcfg "$ehome/.cfg"
+  clean claude auth status 2>/dev/null | grep -q '"loggedIn": true' || {
+    rm -rf "$ehome"
+    echo "no login for $cfg; run once in a terminal: CLAUDE_CONFIG_DIR=$cfg claude auth login" >&2; exit 2; }
+  rm -rf "$ehome"
+fi
 
 NOTE="This is an automated ntkit eval. The working directory is a disposable scratch \
 project. Stay inside it: read and write nothing outside it, push nothing, and contact no \
@@ -114,12 +147,13 @@ for case_dir in "$here"/cases/$glob; do
     while [ "$i" -le "$runs" ]; do
       # one run keeps the plain log names; repeated or A/B runs get arm and index
       if [ "$runs" -eq 1 ] && [ "$arm" = A ] && [ -z "$kind" ]; then tag=$name; else tag=$name.$arm$i; fi
-      work=$(mktemp -d "${TMPDIR:-/tmp}/nt-eval-$name.XXXXXX"); meta=$(mktemp -d)
+      box=$(mktemp -d "${TMPDIR:-/tmp}/nt-eval-$name.XXXXXX"); meta=$(mktemp -d)
+      work=$box/project; ehome=$box/home; mkdir "$work"; mkhome "$ehome"; mkcfg "$box/config"
       if ! (cd "$work" && FIXTURES="$here/fixtures" META="$meta" sh "$case_dir/setup.sh") \
           >"$out/$tag.setup.log" 2>&1; then
         echo "FAIL  $tag  (setup; see $out/$tag.setup.log)"; fail=$((fail + 1))
         printf '%s\t%s\t%s\t0\t0\t0\t0\t0\t0\t0\t0\n' "$name" "$arm" "$i" >>"$tsv"
-        rm -rf "$work" "$meta"; i=$((i + 1)); continue
+        rm -rf "$box" "$meta"; i=$((i + 1)); continue
       fi
       mkdir -p "$work/.claude/skills" && cp -R "$root"/skills/* "$work/.claude/skills/"
       if [ "$arm" = B ]; then
@@ -153,7 +187,7 @@ PY
       if (cd "$work" && RESULT="$out/$tag.txt" META="$meta" sh "$case_dir/check.sh") \
           >"$out/$tag.check.log" 2>&1; then
         echo "PASS  $tag  $cost"; pass=$((pass + 1)); ok=1
-        [ "${NT_EVAL_KEEP:-0}" = 1 ] || rm -rf "$work" "$meta"
+        [ "${NT_EVAL_KEEP:-0}" = 1 ] || rm -rf "$box" "$meta"
       else
         echo "FAIL  $tag  $cost  $(tail -1 "$out/$tag.check.log")  (scratch kept: $work)"
         fail=$((fail + 1)); ok=0

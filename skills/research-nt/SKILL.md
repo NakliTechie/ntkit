@@ -1,6 +1,6 @@
 ---
 name: research-nt
-description: "Research a question into a cited report; drafts the plan, then runs without a stop; writes plan/research/."
+description: "Research a question into a cited report; drafts the plan, then runs unattended; writes plan/research/."
 allowed-tools: Bash Glob Read Write Edit Agent Skill
 metadata:
   argument-hint: "<question> | go <slug> | status — e.g. \"how do open deep-research harnesses verify citations\""

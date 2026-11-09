@@ -38,4 +38,7 @@ Apache-2.0 notice: portions of `skills/forward-pass-nt/` and `skills/harden-nt/`
 | TandemLLM conductor | `SUBSTANCE.md` §6.18–20 run guards |
 | TokenEconomizer (arXiv:2610.22732) | `traces-nt` spend ranking |
 | Anthropic, "The components of agent memory" (2026-11-06) | `MEMORY.md` W6; `prefs-nt` size budget |
+| Tinycharts and `statechart-art` (April Zhu; `kevintngo/statechart-art`, MIT) | `guide-nt` rules panel and chart rubric; the panel uses a Python checker in place of TLA+ and TLC |
+| Thermite (`iammrduncan/thermite`, Apache-2.0); Tan et al., "Scaling Discovery Requires Forgetting" (arXiv:2610.20563) | `lab-nt` judge check, re-measured HIGH-surprise wins, saved reverts, interleaving and per-leg noise floor, fork brief setting |
+| AREX-2 (BAAI, arXiv:2609.38288) | `lab-nt` leg diagnosis and round handoff |
 | Mainplane; REMORY (arXiv:2610.11287) | `windup-nt` and `resume-nt` "Pick up here" block |

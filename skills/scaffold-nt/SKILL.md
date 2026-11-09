@@ -5,7 +5,7 @@ allowed-tools: Bash Glob Grep Read Write Agent
 metadata:
   argument-hint: "[name | parent/name]  (attach md/zip OR describe inline)"
   entry: "fresh — no repo yet; handoff materials attached"
-  exit: "repo + remote exist, plan/ seeded, brief printed, top chunk underway"
+  exit: "`git rev-parse HEAD` and `git remote get-url origin` exit 0 (or the brief names the owed remote when `gh` is not signed in); `plan/history.md`, `plan/pending.md` and `plan/workplan.md` exist; the brief contains `Starting on` and the top chunk's title"
   writes: "plan/history.md, plan/pending.md, plan/workplan.md, git"
 ---
 

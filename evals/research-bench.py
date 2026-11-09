@@ -65,7 +65,7 @@ def prepare(prompts, results, out):
             target.write_bytes((results / pair["id"] / f"{arm}.md").read_bytes())
             pair["hashes"][str(slot)] = digest(target)
         pair["rubrics_hash"] = digest(folder / "rubrics.json")
-    (out / "manifest.json").write_text(json.dumps({"prompts_sha256": digest(prompts), "pairs": pairs}, indent=2) + "\n")
+    (out / "manifest.json").write_text(json.dumps({"pairs": pairs}, indent=2) + "\n")
     return {"prepared": len(pairs), "judge_root": str(out / "judge")}
 
 

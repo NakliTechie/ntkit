@@ -28,6 +28,8 @@ Contract fields, each with its default, stated rather than asked:
 | critic | every 5 experiments | fresh subagent, contract + journal only |
 | stagnation | 8 experiments without a kept gain | STAGNANT |
 | forks | 3 per fork point, at 1/3 and 2/3 of a leg of 12+ experiments | `lab.py forks`; `off` disables |
+| fork brief | `journal` | `tip` gives forks only the contract and the tip, not the journal |
+| judge | on | planted cases must get their expected verdicts before experiment 1; `init --no-judge` only with the owner's say-so |
 | device | `own` | `shared` (one GPU, one benchmark box) serialises forks and children |
 | max depth | 2 | `lab.py child` refuses deeper |
 | gates | none | commands that must pass on the same commit before its metric counts |
@@ -43,7 +45,7 @@ On entering a phase, read its file, then act. The Outcome column is the contract
 | Phase | Outcome | Detail |
 |---|---|---|
 | 0 Contract | five gates passed; `contract.md` written | `references/contract.md` |
-| 0.5 Isolate | worktree on `lab/<slug>`; noise floor measured; `lab.py init` exit 0; journal opened | `references/contract.md` |
+| 0.5 Isolate | worktree on `lab/<slug>`; noise floor measured; `lab.py init` exit 0; judge check sealed; journal opened | `references/contract.md` |
 | 1 Leg loop | experiments journaled, kept ones committed under the joint gate; forks and children run by the rules | `references/loop.md`; at a fork point or a child, `references/recursion.md` |
 | 2 End | first exit wins: GOAL-MET, BUDGET, STAGNANT, DRY-WELL, PARKED | `references/ending.md` |
 | 3 Re-arm | the leg report recommends CONTINUE or STOP; only a human resumes, through `lab.py leg` | `references/ending.md` |

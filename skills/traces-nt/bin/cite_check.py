@@ -9,22 +9,24 @@ Each "## F<n>" section must have:
     and whose line number is within the file;
   - a "Fix target:" line whose type is one of FIX_TYPES;
   - a "Measure:" line.
-Every pointer anywhere in the file must resolve. Exit 0 when all hold, 1 otherwise, 2 on usage error.
+Every pointer anywhere in the file must resolve inside the archive. Exit 0 when all hold,
+1 otherwise, 2 on usage error (no findings file, --home without a value, no archive).
+Pointer resolution is forward-pass-nt's bin/cite-check.py resolve(); every install puts
+the skills side by side, so this script loads it from ../../forward-pass-nt/bin.
 """
 
+import importlib.util
 import os
 import re
 import sys
 
+_spec = importlib.util.spec_from_file_location("cite_check_shared", os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "..", "forward-pass-nt", "bin", "cite-check.py"))
+shared = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(shared)
+
 FIX_TYPES = {"agent-instructions", "claude-md", "playbook", "skill", "allow-rule", "task-prompt", "tool-bug", "none"}
 POINTER = re.compile(r"`((?:claude|codex)/[^`\s]+?\.jsonl):(\d+)`")
-
-
-def count_lines(path, cache={}):
-    if path not in cache:
-        with open(path, "rb") as f:
-            cache[path] = sum(1 for _ in f)
-    return cache[path]
 
 
 def main(argv):
@@ -32,9 +34,9 @@ def main(argv):
     home = None
     if "--home" in args:
         i = args.index("--home")
-        home = args[i + 1] if i + 1 < len(args) else None
+        home = args[i + 1] if i + 1 < len(args) else ""
         del args[i:i + 2]
-    if len(args) != 1 or home == "":
+    if len(args) != 1 or home == "" or (home or "").startswith("--"):
         print(__doc__.strip().splitlines()[2])
         return 2
     home = home or os.environ.get("TRACELENS_HOME") or os.getcwd()
@@ -42,16 +44,21 @@ def main(argv):
     if not os.path.isdir(archive):
         print(f"no archive at {archive}: set TRACELENS_HOME or pass --home")
         return 2
+    if not os.path.isfile(args[0]):
+        print(f"no findings file at {args[0]}")
+        return 2
     text = open(args[0], encoding="utf-8").read()
 
-    failures, n_cites = [], 0
+    failures, n_cites, counts = [], 0, {}
     for rel, line in POINTER.findall(text):
         n_cites += 1
-        path = os.path.join(archive, rel)
-        if not os.path.isfile(path):
+        problem, total = shared.resolve(archive, rel, int(line), None, counts, contained=True)
+        if problem == "outside":
+            failures.append(f"{rel}:{line}: path leaves the archive")
+        elif problem == "missing":
             failures.append(f"{rel}:{line}: file not in archive")
-        elif not 1 <= int(line) <= count_lines(path):
-            failures.append(f"{rel}:{line}: line past the end ({count_lines(path)} lines)")
+        elif problem == "range":
+            failures.append(f"{rel}:{line}: line past the end ({total} lines)")
 
     sections = re.split(r"^## (F\d+)\b", text, flags=re.M)
     findings = list(zip(sections[1::2], sections[2::2]))

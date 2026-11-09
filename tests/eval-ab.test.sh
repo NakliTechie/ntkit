@@ -1,6 +1,7 @@
 #!/bin/sh
 # evals/run.sh --runs/--without: argument checks and the cost ceiling (via --dry-run, no
-# model call), and evals/summary.py's pass rates, flips and per-arm means.
+# model call), the throwaway HOME (via a stub claude), and evals/summary.py's pass rates,
+# flips and per-arm means.
 set -eu
 root=$(cd "$(dirname "$0")/.." && pwd)
 run=$root/evals/run.sh; summary=$root/evals/summary.py
@@ -32,6 +33,32 @@ cp "$root/$some" "$t/edited"; echo "extra line" >>"$t/edited"
 diff -u "$root/$some" "$t/edited" | sed "1s|.*|--- a/$some|; 2s|.*|+++ b/$some|" >"$t/ok.patch" || true
 out=$(sh "$run" --dry-run --without "$t/ok.patch" "$case1") || { echo "FAIL: valid patch refused"; bad=1; }
 printf '%s\n' "$out" | grep -q "arm B: patch" || { echo "FAIL: patch arm line: $out"; bad=1; }
+
+# a run never writes under the caller's HOME: a stub claude writes to ~/.claude, and the
+# real HOME must stay empty. A copy of the harness keeps results/ out of the checkout.
+mkdir -p "$t/h/evals/cases/home-probe" "$t/h/skills/probe" "$t/bin" "$t/realhome"
+cp "$run" "$summary" "$t/h/evals/"; printf -- '---\nname: probe\n---\n' >"$t/h/skills/probe/SKILL.md"
+printf '/probe\n' >"$t/h/evals/cases/home-probe/prompt"
+printf 'git init -q\n' >"$t/h/evals/cases/home-probe/setup.sh"
+printf '[ "$(cat seen-home)" != "%s" ]\n' "$t/realhome" >"$t/h/evals/cases/home-probe/check.sh"
+cat >"$t/bin/claude" <<'EOF'
+#!/bin/sh
+[ "$1" = auth ] && { echo '{"loggedIn": true}'; exit 0; }
+printf '%s' "$HOME" >seen-home; mkdir -p "$HOME/.claude" && : >"$HOME/.claude/touched"
+mkdir -p "$HOME/Library/Keychains" && : >"$HOME/Library/Keychains/touched"
+: >"$CLAUDE_CONFIG_DIR/touched"; [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] || exit 9
+echo '{"result": "ok", "total_cost_usd": 0, "num_turns": 1, "usage": {}}'
+EOF
+chmod +x "$t/bin/claude"
+mkdir -p "$t/realhome/Library/Keychains" "$t/cfg"; : >"$t/cfg/orig"
+HOME=$t/realhome PATH="$t/bin:$PATH" NT_EVAL_CONFIG_DIR=$t/cfg NT_EVAL_OAUTH_TOKEN=tok sh "$t/h/evals/run.sh" home-probe \
+  >"$t/o" 2>&1 || { echo "FAIL: stubbed run failed:"; sed 's/^/  | /' "$t/o"; bad=1; }
+[ "$(cd "$t/realhome" && find . -mindepth 1 | sort | tr '\n' ' ')" = "./Library ./Library/Keychains " ] \
+  || { echo "FAIL: the eval wrote under the caller's HOME or keychain"; bad=1; }
+[ "$(ls -A "$t/cfg")" = orig ] || { echo "FAIL: the eval wrote into the real config dir"; bad=1; }
+# with no token and no keychain opt-in, the run refuses before any model call
+rc=0; HOME=$t/realhome PATH="$t/bin:$PATH" NT_EVAL_CONFIG_DIR=$t/cfg sh "$t/h/evals/run.sh" home-probe >"$t/o2" 2>&1 || rc=$?
+[ "$rc" -eq 2 ] && grep -q 'claude setup-token' "$t/o2" || { echo "FAIL: no-token run was not refused (exit $rc)"; bad=1; }
 
 tab=$(printf '\t')
 {

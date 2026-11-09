@@ -1,12 +1,14 @@
 #!/bin/sh
 # Render a 1280x640 social card from social-card-template.html (same dir) at 2x, then
-# downsample so the type is crisp. No npm deps: headless Chrome + sips (macOS).
+# downsample so the type is crisp. No npm deps: headless Chrome + sips (macOS). Set CHROME to
+# the Chrome binary when it is not at the macOS default path.
 #
 # Usage:
 #   render-social-card.sh --name "ntkit" --tagline "Software engineering for vibe coding." \
 #     --facts '<b>21 slash commands</b> &nbsp;&#183;&nbsp; every repo &nbsp;&#183;&nbsp; MIT' \
 #     --accent "#0891b2" --accent-text "#0e7490" --out ./assets/social.png
 #
+# --name and --tagline are plain text (escaped, so "R&D" or "<" print as typed).
 # --facts takes literal HTML (so you control bolding/spacing directly) — put the one
 # phrase worth emphasizing in <b>...</b>, separate clauses with " &nbsp;·&nbsp; ".
 # --accent colours the brand bar (decoration, no contrast minimum). --accent-text colours
@@ -42,14 +44,14 @@ tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
 NAME="$NAME" TAGLINE="$TAGLINE" FACTS="$FACTS" ACCENT="$ACCENT" ACCENT_TEXT="$ACCENT_TEXT" \
   python3 - "$here/social-card-template.html" "$tmp/filled.html" <<'PY'
-import os, re, sys
+import html as h, os, re, sys
 src, dst = sys.argv[1], sys.argv[2]
 for flag, key in (("--accent", "ACCENT"), ("--accent-text", "ACCENT_TEXT")):
     if not re.fullmatch(r"#[0-9a-fA-F]{6}", os.environ[key]):
         sys.exit(f"{flag} must be a #rrggbb hex colour, got {os.environ[key]!r}")
-html = open(src).read()
-for key in ("NAME", "TAGLINE", "FACTS", "ACCENT_TEXT", "ACCENT"):
-    html = html.replace(f"__{key}__", os.environ[key])
+vals = {k: os.environ[k] for k in ("FACTS", "ACCENT_TEXT", "ACCENT")}
+vals.update({k: h.escape(os.environ[k]) for k in ("NAME", "TAGLINE")})  # plain text, not HTML
+html = re.sub(r"__(NAME|TAGLINE|FACTS|ACCENT_TEXT|ACCENT)__", lambda m: vals[m.group(1)], open(src).read())
 
 def lum(hexc):
     def ch(c):
@@ -89,9 +91,13 @@ if failed:
 open(dst, "w").write(html)
 PY
 
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --disable-gpu \
+CHROME=${CHROME:-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"}
+[ -x "$CHROME" ] || { echo "Google Chrome not found at $CHROME; set CHROME to its binary" >&2; exit 1; }
+command -v sips >/dev/null || { echo "sips not found: the downsample step needs macOS" >&2; exit 1; }
+"$CHROME" --headless=new --disable-gpu \
   --hide-scrollbars --force-device-scale-factor=2 --window-size=1280,640 \
-  --screenshot="$tmp/2x.png" "file://$tmp/filled.html" 2>/dev/null
+  --screenshot="$tmp/2x.png" "file://$tmp/filled.html" 2>"$tmp/chrome.err" || true
+[ -s "$tmp/2x.png" ] || { echo "Chrome wrote no screenshot:" >&2; tail -5 "$tmp/chrome.err" >&2; exit 1; }
 
 mkdir -p "$(dirname "$OUT")"
 sips -z 640 1280 "$tmp/2x.png" --out "$OUT" >/dev/null

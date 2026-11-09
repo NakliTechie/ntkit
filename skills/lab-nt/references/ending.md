@@ -14,6 +14,8 @@ Record the exit with `python3 $SKILL/bin/lab.py end <dir> <STATE>` before writin
 ## Phase 3 — Re-arm
 
 - Every next leg is started by the user with `/lab-nt resume` after reading the leg report. Its `Re-arm` line recommends CONTINUE (what to try) or STOP (why), and says whether the gap is worth chasing: the distance to the goal measured in noise floors, and, when the last kept gains sat near the floor, how many more items or repeats would separate them (or that the gap is too small to chase with volume).
+- A resumed leg's brief is the contract, the journal, the branch tip, the last leg report's Diagnosis, and what remains: experiments, legs and usd. Its first act after `leg` is to re-measure the noise floor (best-so-far against itself, three runs, `lab.py noise`), because machine noise drifts; every `keep` this leg passes the larger of that floor and the contract's.
+- A CONTINUE names a different method, not a small perturbation of the last best result.
 - A resumed leg starts with `python3 $SKILL/bin/lab.py leg plan/lab/<slug> --experiments <n>`, which enforces the rest of this list: it re-checks every locked hash, resets the experiment counter, records the new start commit, and refuses a child or fork.
 - A locked file that changed between legs refuses the leg (PARKED for the human). When the owner approved the change, seal a successor campaign instead (`references/loop.md`, Blockers are work, item 3).
 - An owner question left unanswered at the next leg start takes its stated default when the default is reversible; otherwise the provisional branch continues.
@@ -30,7 +32,11 @@ Tear down first. Stop or delete every outside resource this leg created (cloud i
 Lab ran <slug> — leg <n> of <odometer>, <duration>, branch lab/<slug>, depth <d>.
 
 Ended:        <GOAL-MET | BUDGET | STAGNANT | DRY-WELL | PARKED> — <one line why>
-Metric:       <start of leg> → <best>   (goal: <threshold | open-ended>; noise floor ±<spread>)
+Metric:       <start of leg> → <best>   (goal: <threshold | open-ended>; noise floor ±<spread>, re-measured ±<spread>)
+Diagnosis:    method: <what this leg tried, in one line>
+              estimate: <best now> · gap to goal <distance | open-ended>
+              bottleneck: <the main thing holding the metric back>
+              next: <the single change the next leg should try first>
 Best-so-far:  <SHA> — <re-measured clean, gates passing: harness output cited>
 Confirmation: <score on the confirmation set, read once | not read (no GOAL-MET) | none (scalar metric)>
 Spend:        <experiments used of budget> · <usd used of cap | no paid calls>

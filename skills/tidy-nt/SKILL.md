@@ -1,6 +1,6 @@
 ---
 name: tidy-nt
-description: "Mid-session cleanup of what this session created: files, temp dirs, servers. Lists first, deletes by name."
+description: "Mid-session: clear what this session created (files, temp dirs, servers); lists first, deletes by name."
 allowed-tools: Bash Glob Read Write
 metadata:
   argument-hint: "[list | log <path> <purpose>]"
@@ -22,7 +22,7 @@ A JSONL file at `<scratchpad>/ledger.jsonl` (the session scratchpad directory; i
 Collect candidates from four signals and merge them by path:
 
 1. **Ledger lines** with a path that still exists.
-2. **Files newer than the session start** in known roots: the scratchpad and any temporary project directory the active session actually used, the project's git-ignored directories (`git status --ignored --short`), and tool output folders the session ran (`snapshots/`, `renders/`, `.artifacts/`, `tmp/`).
+2. **Files newer than the session start** in known roots: this session's own scratchpad and any temp directory this session created (never the scratchpad's parent, whose other folders belong to other sessions), the project's git-ignored directories (`git status --ignored --short`), and tool output folders the session ran (`snapshots/`, `renders/`, `.artifacts/`, `tmp/`).
 3. **Processes started this session**: preview servers, dev servers, background tasks, launchd agents (`pgrep -fl`, `/tasks`).
 4. **Work folders touched by background agents.** Re-list every folder a subagent wrote to after it finishes.
 
@@ -32,7 +32,7 @@ For each candidate record `path`, `bytes`, **file count** (`find <dir> -type f |
 
 - **Mine, disposable** — regenerable output (contact sheets, worker packets, caches this session wrote, rejected samples). Propose deletion.
 - **Mine, keep** — a deliverable, source, or input needed to re-run (the final render, narration audio, fonts the project loads). Keep and say why.
-- **Not mine** — birth date before the session start, another project's path, a shared cache another tool owns, anything under a running app's profile. Report with name and size. Never propose deletion.
+- **Not mine** — birth date before the session start, another project's path, another session's folder (of any project), a shared cache another tool owns, anything under a running app's profile. Report with name and size. Never propose deletion.
 - **Flood** — over 20,000 files in one directory. Flag it first, whatever its size, and name the script that wrote it when `git log` shows one.
 
 ## Step 3 — Delete by name

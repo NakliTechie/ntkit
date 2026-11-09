@@ -10,8 +10,10 @@ RUN_DIR/fetch-log.jsonl and prints the text. `--stdin` records text read some ot
 browser) under the same log, so it can be cited.
 
 Rules it enforces, not the agent:
-- http and https only; hosts that resolve to private, loopback, link-local, reserved or
-  multicast addresses are refused, redirects included;
+- http and https only; hosts that resolve to any address that is not global unicast
+  (private, loopback, link-local, carrier-grade NAT, reserved, multicast) are refused, redirects
+  included. The host is resolved once per connection and the socket goes to the checked address;
+  proxy environment variables are ignored, so no connection goes to an unchecked host;
 - a per-section fetch cap: `fetches_per_section` from RUN_DIR/spec.md (default 15), and
   3x that for `--section plan`. Every attempt counts, failed or not. A per-section lock
   covers counting, fetching and logging, including the shared planning budget;
@@ -65,27 +67,67 @@ class Failed(Exception):
 
 # --- the address guard ------------------------------------------------------
 
-def real_address_guard(host: str) -> None:
+def real_address_guard(host: str) -> list[str]:
+    """Every address `host` resolves to, after refusing the host if any of them is not global."""
     try:
-        infos = socket.getaddrinfo(host, None)
-    except socket.gaierror as e:
-        raise Refused(f"cannot resolve {host}: {e}")
+        infos = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+    except (socket.gaierror, UnicodeError) as e:
+        raise Refused(f"cannot resolve {host[:80]}: {e}")
+    addresses = []
     for info in infos:
         ip = ipaddress.ip_address(info[4][0].split("%")[0])
-        if (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved
-                or ip.is_multicast or ip.is_unspecified):
+        if not ip.is_global or ip.is_multicast:
             raise Refused(f"{host} resolves to a non-public address ({ip})")
+        addresses.append(info[4][0])
+    return addresses
 
 
 address_guard = real_address_guard   # seam: the tests swap this to reach a local server
 
 
-def check_url(url: str, resolve: bool = True) -> None:
-    p = urlsplit(url)
-    if p.scheme not in ("http", "https") or not p.hostname:
+def guarded_connection(address, timeout, source_address=None):
+    """socket.create_connection, but only to addresses the guard checked: no second lookup."""
+    host, port = address
+    error: OSError | None = None
+    for ip in address_guard(host):
+        try:
+            return socket.create_connection((ip, port), timeout, source_address)
+        except OSError as e:
+            error = e
+    raise error or OSError(f"no address for {host}")
+
+
+class GuardedHTTPConnection(http.client.HTTPConnection):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._create_connection = guarded_connection
+
+
+class GuardedHTTPSConnection(http.client.HTTPSConnection):
+    """TLS still checks the certificate against the host name (`self.host`), not the address."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._create_connection = guarded_connection
+
+
+class GuardedHTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):
+        return self.do_open(GuardedHTTPConnection, req)
+
+
+class GuardedHTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(GuardedHTTPSConnection, req, context=self._context)
+
+
+def check_url(url: str) -> None:
+    try:
+        p = urlsplit(url)
+        host = p.hostname
+    except ValueError as e:
+        raise Refused(f"malformed URL: {e}") from None
+    if p.scheme not in ("http", "https") or not host:
         raise Refused("only http and https URLs")
-    if resolve:
-        address_guard(p.hostname)
 
 
 class GuardedRedirect(urllib.request.HTTPRedirectHandler):
@@ -138,16 +180,20 @@ def tidy(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
+def decode(raw: bytes, charset: str | None) -> str:
+    """Decode with the declared charset; an unknown one falls back to UTF-8."""
+    try:
+        return raw.decode(charset or "utf-8", errors="replace")
+    except LookupError:
+        return raw.decode("utf-8", errors="replace")
+
+
 def html_to_text(raw: bytes, charset: str | None) -> tuple[str, str]:
     if not charset:
         m = re.search(rb"<meta[^>]+charset=[\"']?([A-Za-z0-9_-]+)", raw[:4096], re.I)
         charset = m.group(1).decode() if m else "utf-8"
-    try:
-        markup = raw.decode(charset, errors="replace")
-    except LookupError:
-        markup = raw.decode("utf-8", errors="replace")
     parser = TextExtractor()
-    parser.feed(markup)
+    parser.feed(decode(raw, charset))
     parser.close()
     return tidy("".join(parser.parts)), tidy(parser.title)
 
@@ -166,7 +212,10 @@ def pdf_to_text(raw: bytes) -> str:
 
 def download(url: str) -> dict:
     check_url(url)
-    opener = urllib.request.build_opener(GuardedRedirect)
+    # An empty ProxyHandler: proxy variables are ignored. Through a proxy the guard would check
+    # the proxy's address while the proxy fetched the unchecked target.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), GuardedRedirect,
+                                         GuardedHTTPHandler, GuardedHTTPSHandler)
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"})
     try:
         with opener.open(req, timeout=TIMEOUT) as resp:
@@ -177,8 +226,6 @@ def download(url: str) -> dict:
     except urllib.error.HTTPError as e:
         raise Failed(f"HTTP {e.code}") from None
     except urllib.error.URLError as e:
-        if isinstance(e.reason, Refused):
-            raise e.reason from None
         raise Failed(f"network error: {e.reason}") from None
     except (TimeoutError, socket.timeout):
         raise Failed(f"timed out after {TIMEOUT}s") from None
@@ -193,7 +240,7 @@ def download(url: str) -> dict:
     elif ctype in ("text/html", "application/xhtml+xml"):
         text, title = html_to_text(raw, charset)
     elif ctype in TEXT_TYPES:
-        text = tidy(raw.decode(charset or "utf-8", errors="replace"))
+        text = tidy(decode(raw, charset))
     else:
         raise Failed(f"unsupported content type {ctype}")
     if not text:
@@ -314,7 +361,7 @@ def main(argv: list[str] | None = None) -> int:
             result, error = None, None
             try:
                 if args.stdin:
-                    check_url(url, resolve=False)
+                    check_url(url)
                     text = tidy(sys.stdin.read())
                     if not text:
                         raise Failed("no text on stdin")
@@ -324,6 +371,8 @@ def main(argv: list[str] | None = None) -> int:
                     result = download(url)
             except (Refused, Failed) as e:
                 error = e
+            except Exception as e:   # untrusted input: log the attempt, keep going
+                error = Failed(f"{type(e).__name__}: {e}")
             entry = record(run, store, args.section, url, args.via if args.stdin else "urllib", result, error)
             show(entry, args.print_chars)
             bad += entry["status"] != "ok"

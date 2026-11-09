@@ -1,6 +1,7 @@
 #!/bin/sh
-# Every skill's frontmatter must parse as YAML and carry the AUTHORING.md §1 keys. A broken
-# header loads silently: the harness falls back to the body's first line as the description.
+# Every skill's frontmatter must parse as YAML, carry the AUTHORING.md §1 keys and keep its
+# description to 15 words or fewer. A broken header loads silently: the harness falls back
+# to the body's first line as the description.
 set -eu
 command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
 python3 -c 'import yaml' 2>/dev/null || { echo "PyYAML not installed"; exit 77; }
@@ -21,6 +22,9 @@ for f in sorted(pathlib.Path(sys.argv[1], "skills").glob("*/SKILL.md")):
     for k in ("description", "allowed-tools"):
         if not isinstance(meta.get(k), str) or not meta[k].strip():
             bad.append(f"{f.parent.name}: '{k}' missing or not a string")
+    words = len(str(meta.get("description") or "").split())
+    if words > 15:
+        bad.append(f"{f.parent.name}: description has {words} words; AUTHORING.md §1 caps it at 15")
     contract = meta.get("metadata") or {}
     for k in ("argument-hint", "entry", "exit", "writes"):
         if not isinstance(contract.get(k), str) or not contract[k].strip():

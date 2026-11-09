@@ -13,4 +13,11 @@ present=$(cd "$d" && find . -type f ! -name 'VENDORED*' ! -path './assets/music/
 cmp -s "$d/slim.md" "$d/brag.md" && fail "slim.md and brag.md are the same file"
 n=$(cd "$root" && git ls-files skills/package-nt/references/brag | grep -c '\.mp3$' || true)
 [ "$n" -eq 0 ] || fail "$n music track(s) committed under references/brag"
+# the regeneration command in VENDORED.md reproduces VENDORED.sha256, even beside local music
+cmd=$(sed -n 's/^`\(find .*> VENDORED.sha256\)`$/\1/p' "$d/VENDORED.md")
+[ -n "$cmd" ] || fail "no hash command in VENDORED.md"
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+cp -R "$d" "$tmp/brag"; : >"$tmp/brag/assets/music/track.mp3"; : >"$tmp/brag/.DS_Store"
+(cd "$tmp/brag" && sh -c "$cmd") || fail "the VENDORED.md hash command failed"
+cmp -s "$d/VENDORED.sha256" "$tmp/brag/VENDORED.sha256" || fail "the VENDORED.md hash command lists other files than VENDORED.sha256"
 echo ok

@@ -32,8 +32,8 @@ Each returns one line: `DONE <id>` or `BLOCKED <id>: <reason>`.
 
 3. Count the `BLOCKED` returns across the first launch. Three or more → the run ends BLOCKED; write
    `run.md` per `references/report.md` and stop.
-4. Go to Phase 4 with whatever sections exist. A unit that still fails its check is left for the
-   gates to report.
+4. Go to Phase 4 with whatever sections exist. Assemble refuses a unit citing an unfetched page;
+   any other failure is left for the gates to report.
 
 ## Researcher brief
 

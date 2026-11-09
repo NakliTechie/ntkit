@@ -19,6 +19,7 @@ plan=${1:-plan}
 open_items=$(cat "$plan/pending.md" "$plan/workplan.md" 2>/dev/null | grep -E '^[[:space:]]*- \[( |~)\]' || true)
 for p in marketing/* brag-output*; do
   [ -e "$p" ] || continue
+  case $p in brag-output*) [ -d "$p" ] || continue ;; esac  # a brag-output file is not render output
   kb=$(du -sk "$p" | awk '{print $1}')
   name=$(basename "$p"); stem=${name%.*}
   cite=$(printf '%s\n' "$open_items" | grep -F -e "$name" -e "$p" | head -1 || true)

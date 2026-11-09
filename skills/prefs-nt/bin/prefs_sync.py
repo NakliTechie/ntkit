@@ -8,6 +8,7 @@ The folder (--dir, else $NT_PREFS_DIR, else ~/.agent-prefs) holds:
                  A shadow file, when it exists and is not empty, makes the agent ignore the global
                  file (Codex's AGENTS.override.md); --check then fails for that agent.
                  Paths start with ~ or $VAR; CODEX_HOME defaults to ~/.codex.
+                 A row whose file is an earlier row's file (a symlink) is skipped with a log line.
   inbox.md       append-only lines from any agent, copied into every file at once
 
 For each target whose parent folder exists (the agent is installed):
@@ -127,11 +128,17 @@ class Prefs:
         print(f"{NOW:%Y-%m-%d %H:%M} prefs-sync: {msg}")
 
     def targets(self):
-        rows = []
+        """Rows in file order. A row whose file resolves to one an earlier row already names (a
+        symlink, or the same path twice) is left out: one file gets one build and one baseline."""
+        rows, owner = [], {}
+        self.duplicates = []
         for line in (self.root / "targets.tsv").read_text().splitlines():
             if not line.strip() or line.startswith("#"):
                 continue
             cols = line.split("\t")
+            if len(cols) < 2 or not cols[1].strip():
+                raise ValueError(f"targets.tsv row '{line.strip()}': expected agent <TAB> global file "
+                                 "[<TAB> shadow file or -]")
             agent, path = cols[0], expand(cols[1])
             col3 = cols[2].strip() if len(cols) > 2 else "-"
             if col3 not in ("", "-") and not col3.startswith(("~", "$", "/")):
@@ -139,6 +146,11 @@ class Prefs:
                                  f"extras name ('{col3}'). Extras now come from agents/{agent}.md; "
                                  "put - in column 3")
             shadow = expand(col3) if col3 not in ("", "-") else None
+            real = path.resolve()
+            if real in owner:
+                self.duplicates.append((agent, owner[real]))
+                continue
+            owner[real] = agent
             rows.append((agent, path, shadow))
         return rows
 
@@ -233,6 +245,8 @@ class Prefs:
         if self.write:
             self.state.mkdir(exist_ok=True)
         rows = self.targets()
+        for agent, first in self.duplicates:
+            self.log(f"{agent}: its file is {first}'s file; skipped, so {first}'s build stays")
         seen = {}
         # Pass 1: capture every hand edit first, so pass 2 puts each one into every file.
         for agent, target, shadow in rows:

@@ -60,7 +60,7 @@ expect("init without fence", run("init", D, "--lock", "harness/**", "--experimen
 expect("init with no lock", run("init", D, "--fence", "src/**", "--experiments", "25"), 1, "lockbox is empty")
 expect("init with an empty lock glob", run("init", D, "--fence", "src/**", "--lock", "nothing/**", "--experiments", "25"), 1, "match no file")
 expect("lock inside fence", run("init", D, "--fence", "src/**", "harness/**", "--lock", "harness/**", "--experiments", "25"), 1, "inside the fence")
-expect("init ok", run("init", D, "--fence", "src/**", "--lock", "harness/**", "--experiments", "25"), 0, "3 locked files")
+expect("init ok", run("init", D, "--fence", "src/**", "--lock", "harness/**", "--experiments", "25", "--no-judge"), 0, "3 locked files")
 expect("init twice refused", run("init", D, "--fence", "src/**", "--lock", "harness/**", "--experiments", "25"), 1, "initialised before")
 expect("zero-match lock glob refused", run("init", "plan/lab/typo", "--fence", "src/**", "--lock", "harness/**", "harnes/*.py", "--experiments", "5"), 1, "match no file (typo?): harnes/*.py")
 
@@ -128,12 +128,12 @@ expect("paired needs actual", run("keep", D, "--id", "g7", "--gate", "pass", "--
 expect("negative noise refused", run("keep", D, "--id", "g8", "--noise", "-5", "--gate", "pass", "--base", "10", "--cand", "7"), 2, "cannot be negative")
 # simple-fix control: a gain the plain fix also reaches reverts; a gain past the control keeps
 expect("control explains the gain", run("keep", D, "--id", "ct1", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "220", "--control", "218"), 4, "simple-fix control reaches it")
-expect("candidate beats the control", run("keep", D, "--id", "ct2", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "230", "--control", "210"), 0, "beats the simple-fix control by 20")
+expect("candidate beats the control", run("keep", D, "--id", "ct2", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "230", "--control", "210", "--confirm-base", "200", "201", "199", "--confirm", "229", "231", "230"), 0, "beats the simple-fix control by 20")
 
 # gate failures already on the start commit: recorded once, never block a keep; a new failure still reverts
 B = "plan/lab/base"
 Path(B).mkdir(parents=True); Path(B, "contract.md").write_text("metric: decode\n")
-run("init", B, "--fence", "src/**", "--lock", "harness/**", "--experiments", "6")
+run("init", B, "--fence", "src/**", "--lock", "harness/**", "--experiments", "6", "--no-judge")
 for e in ("k1", "k2", "k3", "k4"):
     run("predict", B, e, "--proposer", "claude-opus-5-5", "--predicted", "205")
 expect("known gate needs a baseline", run("keep", B, "--id", "k1", "--noise", "4", "--gate", "known", "--failures", "olmoe/p4", "--base", "200", "--cand", "210"), 1, "no baseline recorded")
@@ -176,15 +176,15 @@ st.write_text(orig)
 
 # lower is better flips the sign of the gain and of "better than predicted"; --surprise sets the threshold
 L = "plan/lab/lat"
-run("init", L, "--fence", "src/**", "--lock", "harness/**", "--experiments", "5", "--lower-is-better", "--surprise", "0.5")
+run("init", L, "--fence", "src/**", "--lock", "harness/**", "--experiments", "5", "--lower-is-better", "--surprise", "0.5", "--no-judge")
 run("predict", L, "l1", "--proposer", "x", "--predicted", "9"); run("predict", L, "l2", "--proposer", "x", "--predicted", "11.8")
-expect("lower is better keep", run("keep", L, "--id", "l1", "--noise", "1", "--gate", "pass", "--base", "10", "--cand", "8"), 0, "surprise -1 (|1|, better than predicted, HIGH)")
+expect("lower is better keep", run("keep", L, "--id", "l1", "--noise", "1", "--gate", "pass", "--base", "10", "--cand", "8", "--confirm-base", "10", "10.1", "9.9", "--confirm", "8.2", "8.1", "8.3"), 0, "surprise -1 (|1|, better than predicted, HIGH)")
 expect("lower is better revert", run("keep", L, "--id", "l2", "--noise", "1", "--gate", "pass", "--base", "10", "--cand", "12"), 4, "worse than predicted)")
 expect("negative threshold refused", run("init", "plan/lab/neg", "--fence", "src/**", "--lock", "harness/**", "--experiments", "5", "--surprise", "-1"), 1, "--surprise")
 
 # per-proposer counts over the campaign and its children, threshold 2 (default would be 10%)
 P = "plan/lab/prop"
-run("init", P, "--fence", "src/**", "--lock", "harness/**", "--experiments", "10", "--surprise", "2")
+run("init", P, "--fence", "src/**", "--lock", "harness/**", "--experiments", "10", "--surprise", "2", "--no-judge")
 run("child", P, f"{P}/child-1", "--experiments", "3")
 plan = [(P, "1", "qwen", 100, ["103"], "keep"),          # surprise +3, HIGH, kept
         (P, "2", "qwen", 100, ["99"], "revert"),         # -1
@@ -192,7 +192,7 @@ plan = [(P, "1", "qwen", 100, ["103"], "keep"),          # surprise +3, HIGH, ke
         (f"{P}/child-1", "1", "qwen", 100, ["101"], "revert")]
 for d_, e, who, pred, cand, _ in plan:
     run("predict", d_, e, "--proposer", who, "--predicted", str(pred))
-    run("keep", d_, "--id", e, "--noise", "2", "--gate", "pass", "--base", "100", "--cand", *cand)
+    run("keep", d_, "--id", e, "--noise", "2", "--gate", "pass", "--base", "100", "--cand", *cand, "--confirm-base", "100", "100", "100", "--confirm", *(cand * 3))
 run("predict", P, "4", "--proposer", "glm", "--predicted", "100")
 run("record", P, "4", "--outcome", "fail")
 run("predict", P, "5", "--proposer", "glm", "--predicted", "100")
@@ -209,7 +209,7 @@ O = "plan/lab/old"
 Path(O).mkdir(parents=True); Path(O, "contract.md").write_text("old contract\n")
 run("init", O, "--fence", "src/**", "--lock", "harness/**", "--experiments", "4")
 old = json.loads(Path(O, "lab.json").read_text())
-del old["ideas"], old["surprise_threshold"]
+del old["ideas"], old["surprise_threshold"], old["no_judge"], old["judged"], old["judge"]
 lab.save(O, old)   # what lab.py 2.7.1 wrote
 Path(O, "journal.md").write_text("# Lab journal\n\n- **A1 · hypothesis** · ran x · 210.0 · pass · keep · y\n")
 expect("old state passes check", run("check", O), 0, "ok")
@@ -217,7 +217,7 @@ expect("old state summary", run("summary", O), 0, "no predictions recorded")
 expect("old state spends", run("spend", O), 0, "1 of 4 used")
 expect("old state still needs a prediction to keep", run("keep", O, "--id", "A2", "--noise", "1", "--gate", "pass", "--base", "1", "--cand", "5"), 1, "has no prediction")
 expect("old state takes a prediction", run("predict", O, "A2", "--proposer", "x", "--predicted", "4"), 0, "ok")
-expect("old state default threshold", run("keep", O, "--id", "A2", "--noise", "1", "--gate", "pass", "--base", "1", "--cand", "5"), 0, "surprise +1 (|1|, better than predicted, HIGH)")
+expect("old state default threshold", run("keep", O, "--id", "A2", "--noise", "1", "--gate", "pass", "--base", "1", "--cand", "5", "--confirm-base", "1", "1", "1", "--confirm", "5", "5", "5"), 0, "surprise +1 (|1|, better than predicted, HIGH)")
 expect("old state check after the ledger", run("check", O), 0, "ok")
 
 # spend books before running; a budget of N runs N experiments
@@ -270,6 +270,144 @@ pj = Path(D, "lab.json"); before = pj.read_text()
 pj.write_text(before.replace('"src/**"', '"**"', 1))
 expect("tampered ancestor refused", run("check", f"{D}/child-1"), 1, "does not match its seal")
 pj.write_text(before)
+
+# keep runs check itself before any verdict: a change outside the fence or to a locked file reverts as fail
+K = "plan/lab/keepcheck"
+run("init", K, "--fence", "src/**", "--lock", "harness/**", "--experiments", "5", "--no-judge")
+for e in ("x1", "x2", "x3"):
+    run("predict", K, e, "--proposer", "x", "--predicted", "210")
+Path("README.md").write_text("# outside the fence\n")
+expect("keep reverts a change outside the fence", run("keep", K, "--id", "x1", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "210"), 4, "REVERT: lab.py check fails: change outside the fence: README.md")
+subprocess.run(["git", "checkout", "-q", "README.md"], check=True)
+Path("README.md").write_text("# committed outside the fence\n"); commit("outside again")
+expect("keep reverts a committed change outside the fence", run("keep", K, "--id", "x3", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "210"), 4, "REVERT: lab.py check fails: change outside the fence: README.md")
+subprocess.run(["git", "reset", "-q", "--hard", "HEAD~1"], check=True)
+Path("harness/bench.py").write_text("print(3)\n")
+expect("keep reverts an edit to a locked file", run("keep", K, "--id", "x2", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "210"), 4, "locked file changed: harness/bench.py")
+subprocess.run(["git", "checkout", "-q", "harness/bench.py"], check=True)
+ki = json.loads(Path(K, "lab.json").read_text())["ideas"]
+if any(ki[e].get("outcome") != "fail" or "actual" in ki[e] for e in ("x1", "x2", "x3")):
+    failures.append(f"a keep that failed check was not recorded as fail: {ki}")
+
+# the judge: planted cases before experiment 1; predict refuses until it is sealed; no budget spent
+J = "plan/lab/judge"
+run("init", J, "--fence", "src/**", "--lock", "harness/**", "--experiments", "5")
+expect("predict before the judge refused", run("predict", J, "e1", "--proposer", "x", "--predicted", "1"), 1, "lab.py judge")
+expect("judge done with no cases refused", run("judge", J, "--done"), 1, "at least 3")
+expect("planted case predicted", run("predict", J, "noop", "--judge", "--proposer", "judge", "--predicted", "200"), 0, "ok")
+expect("planted case through keep", run("keep", J, "--id", "noop", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "201"), 4, "REVERT")
+expect("judge takes no typed-in verdict", run("judge", J, "--case", "noop", "--expect", "revert", "--got", "revert"), 2, "unrecognized arguments")
+expect("judge case recorded", run("judge", J, "--case", "noop", "--expect", "revert"), 0, "ok: judge case noop got revert")
+expect("judge case needs --expect", run("judge", J, "--case", "gain"), 2, "usage")
+expect("judge case name repeated refused", run("judge", J, "--case", "noop", "--expect", "revert"), 1, "already recorded")
+# a case names a planted experiment that has run: invented cases and cases not yet run are refused
+expect("invented judge case refused", run("judge", J, "--case", "invented", "--expect", "keep"), 1, "not a planted experiment")
+run("predict", J, "gain", "--judge", "--proposer", "judge", "--predicted", "210")
+expect("judge case not yet run refused", run("judge", J, "--case", "gain", "--expect", "keep"), 1, "no recorded outcome yet")
+run("keep", J, "--id", "gain", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "210")
+expect("judge case 2 reads keep from the row", run("judge", J, "--case", "gain", "--expect", "keep"), 0, "got keep as expected; 2 recorded")
+expect("judge done with 2 cases refused", run("judge", J, "--done"), 1, "at least 3 planted cases; 2 recorded")
+expect("still no prediction before the seal", run("predict", J, "e1", "--proposer", "x", "--predicted", "1"), 1, "lab.py judge")
+run("predict", J, "zeros", "--judge", "--proposer", "judge", "--predicted", "210")
+run("keep", J, "--id", "zeros", "--noise", "4", "--gate", "fail", "--base", "200", "--cand", "210")
+expect("judge case 3 reads fail from the row", run("judge", J, "--case", "zeros", "--expect", "fail"), 0, "got fail as expected; 3 recorded")
+run("predict", J, "lockedit", "--judge", "--proposer", "judge", "--predicted", "210")
+Path("harness/bench.py").write_text("print(4)\n")
+run("keep", J, "--id", "lockedit", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "210")
+subprocess.run(["git", "checkout", "-q", "harness/bench.py"], check=True)
+run("judge", J, "--case", "lockedit", "--expect", "fail")
+sj = json.loads(Path(J, "lab.json").read_text())
+if sj["spent"] != 0 or sj["judged"] is not False or [c["name"] for c in sj["judge"]] != ["noop", "gain", "zeros", "lockedit"] or not all(c["match"] for c in sj["judge"]):
+    failures.append(f"judge state wrong before the seal: {sj}")
+st = Path(J, "lab.json"); orig = st.read_text()
+st.write_text(orig.replace('"judged": false', '"judged": true'))
+expect("hand-set judged refused by the seal", run("predict", J, "e1", "--proposer", "x", "--predicted", "1"), 1, "does not match its seal")
+st.write_text(orig)
+expect("judge sealed", run("judge", J, "--done"), 0, "judge sealed, 4 of 4")
+expect("predict after the seal", run("predict", J, "e1", "--proposer", "x", "--predicted", "1"), 0, "ok")
+expect("planted case after the seal refused", run("predict", J, "late", "--judge", "--proposer", "x", "--predicted", "1"), 1, "sealed")
+expect("judge case after the seal refused", run("judge", J, "--case", "late", "--expect", "keep"), 1, "already sealed")
+expect("summary leaves planted cases out", run("summary", J), 0, "1 predicted, 0 with a result")
+if json.loads(Path(J, "lab.json").read_text())["spent"] != 0:
+    failures.append("the judge spent experiment budget")
+expect("child of a judged campaign", run("child", J, f"{J}/c1", "--experiments", "1"), 0, "ok")
+expect("child inherits the judge", run("predict", f"{J}/c1", "e1", "--proposer", "x", "--predicted", "1"), 0, "ok")
+expect("child runs no judge", run("judge", f"{J}/c1", "--case", "a", "--expect", "keep"), 1, "inherits its parent's judge")
+expect("fork inherits the judge", run("fork", J, f"{J}/f1", "--experiments", "1"), 0, "ok")
+expect("fork predicts", run("predict", f"{J}/f1", "e1", "--proposer", "x", "--predicted", "1"), 0, "ok")
+# a mismatch between the expected verdict and the planted run's recorded outcome parks the campaign
+J2 = "plan/lab/judge2"
+run("init", J2, "--fence", "src/**", "--lock", "harness/**", "--experiments", "5")
+run("predict", J2, "noop", "--judge", "--proposer", "judge", "--predicted", "200")
+run("keep", J2, "--id", "noop", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "201")
+run("judge", J2, "--case", "noop", "--expect", "revert")
+run("predict", J2, "gain", "--judge", "--proposer", "judge", "--predicted", "200")
+run("keep", J2, "--id", "gain", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "201")
+expect("judge mismatch parks", run("judge", J2, "--case", "gain", "--expect", "keep"), 5, "PARKED: the judge returned revert for gain, expected keep; fix the harness or the gates, never the loop")
+expect("judge done with a mismatch parks", run("judge", J2, "--done"), 5, "PARKED: the judge returned revert for gain")
+expect("parked judge still blocks predict", run("predict", J2, "e1", "--proposer", "x", "--predicted", "1"), 1, "lab.py judge")
+expect("child of an unjudged campaign", run("child", J2, f"{J2}/c1", "--experiments", "1"), 0, "ok")
+expect("child of an unjudged campaign cannot predict", run("predict", f"{J2}/c1", "e1", "--proposer", "x", "--predicted", "1"), 1, "lab.py judge")
+# the seal needs keep, revert and fail each got at least once, even with 3 matching cases
+J3 = "plan/lab/judge3"
+run("init", J3, "--fence", "src/**", "--lock", "harness/**", "--experiments", "5")
+for e, gate in (("n1", "pass"), ("n2", "pass"), ("z1", "fail")):
+    run("predict", J3, e, "--judge", "--proposer", "judge", "--predicted", "200")
+    run("keep", J3, "--id", e, "--noise", "4", "--gate", gate, "--base", "200", "--cand", "201")
+    run("judge", J3, "--case", e, "--expect", "fail" if gate == "fail" else "revert")
+expect("judge done without a keep case refused", run("judge", J3, "--done"), 1, "cover every verdict (keep, revert, fail); none got keep")
+# --no-judge is stored and sealed; such a campaign predicts at once and runs no judge
+N = "plan/lab/nojudge"
+run("init", N, "--fence", "src/**", "--lock", "harness/**", "--experiments", "5", "--no-judge")
+if json.loads(Path(N, "lab.json").read_text()).get("no_judge") is not True:
+    failures.append("--no-judge not stored")
+expect("no-judge campaign predicts", run("predict", N, "e1", "--proposer", "x", "--predicted", "1"), 0, "ok")
+expect("no-judge campaign runs no judge", run("judge", N, "--case", "a", "--expect", "keep"), 1, "--no-judge")
+st = Path(N, "lab.json"); orig = st.read_text()
+st.write_text(orig.replace('"no_judge": true', '"no_judge": false'))
+expect("hand-cleared no_judge refused by the seal", run("check", N), 1, "does not match its seal")
+st.write_text(orig)
+# a state file written before the judge existed (no judged key) counts as judged, and so do its children
+Q = "plan/lab/prejudge"
+run("init", Q, "--fence", "src/**", "--lock", "harness/**", "--experiments", "6")
+old = json.loads(Path(Q, "lab.json").read_text())
+del old["no_judge"], old["judged"], old["judge"]
+lab.save(Q, old)   # what lab.py wrote before the judge
+expect("pre-judge state passes check", run("check", Q), 0, "ok")
+expect("pre-judge state predicts", run("predict", Q, "e1", "--proposer", "x", "--predicted", "205"), 0, "ok")
+expect("pre-judge state keeps", run("keep", Q, "--id", "e1", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "205"), 0, "KEEP")
+expect("pre-judge child", run("child", Q, f"{Q}/c1", "--experiments", "1"), 0, "ok")
+expect("pre-judge child predicts", run("predict", f"{Q}/c1", "e1", "--proposer", "x", "--predicted", "1"), 0, "ok")
+
+# a HIGH-surprise KEEP needs fresh confirmation runs; it keeps only if the gain holds on them
+H = "plan/lab/high"
+run("init", H, "--fence", "src/**", "--lock", "harness/**", "--experiments", "10", "--surprise", "2", "--no-judge")
+for e, pred in (("h1", 100), ("h2", 100), ("h3", 105), ("h4", 100), ("h5", 100), ("h6", 100), ("h7", 100), ("h8", 100), ("h9", 100)):
+    run("predict", H, e, "--proposer", "x", "--predicted", str(pred))
+expect("HIGH keep without --confirm refused", run("keep", H, "--id", "h1", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110"), 1, "needs --confirm")
+if "outcome" in json.loads(Path(H, "lab.json").read_text())["ideas"]["h1"]:
+    failures.append("a refused HIGH keep recorded a result")
+expect("HIGH gain gone on fresh runs", run("keep", H, "--id", "h1", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--confirm-base", "100", "100", "100", "--confirm", "101", "101.5", "101.25"), 4, "REVERT: the HIGH-surprise gain did not hold on fresh runs (1.25 against noise 2)")
+expect("HIGH gain holds on fresh runs", run("keep", H, "--id", "h2", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--confirm-base", "100", "100", "100", "--confirm", "109", "111", "110"), 0, "held on fresh runs (10 against noise 2)")
+expect("non-HIGH keep needs no confirm", run("keep", H, "--id", "h3", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "105"), 0, "KEEP")
+expect("HIGH revert needs no confirm", run("keep", H, "--id", "h4", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "90"), 4, "REVERT: gain -10")
+good = ["1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"]
+mixed = ["1", "-2", "1.5", "-2.5", "1", "-2", "1", "-2", "1", "-2"]
+expect("HIGH paired keep without --confirm-paired refused", run("keep", H, "--id", "h5", "--gate", "pass", "--actual", "110", "--paired", *good), 1, "needs --confirm-paired")
+expect("HIGH paired confirm too short", run("keep", H, "--id", "h5", "--gate", "pass", "--actual", "110", "--paired", *good, "--confirm-paired", "1", "2"), 2, "at least 10")
+expect("HIGH paired gain gone on fresh runs", run("keep", H, "--id", "h5", "--gate", "pass", "--actual", "110", "--paired", *good, "--confirm-paired", *mixed), 4, "REVERT: the HIGH-surprise gain did not hold on fresh runs (paired 95% interval")
+expect("HIGH paired gain holds", run("keep", H, "--id", "h6", "--gate", "pass", "--actual", "110", "--paired", *good, "--confirm-paired", *good), 0, "held on fresh runs (paired 95% interval")
+# --actual cannot replace mean(--cand), so a HIGH surprise cannot be hidden behind a typed-in number
+expect("--actual with --cand refused", run("keep", H, "--id", "h7", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--actual", "100"), 2, "drop --actual")
+# the confirmation re-measures both sides: a drift that lifts best-so-far as much as the candidate is no gain
+expect("HIGH gain is drift on fresh runs of both sides", run("keep", H, "--id", "h8", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--confirm-base", "110", "110", "110", "--confirm", "110", "110", "110"), 4, "did not hold on fresh runs (0 against noise 2)")
+expect("HIGH confirm needs fresh best-so-far readings", run("keep", H, "--id", "h9", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--confirm", "109", "111", "110"), 1, "needs --confirm-base and --confirm")
+expect("HIGH confirm needs 3 readings a side", run("keep", H, "--id", "h9", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--confirm-base", "100", "100", "100", "--confirm", "110"), 2, "at least 3 readings each")
+expect("HIGH confirm readings alternate", run("keep", H, "--id", "h9", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--confirm-base", "100", "100", "100", "--confirm", "110", "110", "110", "110", "110"), 2, "taken alternately")
+hi_ = json.loads(Path(H, "lab.json").read_text())["ideas"]
+if [hi_[e].get("outcome") for e in ("h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9")] != ["revert", "keep", "keep", "revert", "revert", "keep", None, "revert", None] or hi_["h1"]["actual"] != 110:
+    failures.append(f"HIGH-surprise outcomes wrong: {hi_}")
+
 # every call left a ledger row
 rows = (lab.seal_dir() / "ledger.jsonl").read_text().splitlines()
 if not any('"event": "init"' in r for r in rows) or not any('"event": "child"' in r for r in rows):

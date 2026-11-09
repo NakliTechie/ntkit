@@ -39,7 +39,7 @@ Try it: <command or URL that runs today's working build | "no runnable build yet
 [if branches deleted:] Branches deleted: <N> merged (tip SHAs in the summary)
 [if promo output cleared:] Promo output cleared: <N> entries, <MB> MB (regenerate with /package-nt assets)
 [if scratch cleared:] Scratch cleared: <N> entries, <MB> MB · free space <df -h / Avail>
-[if scratch kept or older:] Scratch kept: <path> — <open item>; older sessions: <path> (<MB> MB) — delete?
+[if scratch kept or older:] Scratch kept: <path> — <open item>; older sessions: <path> (<MB> MB) — delete? · recent sessions (live, never deleted): <path>
 [if generated files > 20,000:] Generated files: <N> in <dir> — unbounded evidence; clean by name (SUBSTANCE.md §3.9)
 [if footprint left:] Still on disk: .worktrees <MB> MB · open-cited promo output <MB> MB · demo tunnel / launchd agents running: <names | none>
 [if held or unmerged:] Branches waiting on you: <ref> — <reason>, … (merge, keep, or delete?)

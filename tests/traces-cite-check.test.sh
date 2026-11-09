@@ -1,7 +1,8 @@
 #!/bin/sh
 # traces-nt cite_check.py against a synthetic tracelens archive: a clean findings file, a missing
 # file, a line past the end, a finding with no pointer, a bad fix-target type, a missing Measure
-# line, an empty file, and a missing archive. No model calls.
+# line, an empty file, a missing archive, a pointer that leaves the archive, a missing findings
+# file, and --home without a value. No model calls.
 set -eu
 command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
 CC=$(cd "$(dirname "$0")/.." && pwd)/skills/traces-nt/bin/cite_check.py
@@ -52,6 +53,21 @@ echo '# Trace findings — empty' >"$work/empty.md"
 expect "file with no findings fails" 1 "no '## F<n>' findings" "$work/empty.md"
 
 expect "missing archive is a usage error" 2 "no archive at" "$work/clean.md" --home "$work/nowhere"
+
+echo '{"n":1}' >"$work/home/outside.jsonl"
+{ finding 1 '`claude/../../outside.jsonl:1`' skill; } >"$work/escape.md"
+expect "pointer leaving the archive fails" 1 "path leaves the archive" "$work/escape.md"
+ln -s "$work/home/outside.jsonl" "$work/home/archive/claude/link.jsonl"
+{ finding 1 '`claude/link.jsonl:1`' skill; } >"$work/symlink.md"
+expect "symlink leaving the archive fails" 1 "path leaves the archive" "$work/symlink.md"
+
+expect "missing findings file is a usage error" 2 "no findings file at" "$work/absent.md"
+expect "--home without a value is a usage error" 2 "Usage:" "$work/clean.md" --home
+
+# installed layout: skills copied side by side, outside the repo (the shared resolver loads from there)
+mkdir -p "$work/installed"; cp -R "${CC%/traces-nt/bin/cite_check.py}/traces-nt" "${CC%/traces-nt/bin/cite_check.py}/forward-pass-nt" "$work/installed/"
+CC=$work/installed/traces-nt/bin/cite_check.py
+expect "installed copy passes a clean file" 0 "2 findings, 3 citations, 0 failures" "$work/clean.md"
 
 [ "$bad" -eq 0 ] && echo "all cite_check cases pass"
 exit "$bad"

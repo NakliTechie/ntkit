@@ -1,6 +1,7 @@
 #!/bin/sh
 # plancheck against small plan/ folders: clean, orphan, ghost, a quoted tag that matches,
-# a quoted tag that does not (misquote), a soc quote, and standing.md read as derived.
+# a quoted tag that does not (misquote), a soc quote, standing.md read as derived, wrapped
+# tags, --since on items, partial ghosts, plan/research/ records and _archive/ copies.
 # No model calls. Contract: MEMORY.md §4, §5, §7.
 set -eu
 command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
@@ -15,6 +16,13 @@ expect() { # expect <description> <exit code> <substring> <plan dir> [plancheck 
   fi
   case $out in *"$want"*) : ;; *)
     echo "FAIL $desc: output lacks '$want'"; printf '%s\n' "$out" | sed 's/^/     | /'; bad=1 ;;
+  esac
+}
+reject() { # reject <description> <substring> <plan dir> [plancheck args...]: output must lack it
+  desc=$1; unwanted=$2; dir=$3; shift 3
+  set +e; out=$(python3 "$PC" "$dir" "$@" 2>&1); set -e
+  case $out in *"$unwanted"*)
+    echo "FAIL $desc: output has '$unwanted'"; printf '%s\n' "$out" | sed 's/^/     | /'; bad=1 ;;
   esac
 }
 base() { # base <dir>: records every case shares
@@ -100,5 +108,117 @@ expect "standing.md orphan is reported" 1 "1 orphan(s)" "$t"
 
 # 7. --json carries the misquote kind.
 expect "json output names misquote" 1 '"kind": "misquote"' "$m" --json
+
+# 8. a tag on a wrapped continuation line belongs to its item (no false ghost).
+w="$work/wrapped"; base "$w"
+cat >"$w/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone, once the index has run a week
+  without a rebuild.  [from: 2026-09-10-summary]
+EOF
+expect "tag on a continuation line is read" 0 "Replay: clean" "$w"
+
+# 9. --since drops items dated before it, as well as records (no false orphan).
+n="$work/since"; base "$n"
+printf '# Summary 2026-08-01\n\n## Impact\n- none\n' >"$n/plan/2026-08-01-summary.md"
+cat >"$n/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- An August item  [from: 2026-08-01-summary]
+EOF
+expect "--since skips an item whose record is out of range" 0 "Replay: clean" "$n" --since 2026-09-01
+
+# 10. each add line needs its own citing item: one citation does not cover three adds.
+p="$work/partial"; base "$p"
+cat >"$p/plan/2026-09-12-summary.md" <<'EOF'
+# Summary 2026-09-12
+
+## Impact
+- pending.md/Now — add: first follow-up
+- pending.md/Now — add: second follow-up
+- pending.md/Now — add: third follow-up
+EOF
+cat >"$p/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- First follow-up  [from: 2026-09-12-summary]
+EOF
+expect "two uncited adds of three are two ghosts" 1 "2 ghost(s)" "$p"
+# An unquoted citation cannot say which add it answers: one finding names every candidate line.
+expect "an unquoted citation leaves all three adds as candidates" 1 "2026-09-12-summary.md:4,5,6" "$p"
+
+# 14. a quoted citation answers the add whose text holds its words; the other adds are the ghosts.
+q="$work/quoted-impact"; base "$q"
+cp "$p/plan/2026-09-12-summary.md" "$q/plan/"
+cat >"$q/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- Third follow-up  [from: 2026-09-12-summary "third follow-up"]
+EOF
+expect "a quoted citation leaves exactly the other adds as ghosts" 1 "2 ghost(s)" "$q"
+expect "the first uncited add is a ghost" 1 "2026-09-12-summary.md:4 " "$q"
+expect "the second uncited add is a ghost" 1 "2026-09-12-summary.md:5 " "$q"
+reject "the quoted add is not a ghost" "2026-09-12-summary.md:6" "$q"
+
+# 15. quoted and unquoted together: the quote is matched first, the count covers the rest.
+x="$work/mixed-impact"; base "$x"
+cp "$p/plan/2026-09-12-summary.md" "$x/plan/"
+cat >"$x/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- Second follow-up  [from: 2026-09-12-summary "second follow-up"]
+- Some follow-up  [from: 2026-09-12-summary]
+EOF
+expect "one add missing of two candidates is one ghost" 1 "1 ghost(s)" "$x"
+expect "the ghost names both unquoted candidates" 1 "2026-09-12-summary.md:4,6" "$x"
+
+# 16. an add line that names another source with its own [from:] tag is that source's to cite,
+# not this record's: its item cites [from: hand], and no ghost is reported.
+h="$work/handtag"; base "$h"
+printf '# Summary 2026-09-13\n\n## Impact\n- pending.md/Now — add: write the release notes  [from: hand]\n' >"$h/plan/2026-09-13-summary.md"
+cat >"$h/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- [ ] Write the release notes  [from: hand]
+EOF
+expect "an add tagged with another source is not this record's ghost" 0 "Replay: clean" "$h"
+
+# 11. /research-nt reports under plan/research/ are records: a flat file by its stem,
+# a run folder by its folder name.
+r="$work/research"; base "$r"
+mkdir -p "$r/plan/research/2026-09-12-cache-study"
+printf '# Cache study\nThe LRU wins below 4 GB.\n' >"$r/plan/research/2026-09-12-cache-study/report.md"
+printf '# Notes\nRead the flare server.\n' >"$r/plan/research/2026-09-13-flare-notes.md"
+cat >"$r/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]
+- Keep the LRU  [from: 2026-09-12-cache-study "The LRU wins below 4 GB"]
+- Read flare  [from: 2026-09-13-flare-notes]
+EOF
+expect "research reports resolve" 0 "Replay: clean" "$r"
+
+# 12. an archived copy of a record never replaces the live one.
+a="$work/archived"; base "$a"
+printf '# Summary 2026-09-10 (older draft)\n\n## Impact\n- none\n' >"$a/plan/_archive/2026-09-10-summary.md"
+cat >"$a/plan/pending.md" <<'EOF'
+# Pending
+## Now
+- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary "flip the trigram flag"]
+EOF
+expect "the live record wins over its archived copy" 0 "Replay: clean" "$a"
+
+# 13. an archived record's add lines are not ghosts: the reconcile pass applied them when it
+# folded the record, and the items may since be finished and removed.
+g="$work/folded"; base "$g"
+printf '# Forward pass 2026-08-01\n\n## Impact\n- pending.md/Now — add: fix the parser\n' >"$g/plan/_archive/forward-pass-2026-08-01.md"
+printf '# Pending\n## Now\n- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]\n' >"$g/plan/pending.md"
+expect "an archived record's finished adds are not ghosts" 0 "Replay: clean" "$g"
 
 [ "$bad" -eq 0 ] && echo ok

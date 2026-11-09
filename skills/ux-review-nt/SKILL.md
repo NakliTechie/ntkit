@@ -5,7 +5,7 @@ allowed-tools: Bash Glob Grep Read Write Agent SendUserFile mcp__computer-use__*
 metadata:
   argument-hint: "[area to focus, e.g. first-run | settings | nav] [surface: web|cli|tui|native — auto-detected if omitted]"
   entry: "app boots; state wipeable to cold-start"
-  exit: "first-run + IA report written, with the invariant set armed before the first beat and the flail run to its budget or declared skipped; app unmodified (read-only run)"
+  exit: "`plan/ux-review-<date>.md` exists with a `## Workplan` and a `## Impact` section, and records the invariant set and the flail run or its skip reason; `git status --short` is unchanged by the run (read-only)"
   writes: "plan/ux-review-<date>.md, plan/ux-review-<date>-run/ (recording + beat log)"
 ---
 

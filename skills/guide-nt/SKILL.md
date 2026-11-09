@@ -5,7 +5,7 @@ allowed-tools: Bash Glob Grep Read Edit Write Agent mcp__claude-in-chrome__* mcp
 metadata:
   argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
   entry: "at least one surface is runnable (dev server, CLI binary, or built .app); guide generator committed (or created this run)"
-  exit: "single-file HTML guide regenerated from the generator — never hand-edited"
+  exit: "`guide/regenerate.sh` exits 0 and its `guide/index.html` is committed: `git status --short guide/` prints nothing"
   writes: "guide generator + output"
 ---
 
@@ -34,6 +34,7 @@ On entering a phase, read its Detail file first, then act. Do not read ahead.
 | 1 Surfaces | The app classified as `browser` · `cli` · `native-macos` · `mixed`. The backend decides the route-plan shape and the capture path. | `references/surfaces-and-routes.md` |
 | 2 Roles + routes | Roles per surface and an ordered route-plan per role, derived from `verify/features/` when it exists, plus one `HERO_FLOW` of 2–3 captures (entry → key action → result) that `/package-nt` films. | `references/surfaces-and-routes.md` |
 | 3 Generator | Exists → update its data (route rows, captions, sections) and preserve every hand-written caption. Missing → scaffold `guide/capture.*`, `guide/build_index.py`, `guide/regenerate.sh`. | `references/generator.md` |
-| 4 Capture | Every route captured with its backend's readiness wait and blank-capture guard; `update` re-shoots only changed routes. A blank or failing route is a bug for `/walkthrough-nt`, not something to paper over. A native macOS app is not unattended: say so before the run starts. | `references/capture.md` |
-| 5 Build | One self-contained, searchable `index.html` themed from the app's own CSS tokens and usable on a phone. | `references/build.md` |
+| 4 Capture | Every route captured with its backend's readiness wait and blank-capture guard; `update` re-shoots only changed routes. A blank or failing route is a bug for `/walkthrough-nt`, not something to paper over. | `references/capture.md` |
+| 4b Rules (optional) | For a feature that is a process, a small Python model of its states with the product's rules, every reachable state checked by `bin/statecheck.py`, each guard switched off to show what it prevents, and a Rules section in its guide entry. | `references/rules-panel.md` |
+| 5 Build | One self-contained, searchable `index.html` themed from the app's own CSS tokens and usable on a phone. A process drawn as a chart follows `references/charts.md`. | `references/build.md` |
 | 6 Verify | The served guide checked at desktop and phone width; coverage, capture counts, blind spots and the path printed. Commit the guide; do not push. | `references/verify.md` |

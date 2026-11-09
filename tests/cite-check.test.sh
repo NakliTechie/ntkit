@@ -60,7 +60,14 @@ cat >"$work/app/plan/nopointer.md" <<'EOF'
 EOF
 expect "finding without pointer fails" 1 "finding cites no path:line" plan/nopointer.md
 
-# 5. usage: no report.
+# 5. a missing extensionless file or dotfile beside a valid pointer on the same line.
+cat >"$work/app/plan/bare.md" <<'EOF'
+- **L1** [Bug] Dockerfile:5 and .env:2 — both missing; src/api/orders.ts:1 resolves
+EOF
+expect "missing Dockerfile fails" 1 "Dockerfile:5 - no such file" plan/bare.md
+expect "missing dotfile fails" 1 ".env:2 - no such file" plan/bare.md
+
+# 6. usage: no report.
 expect "missing report is a usage error" 2 "no report" plan/absent.md
 
 [ "$bad" -eq 0 ] && echo "cite-check: all cases pass"

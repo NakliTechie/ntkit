@@ -19,5 +19,10 @@ expect open walkthrough-2026-10-05-run
 printf '%s\n' "$out" | grep -q 'ux-review-2026-10-03-run' && { echo "FAIL: a run without media is listed"; bad=1; }
 printf '%s\n' "$out" | awk -F '\t' '$2 ~ /10-01-run$/ && $3 == 2 { f = 1 } END { exit !f }' || { echo "FAIL: file count"; bad=1; }
 sh "$script" "$t/none" 2>/dev/null && { echo "FAIL: a missing plan dir exits 0"; bad=1; }
+# --list prints a run's media files by path from the same one extension list, and nothing else.
+echo '{}' >"$p/ux-review-2026-10-01-run/beats.json"
+list=$(sh "$script" --list "$p/ux-review-2026-10-01-run" 2>&1 | sort)
+[ "$list" = "$(printf '%s\n' "$p/ux-review-2026-10-01-run/001.png" "$p/ux-review-2026-10-01-run/journey.webm")" ] || { echo "FAIL: --list printed: $list"; bad=1; }
+sh "$script" --list "$t/none" 2>/dev/null && { echo "FAIL: --list on a missing dir exits 0"; bad=1; }
 [ "$bad" = 0 ] && echo "review-media: ok"
 exit "$bad"

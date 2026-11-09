@@ -97,6 +97,20 @@ printf 'claude\t~/.claude/CLAUDE.md\tclaude\n' > "$HOME/prefs/targets.tsv"
 [ "$(rcof sync)" -eq 2 ] && grep -q 'agents/claude.md' "$tmp/out" || fail "old format not explained"
 cp "$tmp/targets.keep" "$HOME/prefs/targets.tsv"
 
+# A row with no file column exits 2 with a message, not a traceback.
+P2="$HOME/p2"; cp -R "$skill/references/template" "$P2"; rm -rf "$P2/.state" "$P2/drift"
+printf 'solo\n' > "$P2/targets.tsv"
+[ "$(rcof run --dir "$P2")" -eq 2 ] && grep -q 'expected agent <TAB> global file' "$tmp/out" || fail "malformed row: expected exit 2 with a message"
+
+# Two rows that reach one file (a symlink) give one build and no false hand edit, run after run.
+mkdir -p "$HOME/dup"; ln -s "$HOME/dup/A.md" "$HOME/dup/B.md"
+printf 'aa\t~/dup/A.md\t-\nbb\t~/dup/B.md\t-\n' > "$P2/targets.tsv"
+for i in 1 2 3; do run --dir "$P2" >> "$tmp/dup"; done
+! grep -q 'hand edit' "$P2/inbox.md" || fail "two rows on one file logged a hand edit"
+grep -q 'Generated for aa' "$HOME/dup/A.md" || fail "two rows on one file: first row's build missing"
+grep -q "bb: its file is aa's file; skipped" "$tmp/dup" || fail "two rows on one file: skip not logged"
+run --dir "$P2" --check >/dev/null || fail "two rows on one file: --check should exit 0"
+
 # A second sync while one holds the lock exits 3.
 python3 - "$skill/bin/prefs_sync.py" "$HOME/prefs" <<'EOF' || fail "concurrent sync was not refused"
 import fcntl, subprocess, sys

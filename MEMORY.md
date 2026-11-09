@@ -54,7 +54,7 @@ contract; everything else follows from it.
 
 | Kind | Files | Rule |
 |---|---|---|
-| **Record** | `soc.md` · `<type>-<date>.md` reports · `<date>-summary.md` · `lab/<slug>/journal.md` · `history.md` `## Log` · `_archive/` | Append-only. Once written, an entry is never edited or deleted. A dead end is recorded exactly like a success. |
+| **Record** | `soc.md` · `<type>-<date>.md` reports · `research/` reports · `<date>-summary.md` · `lab/<slug>/journal.md` · `history.md` `## Log` · `_archive/` | Append-only. Once written, an entry is never edited or deleted. A dead end is recorded exactly like a success. |
 | **Derived** | `pending.md` · `workplan.md` · `history.md` `## Decisions` · `history.md` `## Dead ends` · `standing.md` (optional, §7) | A projection over the record. Rewritten wholesale by the reconcile pass, and by nothing else. |
 
 `history.md` is deliberately hybrid: its `## Log` is the record, its `## Decisions` and

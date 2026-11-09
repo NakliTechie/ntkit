@@ -1,7 +1,7 @@
 #!/bin/sh
 # lab-nt lab.py: sealed state, lockbox and fence (committed and uncommitted changes, ancestor fences),
 # keep decisions under the joint gate, the surprise ledger (prediction before result, surprise with sign,
-# kept ideas per proposer, state files written before the ledger), budget, child and fork carving, depth, legs and odometer, merge
+# kept ideas per proposer, state files written before the ledger), budget, child and fork carving, depth, legs and odometer
 # grant. A scratch git repo; no network, no model calls. Contract: skills/lab-nt/bin/lab.py docstring.
 set -eu
 command -v python3 >/dev/null || { echo "python3 not found"; exit 77; }
@@ -66,20 +66,20 @@ expect("zero-match lock glob refused", run("init", "plan/lab/typo", "--fence", "
 
 # the seal: a hand edit to any field is refused, including the budget counter
 st = Path(D, "lab.json"); orig = st.read_text()
-st.write_text(orig.replace('"merge": "none"', '"merge": "auto"'))
-expect("tampered grant refused", run("check", D), 1, "does not match its seal")
+st.write_text(orig.replace('"higher_is_better": true', '"higher_is_better": false'))
+expect("tampered direction refused", run("check", D), 1, "does not match its seal")
 st.write_text(orig.replace('"spent": 0', '"spent": -100'))
 expect("tampered budget refused", run("spend", D, "--n", "50"), 1, "does not match its seal")
 st.write_text(orig)
 
-# deleting the state file and re-initialising with a merge grant is refused, twice over
+# deleting the state file and re-initialising with a fresh budget is refused, twice over
 R = "plan/lab/reinit"
 run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "2")
 Path(R, "lab.json").unlink()
 expect("deleted state noticed", run("check", R), 1, "initialised before and its state file is gone")
-expect("re-init refused", run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "99", "--merge", "auto"), 1, "initialised before")
+expect("re-init refused", run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "99"), 1, "initialised before")
 seal = lab.seal_path(R); seal.unlink()
-expect("re-init refused by the ledger", run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "99", "--merge", "auto"), 1, "initialised before")
+expect("re-init refused by the ledger", run("init", R, "--fence", "src/**", "--lock", "harness/**", "--experiments", "99"), 1, "initialised before")
 
 # check: uncommitted and committed changes against the leg's start
 Path("src/kernel.metal").write_text("kernel v2\n")
@@ -234,7 +234,7 @@ expect("child too big", run("child", D, f"{D}/child-1", "--experiments", "13"), 
 expect("child fence outside", run("child", D, f"{D}/child-1", "--experiments", "6", "--fence", "README.md"), 1, "outside the parent's")
 expect("child ok", run("child", D, f"{D}/child-1", "--experiments", "6", "--fence", "src/attn/**"), 0, "depth 1 with 6")
 p = json.loads(Path(D, "lab.json").read_text()); c = json.loads(Path(D, "child-1", "lab.json").read_text())
-if p["spent"] != 6 or c["locked"] != p["locked"] or c["depth"] != 1 or c["merge"] != "none":
+if p["spent"] != 6 or c["locked"] != p["locked"] or c["depth"] != 1:
     failures.append(f"child bookkeeping wrong: parent {p}, child {c}")
 Path("src/kernel.metal").write_text("kernel v3\n")
 expect("child fence enforced", run("check", f"{D}/child-1"), 1, "outside the fence: src/kernel.metal")
@@ -264,14 +264,6 @@ run("end", D, "BUDGET")
 Path("harness/gate.sh").write_text("changed\n")
 expect("leg parked on changed lock", run("leg", D, "--experiments", "4"), 1, "PARKED")
 subprocess.run(["git", "checkout", "-q", "harness/gate.sh"], check=True)
-
-# merge grant
-expect("no grant", run("merge-ok", D), 1, "no merge grant")
-M = "plan/lab/m"
-run("init", M, "--fence", "src/**", "--lock", "harness/**", "--experiments", "3", "--merge", "auto")
-expect("grant", run("merge-ok", M), 0, "merge granted")
-expect("child has no grant", run("child", M, f"{M}/c1", "--experiments", "1"), 0, "")
-expect("child merge refused", run("merge-ok", f"{M}/c1"), 1, "no merge grant")
 
 # an ancestor's state is read through its seal: widening the parent's fence by hand is refused
 pj = Path(D, "lab.json"); before = pj.read_text()

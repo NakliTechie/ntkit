@@ -45,7 +45,6 @@ High surprise (kept or not):
   - <id> — predicted <p>, got <a>, surprise <±s> — <what it suggests>   [or "none"]
 Forks:        <fork point → winning fork or "tip kept">            [or "off" / "leg too short"]
 Children:     <c<n> — question — end state — best — merged or reverted>   [or "none"]
-Merged:       <meta auto-merge SHA + revert command>                [or "none"]
 Critic said:  <verdicts, incl. anything flagged>        [or "no cadence point reached"]
 
 What stays:   <each surviving outside resource + the command that removes it | none>

@@ -57,6 +57,14 @@ grep -q '^          code line$' "$C" || fail "code indentation lost on the way t
 ls "$HOME"/prefs/drift/codex-2*.md >/dev/null 2>&1 || fail "edited copy not saved to drift/"
 sync --check >/dev/null || fail "after edit sync: --check should exit 0"
 
+# A file over the size budget is still written, with a warning that names the largest source.
+printf 'Line two.\n' >> "$HOME/prefs/core/01-about.md"
+NT_PREFS_MAX_LINES=5 sync > "$tmp/size"
+grep -q 'claude: WARNING .* over the budget of 5 lines' "$tmp/size" || fail "no size warning"
+grep -q 'Largest: ' "$tmp/size" || fail "size warning does not name the largest sources"
+grep -q 'Line two.' "$C" || fail "over-budget file was not written"
+sync >/dev/null; ! sync --dry-run | grep -q WARNING || fail "warning on an unchanged file"
+
 # agents/<agent>.md is used as soon as it exists; no targets.tsv change needed.
 printf '## Codex only\n\n- codex marker\n' > "$HOME/prefs/agents/codex.md"
 sync >/dev/null

@@ -16,6 +16,9 @@ For each target whose parent folder exists (the agent is installed):
   2. Write header + core + extras + inbox to the live file, atomically. A file that changed
      after step 1 read it is left alone this run and captured on the next.
 `{{PREFS_DIR}}` in any source file becomes the folder's path.
+Each file written is measured against a size budget for always-loaded text ($NT_PREFS_MAX_LINES,
+default 200; $NT_PREFS_MAX_BYTES, default 25000). Over budget logs a warning naming the largest
+sources, because a longer instruction file is followed less closely. It never blocks a write.
 
 Usage: prefs_sync.py [--dir D] [--dry-run | --check] [--push]
   --dry-run  print what would change; write nothing
@@ -37,6 +40,11 @@ from pathlib import Path
 INBOX_HEAD = "# Inbox — append-only, one fact per line, newest last\n"
 NOW = datetime.now().astimezone()
 ENV_DEFAULTS = {"CODEX_HOME": "~/.codex"}
+
+
+def budget():
+    return (int(os.environ.get("NT_PREFS_MAX_LINES", "200")),
+            int(os.environ.get("NT_PREFS_MAX_BYTES", "25000")))
 
 
 def args():
@@ -149,6 +157,25 @@ class Prefs:
                          "wins.\n\n" + body.strip("\n") + "\n")
         return "\n".join(parts).replace("{{PREFS_DIR}}", here)
 
+    def sources(self, agent):
+        """(name, bytes) of each source that goes into the agent's file, largest first."""
+        files = sorted((self.root / "core").glob("*.md"))
+        extra = self.root / "agents" / f"{agent}.md"
+        sizes = [(f"core/{p.name}", len(p.read_bytes())) for p in files]
+        if extra.is_file():
+            sizes.append((f"agents/{agent}.md", len(extra.read_bytes())))
+        sizes.append(("inbox.md", len(self.inbox.encode())))
+        return sorted(sizes, key=lambda s: -s[1])
+
+    def check_size(self, agent, out):
+        max_lines, max_bytes = budget()
+        lines, size = out.count("\n"), len(out.encode())
+        if lines <= max_lines and size <= max_bytes:
+            return
+        top = ", ".join(f"{n} {b // 1000} KB" for n, b in self.sources(agent)[:3])
+        self.log(f"{agent}: WARNING {lines} lines, {size} bytes, over the budget of {max_lines} "
+                 f"lines / {max_bytes} bytes; move detail into linked files. Largest: {top}")
+
     def capture_drift(self, agent, live, last):
         """Save a hand-edited file to drift/ and add its added blocks, formatting kept, to the inbox."""
         blocks, block, removed = [], [], 0
@@ -243,6 +270,7 @@ class Prefs:
                 continue
             if now != out:
                 self.log(f"{agent}: writing {tilde(target)} ({len(out.encode())} bytes)")
+                self.check_size(agent, out)
                 if self.write and not atomic_write(target, out, expected=now):
                     self.log(f"{agent}: file changed during this sync; left alone until the next run")
                     continue

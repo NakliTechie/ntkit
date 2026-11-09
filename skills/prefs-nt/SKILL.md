@@ -25,6 +25,7 @@ template path, so a project install runs its own copy.
 |---|---|---|
 | mode (invocation text) | `sync` | `init`, `sync`, `fold`, `schedule` or `unschedule`; see the phases below |
 | `dir=<path>` | `$NT_PREFS_DIR`, else `~/.agent-prefs` | The preferences folder; pass it to the script as `--dir`. Set `NT_PREFS_DIR` in your shell profile to keep the folder in a backed-up repo |
+| `NT_PREFS_MAX_LINES`, `NT_PREFS_MAX_BYTES` (env) | 200 lines, 25000 bytes | Size budget for each generated file. A file over it is still written, and the sync logs a warning naming the three largest sources, because agents follow a long always-loaded file less closely. Move detail into files the instructions link to |
 | `--push` (sync and schedule) | off | Pull, then push the folder's git repo. Pushing is outward-facing, so it is granted per run. Git runs only when the folder is the root of its own repo |
 
 ## The folder

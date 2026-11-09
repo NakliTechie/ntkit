@@ -93,6 +93,14 @@ that into workplan items. An agent that writes its own criteria and then ticks t
 has graded its own exam: it can meet the criteria by editing them. This is W4 applied to
 the case that matters most, and it is why it is stated separately.
 
+**W6 — Parallel writers each write their own file.** When two or more sessions or
+subagents run at once on one project, each appends to its own dated record
+(`<date>-<writer>-notes.md`, a report, its own journal) and none edits a shared list.
+The next reconcile pass folds those files into `pending.md` and `workplan.md`. A shared
+file written by several agents at once loses entries: in Anthropic's test of agent memory,
+four agents writing one shared table kept 41 of 57 facts, and one page per agent kept all
+57 ("The components of agent memory", Anthropic, 2026-11-06).
+
 ## 3. Declared impact
 
 Every agent-written **record** file ends with an `## Impact` section saying what it

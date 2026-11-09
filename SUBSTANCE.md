@@ -117,8 +117,9 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
 10. **Verification churn** — running tests, evals or diagnostics between implementation steps,
     repeating an unchanged suite, or adding a new diagnostic script for every symptom. Build a
     complete batch first. Run only the checks that cover the changed batch, once, at its boundary.
-    One diagnostic batch per failure; a second needs a written hypothesis the first batch ruled
-    out. For systems-level work the order is feature complete, benchmark, optimise, and
+    One diagnostic batch per failure. Before it runs, write two to four hypotheses and make the
+    one batch test all of them, so a single round trip rules several out. A second batch needs a
+    written hypothesis the first batch did not cover. For systems-level work the order is feature complete, benchmark, optimise, and
     verification stays at the accuracy bar the project states, not at bit-equality with a reference.
     "Check once per batch" assumes a bounded batch; item 11 is its other half. The one speed number
     allowed before the Benchmark phase is one observed speed reading per stage boundary (one command, a few runs, the current build against the reference on the same machine), labelled "observed, not a benchmark" and reported in the handback. It informs; it never starts tuning and never gates.

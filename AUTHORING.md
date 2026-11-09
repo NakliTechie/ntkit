@@ -83,6 +83,15 @@ full playbook, and when the subagent errs, answer with a targeted hint for a
 retry — scaffolding that never enters the record. A brief the actor can't yet
 use is noise now and contamination later.
 
+**A review brief has exactly three inputs:** the diff, the requirement it claims
+to meet, and the check commands the maker ran with their real output. Never the
+maker's conversation, plan or self-assessment, because a reviewer that reads the
+maker's reasoning follows it and misses what the maker missed. With no stated
+requirement the reviewer stops and reports that, rather than inferring one. Each
+finding names the problem, its `path:line`, the reason, and a severity (blocking,
+should-fix, nit). Pattern from the MiniMax Code team's `independent-review` skill
+(idea only).
+
 ## 8. Working memory: fold, don't discard
 
 Long-running commands manage their own context at chosen seams (batch

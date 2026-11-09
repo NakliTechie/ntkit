@@ -2,9 +2,11 @@
 
 ## [Unreleased]
 
+## [2.9.1] — 2026-11-09
+
 ### Changed
 
-- `/forward-pass-nt` keeps an inventory of implicit state machines: booleans, status strings, nullable fields and step counters that together encode what happened before. Each entry lists where the state lives, its meaningful states, how many combinations the fields allow against how many are meaningful, and every place it changes. Each implicit machine is judged on three sides, each with its own finding: impossible combinations a real path reaches (Bugs), states the user reaches with no screen (Bugs when the user is stuck, else Worth a look for `/ux-review-nt`), and state or transitions the agent door cannot read or trigger (Agent-readiness). The fix is one tagged union or enum with one transition function, verified by `/autopilot-nt` as a reshaping item. The report gains an `### Implicit state machines` section, with optional Mermaid statecharts. Ideas from Harel's statecharts (1987) and the prompt "find all of the implicit state machines in my app".
+- `/forward-pass-nt` keeps an inventory of implicit state machines: booleans, status strings, nullable fields and step counters that together encode what happened before. Each entry lists where the state lives, its meaningful states, how many combinations the fields allow against how many are meaningful, and every place it changes. Each implicit machine is judged on three sides, each with its own finding: impossible combinations a real path reaches (Bugs), states the user reaches with no screen (Bugs when the user is stuck, else Worth a look for `/ux-review-nt`), and state or transitions the agent door cannot read or trigger (Agent-readiness). The fix is one tagged union or enum with one transition function, verified by `/autopilot-nt` as a reshaping item. The user side also checks re-entry (Harel's history entry): coming back to a state that restarts and discards the user's input is a Bug. A nested or parallel machine is fixed with an established statechart library such as XState rather than a hand-written one. The report gains an `### Implicit state machines` section, with optional Mermaid statecharts. Ideas from Harel's statecharts (1987) and the prompt "find all of the implicit state machines in my app".
 
 ## [2.9.0] — 2026-11-09
 

@@ -12,9 +12,9 @@ ATTEST.md is the operative standard; read it first.
 
 | Field | Value |
 |---|---|
-| Issue | 0.2 |
+| Issue | 0.3 |
 | Status | Reference spec. §§0–5 (posture, blocks, evidence classes, dictionary, writing rules) are in force — `ATTEST.md` is their operative subset, used every session. §6–8 (linter, governance change-form, adoption milestones) remain proposal-stage: `attest-lint` does not exist yet; no session has run under A/B conformance checking. |
-| Date | 2026-09-23 (Issue 0.2 revision; Issue 0.1 drafted 2026-08-01) |
+| Date | 2026-10-11 (Issue 0.3; Issue 0.2 2026-09-23; Issue 0.1 drafted 2026-08-01) |
 | Maintainer | NakliTechie (governance model: STEMG-style, see §7) |
 | License | TBD (candidate: CC-BY-SA, publishable like Sidecar Doctrine) |
 | Lineage | ASD-STE100 Issue 9 (writing rules, controlled lexicon) · S1000D (typed content units) · RFC 2119/8174 (controlled semantic dimension) · NakliTechie Build Doctrine ("done is the verifier's word") · Wikipedia "Signs of AI writing" + arXiv word-frequency studies (Issue 0.2 readability zone, see §0) |
@@ -32,7 +32,7 @@ detectable* rather than stylistically discouraged.
 **The inversion, Issue 0.1.** ASD-STE100 closes the entire general vocabulary
 (~900 approved words) because its readers are non-native mechanics. ATTEST-100
 left the general vocabulary open and closed only the **claim zone**: a reserved
-lexicon usable only with machine evidence, and a banned lexicon with no legal use.
+lexicon usable only with machine evidence, and a banned lexicon never used, in any block, at any length.
 
 **The second zone, Issue 0.2.** A claim-zone-only standard still let natural
 prose run long and unreadable, because nothing gated sentence length or word
@@ -132,9 +132,9 @@ reader is better served (ATTEST.md §0.2). An ○ break is bounded, not unlimite
 the claims hard, the prose moderately — the ACE failure (unreadable because
 fully machine-parseable) is the over-rotation this tier split prevents.
 
-**Scope, Issue 0.2.** Rules 3.1–3.4 bind only inside typed blocks (above the
-structure threshold). The sentence rules and readability rules bind
-everywhere — inside blocks and in natural prose alike.
+**Scope.** Every writing rule, 3.1–3.17, binds everywhere: inside typed blocks
+and in natural prose alike (ATTEST.md §0.1). The structure threshold gates only
+the typed blocks and evidence-class labels.
 
 | ID | Tier | Rule | ATTEST.md home | Added clause |
 |---|---|---|---|---|
@@ -184,9 +184,8 @@ not VERIFIED:
 ### 4.2 Banned lexicon additions (extends ATTEST.md §4.1)
 
 - Social filler also includes "as requested".
-- "appears to" is banned when it describes the agent's own work.
 
-### 4.4 Severity words (extends ATTEST.md §1, RISK)
+### 4.3 Severity words (extends ATTEST.md §1, RISK)
 
 BLOCKS · DEGRADES · COSMETIC is a closed set. No synonyms ("critical," "minor,"
 "P1") — one scale, three words.
@@ -217,7 +216,7 @@ evidence: `npm test -- grant.spec.js` exit 0, 17/17, artifact tests/logs/run-014
 
 The gate artifact. A-rules are deterministic — a linter runs them on every agent
 message, same seam as maker-checker. B-rules are screened by the checker context
-alongside its existing reward-hack screen. **Unbuilt as of Issue 0.2** — this
+alongside its existing reward-hack screen. **Unbuilt as of Issue 0.3** — this
 table specifies `attest-lint`'s behavior once §8 M0 lands; no session has been
 scored against it yet.
 
@@ -286,6 +285,7 @@ linter's word, never the agent's.
   Relaxed 3.5 and 3.15. Removed the one-line compact register from ATTEST.md
   §1a: every formal block is written out in full. Entry method: owner review of Issue 0.2 output, plus the
   Office of the Federal Register's "Principles of Clear Writing".
+- **Alignment (2026-11-10):** this spec now matches ATTEST.md on the issue number (0.3), the scope of the writing rules (everywhere), "appears to" (banned everywhere), where banned words apply (any block, any length) and the linter (ATTEST.md states the target; the linter is not built yet).
 - **Issue 0.2 change log (2026-09-23):** added the readability zone (§0, §3.5,
   3.15–3.17, §4.3–4.5, A-15–A-18, B-07). Entry method: maintainer directive plus
   external published evidence, not the standard ≥3-transcript-excerpts form —
@@ -304,8 +304,9 @@ linter's word, never the agent's.
 
 1. **M0** — This spec + `attest-lint` as a standalone script (stdin → violations,
    exit code). Deterministic verifier; no agent self-report. **Not started as of
-   Issue 0.2** — no `attest-lint` script exists in this repo or elsewhere on this
-   machine.
+   Issue 0.3** — no `attest-lint` script exists yet. ATTEST.md §7 states the
+   target: a linter and a separate checker judge conformance. Until the linter
+   exists, the separate checker judges alone.
 2. **M1** — Handoff template gains a pointer: "All handback communication conforms
    to ATTEST-100; the checker runs `attest-lint`." Wire into maker-checker.
 3. **M2** — Transcript corpus review after ~10 real sessions; first change-form

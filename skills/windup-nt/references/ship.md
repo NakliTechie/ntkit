@@ -21,8 +21,8 @@ Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.
 - Finish with `git worktree prune`.
 
 **Review-media sweep:**
-- Run `sh $SKILL/bin/review-media.sh` from the repo root. It changes nothing. It prints one line per `plan/*-run/` folder that still holds media (`*.webm`, `*.mp4`, `*.mov`, `*.cast`, `*.png`, `*.jpg`, `*.jpeg`, `*.gif`): `done` or `open`, the file count and the size in KB. `open` means an open item (`[ ]` or `[~]`) in `pending.md` or `workplan.md` cites the report, by its name or its date key.
-- `done` → delete that folder's media by name, never the folder: `find <dir> -type f \( -name '*.webm' -o … \) -delete` with the same extension list. Keep the report, beat logs and JSON. List each in the day summary as `<dir> — <files> files, <MB> MB`.
+- Run `sh $SKILL/bin/review-media.sh` from the repo root. It changes nothing. It prints one line per `plan/*-run/` folder that still holds media (the script's one extension list): `done` or `open`, the file count and the size in KB. `open` means an open item (`[ ]` or `[~]`) in `pending.md` or `workplan.md` cites the report, by its name or its date key.
+- `done` → delete that folder's media by name, never the folder: `sh $SKILL/bin/review-media.sh --list <dir>` prints each media file; `rm` each printed path. Keep the report, beat logs and JSON. List each in the day summary as `<dir> — <files> files, <MB> MB`.
 - `open` → keep; the fixer replays beats from it. Name it in the handoff with the item that holds it.
 
 **Promo-output sweep** (`/package-nt` output is regenerable):
@@ -37,10 +37,11 @@ Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.
 - `hold` and `unmerged` → never delete; asking is the action. List them in the handoff with the script's reason, and keep one `pending.md/Open questions` item naming them all: "Branches waiting on a call: `<ref>` (<reason>), … — merge, keep, or delete?" `[from: <date>-summary]`. Update that item when an earlier windup left one; never add a second.
 
 **Scratch sweep** (last action of Step 5):
-- Run `sh $SKILL/bin/scratch.sh <scratchpad> plan` with the scratchpad path your system prompt names. It changes nothing. It prints `drop`, `keep` or `older` per top-level entry with its size in KB.
+- Run `sh $SKILL/bin/scratch.sh <scratchpad> plan` with the scratchpad path your system prompt names. It changes nothing. It prints `drop` or `keep` per top-level entry, then `older` or `recent` per other session's scratchpad, with its size in KB.
 - `drop` → delete that entry by name (`rm -rf <path>`), never a glob and never the scratchpad's parent. A video composition, a capture set or a clone the next session needs is a `keep`: it must be named in an open item, or it goes. List each deletion in the day summary as `<path> — <MB> MB`, then report `df -h /`.
 - `keep` → leave it, and name it in the handoff with the item that holds it.
-- `older` → earlier sessions' scratchpads of this project: list them in the handoff with their sizes and ask; delete by name only on a yes. Another project's folders are never listed here and never touched.
+- `older` → other sessions' scratchpads of this project, idle over 24 hours: list them in the handoff with their sizes and ask; delete by name only on a yes. Another project's folders are never listed here and never touched.
+- `recent` → another session wrote there in the last 24 hours and may still be running: list it in the handoff; never delete it, even on a yes, until it turns `older`.
 - Anything this session wrote outside the scratchpad (a `/tmp` clone, a profile copy, a model download) is not found by the script. Delete each by name from your own footprint notes, or list it in the handoff.
 - Stop any dev server, preview or watcher this session started from a scratch directory before deleting it.
 

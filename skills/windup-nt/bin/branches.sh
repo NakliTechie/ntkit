@@ -75,6 +75,7 @@ for r in $(git for-each-ref --sort=committerdate --format='%(refname:short)' ref
   name=${r#origin/}
   [ "$r" = origin ] || [ "$name" = HEAD ] && continue
   skip "$r" "$name" && continue
+  printf '%s\n' "$in_worktree" | grep -qxF -- "$name" && continue
   how=$(merged_how "$r") || { unmerged "$r"; continue; }
   if long_lived "$name"; then line hold "$r" "long-lived branch name"
   elif git show-ref --verify --quiet "refs/heads/$name" && ! merged_how "refs/heads/$name" >/dev/null

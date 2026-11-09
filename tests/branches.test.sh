@@ -20,8 +20,11 @@ g checkout -q --orphan gh-pages && g rm -rqf . && c site && g checkout -q main
 g branch develop
 g branch wt && g worktree add -q ../wt wt 2>/dev/null
 g branch live && mkdir plan && echo "- [ ] review the live branch" >plan/pending.md
+g branch wp-named && echo "- [ ] land wp-named after review" >plan/workplan.md
+g checkout -qb lhold && c lh && g checkout -q main
 g checkout -qb ahead && c ah && g checkout -q main && g merge -q --no-ff ahead -m "merge ahead"
 g push -q -u origin ahead 2>/dev/null && g push -q origin main merged-ff:remote-merged 2>/dev/null
+g push -q origin wt merged-ff:lhold 2>/dev/null
 (cd .. && g clone -q origin.git other 2>/dev/null && cd other && g checkout -q ahead \
   && c extra && g push -q origin ahead 2>/dev/null)
 g fetch -q origin
@@ -48,7 +51,10 @@ expect hold live plan/pending.md
 expect hold ahead "origin/ahead holds unmerged"
 expect unmerged origin/ahead
 expect merged origin/remote-merged ancestor
-for r in main gh-pages wt origin/main origin; do absent "$r"; done
-[ "$(printf '%s\n' "$out" | wc -l | tr -d ' ')" -eq 8 ] || { echo "FAIL: expected 8 lines:"; echo "$out"; bad=1; }
+expect hold wp-named plan/workplan.md
+expect unmerged lhold "+1 commits"
+expect hold origin/lhold "local lhold holds unmerged work"
+for r in main gh-pages wt origin/wt origin/main origin; do absent "$r"; done
+[ "$(printf '%s\n' "$out" | wc -l | tr -d ' ')" -eq 11 ] || { echo "FAIL: expected 11 lines:"; echo "$out"; bad=1; }
 [ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "FAIL: the script changed the tree"; bad=1; }
 [ "$bad" -eq 0 ] && echo ok

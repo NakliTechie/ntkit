@@ -31,7 +31,7 @@ template path.
 |---|---|
 | `core/*.md` | Shared sections, joined in filename order into every agent's file |
 | `agents/<agent>.md` | Extras for one agent only (its tool names, its memory habits). Used whenever the file exists |
-| `targets.tsv` | `agent <TAB> global file <TAB> shadow file or -`. A shadow file that exists and is not empty makes the agent ignore its global file (Codex's `AGENTS.override.md`); `--check` fails on it. Paths start with `~` or `$VAR`; `$CODEX_HOME` defaults to `~/.codex`. Add a row to add an agent |
+| `targets.tsv` | `agent <TAB> global file <TAB> shadow file or -`. A shadow file that exists and is not empty makes the agent ignore its global file (Codex's `AGENTS.override.md`); `--check` fails on it. Paths start with `~` or `$VAR`; `$CODEX_HOME` defaults to `~/.codex`. A row whose file resolves to an earlier row's file is skipped. Add a row to add an agent |
 | `inbox.md` | Append-only lines from any agent. Copied into every file at once; folded into `core/` later |
 | `drift/` | Copies of generated files that someone edited by hand, saved before the overwrite |
 

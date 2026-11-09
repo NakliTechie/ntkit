@@ -7,8 +7,9 @@
 # Classes:
 #   drop  nothing open cites it: delete this entry by name.
 #   keep  an open item ([ ] or [~]) in plan/pending.md or plan/workplan.md names it: keep for the next session.
-#   older a scratchpad of an earlier session of the same project (a sibling under the same parent):
-#         list it and ask; delete by name only when the user says so.
+#   older  a scratchpad of another session of the same project (a sibling under the same parent),
+#          last written over 24 hours ago: list it and ask; delete by name only when the user says so.
+#   recent a sibling written in the last 24 hours: that session may still be running. List it; never delete.
 # Never prints, and windup never deletes, anything outside the given scratchpad or its sibling sessions.
 # Usage: scratch.sh <scratchpad-dir> [plan-dir]
 set -eu
@@ -27,12 +28,16 @@ for p in "$sp"/* "$sp"/.[!.]*; do
     printf 'drop\t%s\t%s\t%s\n' "$p" "$kb" "no open item names $name"
   fi
 done | sort -t"$(printf '\t')" -k3,3nr
-# Earlier sessions of this project: <parent>/<other-session>/scratchpad
+# Other sessions of this project: <parent>/<other-session>/scratchpad
 parent=$(dirname "$(dirname "$sp")"); me=$(basename "$(dirname "$sp")")
 for s in "$parent"/*/scratchpad; do
   [ -d "$s" ] || continue
   [ "$(basename "$(dirname "$s")")" = "$me" ] && continue
+  [ -n "$(ls -A "$s")" ] || continue  # empty: du -sk says 0 on APFS but 4 on ext4, so ask ls
   kb=$(du -sk "$s" | awk '{print $1}')
-  [ "$kb" -gt 0 ] || continue
-  printf 'older\t%s\t%s\t%s\n' "$s" "$kb" "earlier session of this project"
+  if [ -n "$(find "$s" -mmin -1440 | head -1)" ]; then
+    printf 'recent\t%s\t%s\t%s\n' "$s" "$kb" "another session wrote here in the last 24 hours; it may be live"
+  else
+    printf 'older\t%s\t%s\t%s\n' "$s" "$kb" "earlier session of this project, idle over 24 hours"
+  fi
 done

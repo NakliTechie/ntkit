@@ -122,4 +122,4 @@ When a **HELD** autopilot run is on file, ask this instead:
 
 Start executing only after the user picks a direction, and follow their pick, not necessarily the top chunk.
 
-**When the question is about the past** ("when did we decide X"), search the records instead of guessing: `scholia history <terms> --plan .` ranks every entry under `plan/`, `_archive/` included (MEMORY.md §8). No scholia → `rg -n <terms> plan/`. For an exact error text, path or number from the last session, search its `Transcript:` file with `rg -n` before answering from the summary.
+**When the question is about the past** ("when did we decide X"), search the records instead of guessing: `scholia history <terms> --plan .` ranks every entry under `plan/`, `_archive/` included ([MEMORY.md §8](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#8-recall-over-the-records)). No scholia → `rg -n <terms> plan/`. For an exact error text, path or number from the last session, search its `Transcript:` file with `rg -n` before answering from the summary.

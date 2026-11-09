@@ -20,7 +20,7 @@ Per ATTEST, in this order:
 8. **Coverage / blind spots**: what couldn't be reached cold.
 9. **`## Workplan`**: the ranked findings as a fix-workplan, the same shape as `/forward-pass-nt`'s. Themed batches, the keystone first and marked `## Batch A — <theme>  (keystone)`; each item `- [ ] **H2** <fix> (<location>). <one-line why>.`, where the location is the beat and screen, or `path:line` when known. Structural items end `→ /decide-nt`; bugs and invariant breaches end `→ /walkthrough-nt`. `/release-nt` and `/autopilot-nt` read the open `[ ]` items.
 
-Create or check `plan/` as `/decide-nt` step 2 does (MEMORY.md §0); a broken `plan` symlink stops the run. If today's report exists, suffix `-2`.
+Create or check `plan/` as `/decide-nt` step 2 does ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); a broken `plan` symlink stops the run. If today's report exists, suffix `-2`.
 
 ### Hand back the recording
 

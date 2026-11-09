@@ -13,7 +13,7 @@ Cut a versioned release: suggest the bump, write the CHANGELOG and release notes
 
 `$SKILL` is the directory containing this skill's loaded `SKILL.md`; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
 
-Optional input: `major` / `minor` / `patch` or an explicit version. Empty → suggest one from the commits.
+Optional input: `major` / `minor` / `patch` or an explicit version. Empty → suggest one from the commits (conventional-commit prefixes when the repo uses them).
 
 Not in a git repo → ask which project; this command tags and pushes.
 

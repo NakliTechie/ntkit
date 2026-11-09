@@ -44,4 +44,4 @@ On entering a phase, read its Detail file first, then act; the Outcome column is
 
 ## Impact declaration
 
-`plan/ux-review-<date>.md` is a record: append-only. End it with `## Impact`: one line per change it implies for `pending.md`, `workplan.md` or `history.md` (`- pending.md/Now — add: …`), or `- none — <reason>`. Never add, drop or reword items there yourself; a status flip on an existing item is allowed. `/replan-nt` applies the rest (MEMORY.md §3).
+`plan/ux-review-<date>.md` is a record: append-only. End it with `## Impact`: one line per change it implies for `pending.md`, `workplan.md` or `history.md` (`- pending.md/Now — add: …`, `- workplan.md/B2#3 — status: [ ] → [x], verified by …`), or `- none — <reason>`. Never add, drop or reword items there yourself; a status flip on an existing item is allowed. `/replan-nt` applies the rest ([MEMORY.md §3](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#3-declared-impact)).

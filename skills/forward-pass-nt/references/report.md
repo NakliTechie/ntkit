@@ -14,7 +14,7 @@
 
 **Check every pointer before you print.** Run `python3 "$SKILL/bin/cite-check.py" plan/forward-pass-<date>.md` from the project root, where `$SKILL` is the directory containing this skill's loaded `SKILL.md`. Write every path from the project root (`app/services/ledger.rb:90`, not `ledger.rb:90`); a bare filename does not resolve. A finding about a whole file cites its line 1. Fix or drop every failure and re-run until it exits 0; an unresolved pointer is a fabrication, not a typo.
 
-Create or check `plan/` as `/decide-nt` step 2 does (MEMORY.md §0); a broken `plan` symlink stops the run. If today's report already exists, suffix `-2`. Don't commit or push; `plan/` is local.
+Create or check `plan/` as `/decide-nt` step 2 does ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); a broken `plan` symlink stops the run. If today's report already exists, suffix `-2`. Don't commit or push; `plan/` is local.
 
 ## Phase 6 — Handoff
 

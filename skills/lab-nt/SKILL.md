@@ -1,6 +1,6 @@
 ---
 name: lab-nt
-description: "Turn an idea into a measured contract, then run bounded experiment legs; can self-improve skills."
+description: "Turn an idea into a measured contract, then run bounded experiment legs."
 allowed-tools: Bash Glob Grep Read Edit Write Agent WebSearch WebFetch
 metadata:
   argument-hint: "[idea, e.g. \"can QAT recover fp16 quality at int4 in-browser\" | resume [<slug>] | status]"

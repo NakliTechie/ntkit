@@ -42,7 +42,7 @@ Example: `/research-nt "how do open deep-research harnesses verify citations"`. 
 
 ## Guards
 
-- **Legal states:** any. The command never reads the project's code. No `plan/` → create or check `plan/` as `/decide-nt` step 2 does (MEMORY.md §0); a broken `plan` symlink stops the run. A symlinked `plan` is fine; never replace it.
+- **Legal states:** any. The command never reads the project's code. No `plan/` → create or check `plan/` as `/decide-nt` step 2 does ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); a broken `plan` symlink stops the run. A symlinked `plan` is fine; never replace it.
 - **Refuse, writing nothing,** when: the input is empty; `go <slug>` names no run; the run's `State:` is not SPEC-READY or BUDGET (SPEC-READY means the run died after planning); `python3 $SKILL/bin/check.py spec $RUN` fails on `go` (show its problem list — the user's edit broke the spec).
 - **Fold at seams** (AUTHORING §8). Subagents return one status line; the files hold the rest. Re-read a file rather than carry its content.
 

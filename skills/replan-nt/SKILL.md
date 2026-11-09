@@ -53,7 +53,7 @@ Merge existing `plan/history.md` (if present) with the summaries and scratch bei
 ```
 
 Merge rules:
-- Carry existing `## Log` entries through verbatim; the Log is a record (MEMORY.md §1). Newest entries first.
+- Carry existing `## Log` entries through verbatim; the Log is a record ([MEMORY.md §1](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#1-two-kinds-of-file)). Newest entries first.
 - Pull existing Decisions and Dead ends forward; never overwrite blindly.
 - Lift the summaries' decisions and dead ends into the top-level Decisions and Dead ends sections, so they're findable.
 
@@ -95,7 +95,7 @@ Before archiving anything, run the mechanical check:
 python3 "$SKILL/bin/plancheck.py" .  # Set SKILL to the directory containing this loaded SKILL.md
 ```
 
-It compares provenance tags, quoted tags and `## Impact` declarations against the records (MEMORY.md §5). Four findings:
+It compares provenance tags, quoted tags and `## Impact` declarations against the records ([MEMORY.md §5](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#5-the-check)). Four findings:
 
 - **orphan** — a derived item whose `[from:]` names a record that does not exist.
 - **ghost** — a record declaring an `add` impact that no derived item cites.
@@ -116,11 +116,11 @@ Every item you wrote into `pending.md` or `workplan.md` this run carries a trail
 - Ask legal about retention  [from: hand]
 ```
 
-Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. **Quote when you can:** add the record's own words after the source, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`, a few words to one sentence, copied exactly, no `]` or `"` inside (MEMORY.md §4). Carry existing tags through untouched. **Leave pre-existing untagged items alone**: a back-filled tag you cannot source is invented provenance.
+Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. **Quote when you can:** add the record's own words after the source, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`, a few words to one sentence, copied exactly, no `]` or `"` inside ([MEMORY.md §4](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#4-provenance)). Carry existing tags through untouched. **Leave pre-existing untagged items alone**: a back-filled tag you cannot source is invented provenance.
 
 ## Step 4.7: Refresh standing questions
 
-Only if `plan/standing.md` exists (MEMORY.md §7). For each `##` question, rewrite the bullets under it from the records you just folded plus the canonical files: every bullet tagged, quoted where the record has the words, `- none  [from: <record>]` when the records show nothing. **Never add, remove, reorder or reword a question**; questions are the human's. Re-run `plancheck` if Step 4.5 ran before this step. No `standing.md` → skip silently; never create one.
+Only if `plan/standing.md` exists ([MEMORY.md §7](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#7-standing-questions)). For each `##` question, rewrite the bullets under it from the records you just folded plus the canonical files: every bullet tagged, quoted where the record has the words, `- none  [from: <record>]` when the records show nothing. **Never add, remove, reorder or reword a question**; questions are the human's. Re-run `plancheck` if Step 4.5 ran before this step. No `standing.md` → skip silently; never create one.
 
 ## Step 5: Archive source files
 
@@ -128,7 +128,7 @@ Move (never copy or delete) every file Step 1 marked archive into `plan/_archive
 
 ## Step 6: Verify gitignore
 
-`git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore` (MEMORY.md §0). `_archive/` inherits it.
+`git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore` ([MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)). `_archive/` inherits it.
 
 ## Step 7: Print summary
 

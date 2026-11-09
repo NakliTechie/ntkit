@@ -29,7 +29,7 @@ Unzip attached zips at the target root preserving structure, copy attached md fi
 
 ## Phase 4 — Git
 
-`git init -b main`; `.gitignore` with OS junk and `/plan` (no trailing slash, so a symlinked `plan` is covered, MEMORY.md §0); stage by explicit path, never `git add -A`; commit `Initial commit — scaffolded from handoff`.
+`git init -b main`; `.gitignore` with OS junk and `/plan` (no trailing slash, so a symlinked `plan` is covered, [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); stage by explicit path, never `git add -A`; commit `Initial commit — scaffolded from handoff`.
 
 ## Phase 5 — Remote
 
@@ -37,7 +37,7 @@ Default, no question: the user's own account (`gh api user --jq .login`), **priv
 
 ## Phase 6 — Seed plan/
 
-1. Create `plan/` per MEMORY.md §0: with `NT_PLAN_STORE` set, make it in the store and symlink it in; else a plain folder.
+1. Create `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): with `NT_PLAN_STORE` set, make it in the store and symlink it in; else a plain folder.
    ```bash
    if [ ! -e plan ] && [ -n "${NT_PLAN_STORE:-}" ]; then
      root="$(cd "$(dirname "$NT_PLAN_STORE")" && pwd -P)"; here="$(pwd -P)"

@@ -13,3 +13,4 @@ plan/
 
 # Eval run logs
 evals/results/
+__pycache__/

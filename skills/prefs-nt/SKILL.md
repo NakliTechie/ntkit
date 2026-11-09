@@ -9,15 +9,12 @@ metadata:
   writes: "the preferences folder; each installed agent's global file in its targets.tsv; fold only: a dated bullet appended to a named project's plan/pending.md; schedule and unschedule only: one launchd plist or one tagged crontab line, created or removed"
 ---
 
-Every new coding agent asks the same things again: who you are, how you write, how you work. This
-command keeps the answers in one folder of plain markdown files that you own. It builds each installed
-agent's global instruction file from them: Claude Code, Codex, Gemini CLI, opencode, goose and amp.
-Agents write back through an append-only inbox, so a preference one agent learns reaches the others at
-the next sync. Project facts stay in each repo's `plan/` folder; this folder holds what is true in every
-repo.
+Keep the owner's cross-project preferences in one folder of plain markdown files and build each
+installed agent's global instruction file from it (Claude Code, Codex, Gemini CLI, opencode, goose,
+amp). Agents write back through an append-only inbox. Project facts stay in each repo's `plan/`.
 
 `$SKILL` below is the directory containing this skill's loaded `SKILL.md`. Use it for every script and
-template path, so a project install runs its own copy.
+template path.
 
 ## Inputs (defaults announced at the start of the run)
 
@@ -25,8 +22,8 @@ template path, so a project install runs its own copy.
 |---|---|---|
 | mode (invocation text) | `sync` | `init`, `sync`, `fold`, `schedule` or `unschedule`; see the phases below |
 | `dir=<path>` | `$NT_PREFS_DIR`, else `~/.agent-prefs` | The preferences folder; pass it to the script as `--dir`. Set `NT_PREFS_DIR` in your shell profile to keep the folder in a backed-up repo |
-| `NT_PREFS_MAX_LINES`, `NT_PREFS_MAX_BYTES` (env) | 200 lines, 25000 bytes | Size budget for each generated file. A file over it is still written, and the sync logs a warning naming the three largest sources, because agents follow a long always-loaded file less closely. Move detail into files the instructions link to |
-| `--push` (sync and schedule) | off | Pull, then push the folder's git repo. Pushing is outward-facing, so it is granted per run. Git runs only when the folder is the root of its own repo |
+| `NT_PREFS_MAX_LINES`, `NT_PREFS_MAX_BYTES` (env) | 200 lines, 25000 bytes | Size budget for each generated file. A file over it is still written, with a warning naming the three largest sources. Move detail into files the instructions link to |
+| `--push` (sync and schedule) | off | Pull, then push the folder's git repo. Granted per run. Git runs only when the folder is the root of its own repo |
 
 ## The folder
 
@@ -38,10 +35,8 @@ template path, so a project install runs its own copy.
 | `inbox.md` | Append-only lines from any agent. Copied into every file at once; folded into `core/` later |
 | `drift/` | Copies of generated files that someone edited by hand, saved before the overwrite |
 
-A generated file is never edited in place. When an agent or a person edits one, the next sync saves the
-edited copy to `drift/` and moves the added blocks, formatting kept, into `inbox.md`, so nothing is lost.
-A backup never overwrites an earlier one, and a sync that finds a file changing under it leaves that
-file for the next run.
+A generated file is never edited in place; the next sync saves a hand-edited copy to `drift/` and moves
+its added blocks into `inbox.md`.
 
 ## Phases
 

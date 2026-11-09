@@ -52,10 +52,10 @@ Read the flow's file in `verify/features/` first, when one exists. Then walk the
 ## Phase 3 — Instrument, and read machine evidence
 
 Every claim needs a resolving pointer; don't eyeball it.
-- **Hook the output.** Wrap the sink that proves the work happened and read its shape: buffer sample count and duration, token count, image dimensions, row counts, the network requests fired (or not fired, for an on-device claim). LocalMind example: wrap `AudioContext.prototype.createBuffer`; a 175 680-sample / 7.32 s buffer is real speech, a <2 400-sample buffer is the bug.
+- **Hook the output.** Wrap the sink that proves the work happened and read its shape: buffer sample count and duration, token count, image dimensions, row counts, the network requests fired (or not fired, for an on-device claim). Example: wrap `AudioContext.prototype.createBuffer` and read the sample count and duration.
 - **Run a control** when the defect is input-specific: the failing input and a known-good input side by side.
 - **Reload to prove persistence**, then re-read the restored state; don't infer it from the write path.
-- **Read the response headers** on the flow's requests and flag: wildcard CORS with `Access-Control-Allow-Credentials`, a session or auth cookie missing `HttpOnly`/`Secure`/`SameSite`, a stack trace or SQL error text in a production error response, an unauthenticated `/debug`, `/admin`, `/status` or `/.env` route. (Checklist condensed from [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill), MIT.) A hit is a Security finding; don't widen it into a full sweep, which is `/forward-pass-nt`'s job.
+- **Read the response headers** on the flow's requests and flag: wildcard CORS with `Access-Control-Allow-Credentials`, a session or auth cookie missing `HttpOnly`/`Secure`/`SameSite`, a stack trace or SQL error text in a production error response, an unauthenticated `/debug`, `/admin`, `/status` or `/.env` route. A hit is a Security finding; don't widen it into a full sweep, which is `/forward-pass-nt`'s job.
 - **Confirm a suspected regression with a second measurement.** A programmatic `.click()` doesn't move focus or grant activation, and a synchronous read right after an `async` handler runs before the handler resumes; both make working features look broken. Reproduce with real input and a settled microtask before it earns a finding.
 
 ## Phase 4 — Report as verified RESULTs, and set the state
@@ -74,4 +74,4 @@ If the user's config (such as AGENTS.md, CLAUDE.md or saved preferences) or the 
 
 ## Impact declaration
 
-`plan/live-check-<date>.md` is a record: append-only. End it with an `## Impact` section, one line per change it implies for `pending.md`, `workplan.md` or `history.md`'s indexes (`- pending.md/Now — add: …`, `- workplan.md/B2#3 — status: [ ] → [x], verified by …`), or `- none — <reason>`. Declare it; never add, drop or reword items in `pending.md` or `workplan.md` yourself (a status flip on an existing item is allowed). `/replan-nt` applies it ([MEMORY.md §3](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#3-declared-impact)).
+`plan/live-check-<date>.md` is a record: append-only. End it with `## Impact`: one line per change it implies for `pending.md`, `workplan.md` or `history.md` (`- pending.md/Now — add: …`), or `- none — <reason>`. Never add, drop or reword items there yourself; a status flip on an existing item is allowed. `/replan-nt` applies the rest (MEMORY.md §3).

@@ -9,9 +9,9 @@ metadata:
   writes: "nothing"
 ---
 
-Send a short completion ping to the user. This is the smallest command in the kit and it must stay that way: compose one line, deliver it on every channel that's configured, never block, never fail loudly.
+Send a short completion ping to the user: one line, every configured channel, never block, never fail loudly.
 
-**Phone topic:** set the environment variable `NTFY_TOPIC` to an [ntfy.sh](https://ntfy.sh) topic name (pick something unguessable — the topic *is* the auth) and subscribe to it in the ntfy app. Leave it unset to skip the phone push. Edit this paragraph if you use a different push service.
+**Phone topic:** `NTFY_TOPIC` names an [ntfy.sh](https://ntfy.sh) topic (unguessable; the topic *is* the auth). Unset → skip the phone push.
 
 ## Step 1 — Compose the message
 
@@ -19,11 +19,11 @@ If the input is non-empty, that's the message — use it verbatim. If empty, wri
 
 ## Step 2 — Deliver, best-effort, every configured channel
 
-- **Desktop** — macOS: `osascript -e 'display notification "<msg>" with title "ntkit"'` (or `terminal-notifier` if installed). Linux: `notify-send "ntkit" "<msg>"`. Skip silently if neither exists (a headless CI box, a container).
+- **Desktop** — macOS: `osascript -e 'display notification "<msg>" with title "ntkit"'` (or `terminal-notifier` if installed). Linux: `notify-send "ntkit" "<msg>"`. Skip silently if neither exists.
 - **Phone** — if `$NTFY_TOPIC` is set: `curl -fsS -m 10 -d "<msg>" "ntfy.sh/$NTFY_TOPIC"`.
 
-Wrap every delivery so a failure is swallowed (`|| true`) — a notification is a courtesy, and the run that called it has already done the real work.
+Wrap every delivery so a failure is swallowed (`|| true`).
 
 ## Step 3 — Confirm
 
-One line, listing where the ping went: `Pinged: desktop · ntfy (<topic>)` — or `Pinged: nowhere (no channel configured — set NTFY_TOPIC or run on a machine with a desktop)`. Nothing else. Don't write to plan/, don't commit, don't push.
+One line, listing where the ping went: `Pinged: desktop · ntfy (<topic>)` — or `Pinged: nowhere (no channel configured — set NTFY_TOPIC or run on a machine with a desktop)`. Don't write to plan/, commit or push.

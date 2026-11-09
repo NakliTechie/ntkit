@@ -19,7 +19,7 @@ List everything in `plan/` except `_archive/`. Classify each file into exactly o
 - **Autopilot morning report** — `plan/YYYY-MM-DD[-N]-autopilot.md` (from `/autopilot-nt`). → apply its `## Impact` adds (its Needs-you items, and `Review/merge autopilot/<date>` for a held branch). An older report with no `## Impact`: **Needs you** questions → `Open questions`, stop-lined actions → `Now`, and `Review/merge` if its branch is unmerged. **Assumed** entries into `history.md` Decisions, dated and marked `(autopilot default)`; `[~]` items into `workplan.md`. Archive.
 - **Unnamed scratch** — generic names like `notes.md`, `scratch.md`, `thoughts.md`, untitled drafts. → fold into `history.md`; archive.
 - **Stream-of-consciousness log** — `plan/soc.md` (from `/soc-nt`). → **triage line by line**, never blanket-fold: load-bearing choices → `history.md` Decisions (dated from the entry's timestamp); actionable future work → the ideas backlog (`plan/ideas.md`, or `IDEAS.md` if the repo has one); deferred / "not now" → `pending.md` `## Parked`; questions → `pending.md` Open questions; the rest → `history.md` Log under the entry's date. Archive it as `soc-<replan-date>.md` so the next cycle's name doesn't collide.
-- **Dated audit report** — any `plan/<type>-YYYY-MM-DD.md` written by a kit command. → open (`[ ]`/`[~]`) and deferred items into `pending.md`/`workplan.md`; verified false positives and non-issues into `history.md` Dead ends (finding ID + one-line reason), so a future audit doesn't re-flag them; anything that is really a *decision* (structural recommendations, major bumps) surfaces for `/decide-nt`. Archive.
+- **Dated audit report** — any `plan/<type>-YYYY-MM-DD.md` written by a kit command. → open (`[ ]`/`[~]`) and deferred items into `pending.md`/`workplan.md`; verified false positives and non-issues into `history.md` Dead ends (finding ID + one-line reason); anything that is really a *decision* (structural recommendations, major bumps) surfaces for `/decide-nt`. Archive.
 - **Lab campaign** — `plan/lab/<slug>/` (from `/lab-nt`). → fold each leg report that no derived item and no `## Log` line cites yet: apply its `## Impact` lines, then append a Log line tagged `[from: <date>-leg]` so the next replan skips it. Leave the folder in place, never archive it; `/lab-nt` resumes from it.
 - **Canonical output** — `pending.md`, `workplan.md`, `history.md` → rewritten this run; `standing.md` → answers only (Step 4.7).
 - **Named design / intentional artifact** — anything with a meaningful name: `feature-x-design.md`, `<milestone>-breakdown.md`, `pending-from-<source>.md`, charters, spec drafts. → **leave untouched**
@@ -83,19 +83,19 @@ Existing items by judgment: actionable → `Now`, deferred but not abandoned →
 
 Regenerate `plan/workplan.md` from the new pending `Now`, in the shape `/windup-nt` produces: each chunk gets a short title, 2–5 items from Now, and a rough size estimate ("30 min", "half day", "1–2 hours"). Items that don't yet cluster go under `## Unbatched`.
 
-**Phase order for systems-level projects** (engine, server, runtime, kernels, compiler): order chunks Feature complete → Benchmark → Optimise. Feature includes width (architectures, formats, platforms), ordered core path first, then width, then peripheral surfaces; a parity matrix needs an owner-approved scope (SUBSTANCE item 12). Optimisation chunks are per architecture. Never pull an optimisation chunk ahead of an open feature chunk. Before Benchmark, the only speed work is one observed speed reading per stage boundary (one command, a few runs, the current build against the reference on the same machine), labelled "observed, not a benchmark" and reported in the handback. It informs; it never starts tuning and never gates. Speed ideas that arrive early go to `## Parked` labelled `Optimise`, and surface when the Benchmark phase closes.
+**Phase order:** for a systems-level project (engine, server, runtime, kernel, compiler, protocol), the order is Feature complete (including width) → Benchmark → Optimise, as the project's `plan/workplan.md` states. Never start Optimise while a Feature item is open. Before Benchmark, one observed speed reading per stage boundary is allowed, labelled 'observed, not a benchmark'; it never starts tuning and never gates. Here: order Feature chunks core path first, then width, then peripheral surfaces; a parity matrix needs an owner-approved scope (SUBSTANCE item 12); Optimise chunks are per architecture; never pull an Optimise chunk ahead of an open Feature chunk; speed ideas that arrive early go to `## Parked` labelled `Optimise`.
 
-**Preserve in-flight chunks:** if a chunk in the existing workplan still has all its items in pending Now, copy it through verbatim. The user may be mid-execution.
+**Preserve in-flight chunks:** if a chunk in the existing workplan still has all its items in pending Now, copy it through verbatim.
 
 ## Step 4.5: Replay check
 
-Before archiving anything, run the mechanical check rather than judging by reading:
+Before archiving anything, run the mechanical check:
 
 ```bash
 python3 "$SKILL/bin/plancheck.py" .  # Set SKILL to the directory containing this loaded SKILL.md
 ```
 
-It compares provenance tags, quoted tags and `## Impact` declarations against the records ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) §5). Four findings:
+It compares provenance tags, quoted tags and `## Impact` declarations against the records (MEMORY.md §5). Four findings:
 
 - **orphan** — a derived item whose `[from:]` names a record that does not exist.
 - **ghost** — a record declaring an `add` impact that no derived item cites.
@@ -116,11 +116,11 @@ Every item you wrote into `pending.md` or `workplan.md` this run carries a trail
 - Ask legal about retention  [from: hand]
 ```
 
-Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. **Quote when you can:** add the record's own words after the source, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`, a few words to one sentence, copied exactly, no `]` or `"` inside (MEMORY.md §4). Carry existing tags through untouched. **Leave pre-existing untagged items alone**: untagged means hand-written, and a back-filled tag you cannot source is invented provenance.
+Grammar: `[from: <record-slug>]`, `[from: <report>#<finding-id>]`, `[from: soc:<timestamp>]`, or `[from: hand]`. **Quote when you can:** add the record's own words after the source, `[from: 2026-09-10-summary "parked until usage passes 10k rows"]`, a few words to one sentence, copied exactly, no `]` or `"` inside (MEMORY.md §4). Carry existing tags through untouched. **Leave pre-existing untagged items alone**: a back-filled tag you cannot source is invented provenance.
 
 ## Step 4.7: Refresh standing questions
 
-Only if `plan/standing.md` exists ([MEMORY.md §7](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#7-standing-questions)). For each `##` question, rewrite the bullets under it from the records you just folded plus the canonical files: every bullet tagged, quoted where the record has the words, `- none  [from: <record>]` when the records show nothing. **Never add, remove, reorder or reword a question**; questions are the human's. Re-run `plancheck` if Step 4.5 ran before this step. No `standing.md` → skip silently; never create one.
+Only if `plan/standing.md` exists (MEMORY.md §7). For each `##` question, rewrite the bullets under it from the records you just folded plus the canonical files: every bullet tagged, quoted where the record has the words, `- none  [from: <record>]` when the records show nothing. **Never add, remove, reorder or reword a question**; questions are the human's. Re-run `plancheck` if Step 4.5 ran before this step. No `standing.md` → skip silently; never create one.
 
 ## Step 5: Archive source files
 
@@ -128,7 +128,7 @@ Move (never copy or delete) every file Step 1 marked archive into `plan/_archive
 
 ## Step 6: Verify gitignore
 
-Check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives) (`git check-ignore -q plan`; add `/plan`, no trailing slash). `_archive/` inherits it.
+`git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore` (MEMORY.md §0). `_archive/` inherits it.
 
 ## Step 7: Print summary
 

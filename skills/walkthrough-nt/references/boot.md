@@ -8,7 +8,7 @@
 - **Driver:** Playwright, because the recording below needs its `recordVideo`; the browser pane and browser MCPs do not record video. Drive WebGPU flows in a browser with verified GPU access (record a GIF or a screenshot per beat), or mark them untested.
 - **Wait on a condition, never a fixed sleep.** A React/Next page reads blank before hydration. Wait for `load`, `document.fonts.ready`, and an app-ready signal (a rendered root element, a state flag), not `domcontentloaded`.
 - **Enter as each role**, through the UI login where possible; a seeded session cookie is the fallback. Seed from the **shared demo seed** (`demo/seed/`, also loaded by `/demo-nt` and `/guide-nt`) so no page is a pure empty state, except the first-run journeys, where empty is the thing under test. Extend the seed when a feature lands. Without `demo/seed/`, use the repo's fixture convention and name it in the report; create `demo/seed/` only if the repo has none.
-- **Arm the invariant set before the first click**: named conditions checked after every action, each breach a finding with an ID even when the step looked fine. The floor set of six (after Bombadil's zero-spec browser defaults):
+- **Arm the invariant set before the first click**: named conditions checked after every action, each breach a finding with an ID even when the step looked fine. The floor set of six:
 
   | ID | Invariant |
   |---|---|
@@ -21,7 +21,7 @@
 
   - `INV-DURABLE`'s oracle compares **all** persisted state. One that reads only the active tab, sheet or pane reports a UI-state reset as data loss.
   - Register an auto-dismissing dialog handler (`page.on("dialog", d => { log(d.type(), d.message()); d.dismiss(); })`) before the first click. An unhandled `confirm()` hangs the driver and loses the run.
-  - `INV-SILENT` (every action changes something observable) left the floor set after three runs on three apps: 44 fires, 0 findings. Add it as a repo invariant only when silence is the suspected defect, as a lead to read, never a failure.
+  - `INV-SILENT` (every action changes something observable) is not in the floor set. Add it as a repo invariant only when silence is the suspected defect, as a lead to read, never a failure.
   - `pageerror` misses unhandled rejections. Add `page.addInitScript(() => addEventListener("unhandledrejection", e => console.error("INV-REJ", e.reason)))` and count those as `INV-REJ`, not `INV-ERR`. Tag every breach by cause, not by the channel it arrived on.
   - Report zero breaches as zero. A quiet log is not evidence the app is sound, and the set only sees what the driver requests (headless never fetches a favicon; a headed browser reports that 404 on the console channel, not the `response` event — tag by cause).
   - Add repo invariants from the repo's own CSP, locked decisions and doctrines, never a generic rule.

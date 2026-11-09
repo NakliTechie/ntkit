@@ -24,9 +24,7 @@
    Keep each rule's wording, date and reason. Where two agents' files disagree, put the rule in each
    agent's own `agents/` file, not in `core/`, and list the disagreement.
    A long section such as a style guide or a playbook goes into its own file in the folder, and `core/`
-   gets one line saying when to read it. Keep each generated file small: every agent loads it in every
-   session. Codex reads its global file in full; its 32 KiB budget (`project_doc_max_bytes`) applies
-   to the project `AGENTS.md` files it gathers, which share the context with this one.
+   gets one line saying when to read it. Keep each generated file small.
 6. **Preview.** Run `python3 "$SKILL/bin/prefs_sync.py" --dir <folder> --dry-run` and show its output:
    which files the first sync would write, and their sizes.
 7. **Offer git.** If the folder is not inside a git repo, run `git init` and make a first commit. Do

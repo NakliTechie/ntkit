@@ -36,7 +36,7 @@ These hold in every phase.
 
 ## The run
 
-On entering a phase, read its Detail file first, then act; the Outcome column is the contract, not the procedure. Do not read ahead. Local-only mode runs Phases 1–4, 7 and 8.
+On entering a phase, read its Detail file first, then act. Do not read ahead. Local-only mode runs Phases 1–4, 7 and 8.
 
 | Phase | Outcome | Detail |
 |---|---|---|

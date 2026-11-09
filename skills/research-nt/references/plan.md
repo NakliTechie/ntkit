@@ -3,7 +3,7 @@
 ## Phase 0: intake
 
 1. The invocation text is the question, verbatim.
-2. No `plan/` → create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`. Never replace a symlinked `plan`.
+2. No `plan/` → create or check `plan/` as `/decide-nt` step 2 does (MEMORY.md §0); a broken `plan` symlink stops the run. Never replace a symlinked `plan`.
 3. Slug: today's date plus 3–6 lowercase ASCII words from the question, kebab-case, e.g.
    `2026-09-30-deep-research-citation-checks`. If `plan/research/<slug>` exists, append `-2`, `-3`, ….
    Print the slug.
@@ -119,9 +119,6 @@ Block rules
 Do not write spec.md or edit run settings outside your candidate.
 Return exactly one line: `CANDIDATE <w1|w2|w3> <n> units`.
 ```
-
-The run settings come from the defaults (`sections: 8`, `words: 5000`, `fetches_per_section: 15`,
-`tool_rounds: 20`). There is no flag to change them; the user edits them in `spec.md` and resumes with `go <slug>`.
 
 ## Judge brief
 

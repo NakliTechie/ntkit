@@ -14,8 +14,7 @@ principal, the input or action they control, the control that should stop them,
 the boundary it crosses, and the concrete result: what they read, wrote, ran, or
 broke that they should not have. Cite the ingress as `path:line`: where that
 principal's data enters the code, or where an untrusted writer sets the field
-that reaches the sink (adapted from
-[google/mantis](https://github.com/google/mantis) `mantis-review`, Apache-2.0).
+that reaches the sink.
 A source that only trusted code ever writes, such as server-authored config or
 the app's own constants, is not attacker-controlled, and the finding falls.
 Intrinsic flaws stand without a live caller: a hardcoded secret, broken crypto,

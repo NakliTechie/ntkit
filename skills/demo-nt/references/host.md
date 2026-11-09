@@ -1,7 +1,5 @@
 ## Phase 5 — Host it: a public URL from this laptop (hosted mode only)
 
-Run this phase only when the run was given `host=<hostname>`.
-
 The shape: the app, its worker and its storage run on this machine and listen on `127.0.0.1`. A **named Cloudflare tunnel** (`cloudflared`) carries one public hostname per local service. Three launchd agents (app, worker, tunnel) keep it up across crashes and reboots. Nothing is deployed anywhere else.
 
 ### Steps
@@ -36,6 +34,6 @@ The shape: the app, its worker and its storage run on this machine and listen on
    - **CSP**: `img-src`, `connect-src` and `media-src` name the storage origin the browser actually fetches (`https://<files-host>`), taken from settings.
    - **Presigned URLs** are signed for the public storage host, because the signature covers the `Host` header. Sign with the public endpoint, not the internal one.
    - **Cookies** are `Secure` on an `https` origin; origin checks on state-changing requests compare against `ORIGIN`.
-8. **Install three launchd agents** in `~/Library/LaunchAgents/`, labelled `<reverse-domain>.<project>-demo.{app,worker,tunnel}`. The app and worker agents source `~/.config/<project>-demo/env`, then exec the runtime by absolute path; all three run at load, keep alive, and log to `~/Library/Logs/<project>-demo/`. The tunnel runs `<absolute-path>/cloudflared --no-autoupdate --config <home>/.cloudflared/<project>-demo.yml tunnel run <project>-demo`. Use absolute paths: launchd's `PATH` is minimal. Load with `launchctl bootstrap gui/$(id -u) <plist>`; stop with `launchctl bootout gui/$(id -u)/<label>`. On Linux, three `systemd --user` units with `Restart=always`.
+8. **Install three launchd agents** in `~/Library/LaunchAgents/`, labelled `<reverse-domain>.<project>-demo.{app,worker,tunnel}`. The app and worker agents source `~/.config/<project>-demo/env`, then exec the runtime by absolute path; all three run at load, keep alive, and log to `~/Library/Logs/<project>-demo/`. The tunnel runs `<absolute-path>/cloudflared --no-autoupdate --config <home>/.cloudflared/<project>-demo.yml tunnel run <project>-demo`. Use absolute paths. Load with `launchctl bootstrap gui/$(id -u) <plist>`; stop with `launchctl bootout gui/$(id -u)/<label>`. On Linux, three `systemd --user` units with `Restart=always`.
 9. **Database and storage survive a reboot** through the container runtime (`restart: unless-stopped`), which needs Docker Desktop, or its equivalent, set to start at login. That is a user setting; name it, do not change it.
 10. **Check from outside.** `curl -s https://<host>/health` returns the app's healthy body, and `https://<host>/demo` lists the personas. Then Phase 6, before anyone gets the link.

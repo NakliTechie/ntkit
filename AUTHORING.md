@@ -136,6 +136,13 @@ is the floor — one job, best-effort, never blocks. If a new capability is a
 variant of an existing command, **extend it**; a twenty-second command must earn
 its slot against the minimal-tooling rule.
 
+**How a rule gets in.** A new default rule either replaces existing text, or ships
+with a measured change from `evals/run.sh --without` (§11) named in its CHANGELOG
+line. It lives in one file; every other file carries at most one sentence pointing
+to it. Sources and credits go in `CREDITS.md`, never in skill text, because an agent
+reads skill text on every run and a credit changes nothing it does.
+`tests/lean.test.sh` fails on a credit phrase inside `skills/`.
+
 ## 11. Test it
 
 A skill that ships a script ships a test for it in `tests/`. A guard that stops a run

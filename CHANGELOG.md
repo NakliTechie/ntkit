@@ -2,8 +2,11 @@
 
 ## [Unreleased]
 
+## [2.9.0] — 2026-11-09
+
 ### Added
 
+- All 23 skills load in Codex, OpenCode and other agents that read the Agent Skills format, as well as in Claude Code (contributed by Om Patnaik, NakliTechie/ntkit#2). Each `SKILL.md` declares `name` and `description` at the top level; `argument-hint`, `entry`, `exit` and `writes` move under `metadata`. `./install.sh DIRECTORY` installs the skill folders; `--claude` copies `argument-hint` back to the top level for Claude Code's autocomplete. The installer accepts identical copies and refuses before writing anything when an installed skill differs, so move old copies aside to upgrade. Helpers resolve from the loaded skill's directory, and trace findings can target any agent's instruction file. `tests/install.test.sh` covers the installer.
 - `package-nt/references/check-video.py`: measures a rendered video and prints one PASS, FAIL or INFO line per check with the measured value: size, frame rate, length, frame count, audio stream, black stretches of 0.5 s or more, still stretches over 3 s (a `--hold START-END` excuses a planned hold), integrated loudness against -14 LUFS ± 1, and true peak at or below -1 dBTP. One decode pass. The launch-video steps run it in place of the length-only `ffprobe` check. `tests/check-video.test.sh` covers a passing clip and one fault per check. Ideas from raea's quality floor and SenseNova's Code2Video skill (ideas only).
 - `prefs-nt`: each generated instruction file is measured against a size budget (`NT_PREFS_MAX_LINES`, default 200; `NT_PREFS_MAX_BYTES`, default 25000). Over budget still writes the file and logs a warning naming the three largest sources, because agents follow a long always-loaded file less closely (Anthropic, "The components of agent memory").
 - `MEMORY.md` writer rule **W6**: sessions or subagents running at once each append to their own dated record and never edit a shared list; the next reconcile pass folds them. Anthropic's test kept 41 of 57 facts in one shared table against 57 of 57 with one page per agent.

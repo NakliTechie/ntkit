@@ -1,10 +1,12 @@
 ---
+name: walkthrough-nt
 description: "Walk the running app per role, fixing inline, or recheck its feature map; commits locally."
-argument-hint: "[role or flow to focus, e.g. admin | checkout] | map"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent", "SendUserFile", "mcp__Claude_Browser__*", "mcp__claude-in-chrome__*"]
-entry: "app boots with the shared demo seed; map mode also needs verify/features/"
-exit: "every role walked in a real browser; the invariant set armed before the first click and every breach logged; the chaos leg run to its budget or declared skipped with a reason; fixes committed; verification harness + feature map created or extended; report written. Map mode: every feature file read from source and driven live, outcome clean / changed / blocked, report written"
-writes: "code, the committed verification harness + feature map, plan/walkthrough-<date>.md, plan/walkthrough-<date>-run/ (recording or transcript + action log). Map mode: the harness and map only, plan/walkthrough-map-<date>.md"
+allowed-tools: Bash Glob Grep Read Edit Write Agent SendUserFile mcp__Claude_Browser__* mcp__claude-in-chrome__*
+metadata:
+  argument-hint: "[role or flow to focus, e.g. admin | checkout] | map"
+  entry: "app boots with the shared demo seed; map mode also needs verify/features/"
+  exit: "every role walked in a real browser; the invariant set armed before the first click and every breach logged; the chaos leg run to its budget or declared skipped with a reason; fixes committed; verification harness + feature map created or extended; report written. Map mode: every feature file read from source and driven live, outcome clean / changed / blocked, report written"
+  writes: "code, the committed verification harness + feature map, plan/walkthrough-<date>.md, plan/walkthrough-<date>-run/ (recording or transcript + action log). Map mode: the harness and map only, plan/walkthrough-map-<date>.md"
 ---
 
 Drive the **running app the way its users do, one user role at a time**, walking each role's journeys as that user would, and **fix the logical errors you hit along the way**. This is a live runtime audit; `/forward-pass-nt` is the cold, read-only code audit.
@@ -17,7 +19,7 @@ Drive the **running app the way its users do, one user role at a time**, walking
 
 **Rotate the eyes.** Before starting, read only the `Reviewer:` line of this command's latest report in the main checkout's `plan/`, never its findings. If that run used your model family, prefer another family's agent CLI on PATH (`codex`, `gemini`, checked with `which`, then one probe call), else another model of your family; never materially weaker eyes. Call it by the rules in `$SKILL/../forward-pass-nt/references/other-families.md` (probe, no stdin, timeout, privacy). Neither reachable → run as-is and write `rotation: unavailable` in the `Reviewer:` line. The report header says `Reviewer: <model> · prior: <model> (<date>)` or `prior: none`, and notes when you are the family that built most of the code.
 
-`$ARGUMENTS` (optional): a role (`admin`) or a flow (`checkout`) to scope to. If empty, cover every role and their primary journeys. `map` runs map mode instead of the walk (below).
+Optional input: a role (`admin`) or a flow (`checkout`) to scope to. If empty, cover every role and their primary journeys. `map` runs map mode instead of the walk (below).
 
 ## Map mode — `/walkthrough-nt map`
 

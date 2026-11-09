@@ -30,7 +30,7 @@ Use `promo` when the user asks for a promo, or names a leadership, executive or 
 | You are a current Claude Opus model (brag's own docs name Opus 5.5), and the user did not ask for the full workflow or a voiceover | brag-slim: you build and render the video with local tools | `brag/slim.md` |
 | Any other model, you cannot tell which model you are, or the user asked for the full workflow or a voiceover | full brag: Hyperframes builds and renders | `brag/brag.md` |
 
-Read the file and follow it for the rest of this step, with the direction below as the user's input. brag is not an installed skill, so do not use the Skill tool for it. Read `<skill-dir>` in either file as `$SKILL/references/brag/`.
+Read the file and follow it for the rest of this step, with the direction below as the user's input. The selected workflow is bundled with this skill. Read `<skill-dir>` in either file as `$SKILL/references/brag/`.
 
 ### Preconditions: a miss skips the video, it never blocks the run
 
@@ -44,7 +44,7 @@ Read the file and follow it for the rest of this step, with the direction below 
 Hand brag one brief with every item below; do not invoke it and then feed the direction piece by piece.
 
 - **Input**: the project directory; the deployed URL only when the repo cannot be served locally.
-- **Tone** from the house shape the Unity sentence names (`~/.claude/reference/naklitechie-doctrines/DIRECTIONS.md`):
+- **Tone** from the style named in the project’s design brief:
 
   | Shape | brag tone |
   |---|---|

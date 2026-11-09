@@ -11,7 +11,7 @@
 7. **Workplan** — the batched, ordered, checkbox plan from Phase 4; it doubles as the fix workplan.
 8. **Progress log** — seed with one dated entry: `- YYYY-MM-DD: forward pass complete, workplan created. Starting Batch A.`
 
-**Check every pointer before you print.** Run `python3 "$SKILL/bin/cite-check.py" plan/forward-pass-<date>.md` from the project root, where `$SKILL` is this skill's base directory, printed when the skill loads. Write every path from the project root (`app/services/ledger.rb:90`, not `ledger.rb:90`); a bare filename does not resolve. A finding about a whole file cites its line 1. Fix or drop every failure and re-run until it exits 0; an unresolved pointer is a fabrication, not a typo.
+**Check every pointer before you print.** Run `python3 "$SKILL/bin/cite-check.py" plan/forward-pass-<date>.md` from the project root, where `$SKILL` is the directory containing this skill's loaded `SKILL.md`. Write every path from the project root (`app/services/ledger.rb:90`, not `ledger.rb:90`); a bare filename does not resolve. A finding about a whole file cites its line 1. Fix or drop every failure and re-run until it exits 0; an unresolved pointer is a fabrication, not a typo.
 
 Create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives): a broken `plan` symlink is a stop; if missing, create it in `$NT_PLAN_STORE` and symlink it in when that is set, else `mkdir plan`; then `git check-ignore -q plan`, else add `/plan` (no trailing slash) to `.gitignore`. If today's report already exists, suffix `-2`. Don't commit or push; `plan/` is local.
 

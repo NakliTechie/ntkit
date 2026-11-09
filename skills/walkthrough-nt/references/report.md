@@ -14,4 +14,4 @@ Create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit
 
 **Stale captures.** A fix that changes how a surface looks stales committed screenshots and guides. Run the repo's regenerator (`make screens`, `make guide`, a capture script) and commit the result, or name the stale captures and their regenerator in the report. Zero changed files can be correct (gitignored captures, a text-only guide); confirm which case you are in.
 
-**Hand back the recording.** Send it with `SendUserFile` and say whether it is a video or a screenshot contact sheet. Without `SendUserFile` (a subagent, a non-interactive run), print the absolute paths of `plan/walkthrough-<date>-run/` and its `recordings.md`.
+**Hand back the recording.** Send it using the host’s file attachment tool and say whether it is a video or a screenshot contact sheet. Without file attachment support (a subagent, a non-interactive run), print the absolute paths of `plan/walkthrough-<date>-run/` and its `recordings.md`.

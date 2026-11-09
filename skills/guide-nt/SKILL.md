@@ -1,21 +1,23 @@
 ---
+name: guide-nt
 description: "Regenerate the single-file HTML feature guide from a committed generator, capturing each role's surfaces."
-argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent", "mcp__claude-in-chrome__*", "mcp__computer-use__*"]
-entry: "at least one surface is runnable (dev server, CLI binary, or built .app); guide generator committed (or created this run)"
-exit: "single-file HTML guide regenerated from the generator — never hand-edited"
-writes: "guide generator + output"
+allowed-tools: Bash Glob Grep Read Edit Write Agent mcp__claude-in-chrome__* mcp__computer-use__*
+metadata:
+  argument-hint: "[role/feature to focus | 'update' to refresh an existing guide]"
+  entry: "at least one surface is runnable (dev server, CLI binary, or built .app); guide generator committed (or created this run)"
+  exit: "single-file HTML guide regenerated from the generator — never hand-edited"
+  writes: "guide generator + output"
 ---
 
 Build a **searchable HTML guide** for the app: identify each user role, drive the running app through their features **capturing screenshots or terminal transcripts**, and assemble a single-file `guide/index.html` (role sections × feature subsections × captioned captures, with **inline search**).
 
-`$SKILL` is this skill's base directory, printed when the skill loads; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
+`$SKILL` is the directory containing this skill's loaded `SKILL.md`; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
 
 **The guide is a build artifact.** Its source of truth is a small committed **generator**: a capture script (route-plans per role, tagged with a capture backend) plus a builder (captions and sections as data → HTML). Edit the generator and regenerate; never hand-edit `index.html`.
 
 If no surface can be detected (no dev server, no CLI entry point, no app bundle), say so; there is nothing to capture.
 
-`$ARGUMENTS` (optional): a role (`admin`) or feature (`checkout`) to scope the capture to, or `update` to refresh an existing guide. If empty, cover every role and their primary features.
+Optional input: a role (`admin`) or feature (`checkout`) to scope the capture to, or `update` to refresh an existing guide. If empty, cover every role and their primary features.
 
 ## Guards
 

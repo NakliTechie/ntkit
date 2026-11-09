@@ -54,7 +54,7 @@ live outside the repo entirely.
 
 Four rules make the table enforceable, not decorative:
 
-1. **Every command declares its contract in frontmatter** — `entry` (the state and
+1. **Every command declares its contract under frontmatter `metadata`** — `entry` (the state and
    artifacts it requires), `exit` (the machine-checkable condition that means it
    finished), `writes` (which plan files it touches). A command whose entry
    condition fails says so and stops; it does not proceed politely.

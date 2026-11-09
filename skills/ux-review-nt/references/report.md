@@ -24,7 +24,7 @@ Create or check `plan/` per [MEMORY.md §0](https://github.com/NakliTechie/ntkit
 
 ### Hand back the recording
 
-Send each recording from `plan/ux-review-<date>-run/` with `SendUserFile`, one per viewport. Name a file over 25 MB by its path instead. Without `SendUserFile` (a subagent, a non-interactive run), print the absolute path of the run directory and name each video file. Say whether each is a real recording, an asciicast, or a screenshot contact sheet.
+Send each recording from `plan/ux-review-<date>-run/` using the host’s file attachment tool, one per viewport. Name a file over 25 MB by its path instead. Without file attachment support (a subagent, a non-interactive run), print the absolute path of the run directory and name each video file. Say whether each is a real recording, an asciicast, or a screenshot contact sheet.
 
 ### Media lifecycle
 

@@ -2,7 +2,7 @@
 
 State the plan back so the user can veto or amend it before they walk away:
 - **The goal spec**, three lines:
-  1. **Done when:** the machine-checkable condition (from `$ARGUMENTS` or the workplan) and where the run stops (batch, goal, or "until the safe work runs out").
+  1. **Done when:** the machine-checkable condition (from the invocation or the workplan) and where the run stops (batch, goal, or "until the safe work runs out").
   2. **Because:** one line of why the goal matters, from the workplan or handoff, or asked for.
   3. **Never degrade:** 2–3 protected properties the run must not sacrifice: existing tests stay green, the sovereignty invariants hold, no new dependencies, bundle size, whatever this repo protects. Derive them from the doctrines and the repo; confirm with the user. The final gate (Phase 4.5) checks these too.
 - **The stop-lines** it will park instead of performing (Phase 4). Name them.

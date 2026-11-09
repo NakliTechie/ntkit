@@ -29,8 +29,8 @@ finding() { # finding <n> <evidence> <fix type> [measure]
 }
 
 { echo '# Trace findings — 2026-01-05'; echo 'Scope: all'; echo
-  finding 1 '`claude/-tmp-x/s1.jsonl:30`, `codex/2026/01/05/r1.jsonl:1`' allow-rule
-  finding 2 '`claude/-tmp-x/s1.jsonl:1`' task-prompt; } >"$work/clean.md"
+  finding 1 '`claude/-tmp-x/s1.jsonl:30`, `codex/2026/01/05/r1.jsonl:1`' agent-instructions
+  finding 2 '`claude/-tmp-x/s1.jsonl:1`' claude-md; } >"$work/clean.md"
 expect "clean file passes" 0 "2 findings, 3 citations, 0 failures" "$work/clean.md"
 
 { finding 1 '`claude/-tmp-x/nope.jsonl:3`' skill; } >"$work/missing.md"

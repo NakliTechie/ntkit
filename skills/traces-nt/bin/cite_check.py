@@ -16,7 +16,7 @@ import os
 import re
 import sys
 
-FIX_TYPES = {"claude-md", "playbook", "skill", "allow-rule", "task-prompt", "tool-bug", "none"}
+FIX_TYPES = {"agent-instructions", "claude-md", "playbook", "skill", "allow-rule", "task-prompt", "tool-bug", "none"}
 POINTER = re.compile(r"`((?:claude|codex)/[^`\s]+?\.jsonl):(\d+)`")
 
 

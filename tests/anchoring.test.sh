@@ -1,5 +1,5 @@
 #!/bin/sh
-# Every script a skill ships must be run by an anchored path ($SKILL/..., ~/.claude/skills/...,
+# Every script a skill ships must be run by an anchored path ($SKILL/...,
 # or an absolute path), never repo-relative and never via $(dirname "$0"). A skill runs inside
 # someone else's repo; a relative path runs whatever that repo put there. AUTHORING.md §11.
 # Scans skills/**/*.md for executions of the kit's own scripts. No model calls.
@@ -21,7 +21,7 @@ bad = []
 
 def anchored(path):
     return ("$SKILL" in path or "skill-dir>" in path
-            or path.startswith(("~/.claude/skills/", "/")))
+            or path.startswith("/"))
 
 for md in sorted(skills.rglob("*.md")):
     fenced = False

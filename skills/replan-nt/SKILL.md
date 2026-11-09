@@ -1,10 +1,12 @@
 ---
+name: replan-nt
 description: "Fold accumulated plan/ files into history, pending, workplan; archives the sources."
-argument-hint: "(none)"
-allowed-tools: ["Bash", "Glob", "Read", "Write"]
-entry: "plan/ accumulated beyond the three canonical files"
-exit: "three canonical files rebuilt; replay check reported; sources archived"
-writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/standing.md (answers only, if the file exists), plan/_archive/, plan/ideas.md (or IDEAS.md) from soc triage"
+allowed-tools: Bash Glob Read Write
+metadata:
+  argument-hint: "(none)"
+  entry: "plan/ accumulated beyond the three canonical files"
+  exit: "three canonical files rebuilt; replay check reported; sources archived"
+  writes: "plan/history.md, plan/pending.md, plan/workplan.md, plan/standing.md (answers only, if the file exists), plan/_archive/, plan/ideas.md (or IDEAS.md) from soc triage"
 ---
 
 Consolidate the project's `plan/` folder into three canonical files and archive the folded sources. Never commit or push; `plan/` is gitignored. Not in a git repo with a `plan/` → ask which project.
@@ -90,8 +92,7 @@ Regenerate `plan/workplan.md` from the new pending `Now`, in the shape `/windup-
 Before archiving anything, run the mechanical check rather than judging by reading:
 
 ```bash
-python3 "$SKILL/bin/plancheck.py" .                  # $SKILL: this skill's base directory, printed at load
-python3 ~/.claude/skills/replan-nt/bin/plancheck.py . # installed path
+python3 "$SKILL/bin/plancheck.py" .  # Set SKILL to the directory containing this loaded SKILL.md
 ```
 
 It compares provenance tags, quoted tags and `## Impact` declarations against the records ([`MEMORY.md`](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md) §5). Four findings:

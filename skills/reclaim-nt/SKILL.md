@@ -1,10 +1,12 @@
 ---
+name: reclaim-nt
 description: "Sweep a project for orphaned model checkpoints, stale downloads, and dead artifacts; proposes deletions, read-only."
-argument-hint: "[path, default current repo | apply <id>]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write"]
-entry: "a repo or directory that has accumulated build outputs, downloads, or model files"
-exit: "ranked reclaim-workplan written; nothing deleted without an explicit per-item `apply`"
-writes: "plan/reclaim-<date>.md; moves to the Trash only on explicit `apply <id>`, logged with bytes moved"
+allowed-tools: Bash Glob Grep Read Write
+metadata:
+  argument-hint: "[path, default current repo | apply <id>]"
+  entry: "a repo or directory that has accumulated build outputs, downloads, or model files"
+  exit: "ranked reclaim-workplan written; nothing deleted without an explicit per-item `apply`"
+  writes: "plan/reclaim-<date>.md; moves to the Trash only on explicit `apply <id>`, logged with bytes moved"
 ---
 
 Projects quietly grow hundred-MB-to-multi-GB artifacts — a downloaded model
@@ -21,7 +23,7 @@ assumes.
 without a per-item `apply <id>` naming the exact finding, and then only to the
 Trash, through disktree's removal guards.
 
-`$ARGUMENTS`: a path to scope the sweep (default: current repo root). `apply
+Input: a path to scope the sweep (default: current repo root). `apply
 <id>` trashes exactly the finding with that ID from the most recent
 `plan/reclaim-*.md` in this repo — nothing else, no bulk apply.
 

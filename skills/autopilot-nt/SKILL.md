@@ -1,21 +1,23 @@
 ---
+name: autopilot-nt
 description: "Work a fix-workplan or goal unattended in a worktree; merges and pushes on green."
-argument-hint: "[goal, report, or batch, e.g. \"finish the auth refactor\" | forward-pass | B]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Agent"]
-entry: "briefed or building with an open report/workplan or explicit goal; clean base branch — never launched from blocked at the same wall"
-exit: "run MERGED (gate green) or HELD (gate red) with a report written; never a silent end"
-writes: "its own worktree; plan/<date>-autopilot.md (its record: goal, own queue, progress log, report, Impact); status flips on existing items in the source report or plan/workplan.md"
+allowed-tools: Bash Glob Grep Read Edit Write Agent
+metadata:
+  argument-hint: "[goal, report, or batch, e.g. \"finish the auth refactor\" | forward-pass | B]"
+  entry: "briefed or building with an open report/workplan or explicit goal; clean base branch — never launched from blocked at the same wall"
+  exit: "run MERGED (gate green) or HELD (gate red) with a report written; never a silent end"
+  writes: "its own worktree; plan/<date>-autopilot.md (its record: goal, own queue, progress log, report, Impact); status flips on existing items in the source report or plan/workplan.md"
 ---
 
 `/autopilot-nt` takes a batched fix-workplan (from `/forward-pass-nt`, `/ux-review-nt`, or `plan/workplan.md`) or a prose goal and works it: fix → verify → commit → check off → log, until the queue is done or it hits a wall.
 
-`$SKILL` is this skill's base directory, printed when the skill loads; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
+`$SKILL` is the directory containing this skill's loaded `SKILL.md`; sibling kit skills sit beside it (`$SKILL/../<skill>/`).
 
-`$ARGUMENTS` (optional): a **goal** in prose (`"finish the auth refactor and get tests green"`), a **report name** to scope which audit's batch to run (`forward-pass`, `ux-review`), or a **batch letter** (`B`). Default: the keystone/top batch of the most recent report in `plan/`, else the top chunk of `plan/workplan.md`.
+Optional input: a **goal** in prose (`"finish the auth refactor and get tests green"`), a **report name** to scope which audit's batch to run (`forward-pass`, `ux-review`), or a **batch letter** (`B`). Default: the keystone/top batch of the most recent report in `plan/`, else the top chunk of `plan/workplan.md`.
 
 Not in a git repo → ask which project; this command commits and may run unattended.
 
-**Refuses cleanly, never invents a plan.** No report with open `[ ]` items, no open workplan chunk, and no goal in `$ARGUMENTS` → stop and say so: "Nothing to execute — run `/forward-pass-nt` or `/ux-review-nt` first, point me at `plan/workplan.md`, or give me a goal." Finding work is an audit command's job.
+**Refuses cleanly, never invents a plan.** No report with open `[ ]` items, no open workplan chunk, and no goal in the invocation → stop and say so: "Nothing to execute — run `/forward-pass-nt` or `/ux-review-nt` first, point me at `plan/workplan.md`, or give me a goal." Finding work is an audit command's job.
 
 ## The run
 

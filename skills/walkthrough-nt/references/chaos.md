@@ -12,7 +12,7 @@ From each state the scripted walk reached: enumerate the actionable elements fro
 
 Spend effort in this order: **durability** (reach states the script never did, then reload), **bad values** at every ingest point (wrong type, empty file, binary, enormous, hostile string; an importer that accepts the wrong file and reports success is worse than a crash), then **action sequences and timings**.
 
-Default budget: **~40 sequence actions per role**, with at least as much effort on durability and values. Count actions, not minutes. Scale it down when `$ARGUMENTS` scopes the run to one flow. Declare the budget and yield in the report, or the reason the leg was skipped under the SKILL.md side-effect stop-line.
+Default budget: **~40 sequence actions per role**, with at least as much effort on durability and values. Count actions, not minutes. Scale it down when the user scopes the run to one flow. Declare the budget and yield in the report, or the reason the leg was skipped under the SKILL.md side-effect stop-line.
 
 ### Amplify a timing bug instead of hunting it
 

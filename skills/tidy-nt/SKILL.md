@@ -1,15 +1,17 @@
 ---
+name: tidy-nt
 description: "Mid-session cleanup of what this session created: files, temp dirs, servers. Lists first, deletes by name."
-argument-hint: "[list | log <path> <purpose>]"
-allowed-tools: ["Bash", "Glob", "Read", "Write"]
-entry: "any state; run mid-session, after a long run, or before /windup-nt"
-exit: "this session's disposable artifacts deleted by name and reported with size and file count; free space reported"
-writes: "the session ledger only; deletes only items this session created"
+allowed-tools: Bash Glob Read Write
+metadata:
+  argument-hint: "[list | log <path> <purpose>]"
+  entry: "any state; run mid-session, after a long run, or before /windup-nt"
+  exit: "this session's disposable artifacts deleted by name and reported with size and file count; free space reported"
+  writes: "the session ledger only; deletes only items this session created"
 ---
 
 Clear out what **this session** made. `/reclaim-nt` sweeps a whole project for old weights and archives; this command knows only the current session's output. It never touches another project's files, a running app's profile, or a shared cache that predates the session.
 
-`$ARGUMENTS`: empty → inventory, delete the disposable items, report. It does not wait for confirmation, because it runs several times a day in a thread. `list` → inventory and propose only, delete nothing. `log <path> <purpose>` → append one ledger line and stop.
+Input: empty → inventory, delete the disposable items, report. It does not wait for confirmation, because it runs several times a day in a thread. `list` → inventory and propose only, delete nothing. `log <path> <purpose>` → append one ledger line and stop.
 
 ## The ledger
 
@@ -20,7 +22,7 @@ A JSONL file at `<scratchpad>/ledger.jsonl` (the session scratchpad directory; i
 Collect candidates from four signals and merge them by path:
 
 1. **Ledger lines** with a path that still exists.
-2. **Files newer than the session start** in known roots: the scratchpad, `/private/tmp/claude-501/<project>/`, the project's git-ignored directories (`git status --ignored --short`), and tool output folders the session ran (`snapshots/`, `renders/`, `.artifacts/`, `tmp/`).
+2. **Files newer than the session start** in known roots: the scratchpad and any temporary project directory the active session actually used, the project's git-ignored directories (`git status --ignored --short`), and tool output folders the session ran (`snapshots/`, `renders/`, `.artifacts/`, `tmp/`).
 3. **Processes started this session**: preview servers, dev servers, background tasks, launchd agents (`pgrep -fl`, `/tasks`).
 4. **Work folders touched by background agents.** Re-list every folder a subagent wrote to after they finish. A stale worker can recreate a deleted file.
 

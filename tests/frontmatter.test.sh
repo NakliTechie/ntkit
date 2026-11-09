@@ -16,9 +16,15 @@ for f in sorted(pathlib.Path(sys.argv[1], "skills").glob("*/SKILL.md")):
         meta = yaml.safe_load(m.group(1))
     except yaml.YAMLError as e:
         bad.append(f"{f.parent.name}: YAML error: {str(e).splitlines()[0]}"); continue
-    for k in ("description", "entry", "exit", "writes"):
+    if meta.get("name") != f.parent.name:
+        bad.append(f"{f.parent.name}: name must match the directory")
+    for k in ("description", "allowed-tools"):
         if not isinstance(meta.get(k), str) or not meta[k].strip():
             bad.append(f"{f.parent.name}: '{k}' missing or not a string")
+    contract = meta.get("metadata") or {}
+    for k in ("argument-hint", "entry", "exit", "writes"):
+        if not isinstance(contract.get(k), str) or not contract[k].strip():
+            bad.append(f"{f.parent.name}: metadata.{k} missing or not a string")
 print("\n".join(bad) or "ok")
 sys.exit(1 if bad else 0)
 PY

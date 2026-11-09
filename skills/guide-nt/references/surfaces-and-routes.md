@@ -1,6 +1,6 @@
 ## Phase 1 — Detect the surface(s)
 
-Classify the app as `browser`, `cli`, `native-macos`, or `mixed` (more than one genuinely exists, such as a CLI with a web dashboard; capture each with its own backend). Record the backend(s). `$ARGUMENTS` can name a surface directly when the repo is `mixed` and the ask is scoped to one of them.
+Classify the app as `browser`, `cli`, `native-macos`, or `mixed` (more than one genuinely exists, such as a CLI with a web dashboard; capture each with its own backend). Record the backend(s). The invocation can name a surface directly when the repo is `mixed` and the ask is scoped to one of them.
 
 ## Phase 2 — Roles, routes and the hero flow
 

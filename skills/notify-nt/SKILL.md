@@ -1,10 +1,12 @@
 ---
+name: notify-nt
 description: "Desktop plus optional ntfy phone ping; best-effort, never fails the caller."
-argument-hint: "<message, e.g. \"myapp: autopilot done — gate GREEN, 7 landed\">"
-allowed-tools: ["Bash"]
-entry: "any state"
-exit: "ping attempted on every configured channel; never fails the caller"
-writes: "nothing"
+allowed-tools: Bash
+metadata:
+  argument-hint: "<message, e.g. \"myapp: autopilot done — gate GREEN, 7 landed\">"
+  entry: "any state"
+  exit: "ping attempted on every configured channel; never fails the caller"
+  writes: "nothing"
 ---
 
 Send a short completion ping to the user. This is the smallest command in the kit and it must stay that way: compose one line, deliver it on every channel that's configured, never block, never fail loudly.
@@ -13,7 +15,7 @@ Send a short completion ping to the user. This is the smallest command in the ki
 
 ## Step 1 — Compose the message
 
-If `$ARGUMENTS` is non-empty, that's the message — use it verbatim. If empty, write one line summarizing what just finished in this session (command · project · outcome), e.g. `myapp: autopilot-nt Batch A done — 5 fixed, 1 deferred`. One line, plain text, no markdown.
+If the input is non-empty, that's the message — use it verbatim. If empty, write one line summarizing what just finished in this session (command · project · outcome), e.g. `myapp: autopilot-nt Batch A done — 5 fixed, 1 deferred`. One line, plain text, no markdown.
 
 ## Step 2 — Deliver, best-effort, every configured channel
 

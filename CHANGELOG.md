@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [2.11.0] — 2026-11-10
+
+Closes the 2026-10-22 audit (batches B to G: 53 findings fixed, 4 no longer applied), plus 10 findings from a Codex review of those fixes,, adds a rules panel with a Python state checker to `/guide-nt`, and hardens `/lab-nt`. Each fix that touches a script has a test that failed on the old code first.
+
+### Added
+
+- `guide-nt/bin/statecheck.py`: a standard-library checker that walks every reachable state of a small Python model, reports a broken rule with its shortest path, and with `--break-guards` switches each guard off alone to show which rule it protects. `/guide-nt` gains an optional rules panel (`references/rules-panel.md`) and a chart rubric (`references/charts.md`). No Java or TLA+ tools needed. `tests/statecheck.test.sh`.
+- `/lab-nt` judge check: before experiment 1, planted known changes must each get their expected verdict. A case names a planted experiment (`predict --judge`), and `lab.py judge --case <id> --expect <verdict>` reads the verdict from that experiment's recorded outcome; `judge --done` needs at least 3 cases covering keep, revert and fail. A mismatch parks the campaign. `init --no-judge` skips it only with the owner's say-so; state files from before this release count as judged.
+- `/lab-nt`: a HIGH-surprise KEEP needs fresh confirmation runs of both sides (`keep --confirm-base` and `--confirm`, at least 3 each, alternated; `--confirm-paired` for a paired metric) and counts only if the gain holds on them. A non-paired keep records the mean of `--cand` as its metric, so `--actual` cannot hide a surprise. Reverted experiments are saved as patches. Timed metrics always alternate candidate and best-so-far. Each resumed leg re-measures the noise floor, and each leg report ends with a four-line diagnosis that the next leg starts from. New contract settings: `fork brief` and a `cache/` folder.
+
+### Fixed
+
+- `lab.py keep` now runs the scope check itself and reverts a change that left the fence or touched a lock. Before, the rule held only if the agent ran `lab.py check` first; a state model of the decision showed the gap.
+- `/research-nt`: `assemble` refuses a unit that cites a page `fetch.py` never fetched; every fetch attempt is logged even on a malformed URL, bad charset or long host; the address guard refuses every non-global address (including carrier NAT and Tailscale) and the connection goes to the address that was checked, which closes DNS rebinding; proxy variables are ignored so a proxy cannot carry a private target past the guard; a malformed fetch-log row blocks `assemble` and the gates; entity census matches whole words; alias parsing, duplicate headings and non-ASCII digits fixed.
+- `evals/run.sh` gives each run its own throwaway `HOME` and its own copy of the config dir, and authenticates with a token from `claude setup-token` (`NT_EVAL_OAUTH_TOKEN`), so a skill under test reaches neither the user's agent files nor the real keychain. Without the token it refuses, unless `NT_EVAL_KEYCHAIN=1`. Three weak eval checks tightened.
+- `plancheck.py`: tags on wrapped lines, `--since` on items, one ghost per uncited `add`, `plan/research/` reports as records, a live record wins over its archived copy, archived records' adds are no longer ghosts, a quoted citation is matched to the `add` line holding its words, an ambiguous ghost names every candidate line, and an `add` tagged with another source is that source's to cite.
+- Deletes: `/tidy-nt` stays inside its own session; windup's scratch sweep separates idle sessions (no write to the scratchpad or the session transcript for 7 days: ask) from recent ones (never deleted); the promo sweep lists folders only; a branch checked out in a worktree keeps its remote; two preferences rows on one file no longer log false hand edits; a malformed `targets.tsv` row exits 2. One shared media list (`review-media.sh --list`).
+- Skill text: `/notify-nt` reads the message from a file the agent writes, never from shell syntax, so quotes, `$(...)` and a line equal to a heredoc delimiter can no longer break or run anything; `/live-check-nt` has a stop-line against real send, pay, delete and publish actions; `STATES.md` gives every command a legal state; six skills' exits are checkable; descriptions are capped at 15 words by a test.
+- Scripts: one shared `path:line` resolver for `/forward-pass-nt` and `/traces-nt`, which resolves symlinks before its archive check; social-card text is escaped and contrast-checked; a missing Chrome is reported; the vendored-hash command matches its test. ntkit's own social card passes the contrast check.
+
 ## [2.10.0] — 2026-11-09
 
 A first-principles slim. Skill text had grown from 42,832 to 65,144 words since the 2026-10-01 trim with almost none of it measured. Two independent reviews (a Fable subagent and Codex `gpt-6-astra`) agreed on the cuts; three fresh checkers compared every changed file against v2.9.1 and found no lost rule, and their nine fixes for weakened rules are applied. Skill text is now 57,672 words (−11%), not counting the vendored brag tool.

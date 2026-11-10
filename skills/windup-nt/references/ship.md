@@ -41,7 +41,7 @@ Check per [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.
 - `drop` → delete that entry by name (`rm -rf <path>`), never a glob and never the scratchpad's parent. A video composition, a capture set or a clone the next session needs is a `keep`: it must be named in an open item, or it goes. List each deletion in the day summary as `<path> — <MB> MB`, then report `df -h /`.
 - `keep` → leave it, and name it in the handoff with the item that holds it.
 - `older` → other sessions' scratchpads of this project, with neither the scratchpad nor its session transcript written for 7 days: list them in the handoff with their sizes and ask; delete by name only on a yes. Another project's folders are never listed here and never touched.
-- `recent` → that session wrote there, or its transcript changed, in the last 7 days, so it may still be running: list it in the handoff; never delete it, even on a yes, until it turns `older`.
+- `recent` → that session wrote there or its transcript changed in the last 7 days, or a running process names it, so it may still be running: list it in the handoff; never delete it, even on a yes, until it turns `older`.
 - Anything this session wrote outside the scratchpad (a `/tmp` clone, a profile copy, a model download) is not found by the script. Delete each by name from your own footprint notes, or list it in the handoff.
 - Stop any dev server, preview or watcher this session started from a scratch directory before deleting it.
 

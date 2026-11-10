@@ -14,6 +14,11 @@ paused=$proj/sess-paused/scratchpad; mkdir -p "$paused"; echo p >"$paused/p"   #
 find "$proj/sess-paused" -exec touch -t 202001010000 {} +
 mkdir -p "$t/transcripts/proj"; echo '{}' >"$t/transcripts/proj/sess-paused.jsonl"
 echo '{}' >"$t/transcripts/proj/sess-old.jsonl"; touch -t 202001010000 "$t/transcripts/proj/sess-old.jsonl"
+# idle for years, but a running process names the session (a paused session still open): never offered
+rid=sess-run-$$-$(date +%s); running=$proj/$rid/scratchpad; mkdir -p "$running"; echo r >"$running/r"
+find "$proj/$rid" -exec touch -t 202001010000 {} +
+sh -c 'sleep 60; :' "$rid" & holder=$!
+trap 'kill "$holder" 2>/dev/null; rm -rf "$t"' EXIT
 export NT_TRANSCRIPTS=$t/transcripts
 printf '%s\n' '- [x] done item names probe.json' >"$t/plan/workplan.md"
 printf '%s\n' '## Now' '- [~] re-cut the video from scratchpad comp/ tomorrow' >"$t/plan/pending.md"
@@ -26,6 +31,7 @@ expect keep "$sp/comp"               # an open item names it
 expect older "$old"
 expect recent "$live"                # a sibling written today may be a live session: never offered for deletion
 expect recent "$paused"              # idle scratch but a fresh transcript: the session may resume
+expect recent "$running"             # idle scratch and transcript, but a live process names the session
 printf '%s\n' "$out" | grep -q "sess-empty" && { echo "FAIL: an empty earlier session is listed"; bad=1; }
 # ext4 (Linux) reports 4 KB for an empty folder where APFS reports 0; an empty session stays unlisted there too.
 mkdir "$t/bin"; realdu=$(command -v du)

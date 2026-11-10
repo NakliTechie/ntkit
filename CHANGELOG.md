@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `/lab-nt` paired mode reads its metric from the readings: `keep --paired <gains> --paired-cand <scores>` records the mean of the candidate's per-item scores (one per gain), and `keep` refuses `--actual` in every mode, so a typed-in number can no longer hide a HIGH surprise. Calls that passed `--paired … --actual V` must now pass `--paired-cand`. `keep` also refuses a NaN or infinite reading in any list, because NaN makes the surprise comparison false and would skip the confirmation runs (found by a Codex review).
+- `/research-nt`: `check.py gates` deletes `verify.json` before it starts, so a run that stops early (bad spec, malformed fetch log) never leaves an earlier VERIFIED verdict in place; `check.py sample` refuses a malformed fetch log; `fetch.py` refuses an IPv6 address that carries a non-public IPv4 address (mapped, 6to4, Teredo, NAT64 `64:ff9b::/96`); the entity census matches a one-word name of at most 4 characters ("Go", "Ray", "AWS") with its case, in the section check, the census gate and `Omitted` lines alike, so ordinary words no longer count as mentions.
+- `/windup-nt` scratch sweep: a sibling session whose id appears in a running process's command line is `recent` (never deleted), however long its files have been idle.
+
 ## [2.11.0] — 2026-11-10
 
 Closes the 2026-10-22 audit (batches B to G: 53 findings fixed, 4 no longer applied), plus 10 findings from a Codex review of those fixes, adds a rules panel with a Python state checker to `/guide-nt`, and hardens `/lab-nt`. Each fix that touches a script has a test that failed on the old code first.

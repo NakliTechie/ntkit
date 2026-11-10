@@ -121,10 +121,11 @@ expect("gate fail reverts", run("keep", D, "--id", "g1", "--noise", "4", "--gate
 expect("gain beats noise", run("keep", D, "--id", "g2", "--noise", "4", "--gate", "pass", "--base", "200", "202", "--cand", "210", "212"), 0, "KEEP")
 expect("gain inside noise", run("keep", D, "--id", "g3", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "203"), 4, "REVERT")
 expect("noise required", run("keep", D, "--id", "g4", "--gate", "pass", "--base", "200", "--cand", "203"), 2, "usage")
-expect("paired gain", run("keep", D, "--id", "g5", "--gate", "pass", "--actual", "206", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"), 0, "KEEP")
-expect("paired mixed", run("keep", D, "--id", "g6", "--gate", "pass", "--actual", "199", "--paired", "1", "-2", "1.5", "-2.5", "1", "-2", "1", "-2", "1", "-2"), 4, "REVERT")
-expect("paired too few", run("keep", D, "--id", "g7", "--gate", "pass", "--actual", "1", "--paired", "0.0001"), 2, "at least 10")
-expect("paired needs actual", run("keep", D, "--id", "g7", "--gate", "pass", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"), 2, "needs --actual")
+expect("paired gain", run("keep", D, "--id", "g5", "--gate", "pass", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2", "--paired-cand", "206", "206", "206", "206", "206", "206", "206", "206", "206", "206"), 0, "KEEP")
+expect("paired mixed", run("keep", D, "--id", "g6", "--gate", "pass", "--paired", "1", "-2", "1.5", "-2.5", "1", "-2", "1", "-2", "1", "-2", "--paired-cand", "199", "199", "199", "199", "199", "199", "199", "199", "199", "199"), 4, "REVERT")
+expect("paired too few", run("keep", D, "--id", "g7", "--gate", "pass", "--paired", "0.0001", "--paired-cand", "1"), 2, "at least 10")
+expect("paired needs per-item scores", run("keep", D, "--id", "g7", "--gate", "pass", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"), 2, "needs --paired-cand")
+expect("paired scores must match the gains", run("keep", D, "--id", "g7", "--gate", "pass", "--paired", "1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2", "--paired-cand", "206", "206"), 2, "needs --paired-cand")
 expect("negative noise refused", run("keep", D, "--id", "g8", "--noise", "-5", "--gate", "pass", "--base", "10", "--cand", "7"), 2, "cannot be negative")
 # simple-fix control: a gain the plain fix also reaches reverts; a gain past the control keeps
 expect("control explains the gain", run("keep", D, "--id", "ct1", "--noise", "4", "--gate", "pass", "--base", "200", "--cand", "220", "--control", "218"), 4, "simple-fix control reaches it")
@@ -393,11 +394,20 @@ expect("non-HIGH keep needs no confirm", run("keep", H, "--id", "h3", "--noise",
 expect("HIGH revert needs no confirm", run("keep", H, "--id", "h4", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "90"), 4, "REVERT: gain -10")
 good = ["1", "2", "1.5", "2.5", "1", "2", "3", "1.2", "1.1", "2.2"]
 mixed = ["1", "-2", "1.5", "-2.5", "1", "-2", "1", "-2", "1", "-2"]
-expect("HIGH paired keep without --confirm-paired refused", run("keep", H, "--id", "h5", "--gate", "pass", "--actual", "110", "--paired", *good), 1, "needs --confirm-paired")
-expect("HIGH paired confirm too short", run("keep", H, "--id", "h5", "--gate", "pass", "--actual", "110", "--paired", *good, "--confirm-paired", "1", "2"), 2, "at least 10")
-expect("HIGH paired gain gone on fresh runs", run("keep", H, "--id", "h5", "--gate", "pass", "--actual", "110", "--paired", *good, "--confirm-paired", *mixed), 4, "REVERT: the HIGH-surprise gain did not hold on fresh runs (paired 95% interval")
-expect("HIGH paired gain holds", run("keep", H, "--id", "h6", "--gate", "pass", "--actual", "110", "--paired", *good, "--confirm-paired", *good), 0, "held on fresh runs (paired 95% interval")
+expect("HIGH paired keep without --confirm-paired refused", run("keep", H, "--id", "h5", "--gate", "pass", "--paired", *good, "--paired-cand", *["110"] * 10), 1, "needs --confirm-paired")
+expect("HIGH paired confirm too short", run("keep", H, "--id", "h5", "--gate", "pass", "--paired", *good, "--paired-cand", *["110"] * 10, "--confirm-paired", "1", "2"), 2, "at least 10")
+expect("HIGH paired gain gone on fresh runs", run("keep", H, "--id", "h5", "--gate", "pass", "--paired", *good, "--paired-cand", *["110"] * 10, "--confirm-paired", *mixed), 4, "REVERT: the HIGH-surprise gain did not hold on fresh runs (paired 95% interval")
+expect("HIGH paired gain holds", run("keep", H, "--id", "h6", "--gate", "pass", "--paired", *good, "--paired-cand", *["110"] * 10, "--confirm-paired", *good), 0, "held on fresh runs (paired 95% interval")
 # --actual cannot replace mean(--cand), so a HIGH surprise cannot be hidden behind a typed-in number
+# paired mode reads its metric from the per-item scores, so a typed-in --actual cannot hide a HIGH surprise
+expect("paired --actual refused", run("keep", H, "--id", "h7", "--gate", "pass", "--paired", *good, "--paired-cand", *["110"] * 10, "--actual", "100"), 2, "drop --actual")
+if "outcome" in json.loads(Path(H, "lab.json").read_text())["ideas"]["h7"]:
+    failures.append("a refused paired keep with --actual recorded a result")
+# NaN makes every comparison false, so a NaN reading would skip the HIGH-surprise check
+expect("paired NaN score refused", run("keep", H, "--id", "h7", "--gate", "pass", "--paired", *good, "--paired-cand", "nan", *["110"] * 9), 1, "finite numbers only")
+expect("NaN candidate reading refused", run("keep", H, "--id", "h7", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "nan", "110"), 1, "finite numbers only")
+if "outcome" in json.loads(Path(H, "lab.json").read_text())["ideas"]["h7"]:
+    failures.append("a refused NaN keep recorded a result")
 expect("--actual with --cand refused", run("keep", H, "--id", "h7", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--actual", "100"), 2, "drop --actual")
 # the confirmation re-measures both sides: a drift that lifts best-so-far as much as the candidate is no gain
 expect("HIGH gain is drift on fresh runs of both sides", run("keep", H, "--id", "h8", "--noise", "2", "--gate", "pass", "--base", "100", "--cand", "110", "--confirm-base", "110", "110", "110", "--confirm", "110", "110", "110"), 4, "did not hold on fresh runs (0 against noise 2)")

@@ -285,11 +285,17 @@ def entity_names(entity: str) -> list[str]:
     return [n for n in names if n]
 
 
-def fold(text: str) -> str:
+def fold(text: str, keep_case: bool = False) -> str:
     """Case-, quote-, emphasis- and whitespace-insensitive form for matching names."""
     text = text.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
     text = re.sub(r"[*_`]", "", text).replace("&", " and ")
-    return re.sub(r"\s+", " ", text).strip().casefold()
+    text = re.sub(r"\s+", " ", text).strip()
+    return text if keep_case else text.casefold()
+
+
+def short_name(name: str) -> bool:
+    """One word of at most 4 characters ("Go", "Ray", "AWS"): it collides with ordinary words, so case counts."""
+    return len(name) <= 4 and " " not in name
 
 
 STOP_WORDS = {"a", "an", "and", "the", "of", "for", "to", "in", "on", "with", "by", "or"}
@@ -316,12 +322,21 @@ def named_in(name: str, text: str) -> bool:
     return bool(name) and re.search(rf"(?<!\w){re.escape(name)}(?!\w)", text) is not None
 
 
+def mentions(name: str, text: str) -> bool:
+    """`name` named in `text` as whole words; a short name must keep its case, any other name may not."""
+    cased = fold(name, keep_case=True)
+    if short_name(cased):
+        return named_in(cased, fold(text, keep_case=True))
+    return named_in(fold(name), fold(text))
+
+
 def entity_covered(entity: str, text: str, dropped: list[tuple[str, str]]) -> bool:
-    """Named in the folded unit text (exactly, or as co-occurring key words), or dropped with a reason."""
-    names = [fold(n) for n in entity_names(entity)]
-    if any(named_in(n, text) for n in names) or words_together(names, text):
+    """Named in the unit text (exactly, or as co-occurring key words), or dropped with a reason.
+    `text` and the dropped names are raw; matching folds them, keeping case for short names."""
+    raw = entity_names(entity)
+    if any(mentions(n, text) for n in raw) or words_together([fold(n) for n in raw], fold(text)):
         return True
-    return any(reason and any(named_in(n, what) for n in names) for what, reason in dropped)
+    return any(reason and any(mentions(n, what) for n in raw) for what, reason in dropped)
 
 
 # --- report -----------------------------------------------------------------
@@ -485,11 +500,9 @@ def cmd_section(run: Path, args) -> int:
         why = why_not(url)
         if why:
             problems.append(f"{unit.id}: {url} — {why}")
-    folded = fold(text)
-    dropped_folded = [(fold(name), reason) for name, reason in dropped]
     entities = unit.entities()
     for entity in entities:
-        if not entity_covered(entity, folded, dropped_folded):
+        if not entity_covered(entity, text, dropped):
             problems.append(f"{unit.id}: required entity '{entity}' is neither named in the text "
                             f"nor dropped with 'Omitted: <name> — <reason>'")
     ids = {u.id for u in spec.units}
@@ -604,6 +617,12 @@ def sample_claims(run: Path, report: str, k: int = 10) -> tuple[list[dict], int]
 
 def cmd_sample(run: Path, args) -> int:
     report = read(run, "report.md")
+    bad_log = load_log(run)[1]
+    if bad_log:   # the sample's evidence comes from the log: a row that does not parse blocks it
+        print(f"cannot sample: fetch-log.jsonl has {len(bad_log)} malformed row(s)")
+        for p in bad_log:
+            print(f"  - {p}")
+        return 1
     target = run / "claims.json"
     if target.exists() and not args.force:
         print("claims.json exists; it may hold verdicts. Pass --force to re-sample.")
@@ -661,12 +680,12 @@ def gate_g2b(spec: Spec, report: str) -> list[str]:
         for line in parts["not-covered"].lines:
             m = NOT_COVERED_ITEM.match(line.strip())
             if m:
-                dropped.setdefault(m.group(1), []).append((fold(m.group(2)), m.group(3).strip()))
+                dropped.setdefault(m.group(1), []).append((m.group(2), m.group(3).strip()))
     problems = []
     for u in spec.units:
-        text = fold(body_text(parts[u.id])) if u.id in parts else ""
+        body = body_text(parts[u.id]) if u.id in parts else ""
         for entity in u.entities():
-            if not entity_covered(entity, text, dropped.get(u.id, [])):
+            if not entity_covered(entity, body, dropped.get(u.id, [])):
                 problems.append(f"{u.id}: required entity '{entity}' is neither in the section nor in '{NOT_COVERED}'")
     return problems
 
@@ -810,6 +829,8 @@ def cited_sources(run: Path, report: str) -> list[dict]:
 
 
 def cmd_gates(run: Path, args) -> int:
+    # An earlier verdict never outlives a new attempt: a run that stops before the gates leaves no verify.json.
+    (run / "verify.json").unlink(missing_ok=True)
     report = read(run, "report.md")
     spec = load_spec(run)
     if spec.errors:

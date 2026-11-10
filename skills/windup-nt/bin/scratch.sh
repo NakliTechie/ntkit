@@ -11,7 +11,8 @@
 #          with neither it nor that session's transcript written for NT_SCRATCH_IDLE_DAYS (default 7):
 #          list it and ask; delete by name only when the user says so.
 #   recent a sibling, or its session's transcript (<session-id>.jsonl under NT_TRANSCRIPTS, default
-#          ~/.claude/projects), written within that time: the session may still be live. List it; never delete.
+#          ~/.claude/projects), written within that time, or a sibling whose session id appears in a running
+#          process's command line (a paused or resumed session): it may be live. List it; never delete.
 # Never prints, and windup never deletes, anything outside the given scratchpad or its sibling sessions.
 # Usage: scratch.sh <scratchpad-dir> [plan-dir]
 set -eu
@@ -44,6 +45,8 @@ for s in "$parent"/*/scratchpad; do
     printf 'recent\t%s\t%s\t%s\n' "$s" "$kb" "another session wrote here in the last $days day(s); it may be live"
   elif [ -d "$tdir" ] && [ -n "$(find "$tdir" -name "$id.jsonl" -mmin -"$idle" 2>/dev/null | head -1)" ]; then
     printf 'recent\t%s\t%s\t%s\n' "$s" "$kb" "that session's transcript changed in the last $days day(s); it may be live"
+  elif command -v pgrep >/dev/null 2>&1 && pgrep -f -- "$id" >/dev/null 2>&1; then
+    printf 'recent\t%s\t%s\t%s\n' "$s" "$kb" "a running process names this session; it is live"
   else
     printf 'older\t%s\t%s\t%s\n' "$s" "$kb" "earlier session of this project, idle over $days day(s)"
   fi

@@ -11,8 +11,9 @@ browser) under the same log, so it can be cited.
 
 Rules it enforces, not the agent:
 - http and https only; hosts that resolve to any address that is not global unicast
-  (private, loopback, link-local, carrier-grade NAT, reserved, multicast) are refused, redirects
-  included. The host is resolved once per connection and the socket goes to the checked address;
+  (private, loopback, link-local, carrier-grade NAT, reserved, multicast, or an IPv6 address
+  that carries such an IPv4 address: mapped, 6to4, Teredo, NAT64 64:ff9b::/96) are refused,
+  redirects included. The host is resolved once per connection and the socket goes to the checked address;
   proxy environment variables are ignored, so no connection goes to an unchecked host;
 - a per-section fetch cap: `fetches_per_section` from RUN_DIR/spec.md (default 15), and
   3x that for `--section plan`. Every attempt counts, failed or not. A per-section lock
@@ -67,6 +68,22 @@ class Failed(Exception):
 
 # --- the address guard ------------------------------------------------------
 
+NAT64 = ipaddress.ip_network("64:ff9b::/96")   # well-known NAT64 prefix: the last 32 bits are an IPv4 address
+
+
+def public(ip) -> bool:
+    """Global and not multicast, judged on the IPv4 address too when an IPv6 address carries one."""
+    if not ip.is_global or ip.is_multicast:
+        return False
+    if ip.version == 6:
+        inner = ip.ipv4_mapped or ip.sixtofour or (ip.teredo[1] if ip.teredo else None)
+        if inner is None and ip in NAT64:
+            inner = ipaddress.IPv4Address(int(ip) & 0xFFFFFFFF)
+        if inner is not None:
+            return public(inner)
+    return True
+
+
 def real_address_guard(host: str) -> list[str]:
     """Every address `host` resolves to, after refusing the host if any of them is not global."""
     try:
@@ -76,7 +93,7 @@ def real_address_guard(host: str) -> list[str]:
     addresses = []
     for info in infos:
         ip = ipaddress.ip_address(info[4][0].split("%")[0])
-        if not ip.is_global or ip.is_multicast:
+        if not public(ip):
             raise Refused(f"{host} resolves to a non-public address ({ip})")
         addresses.append(info[4][0])
     return addresses

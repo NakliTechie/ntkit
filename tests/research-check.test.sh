@@ -285,13 +285,22 @@ expect("G2b: alias counts", run("gates", d, "--without", "g3"), 0, "CHECKED (G3 
 for name, text, want in (("RAG", "Firms leverage data.", False), ("RAG", "RAG pipelines help.", True),
                          ("Go", "A good result.", False), ("llama.cpp", "We use llama.cpp.", True),
                          ("LongCat (Meituan) / LC-DR", "LongCat ships a model.", True),
-                         ("LongCat (Meituan) / LC-DR", "LC-DR ships a model.", True)):
-    if check.entity_covered(name, check.fold(text), []) != want:
+                         ("LongCat (Meituan) / LC-DR", "LC-DR ships a model.", True),
+                         # a short name keeps its case: "go" and "ray" are ordinary words
+                         ("Go", "Let's go there.", False), ("Go", "Written in Go.", True),
+                         ("Ray", "A ray of light.", False), ("AWS", "Runs on aws.", False),
+                         ("PyTorch", "Built on pytorch.", True)):
+    if check.entity_covered(name, text, []) != want:
         failures.append(f"G2b census: {name!r} in {text!r} should be {want}")
 if check.entity_names("LongCat (Meituan) / LC-DR") != ["LongCat", "LC-DR"]:
     failures.append(f"alias parsing: {check.entity_names('LongCat (Meituan) / LC-DR')}")
-if check.entity_covered("RAG", check.fold("Nothing here."), [(check.fold("Leverage"), "no source")]):
+if check.entity_covered("RAG", "Nothing here.", [("Leverage", "no source")]):
     failures.append("G2b census: an Omitted name matched an entity by substring")
+# the case rule holds for dropped names too: "go" in an Omitted line is not the Go language
+if check.entity_covered("Go", "Nothing here.", [("go", "no source")]):
+    failures.append("census: a lowercase Omitted name dropped the short name 'Go'")
+if not check.entity_covered("Go", "Nothing here.", [("Go", "no source")]):
+    failures.append("census: an Omitted 'Go' did not drop the entity 'Go'")
 
 # --- G4 edit scope ----------------------------------------------------------
 d = built("g4-noplan")
@@ -428,6 +437,9 @@ with open(d / "fetch-log.jsonl", "a") as fh:
     fh.write("not json\n")
 expect("gates: corrupt fetch log blocks VERIFIED", run("gates", d), 1, "fetch-log.jsonl line 6 is not JSON")
 expect("gates --without g3: corrupt fetch log still blocks", run("gates", d, "--without", "g3"), 1, "fetch-log.jsonl line 6 is not JSON")
+if (d / "verify.json").exists():
+    failures.append("gates: a blocked run left the earlier VERIFIED verify.json in place")
+expect("sample: corrupt fetch log blocks", run("sample", d, "--force"), 1, "cannot sample: fetch-log.jsonl has 1 malformed row")
 
 # --- could not run ----------------------------------------------------------
 expect("missing run dir", run("gates", work / "nope"), 2, "not found")

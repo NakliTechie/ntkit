@@ -167,12 +167,19 @@ if proxied:
 
 # --- the real guard ----------------------------------------------------------
 for host in ("127.0.0.1", "localhost", "169.254.169.254", "10.0.0.1", "192.168.1.1", "::1",
-             "100.100.100.100", "100.64.0.1", "224.0.0.1", "::ffff:127.0.0.1"):
+             "100.100.100.100", "100.64.0.1", "224.0.0.1", "::ffff:127.0.0.1",
+             "64:ff9b::7f00:1", "64:ff9b::a9fe:a9fe", "64:ff9b::a00:1"):   # NAT64 forms of loopback, metadata, private
     try:
         fetch.real_address_guard(host)
         failures.append(f"real guard let {host} through")
     except fetch.Refused:
         pass
+
+# An IPv6 address carrying a public IPv4 address stays public; one carrying a private one does not.
+import ipaddress
+for addr, want in (("64:ff9b::808:808", True), ("64:ff9b::7f00:1", False), ("2606:4700::1111", True)):
+    if fetch.public(ipaddress.ip_address(addr)) != want:
+        failures.append(f"public({addr}) should be {want}")
 
 # --- the cap comes from spec.md, not a flag ------------------------------------------
 c = work / "run-cap"; c.mkdir()

@@ -76,7 +76,7 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
                              record the gate failures observed on the start commit (none: a clean start); an ID is
                              the failure's own text, e.g. "olmoe/prompt 4/decode/6/layer-13"
   keep  <dir> --id ID --gate pass|fail|known [--failures ID..] (--noise X --base v.. --cand v.. [--control v..]
-        [--confirm-base v.. --confirm v..] | --paired d.. --actual V [--confirm-paired d..])
+        [--confirm-base v.. --confirm v..] | --paired d.. --paired-cand v.. [--confirm-paired d..])
                              first runs `check` against the leg's start: any problem prints
                              "REVERT: lab.py check fails: ...", records fail and exits 4
                              --confirm-base / --confirm / --confirm-paired: a KEEP with HIGH surprise is refused
@@ -93,9 +93,10 @@ Subcommands and exit codes (0 ok; 1 refused or violated; 2 usage; 3 budget; 4 RE
                              baseline is recorded. Refused (exit 1) when ID has no prediction or already has a
                              result; exit 0 KEEP when the gate passed and the gain beats the noise (X >= 0), or the paired 95% bootstrap
                              interval over at least 10 items excludes zero; exit 4 REVERT otherwise. Records the
-                             outcome and surprise (actual is the mean of --cand, and --actual with --cand is a usage
-                             error, so HIGH surprise cannot be hidden; --actual is the paired-mode metric; a failed
-                             gate records no actual, because its metric does not count)
+                             outcome and surprise (actual is the mean of --cand, or in paired mode the mean of
+                             --paired-cand, the candidate's per-item scores, one per --paired gain; keep refuses
+                             --actual, so HIGH surprise cannot be hidden; a failed gate records no actual, because
+                             its metric does not count)
   record <dir> <id> --outcome revert|fail [--actual V]
                              the result of an experiment that never reached `keep` (blown cap, scope violation,
                              crash); revert needs --actual; same refusals as keep
@@ -464,8 +465,13 @@ def cmd_keep(a):
     row = unrecorded(a.dir, s, a.id, a.actual)
     if row is None:
         return 1
-    if a.cand and a.actual is not None:
-        print("usage: with --cand the recorded actual is the mean of --cand; drop --actual (it is only for --paired)"); return 2
+    if a.actual is not None:
+        print("usage: keep reads the metric from the readings (the mean of --cand, or of --paired-cand); drop --actual"); return 2
+    for flag in ("noise", "base", "cand", "control", "paired", "paired_cand", "confirm", "confirm_base", "confirm_paired"):
+        v = getattr(a, flag)
+        if v is not None and not all(math.isfinite(x) for x in (v if isinstance(v, list) else [v])):
+            print(f"refused: --{flag.replace('_', '-')} must hold finite numbers only (NaN or inf hides the surprise); "
+                  "nothing recorded"); return 1
     problems, _ = check_problems(a.dir, s)
     if problems:
         print("REVERT: lab.py check fails: " + "; ".join(problems))
@@ -487,12 +493,12 @@ def cmd_keep(a):
     if a.paired:
         if len(a.paired) < 10:
             print("usage: a paired decision needs at least 10 items"); return 2
-        if a.actual is None:
-            print("usage: a paired decision needs --actual, the candidate's metric as the harness reports it"); return 2
+        if not a.paired_cand or len(a.paired_cand) != len(a.paired):
+            print("usage: a paired decision needs --paired-cand, the candidate's score on each of the same items"); return 2
         lo, hi = paired_interval(sign, a.paired)
         verdict = "KEEP" if lo > 0 else "REVERT"
         print(f"{verdict}: paired gain 95% interval [{lo:.6g}, {hi:.6g}] over {len(a.paired)} items")
-        actual = a.actual
+        actual = mean(a.paired_cand)
     else:
         if not a.base or not a.cand or a.noise is None:
             print("usage: keep needs --noise, --base and --cand, or --paired"); return 2
@@ -703,7 +709,8 @@ def main(argv=None):
     k.add_argument("--gate", choices=["pass", "fail", "known"], required=True); k.add_argument("--failures", nargs="+")
     bl = sub.add_parser("baseline"); bl.add_argument("dir"); bl.add_argument("--failures", nargs="+")
     k.add_argument("--base", type=float, nargs="+"); k.add_argument("--cand", type=float, nargs="+")
-    k.add_argument("--paired", type=float, nargs="+"); k.add_argument("--control", type=float, nargs="+")
+    k.add_argument("--paired", type=float, nargs="+"); k.add_argument("--paired-cand", type=float, nargs="+")
+    k.add_argument("--control", type=float, nargs="+")
     k.add_argument("--confirm", type=float, nargs="+"); k.add_argument("--confirm-paired", type=float, nargs="+")
     k.add_argument("--confirm-base", type=float, nargs="+")
     jd = sub.add_parser("judge"); jd.add_argument("dir"); jd.add_argument("--case")

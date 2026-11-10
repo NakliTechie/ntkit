@@ -37,44 +37,38 @@ activation of sections 1–2, including their block types and evidence-class
 labels. Sections 3–5 (banned words, writing rules, style) bind everywhere,
 formal or not.
 
-### 0.2 Reader first — outranks every rule below
-
-A short message can still be unclear: it can obey every length and word rule and
-leave the reader decoding it. These rules prevent that. They bind every output,
-formal or not.
-
-- **Picture the reader: a senior executive, in plain high-school English.**
+- Picture the reader as a senior executive, and write plain high-school English.
   They are smart and busy, and they were not in the details. Write so they get
   the point on one read. Technical names (files, commands, models, numbers) stay
   exact, but each one comes with a plain word on what it is the first time.
-- **Write for a reader who was not watching.** Assume they have not read the plan
+- Write for a reader who was not watching. Assume they have not read the plan
   files, the earlier turns, or the other agent's notes. Each message stands alone.
-- **Lead with what it means for them.** Open with what they can do now, what
+- Open with what the message means for the reader: what they can do now, what
   needs their decision, or "nothing for you to do". Detail comes after.
-- **Talk to the reader.** Use "you". Say what you need from them, by name.
-- **No unexplained internal labels.** Batch and stage codes ("C3", "B8", "W1"),
-  ticket numbers, and names coined in the session are not words the reader
-  knows. Write the plain description instead. When the label helps them find
-  something, give it once, after the description: "the small hybrid-model test
-  (C3)".
-- **No noun sandwiches.** Three or more nouns stacked together hide a sentence.
-  Rewrite with a verb and prepositions. Not "keystone-blocking decision
-  surfacing"; write "tell the owner when a decision holds up the main task".
-- **One term for one thing.** Once you name something, keep that name. Do not
+- Address the reader as "you". Say what you need from them, by name.
+- Explain every internal label, or leave it out. Batch and stage codes ("C3",
+  "B8", "W1"), ticket numbers, and names coined in the session are not words the
+  reader knows. Write the plain description instead. When the label helps them
+  find something, give it once, after the description: "the small hybrid-model
+  test (C3)".
+- Do not stack three or more nouns together, because the stack hides a sentence.
+  Rewrite it with a verb and prepositions. For "keystone-blocking decision
+  surfacing", write "tell the owner when a decision holds up the main task".
+- Use one term for one thing. Once you name something, keep that name. Do not
   switch to a synonym, and do not reuse a word for something else. A new word
   makes the reader think you mean a new thing.
-- **Concrete names.** Name the model, file, machine, command or number: "Bonsai
-  2 27B", not "the target"; "the server only accepts connections from this Mac",
-  not "it is loopback-only".
-- **Keep the reasoning.** Say why. "Because", "so", "which means" and "unless"
-  connect a fact to its cause or consequence; use them.
-- **State things positively.** "Approved only if X", not "not approved unless
-  X". Avoid two negatives in one sentence.
-- **Order conditions for the reader.** One simple condition: condition first,
-  then the rule. Complex conditions: the rule first, then the conditions.
-  Several conditions: a list.
-- **Write lists that read.** Every item completes the lead-in sentence as a
-  whole thought, and every item has the same grammatical shape.
+- Name the model, file, machine, command or number. Write "Bonsai 2 27B" for
+  "the target", and "the server only accepts connections from this Mac" for "it
+  is loopback-only".
+- Say why. "Because", "so", "which means" and "unless" connect a fact to its
+  cause or consequence; use them.
+- State things positively: "approved only if X", never "not approved unless X".
+  Avoid two negatives in one sentence.
+- Order conditions for the reader. With one simple condition, put the condition
+  first and the rule second. With complex conditions, put the rule first. With
+  several conditions, use a list.
+- Make every list item complete the lead-in sentence as a whole thought, and
+  give every item the same grammatical shape.
 
 The test before sending: would the reader understand this message if it were the
 only one they read today?
@@ -89,24 +83,25 @@ read because it dropped reasons and used internal labels.
 These are the rules that keep natural prose from becoming a wall of text.
 They bind whether or not section 0.1's threshold is met.
 
-- **Sentence length: aim for 25 words or fewer; 40 is the limit.** Split a long
+- Aim for 25 words or fewer in a sentence; 40 is the limit. Split a long
   sentence when the parts still make sense alone. Keep it whole when splitting
   would cut a fact off from its reason.
-- **One main point per sentence.** A sentence may carry its own reason or
+- Give each sentence one main point. A sentence may carry its own reason or
   consequence. Do not chain separate points together with "and".
-- **Active voice, you as subject.** "I changed X," never "X was changed."
-- **Present tense by default.** Use simple past only for a completed action or
-  a tried-trail entry. Use "will" only in a PLAN block or an explicit forward
+- Use the active voice, with yourself as the subject of your own actions: "I
+  changed X," never "X was changed."
+- Use the present tense by default. Use simple past only for a completed action
+  or a tried-trail entry. Use "will" only in a PLAN block or an explicit forward
   statement.
-- **No metaphor, idiom, or figurative language.** Say the literal thing.
-- **No staging.** State each fact once, with its name and its number, in the
-  order the reader needs it. Do not set a fact up for effect before you state
-  it. Section 4.4 lists ten sentence shapes that do this.
-- **Full sentences.** Every sentence has a subject and a verb. Do not write
+- Use no metaphor, idiom, or figurative language. Say the literal thing.
+- State each fact once, with its name and its number, in the order the reader
+  needs it. Do not set a fact up for effect before you state it. Section 4.4
+  lists ten sentence shapes that do this.
+- Write full sentences. Every sentence has a subject and a verb. Do not write
   verbless fragments for rhythm.
-- **Paragraph cap: 6 sentences.** Past that point, switch to a list.
-- **No untyped connective filler at the top of a response.** Say the finding
-  first; skip openers like "So," "Great question," "Let's look at this."
+- Keep a paragraph to 6 sentences. Past that point, switch to a list.
+- Say the finding first. Skip openers like "So," "Great question," "Let's look
+  at this."
 
 Issue 0.3 retires the `[prose-exception: reason]` tag: the 40-word limit already
 covers what it allowed.
@@ -446,7 +441,8 @@ ATTEST-100 Issue 0.4 · operative subset · full spec: attest-100-spec-001.md
 · Issue 0.4 change (2026-11-10): added staged sentences (section 4.4), ten
 sentence shapes that use plain words and still read as machine-written; added
 the "no staging" and "full sentences" style rules (section 0.3), writing rule 10,
-anti-example 4 and two self-check items.
+anti-example 4 and two self-check items; rewrote the bullets of sections 0.2 and
+0.3 as plain sentences with no bold lead-in.
 · Issue 0.3 change (2026-10-11): added "Reader first" (section 0.2), which
 outranks the style rules; relaxed the sentence cap to a 25-word aim and a 40-word
 limit; allowed a sentence to carry its reason; retired the prose-exception tag;

@@ -12,9 +12,9 @@ ATTEST.md is the operative standard; read it first.
 
 | Field | Value |
 |---|---|
-| Issue | 0.3 |
+| Issue | 0.4 |
 | Status | Reference spec. §§0–5 (posture, blocks, evidence classes, dictionary, writing rules) are in force — `ATTEST.md` is their operative subset, used every session. §6–8 (linter, governance change-form, adoption milestones) remain proposal-stage: `attest-lint` does not exist yet; no session has run under A/B conformance checking. |
-| Date | 2026-10-11 (Issue 0.3; Issue 0.2 2026-09-23; Issue 0.1 drafted 2026-08-01) |
+| Date | 2026-11-10 (Issue 0.4; Issue 0.3 2026-10-11; Issue 0.2 2026-09-23; Issue 0.1 drafted 2026-08-01) |
 | Maintainer | NakliTechie (governance model: STEMG-style, see §7) |
 | License | TBD (candidate: CC-BY-SA, publishable like Sidecar Doctrine) |
 | Lineage | ASD-STE100 Issue 9 (writing rules, controlled lexicon) · S1000D (typed content units) · RFC 2119/8174 (controlled semantic dimension) · NakliTechie Build Doctrine ("done is the verifier's word") · Wikipedia "Signs of AI writing" + arXiv word-frequency studies (Issue 0.2 readability zone, see §0) |
@@ -155,6 +155,7 @@ the typed blocks and evidence-class labels.
 | 3.15 | ● | One main point per sentence; a sentence may carry its reason. Reader-first rules outrank this one. | §0.3, §5.1 | — |
 | 3.16 | ● | Paragraph cap: 6 sentences, then a list. | §0.3 | — |
 | 3.17 | ○ | No metaphor, idiom, or figurative language. | §0.3 | The closed instances in the AI-tell list (ATTEST.md §4.2) are A-tier lintable; the open-ended form of this rule is B-tier, checker-screened judgment. |
+| 3.18 | ○ | No staged sentences: state each fact once, with its name and number; full sentences only. | §0.3, §4.4, §5.10 | Verbless fragments and teaser headings are A-tier lintable; the other shapes are B-tier, checker-screened judgment. |
 
 ---
 
@@ -279,6 +280,13 @@ linter's word, never the agent's.
   evidence; removing them needs only a judgment that the ambiguity risk is gone.
 - **Precedence.** Where ATTEST-100 conflicts with a project's Agent Handoff, the
   handoff wins and the conflict is filed as a change form.
+- **Issue 0.4 change log (2026-11-10):** added rule 3.18 and ATTEST.md §4.4
+  (staged sentences): ten sentence shapes that use plain words and still read as
+  machine-written, each with a rewrite, plus three tests. Added the "no staging"
+  and "full sentences" rules to ATTEST.md §0.3, writing rule 10, anti-example 4
+  and two self-check items. Entry method: owner directive plus one external
+  table of tics in model-written reports, not the ≥3-transcript-excerpts form;
+  logged as an exception, as in Issue 0.2.
 - **Issue 0.3 change log (2026-10-11):** added the reader-first rules (ATTEST.md
   §0.2: plain descriptions over internal labels, no noun sandwiches, one term per
   thing, concrete names, keep the reasoning), which outrank the style rules.

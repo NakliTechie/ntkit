@@ -8,6 +8,10 @@
 - `[at: ...]` pointers on plan items (MEMORY.md §4): a repo path with optional lines, a commit, or `session:<id>`. `plancheck` resolves each one and reports a pointer that names a missing file, a line past the end or an unknown commit as **dangling** (exit 1); a transcript that is not on this machine is reported as unreachable, not as a failure. `/windup-nt` adds a pointer to every item it carries.
 - `plan/failures.md` and `windup-nt/bin/failures.py`: `/windup-nt` merges the session's failed tool calls, one line per shape (tool, command word, error), counting a session once however many sessions later it is merged again and keeping any `fix:` already written; declined permissions and bare exit codes are left out; secrets and terminal control characters are redacted; a compound command names each step. `/resume-nt` reads the file before acting.
 
+### Changed
+
+- `ATTEST.md` Issue 0.4: new section 4.4, "Staged sentences", lists ten sentence shapes that use plain words and still read as machine-written (a denial followed by a reveal, an unexplained claim of importance, a statistic as the actor, a withheld name, a teaser heading, a closing line written to be quoted, a knocked-down view nobody stated, verbless fragments, a dressed metaphor, a coined label first), each with a rewrite and three tests to find them. Section 0.3 gains "no staging" and "full sentences"; section 5 gains rule 10; section 6 gains anti-example 4; the self-check gains two items. `attest-100-spec-001.md` gains rule 3.18 and the change-log entry.
+
 ## [2.11.1] — 2026-11-10
 
 Six small fixes for limits 2.11.0 left, plus two found by a Codex review of them. Each has a test that fails on the old code.

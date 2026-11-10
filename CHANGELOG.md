@@ -4,7 +4,7 @@
 
 ## [2.11.0] — 2026-11-10
 
-Closes the 2026-10-22 audit (batches B to G: 53 findings fixed, 4 no longer applied), plus 10 findings from a Codex review of those fixes,, adds a rules panel with a Python state checker to `/guide-nt`, and hardens `/lab-nt`. Each fix that touches a script has a test that failed on the old code first.
+Closes the 2026-10-22 audit (batches B to G: 53 findings fixed, 4 no longer applied), plus 10 findings from a Codex review of those fixes, adds a rules panel with a Python state checker to `/guide-nt`, and hardens `/lab-nt`. Each fix that touches a script has a test that failed on the old code first.
 
 ### Added
 

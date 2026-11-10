@@ -47,4 +47,25 @@ mkdir -p "$t/tx/proj"; cp "$t/s1.jsonl" "$t/tx/proj/sess-9.jsonl"
 NT_TRANSCRIPTS=$t/tx python3 "$F" sess-9 --ledger "$t/other.md" >/dev/null || { echo "FAIL session id lookup"; bad=1; }
 set +e; python3 "$F" nope --ledger "$t/o.md" 2>/dev/null; rc=$?; set -e
 [ "$rc" -eq 2 ] || { echo "FAIL missing transcript exit $rc"; bad=1; }
+# secrets and control text never reach the ledger; a compound command names each step
+python3 - "$t/s3.jsonl" <<'PY'
+import json, sys
+rows = [[], "x",
+  {"sessionId": "sess-3", "timestamp": "2026-11-10T11:00:00Z", "message": {"content": [{"type": "tool_use", "id": "z", "name": "Bash", "input": {"command": "make build && git push origin main"}}]}},
+  {"sessionId": "sess-3", "timestamp": "2026-11-10T11:00:01Z", "message": {"content": [{"type": "tool_result", "tool_use_id": "z", "is_error": True, "content": "Exit code 1\nerror: invalid token=ghp_abcdefghijklmnopqrstuvwxyz0123 \u001bc bearer sk-live-XYZ"}]}}]
+with open(sys.argv[1], "w") as f:
+    for r in rows: f.write(json.dumps(r) + "\n")
+PY
+python3 "$F" "$t/s3.jsonl" --ledger "$t/sec.md" --write >/dev/null || { echo "FAIL a non-object JSON line crashed the reader"; bad=1; }
+grep -q 'ghp_\|sk-live' "$t/sec.md" && { echo "FAIL a secret reached the ledger"; cat "$t/sec.md"; bad=1; }
+grep -q "$(printf '\033')" "$t/sec.md" && { echo "FAIL an escape character reached the ledger"; bad=1; }
+grep -q '`make build && git push`' "$t/sec.md" || { echo "FAIL compound command"; cat "$t/sec.md"; bad=1; }
+# a session merged long ago is still counted once (more than three sessions later)
+for n in 4 5 6 7; do sed "s/sess-1/sess-$n/g" "$t/s1.jsonl" >"$t/s$n.jsonl"; python3 "$F" "$t/s$n.jsonl" --ledger "$L" --write >/dev/null; done
+before=$(grep -o 'seen [0-9]*' "$L" | head -1)
+python3 "$F" "$t/s1.jsonl" --ledger "$L" --write >/dev/null
+[ "$(grep -o "seen [0-9]*" "$L" | head -1)" = "$before" ] || { echo "FAIL an old session was counted again: $before"; cat "$L"; bad=1; }
+# a session argument is a literal id, never a glob
+set +e; NT_TRANSCRIPTS=$t/tx python3 "$F" '*' --ledger "$t/g.md" 2>/dev/null; rc=$?; set -e
+[ "$rc" -eq 2 ] || { echo "FAIL a glob resolved to a transcript"; bad=1; }
 [ "$bad" -eq 0 ] && echo ok

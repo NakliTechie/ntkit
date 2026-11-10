@@ -39,23 +39,39 @@ LINE = re.compile(r"^- (?P<tool>\S+) `(?P<cmd>[^`]*)` → (?P<err>.*?) · seen (
 HEADER = ("# Failures and quirks\n\n"
           "One line per failure shape that a session hit. Read before acting; fill `fix:` when you learn it.\n"
           "Written by /windup-nt (`failures.py --write`); a person may add or edit lines.\n\n")
-KEEP_SESSIONS = 3
+KEEP_SESSIONS = 3          # sessions named on a line; every merged session is kept in MERGED
+MERGED = re.compile(r"^<!-- merged sessions: (?P<ids>[^>]*) -->\s*$")
+SESSION_ID = re.compile(r"^[A-Za-z0-9._-]+$")
+# Secrets and terminal control text never reach the ledger.
+SECRET = re.compile(r"(?i)\b(bearer|token|password|passwd|secret|api[-_]?key|authorization)([\s:=]+)\S+")
+LONG_TOKEN = re.compile(r"\b[A-Za-z0-9_\-]{24,}\b")
+CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f\u200e\u200f\u202a-\u202e\u2066-\u2069]")
 
 
 def norm(text: str) -> str:
     """Fold the parts of an error that change between runs, so one cause gives one shape."""
-    t = re.sub(r"https?://[^\s'\"`<>)]+", "<url>", text)
+    t = CONTROL.sub(" ", text)
+    t = SECRET.sub(lambda m: m.group(1) + m.group(2) + "<secret>", t)
+    t = re.sub(r"https?://[^\s'\"`<>)]+", "<url>", t)
     t = re.sub(r"(?<![\w<])(?:~|/)[^\s:'\"`,)]+", "<path>", t)
     t = re.sub(r"\b[0-9a-f]{7,64}\b", "<id>", t)
+    t = LONG_TOKEN.sub("<secret>", t)
     t = re.sub(r"\d+", "N", t)
     t = t.replace("`", "'")
     return re.sub(r"\s+", " ", t).strip()[:140]
 
 
 def command_word(cmd: str) -> str:
-    """The program a shell command ran, with its subcommand: `git push`, `npm run`, `python3 x.py`."""
-    parts = re.split(r"\s*(?:&&|\|\||;|\|)\s*", re.sub(r"\$\(|`", " ", cmd.strip()))
-    for part in parts:
+    """The programs a shell command ran, each with its subcommand, in order: `make build && git push`.
+    A failed compound command names every step, because the transcript does not say which one failed."""
+    words = [w for w in (_one_word(p) for p in re.split(r"\s*(?:&&|\|\||;|\|)\s*",
+             re.sub(r"\$\(|`", " ", cmd.strip()))) if w]
+    out = " && ".join(dict.fromkeys(words[:3])) or "sh"
+    return CONTROL.sub(" ", out).replace("`", "'")[:80]
+
+
+def _one_word(part: str) -> str | None:
+    for _ in (0,):
         words = part.split()
         while words and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", words[0]):   # leading var=value
             words = words[1:]
@@ -63,12 +79,12 @@ def command_word(cmd: str) -> str:
             words = words[1:]
         if not words or words[0] in ("cd", "set", "export", "source", ".", "sleep", "echo", "true",
                                      "for", "if", "while", "until", "done", "fi", "esac", "case"):
-            continue
+            return None
         w = [os.path.basename(words[0])]
         if len(words) > 1 and re.match(r"^[a-z][\w.-]*$", words[1]):
             w.append(os.path.basename(words[1]))
-        return " ".join(w).replace("`", "'")[:60]
-    return "sh"
+        return " ".join(w)[:40]
+    return None
 
 
 def error_line(text: str) -> str | None:
@@ -103,25 +119,33 @@ def read_transcript(path: Path) -> tuple[str, list[dict]]:
             o = json.loads(raw)
         except ValueError:
             continue
-        session = o.get("sessionId") or session
-        content = (o.get("message") or {}).get("content")
+        if not isinstance(o, dict):
+            continue
+        sid = o.get("sessionId")
+        if isinstance(sid, str) and SESSION_ID.match(sid):
+            session = sid
+        msg = o.get("message")
+        content = msg.get("content") if isinstance(msg, dict) else None
         if not isinstance(content, list):
             continue
         for it in content:
             if not isinstance(it, dict):
                 continue
             if it.get("type") == "tool_use":
-                inp = it.get("input") or {}
-                name = it.get("name", "?")
-                cmd = command_word(inp["command"]) if name == "Bash" and "command" in inp else ""
+                inp = it.get("input") if isinstance(it.get("input"), dict) else {}
+                name = str(it.get("name", "?"))
+                name = re.sub(r"[^A-Za-z0-9_.:-]", "", name)[:40] or "?"
+                c = inp.get("command")
+                cmd = command_word(c) if name == "Bash" and isinstance(c, str) else ""
                 calls[it.get("id", "")] = (name, cmd)
             elif it.get("type") == "tool_result" and it.get("is_error"):
                 err = error_line(result_text(it.get("content")))
                 if err is None:
                     continue
                 tool, cmd = calls.get(it.get("tool_use_id", ""), ("?", ""))
-                found.append({"tool": tool, "cmd": cmd, "err": err,
-                              "date": (o.get("timestamp") or "")[:10] or "?"})
+                ts = o.get("timestamp")
+                date = ts[:10] if isinstance(ts, str) and re.match(r"^\d{4}-\d{2}-\d{2}", ts) else "?"
+                found.append({"tool": tool, "cmd": cmd, "err": err, "date": date})
     return session, found
 
 
@@ -130,10 +154,15 @@ def resolve(arg: str) -> Path | None:
     if p.is_file():
         return p
     base = Path(os.environ.get("NT_TRANSCRIPTS", "~/.claude/projects")).expanduser()
-    if "/" not in arg:
-        for c in [base / f"{arg}.jsonl", *base.glob(f"*/{arg}.jsonl")]:
-            if c.is_file():
-                return c
+    if SESSION_ID.match(arg):   # a literal id, never a glob pattern
+        direct = base / f"{arg}.jsonl"
+        if direct.is_file():
+            return direct
+        if base.is_dir():
+            for d in sorted(base.iterdir()):
+                c = d / f"{arg}.jsonl"
+                if c.is_file():
+                    return c
     return None
 
 
@@ -160,7 +189,14 @@ def main(argv: list[str] | None = None) -> int:
     text = ledger.read_text(errors="replace") if ledger.exists() else HEADER
     out, known, seen_here = [], set(), f"session:{session}"
     new_known = 0
+    merged: list[str] = []
+    for line in text.splitlines():   # the list sits at the end, so read it before any line
+        mm = MERGED.match(line)
+        if mm:
+            merged = mm["ids"].split()
     for line in text.splitlines():
+        if MERGED.match(line):
+            continue
         m = LINE.match(line)
         if m:
             k = (m["tool"], m["cmd"], m["err"])
@@ -168,14 +204,21 @@ def main(argv: list[str] | None = None) -> int:
             if k in shapes:
                 new_known += 1
                 ats = [x.strip() for x in (m["at"] or "").split(",") if x.strip()]
-                if seen_here not in ats:   # merging the same session twice counts it once
+                if session not in merged and seen_here not in ats:   # a session counts once, ever
                     n = int(m["n"]) + shapes[k]["n"]
                     ats = (ats + [seen_here])[-KEEP_SESSIONS:]
                     last = max(m["last"], shapes[k]["last"])
                     line = (f"- {m['tool']} `{m['cmd']}` → {m['err']} · seen {n} · last {last} · "
                             f"fix: {m['fix']}  [at: {', '.join(ats)}]")
         out.append(line)
-    fresh = [k for k in shapes if k not in known]
+    already = session in merged
+    fresh = [] if already else [k for k in shapes if k not in known]
+    if session not in merged:
+        merged.append(session)
+    while out and not out[-1].strip():
+        out.pop()
+    if fresh and out and not LINE.match(out[-1]):
+        out.append("")
     for k in fresh:
         s = shapes[k]
         out.append(f"- {k[0]} `{k[1]}` → {k[2]} · seen {s['n']} · last {s['last']} · fix: ?  [at: {seen_here}]")
@@ -186,10 +229,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  new  {k[0]} `{k[1]}` → {k[2]}")
     for k in shapes:
         if k in known:
-            print(f"  seen {k[0]} `{k[1]}` → {k[2]}  (an earlier session hit this too)")
+            note = "already merged from this session" if already else "an earlier session hit this too"
+            print(f"  seen {k[0]} `{k[1]}` → {k[2]}  ({note})")
+    out += ["", f"<!-- merged sessions: {' '.join(merged)} -->"]
     if a.write and shapes:
         ledger.parent.mkdir(parents=True, exist_ok=True)
-        ledger.write_text("\n".join(out).rstrip("\n") + "\n")
+        tmp = ledger.with_name(f".{ledger.name}.{os.getpid()}.tmp")
+        tmp.write_text("\n".join(out) + "\n")
+        os.replace(tmp, ledger)   # atomic: a reader never sees half a file
         print(f"wrote {ledger}")
     elif not a.write and shapes:
         print("dry run: add --write to merge")

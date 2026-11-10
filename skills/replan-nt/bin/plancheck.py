@@ -229,9 +229,10 @@ def check_pointer(plan: Plan, loc: str) -> str | None:
     if loc.lower().startswith("session:"):
         sid = loc.split(":", 1)[1].strip()
         base = _transcripts_dir()
-        if not sid or "/" in sid:
+        if not re.match(r"^[A-Za-z0-9._-]+$", sid):
             return f"dangling: bad session id {loc!r}"
-        if (base / f"{sid}.jsonl").exists() or any(base.glob(f"*/{sid}.jsonl")):
+        if (base / f"{sid}.jsonl").exists() or (
+                base.is_dir() and any((d / f"{sid}.jsonl").exists() for d in base.iterdir() if d.is_dir())):
             return None
         return f"unreachable: no transcript {sid}.jsonl under {base} on this machine"
     repo = plan.repo

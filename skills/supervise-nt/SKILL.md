@@ -14,7 +14,7 @@ Watch work that runs outside this session: a cloud job, a long script, another a
 ## The contract
 
 1. **Register before launch.** `register NAME KIND --probe CMD --eta MIN`. Work that is not registered is not supervised.
-2. **Every delegation has a probe and an ETA.** The probe exits 0 while the work runs (`kill -0 <pid>`, `test ! -f <done marker>`, a cloud CLI's describe call). No probe is possible for a subagent: say so, and retire it by hand.
+2. **Every delegation has a probe and an ETA.** The probe exits 0 while the work runs (`kill -0 <pid>`, `test ! -f <done marker>`, a cloud CLI's describe call). `register` refuses a missing ETA, and a missing probe for `cloud` and `job`. A subagent or a CLI agent may run without a probe: retire it by hand. A probe that runs past 60 seconds is reported as timed out and counted as running.
 3. **Waiting is not watching.** A loop that waits for the work to end never replaces a check-in, because it cannot tell a stalled job from a slow one.
 4. **What must outlive the session runs detached** (`nohup … &`), never as a child of the session.
 5. **The remote side carries its own last line of defence:** a spend cap, a time limit, or a machine that deletes itself. The supervisor alerts; it does not stop anything.
@@ -22,6 +22,7 @@ Watch work that runs outside this session: a cloud job, a long script, another a
 ## The run
 
 - **Register.** `sh $SKILL/bin/supervise.sh register <name> <cloud|agent|cli|job> --probe '<cmd>' --eta <45 | 45m | 2h> --note '<what it is>'`. A review run through another model's CLI is `cli`.
+- **Scope** is the git repository's folder name, so two repositories with the same folder name share one scope; set `NT_SUPERVISE_SCOPE` to separate them.
 - **Start the supervisor once per project, detached:** `nohup sh $SKILL/bin/supervise.sh supervise >/dev/null 2>&1 &`. It wakes every 30 minutes. It alerts on the desktop (and to `NTFY_TOPIC` when set) and exits when nobody has checked in for 20 minutes while work runs, or when a delegation passes its ETA × 1.5 + 15 minutes. It exits on its own after two idle cycles. Register prints a note when no supervisor runs.
 - **Check in every 15 minutes:** `sh $SKILL/bin/supervise.sh checkin '<what you saw>'`. Then look at real evidence: is it alive, is its output growing, is it on task, what has it spent. Healthy → let it run. Stalled, looping or off task → intervene. A check-in is a look, not a kill.
 - **Retire it when it ends:** `sh $SKILL/bin/supervise.sh done <name> '<outcome>'`. `checkin` lists a delegation whose probe now fails as `ENDED per probe`: read its result, then retire it.

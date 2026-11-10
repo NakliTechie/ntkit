@@ -239,6 +239,8 @@ expect "a path outside the repo is dangling" 1 "outside the repo" "$pt"
 expect "the summary counts dangling pointers" 1 "4 dangling pointer(s)" "$pt"
 printf '# Pending\n## Now\n- [ ] A  [from: 2026-09-10-summary] [at: session:sess-elsewhere]\n' >"$pt/plan/pending.md"
 expect "a transcript on another machine is unreachable, not a failure" 0 "unreachable here" "$pt"
+printf '# Pending\n## Now\n- [ ] A  [from: 2026-09-10-summary] [at: session:*]\n' >"$pt/plan/pending.md"
+expect "a glob is not a session id" 1 "bad session id" "$pt"
 # a plan/ that is a symlink into a plan store still resolves paths against the repo
 st="$work/store"; mv "$pt/plan" "$st"; ln -s "$st" "$pt/plan"
 printf '# Pending\n## Now\n- [ ] A  [from: 2026-09-10-summary] [at: src/db.py:1]\n' >"$st/pending.md"

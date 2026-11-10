@@ -13,22 +13,39 @@
 # PROBE: a shell command that exits 0 while the work still runs, for example `kill -0 12345`,
 #   `test ! -f /path/done.marker`, or a cloud CLI's describe call. No probe means "manual": the delegation
 #   counts as running until `done`.
-# ETA: minutes, as 45, 45m or 2h.
+# ETA (required): minutes, as 45, 45m or 2h. A probe is required for cloud and job; agent and cli may run
+#   without one (manual). Each probe gets NT_SUPERVISE_PROBE_TIMEOUT seconds (default 60); a probe that takes
+#   longer is reported as PROBE TIMED OUT and counted as running.
 # State: ${NT_SUPERVISE_HOME:-${XDG_STATE_HOME:-~/.local/state}/ntkit/supervise}/<scope>/, where scope is the
-#   git repository's folder name (or $NT_SUPERVISE_SCOPE). Times print in local time; set TZ to change it.
+#   git repository's folder name (or $NT_SUPERVISE_SCOPE), so two repositories with the same folder name share
+#   one scope. Times print in local time; set TZ to change it.
 # Alerts: desktop (macOS osascript, Linux notify-send) and, when NTFY_TOPIC is set, an ntfy.sh push.
 #   NT_SUPERVISE_NO_NOTIFY=1 suppresses them (tests). Exit 64 on a usage error.
 set -u
 ROOT=${NT_SUPERVISE_HOME:-${XDG_STATE_HOME:-$HOME/.local/state}/ntkit/supervise}
 SCOPE=${NT_SUPERVISE_SCOPE:-$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")}
+case $SCOPE in ''|.*|*/*) echo "bad scope '$SCOPE': no slash, no leading dot" >&2; exit 64 ;; esac
 D=$ROOT/$SCOPE
-mkdir -p "$D/active" "$D/done"
+mkdir -p "$D/active" "$D/done" 2>/dev/null && [ -w "$D/active" ] || { echo "cannot write state under $D" >&2; exit 73; }
 
 now() { date +%s; }
-stamp() { date -r "${1:-$(now)}" '+%F %H:%M' 2>/dev/null || date -d "@${1:-$(now)}" '+%F %H:%M'; }
+if [ "$(date -r 0 +%Y 2>/dev/null)" = 1970 ] || [ "$(date -r 0 +%Y 2>/dev/null)" = 1969 ]; then
+  stamp() { date -r "${1:-$(now)}" '+%F %H:%M'; }        # BSD: -r takes seconds
+else
+  stamp() { date -d "@${1:-$(now)}" '+%F %H:%M'; }       # GNU: -r takes a file name
+fi
 field() { grep -m1 "^$2=" "$1" 2>/dev/null | cut -d= -f2-; }
 usage() { sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 64; }
-alive() { [ -f "$D/supervisor.pid" ] && kill -0 "$(cat "$D/supervisor.pid")" 2>/dev/null; }
+alive() {  # the pid is live and is a supervisor, so a reused pid never counts
+  [ -f "$D/supervisor.pid" ] || return 1
+  pid=$(cat "$D/supervisor.pid" 2>/dev/null)
+  case $pid in ''|*[!0-9]*) return 1 ;; esac
+  kill -0 "$pid" 2>/dev/null && ps -p "$pid" -o args= 2>/dev/null | grep -q supervise
+}
+put() {  # put <file> : write stdin through a temporary file, then rename; fail loudly
+  tmp="$1.tmp.$$"
+  cat > "$tmp" && mv "$tmp" "$1" || { rm -f "$tmp"; echo "cannot write $1" >&2; exit 73; }
+}
 
 notify() {
   msg=$1
@@ -46,10 +63,17 @@ notify() {
   return 0
 }
 
-running() {  # 0 = still running
+running() {  # 0 = still running, 1 = ended, 2 = probe timed out (counted as running)
   probe=$(field "$1" probe)
   [ -z "$probe" ] && return 0
-  sh -c "$probe" >/dev/null 2>&1
+  sh -c "$probe" >/dev/null 2>&1 & p=$!
+  ( trap 'kill "$s" 2>/dev/null; exit 0' TERM
+    sleep "${NT_SUPERVISE_PROBE_TIMEOUT:-60}" & s=$!; wait "$s" && kill -USR2 "$p" 2>/dev/null ) >/dev/null 2>&1 & w=$!
+  wait "$p" 2>/dev/null; rc=$?
+  kill "$w" 2>/dev/null; wait "$w" 2>/dev/null
+  # the watcher stops a slow probe with SIGUSR2, which no probe sends itself: exit 128 + its number
+  [ "$rc" -gt 128 ] && [ "$(kill -l "$rc" 2>/dev/null)" = USR2 ] && return 2
+  [ "$rc" -eq 0 ]
 }
 
 report() {  # one line per active delegation; sets LIVE to the count still running
@@ -59,8 +83,10 @@ report() {  # one line per active delegation; sets LIVE to the count still runni
     any=1
     name=$(basename "$f"); kind=$(field "$f" kind); started=$(field "$f" started); eta=$(field "$f" eta)
     age=$(( ($(now) - ${started:-$(now)}) / 60 ))
-    if running "$f"; then
+    running "$f"; rc=$?
+    if [ "$rc" -ne 1 ]; then
       LIVE=$((LIVE + 1)); state=running
+      [ "$rc" -eq 2 ] && state="PROBE TIMED OUT (counted as running)"
       if [ -n "$eta" ] && [ "$age" -gt $(( eta * 3 / 2 + 15 )) ]; then state="OVERDUE (eta ${eta}m)"; fi
     else
       state="ENDED per probe: run done $name"
@@ -71,14 +97,15 @@ report() {  # one line per active delegation; sets LIVE to the count still runni
   return 0
 }
 
-minutes() {  # 45 | 45m | 2h -> minutes; empty stays empty
+minutes() {  # 45 | 45m | 2h -> a positive decimal number of minutes
   case $1 in
-    '') echo "" ;;
-    *[!0-9mh]*|m|h|*m*m|*h*h|*m*h|*h*m) return 1 ;;
-    *h) v=${1%h}; [ -n "$v" ] && echo $((v * 60)) ;;
-    *m) echo "${1%m}" ;;
-    *) echo "$1" ;;
+    *h) v=${1%h}; mult=60 ;;
+    *m) v=${1%m}; mult=1 ;;
+    *) v=$1; mult=1 ;;
   esac
+  case $v in ''|*[!0-9]*) return 1 ;; esac
+  v=$(printf '%s' "$v" | sed 's/^0*//'); [ -n "$v" ] && [ ${#v} -le 6 ] || return 1
+  echo $((v * mult))
 }
 
 cmd=${1:-status}; [ $# -gt 0 ] && shift
@@ -97,7 +124,9 @@ case $cmd in
         *) echo "unknown argument $1" >&2; exit 64 ;;
       esac
     done
-    printf "name=%s\nkind=%s\nprobe=%s\neta=%s\nnote=%s\nstarted=%s\n" "$name" "$kind" "$probe" "$eta" "$note" "$(now)" > "$D/active/$name"
+    [ -n "$eta" ] || { echo "--eta is required (minutes: 45, 45m or 2h)" >&2; exit 64; }
+    case $kind in cloud|job) [ -n "$probe" ] || { echo "--probe is required for $kind" >&2; exit 64; } ;; esac
+    printf "name=%s\nkind=%s\nprobe=%s\neta=%s\nnote=%s\nstarted=%s\n" "$name" "$kind" "$probe" "$eta" "$note" "$(now)" | put "$D/active/$name" || exit 73
     echo "registered $name ($kind) in $SCOPE${eta:+, eta ${eta}m}${probe:+, probe: $probe}"
     alive || echo "note: no supervisor running for $SCOPE; start one detached: nohup $0 supervise >/dev/null 2>&1 &"
     ;;
@@ -115,7 +144,7 @@ case $cmd in
     name=$1; f=$D/active/$name
     case $name in */*|.*) echo "bad NAME" >&2; exit 64 ;; esac
     [ -f "$f" ] || { echo "no active delegation $name" >&2; exit 1; }
-    { cat "$f"; echo "ended=$(now)"; echo "outcome=${2:-}"; } > "$D/done/$name.$(now)"
+    { cat "$f"; echo "ended=$(now)"; echo "outcome=${2:-}"; } | put "$D/done/$name.$(now)" || exit 73
     rm -f "$f"; echo "done: $name${2:+ — $2}"
     ;;
   supervise)
@@ -129,7 +158,7 @@ case $cmd in
       esac
     done
     if alive; then echo "supervisor already running for $SCOPE (pid $(cat "$D/supervisor.pid"))"; exit 0; fi
-    echo $$ > "$D/supervisor.pid"
+    echo $$ | put "$D/supervisor.pid" || exit 73
     trap 'rm -f "$D/supervisor.pid"' EXIT
     trap 'exit 1' HUP INT TERM
     echo "$(stamp) supervisor start every=${every}s stale=${stale}s" >> "$D/supervisor.log"

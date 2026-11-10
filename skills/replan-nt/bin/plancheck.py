@@ -5,6 +5,8 @@ Mechanical only: it never calls a model, never edits a file, and never guesses.
 It compares provenance tags in the derived files against the records that exist,
 checks that a quoted tag's words really appear in the record it names, and compares
 `## Impact` declarations in the records against the derived items that cite them.
+It also checks that each `[at: ...]` pointer on an item still resolves: a file and line in
+the repo, a commit, or a session transcript.
 
 Contract: MEMORY.md.  Exit 0 clean · 1 divergence · 2 could not run.
 """
@@ -13,7 +15,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -40,6 +44,11 @@ QUOTED = re.compile(r'^(?P<ref>.*?)\s+["\u201c](?P<quote>[^"\u201c\u201d]+)["\u2
 MARKUP = re.compile(r"[*_`]+")
 TYPOGRAPHY = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"',
                             "\u2013": "-", "\u2014": "-", "\u00a0": " "})
+# Where in the record or the code an item comes from (MEMORY.md §4): [at: src/db.py:42],
+# [at: 3f2a9c1], [at: session:<id>]. Several pointers may sit in one tag, comma-separated.
+AT = re.compile(r"\[at:\s*(?P<loc>[^\]]+?)\s*\]")
+SHA = re.compile(r"^[0-9a-f]{7,40}$")
+PATH_LINE = re.compile(r"^(?P<path>.+?)(?::(?P<a>\d+)(?:-(?P<b>\d+))?)?$")
 HEADING = re.compile(r"^##\s+(?P<name>.+?)\s*$")
 SOC_ENTRY = re.compile(r"^\s*[-*]\s+(?P<ts>\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2})")
 DATE = re.compile(r"(\d{4}-\d{2}-\d{2})")
@@ -55,12 +64,13 @@ FIX = {
     "orphan": "the item's [from:] names no record. Add the record, correct the slug, or tag the item [from: hand].",
     "ghost": "a record declares an `add` impact and no derived item cites it. Add the item with [from: <record>], or change the impact line to `none`.",
     "misquote": "the quoted words are not in the named record. Quote words that appear there, or drop the quote.",
+    "dangling": "the [at:] pointer names a file, line or commit that is not in the repo. Point at where the thing is now, or drop the pointer.",
 }
 
 
 @dataclass
 class Finding:
-    kind: str          # orphan | ghost | misquote | untagged
+    kind: str          # orphan | ghost | misquote | dangling | untagged | unreachable
     where: str         # file:line, or file:line,line,... for a ghost that names candidates
     detail: str
     missing: int = 1   # a ghost: how many of its add lines have no citing item
@@ -75,12 +85,13 @@ class Finding:
 @dataclass
 class Plan:
     root: Path
+    repo: Path | None = None   # the folder that holds plan/, where [at:] paths resolve
     records: dict[str, Path] = field(default_factory=dict)   # slug -> path
     soc_stamps: set[str] = field(default_factory=set)
     # record slug -> one (where, quoted words, has an unquoted tag) per citing item
     cited: dict[str, list[tuple[str, list[str], bool]]] = field(default_factory=dict)
     findings: list[Finding] = field(default_factory=list)
-    counts: dict[str, int] = field(default_factory=lambda: {"items": 0, "tagged": 0, "quoted": 0, "records": 0})
+    counts: dict[str, int] = field(default_factory=lambda: {"items": 0, "tagged": 0, "quoted": 0, "records": 0, "pointers": 0})
 
 
 def _derived_paths(root: Path) -> list[Path]:
@@ -208,6 +219,64 @@ def _items(text: str, only_sections):
         yield item
 
 
+def _transcripts_dir() -> Path:
+    return Path(os.environ.get("NT_TRANSCRIPTS", "~/.claude/projects")).expanduser()
+
+
+def check_pointer(plan: Plan, loc: str) -> str | None:
+    """None when the pointer resolves; else 'dangling: why' or 'unreachable: why'.
+    A session transcript lives on one machine, so a missing one is unreachable, not wrong."""
+    if loc.lower().startswith("session:"):
+        sid = loc.split(":", 1)[1].strip()
+        base = _transcripts_dir()
+        if not sid or "/" in sid:
+            return f"dangling: bad session id {loc!r}"
+        if (base / f"{sid}.jsonl").exists() or any(base.glob(f"*/{sid}.jsonl")):
+            return None
+        return f"unreachable: no transcript {sid}.jsonl under {base} on this machine"
+    repo = plan.repo
+    if repo is None:
+        return "unreachable: no repo folder to resolve against"
+    if SHA.match(loc) and not (repo / loc).exists():
+        try:
+            r = subprocess.run(["git", "-C", str(repo), "cat-file", "-e", f"{loc}^{{commit}}"],
+                               capture_output=True, timeout=10)
+        except (OSError, subprocess.TimeoutExpired):
+            return "unreachable: git did not run"
+        if r.returncode == 0:
+            return None
+        inside = subprocess.run(["git", "-C", str(repo), "rev-parse", "--git-dir"],
+                                capture_output=True, timeout=10).returncode == 0
+        return f"dangling: no commit {loc}" if inside else "unreachable: not a git repo"
+    m = PATH_LINE.match(loc)
+    path, a, b = m.group("path"), m.group("a"), m.group("b")
+    target = (repo / path)
+    try:
+        target.resolve().relative_to(repo.resolve())
+    except ValueError:
+        return f"dangling: {path} is outside the repo"
+    if not target.is_file():
+        return f"dangling: no file {path}"
+    if a:
+        n = sum(1 for _ in target.open(errors="replace"))
+        last = int(b or a)
+        if int(a) < 1 or last > n or (b and int(b) < int(a)):
+            return f"dangling: {path} has {n} lines, not {a}{'-' + b if b else ''}"
+    return None
+
+
+def scan_pointers(plan: Plan, where: str, whole: str) -> None:
+    for t in AT.finditer(whole):
+        for loc in (x.strip().strip("`") for x in t.group("loc").split(",")):
+            if not loc or "<" in loc or ">" in loc:   # a placeholder documents the format
+                continue
+            plan.counts["pointers"] += 1
+            why = check_pointer(plan, loc)
+            if why:
+                kind, detail = why.split(": ", 1)
+                plan.findings.append(Finding(kind, where, f"[at: {loc}] {detail}"))
+
+
 def scan_derived(plan: Plan, since: str | None = None) -> None:
     """Provenance on every derived item: resolving, missing (orphan), or absent (untagged)."""
     targets = [(p, None) for p in _derived_paths(plan.root)]
@@ -229,6 +298,7 @@ def scan_derived(plan: Plan, since: str | None = None) -> None:
                 if tags and len(dates) == len(tags) and max(dates) < since:
                     continue
             plan.counts["items"] += 1
+            scan_pointers(plan, where, whole)
             if not tags:
                 plan.findings.append(Finding("untagged", where, first[:80]))
                 continue
@@ -333,8 +403,8 @@ def scan_impacts(plan: Plan) -> None:
                 f"add's words in its tag to pin it", missing=missing))
 
 
-def run(root: Path, since: str | None) -> Plan:
-    plan = Plan(root=root)
+def run(root: Path, since: str | None, repo: Path | None = None) -> Plan:
+    plan = Plan(root=root, repo=repo)
     collect_records(plan, since)
     scan_derived(plan, since)
     scan_impacts(plan)
@@ -348,16 +418,18 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", action="store_true", dest="as_json", help="machine-readable output")
     args = ap.parse_args(argv)
 
-    root = Path(args.path).expanduser().resolve()
-    if root.name != "plan":
-        root = root / "plan"
+    given = Path(args.path).expanduser().absolute()
+    # plan/ is often a symlink into a plan store, so the repo is found before resolving it
+    repo = given.parent if given.name == "plan" else given
+    root = (given if given.name == "plan" else given / "plan").resolve()
     if not root.is_dir():
         print(f"plancheck: no plan/ folder at {root}", file=sys.stderr)
         return 2
 
-    plan = run(root, args.since)
-    hard = [f for f in plan.findings if f.kind in ("orphan", "ghost", "misquote")]
+    plan = run(root, args.since, repo)
+    hard = [f for f in plan.findings if f.kind in ("orphan", "ghost", "misquote", "dangling")]
     info = [f for f in plan.findings if f.kind == "untagged"]
+    away = [f for f in plan.findings if f.kind == "unreachable"]
 
     if args.as_json:
         print(json.dumps({
@@ -371,18 +443,22 @@ def main(argv: list[str] | None = None) -> int:
     c = plan.counts
     if not hard:
         print(f"Replay: clean — {c['items']} derived items, {c['tagged']} tagged "
-              f"({c['quoted']} quoted), {c['records']} records")
+              f"({c['quoted']} quoted), {c['records']} records, {c['pointers']} pointers")
     else:
         orphans = sum(1 for f in hard if f.kind == "orphan")
         ghosts = sum(f.missing for f in hard if f.kind == "ghost")   # add lines with no item
         misquotes = sum(1 for f in hard if f.kind == "misquote")
-        print(f"Replay: {orphans} orphan(s) / {ghosts} ghost(s) / {misquotes} misquote(s)")
+        dangling = sum(1 for f in hard if f.kind == "dangling")
+        print(f"Replay: {orphans} orphan(s) / {ghosts} ghost(s) / {misquotes} misquote(s)"
+              f" / {dangling} dangling pointer(s)")
         for f in hard:
             print(f"  {f.kind:7} {f.where:28} {f.detail}")
         for kind in sorted({f.kind for f in hard}):
             print(f"  fix {kind}: {FIX[kind]}")
     if info:
         print(f"  untagged: {len(info)} item(s) with no provenance (treated as hand-written)")
+    for f in away:
+        print(f"  unreachable here: {f.where} {f.detail}")
     return 1 if hard else 0
 
 

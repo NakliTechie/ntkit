@@ -1,7 +1,7 @@
 <h1 align="center">ntkit</h1>
 
 <p align="center">
-  <strong>Give your coding agent 23 skills to remember decisions, audit your project, and check that fixes work.</strong>
+  <strong>Give your coding agent 24 skills to remember decisions, audit your project, and check that fixes work.</strong>
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
   <img alt="account: none" src="https://img.shields.io/badge/account-none-0891b2?style=flat-square">
 </p>
 
-![ntkit workflow map: 23 coding agent skills across five phases, a daily session loop, and the scholia knowledge vault used at every phase](assets/workflow.png)
+![ntkit workflow map: 24 coding agent skills across five phases, a daily session loop, and the scholia knowledge vault used at every phase](assets/workflow.png)
 
 ## Install
 
@@ -79,6 +79,7 @@ The example uses the Claude Code CLI. Other hosts need their own non-interactive
 /autopilot-nt           # anytime: work a workplan or goal, unattended, in its own worktree
 /lab-nt                 # research: shape an idea into a falsifiable contract, run bounded legs
 /research-nt "<q>"      # research: a web question into a cited report; drafts the plan, then runs
+/supervise-nt           # anytime: register work that outlives the session; check in, alert on a stall
 /forward-pass-nt        # anytime: fresh-eyes whole-app audit, batched fix-workplan
 /walkthrough-nt         # anytime: drive each role (browser, CLI, TUI, API), fix bugs, leave a harness
 /ux-review-nt           # anytime: cold first-timer review, ranked onboarding and nav failures

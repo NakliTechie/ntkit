@@ -226,6 +226,19 @@ build. Each principle binds every skill, present and future.
 9. **Gates are reviewed like code.** A gate that passes almost always, or whose failures are almost
    always false stops, is removed. Re-measure after each ntkit release that adds or changes a gate.
 
+## 8. Delegated work that outlives the session
+
+Work the harness cannot see (a cloud job, a long detached script, another agent's CLI) fails
+quietly: a stalled job and a slow one look the same from inside the session. `/supervise-nt` is the
+tool; these five rules bind every skill that hands work off.
+
+1. **Register before launch.** Unregistered work is unsupervised.
+2. **Every delegation has a probe and an ETA.** The probe exits 0 while the work runs.
+3. **Waiting is not watching.** A loop that waits for the end never replaces a check-in.
+4. **What must outlive the session runs detached**, never as a child of the session.
+5. **The remote side carries its own last line of defence:** a spend cap, a time limit, a
+   machine that deletes itself. The supervisor alerts; it stops nothing.
+
 ---
 *Delivery rigor — the third pillar beside `STATES.md` (the machine) and `ATTEST.md` (the
 report). Substance over ceremony; credit only for what runs.*

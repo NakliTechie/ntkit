@@ -46,6 +46,10 @@ Example: `/research-nt "how do open deep-research harnesses verify citations"`. 
 - **Refuse, writing nothing,** when: the input is empty; `go <slug>` names no run; the run's `State:` is not SPEC-READY or BUDGET (SPEC-READY means the run died after planning); `python3 $SKILL/bin/check.py spec $RUN` fails on `go` (show its problem list — the user's edit broke the spec).
 - **Fold at seams** (AUTHORING §8). Subagents return one status line; the files hold the rest. Re-read a file rather than carry its content.
 
+## Work that outlives the session
+
+Register only external CLI agents (another model family run through its own CLI), and only when ``sh $SKILL/../supervise-nt/bin/supervise.sh`` exists: before launch, with a probe and an ETA, retired when its answer is read (`/supervise-nt`). In-session subagents are tracked by the harness and are not registered. Without that skill installed, skip this silently.
+
 ## The run
 
 On entering a phase, read its Detail file first, then act. Do not read ahead.

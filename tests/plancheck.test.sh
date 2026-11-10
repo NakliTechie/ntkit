@@ -221,4 +221,28 @@ printf '# Forward pass 2026-08-01\n\n## Impact\n- pending.md/Now — add: fix th
 printf '# Pending\n## Now\n- [ ] Flip the trigram flag on for everyone  [from: 2026-09-10-summary]\n' >"$g/plan/pending.md"
 expect "an archived record's finished adds are not ghosts" 0 "Replay: clean" "$g"
 
+# 14. [at:] pointers: a file and line range, a commit and a session transcript resolve; a missing
+# file, a line past the end, an unknown commit and a path outside the repo are dangling (exit 1);
+# a transcript absent on this machine is reported as unreachable, not as a failure.
+pt="$work/pointers"; base "$pt"; mkdir -p "$pt/src" "$work/tx/proj"
+printf 'a\nb\nc\n' >"$pt/src/db.py"; echo '{}' >"$work/tx/proj/sess-1.jsonl"
+git -C "$pt" init -q; git -C "$pt" -c user.email=t@t -c user.name=t add src/db.py
+git -C "$pt" -c user.email=t@t -c user.name=t commit -qm init; sha=$(git -C "$pt" rev-parse --short HEAD)
+printf '# Pending\n## Now\n- [ ] Flip the flag  [from: 2026-09-10-summary] [at: src/db.py:2-3, %s] [at: session:sess-1]\n- Format note  [at: <path>:<line>]\n' "$sha" >"$pt/plan/pending.md"
+export NT_TRANSCRIPTS="$work/tx"
+expect "pointers that resolve pass" 0 "3 pointers" "$pt"
+printf '# Pending\n## Now\n- [ ] A  [at: src/gone.py]\n- [ ] B  [at: src/db.py:9]\n- [ ] C  [at: deadbee]\n- [ ] D  [at: ../outside.txt]\n' >"$pt/plan/pending.md"
+expect "a missing file is dangling" 1 "no file src/gone.py" "$pt"
+expect "a line past the end is dangling" 1 "has 3 lines, not 9" "$pt"
+expect "an unknown commit is dangling" 1 "no commit deadbee" "$pt"
+expect "a path outside the repo is dangling" 1 "outside the repo" "$pt"
+expect "the summary counts dangling pointers" 1 "4 dangling pointer(s)" "$pt"
+printf '# Pending\n## Now\n- [ ] A  [from: 2026-09-10-summary] [at: session:sess-elsewhere]\n' >"$pt/plan/pending.md"
+expect "a transcript on another machine is unreachable, not a failure" 0 "unreachable here" "$pt"
+# a plan/ that is a symlink into a plan store still resolves paths against the repo
+st="$work/store"; mv "$pt/plan" "$st"; ln -s "$st" "$pt/plan"
+printf '# Pending\n## Now\n- [ ] A  [from: 2026-09-10-summary] [at: src/db.py:1]\n' >"$st/pending.md"
+expect "pointers resolve through a symlinked plan/" 0 "1 pointers" "$pt"
+unset NT_TRANSCRIPTS
+
 [ "$bad" -eq 0 ] && echo ok

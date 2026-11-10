@@ -104,7 +104,7 @@ It compares provenance tags, quoted tags and `## Impact` declarations against th
 
 If the script is not available, fall back to reading: replay the rebuilt `## Decisions` + `## Log` in order and ask of each item now in `pending.md` whether the log explains how it got there. Say which mode you used.
 
-**Don't fix silently.** Report the result in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts / K misquotes — <one line each>`) and fold the obvious ones back: an orphan gets a dated log line, a ghost gets parked or explicitly closed, a misquote gets its item reworded to what the record says (or its quote corrected, if the item was right and the quote careless).
+**Don't fix silently.** Report the result in the Step 7 summary (`Replay: clean` or `Replay: N orphans / M ghosts / K misquotes / D dangling pointers — <one line each>`) and fold the obvious ones back: an orphan gets a dated log line, a ghost gets parked or explicitly closed, a misquote gets its item reworded to what the record says (or its quote corrected, if the item was right and the quote careless), and a dangling pointer is moved to where the thing is now, or dropped.
 
 ## Step 4.6: Tag provenance
 

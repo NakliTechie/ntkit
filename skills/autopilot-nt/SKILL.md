@@ -51,6 +51,10 @@ Park these; never perform them:
 
 Anything ambiguous about reversibility is a stop-line. Standing global stop-signs apply on top of this list.
 
+## Work that outlives the session
+
+When the run is launched detached or on a schedule, or starts a job the harness cannot see (a cloud machine, a long script, another agent's CLI), and ``sh $SKILL/../supervise-nt/bin/supervise.sh`` exists, register that work before launch with a probe and an ETA and retire it in the report (`/supervise-nt`). Without that skill installed, skip this silently.
+
 ## Impact declaration
 
 `plan/<date>-autopilot.md` is a record: append-only. End it with `## Impact`: one line per change it implies for `pending.md`, `workplan.md` or `history.md` (`- pending.md/Now — add: …`, `- workplan.md/B2#3 — status: [ ] → [x], verified by …`), or `- none — <reason>`. Never add, drop or reword items there yourself; a status flip on an existing item is allowed. `/replan-nt` applies the rest ([MEMORY.md §3](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#3-declared-impact)).

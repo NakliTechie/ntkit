@@ -57,6 +57,10 @@ contract; everything else follows from it.
 | **Record** | `soc.md` · `<type>-<date>.md` reports · `research/` reports · `<date>-summary.md` · `lab/<slug>/journal.md` · `history.md` `## Log` · `_archive/` | Append-only. Once written, an entry is never edited or deleted. A dead end is recorded exactly like a success. |
 | **Derived** | `pending.md` · `workplan.md` · `history.md` `## Decisions` · `history.md` `## Dead ends` · `standing.md` (optional, §7) | A projection over the record. Rewritten wholesale by the reconcile pass, and by nothing else. |
 
+Outside both kinds: `failures.md`, one line per failed command shape, derived from the
+session transcripts (which live outside `plan/`). `/windup-nt` merges it with
+`failures.py`, a person fills its `fix:` fields, and nothing else in `plan/` depends on it.
+
 `history.md` is deliberately hybrid: its `## Log` is the record, its `## Decisions` and
 `## Dead ends` are curated indexes *over* that log. Naming the split is enough; the file
 does not need to be split.
@@ -157,6 +161,21 @@ come from that one entry, not the whole stream. A quote cannot contain `]` or `"
 the clause that carries the claim, a few words to one sentence; `hand` tags take no quote.
 Quoting is optional and additive, like the tag itself.
 
+**A pointer says where inside the record or the code.** A `[from:]` tag names the record;
+an `[at:]` tag names the place, so the next session opens the exact spot instead of
+re-reading the record:
+
+```markdown
+- [ ] Fix the retry loop  [from: 2026-09-10-summary] [at: src/sync.py:120-148]
+- [x] Trigram index landed  [from: 2026-09-07-summary] [at: 3f2a9c1]
+- Cold start traced to the session preload  [from: hand] [at: session:4d8d5732-d294-4ffb-a486-4883e6b2f88e]
+```
+
+Pointer grammar: a repo-relative `path`, `path:line` or `path:line-line`; a commit SHA
+(7–40 hex characters); or `session:<id>` for a session transcript. Several pointers
+may share one tag, comma-separated. A command is not a pointer: quote it in backticks in the
+item text. `plancheck` resolves every pointer (§5).
+
 **An untagged item means `hand`.** Every `plan/` folder written before this contract
 existed is therefore already valid — provenance is additive, never a migration.
 
@@ -174,7 +193,9 @@ the derived files. It is mechanical, it never calls a model, and it never edits 
 | **orphan** | A derived item whose `[from:]` names a record that does not exist. State arrived from nowhere. |
 | **ghost** | A record `## Impact` line whose target has no matching derived item. Work was done and silently dropped. |
 | **misquote** | A quoted tag whose words are not in the record it names. The item claims something its source does not say. |
+| **dangling** | An `[at:]` pointer that names a file, line or commit the repo no longer has. The item points at something that moved. |
 | **untagged** | A derived item with no provenance tag. Reported as info, never as failure — this is the legacy case and the hand-written case. |
+| **unreachable** | An `[at: session:<id>]` whose transcript is not on this machine, or a commit pointer outside a git repo. Reported as info, because transcripts are local. |
 
 ```
 plancheck            # exit 0 clean · 1 divergence found · 2 could not run

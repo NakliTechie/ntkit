@@ -51,6 +51,10 @@ On entering a phase, read its file, then act. The Outcome column is the contract
 | 3 Re-arm | the leg report recommends CONTINUE or STOP; only a human resumes, through `lab.py leg` | `references/ending.md` |
 | 4 Report | teardown, audit, leg report, impact section, notify | `references/ending.md` |
 
+## Work that outlives the session
+
+When a leg, a fork or a child runs where the harness cannot see it (a cloud machine, a detached script, another agent's CLI) and ``sh $SKILL/../supervise-nt/bin/supervise.sh`` exists, register it before launch with a probe and an ETA, start its detached supervisor once, check in every 15 minutes and retire it at the end (`/supervise-nt`). Without that skill installed, skip this silently.
+
 ## Stop-lines
 
 `/autopilot-nt`'s stop-lines (no publishing, sending, deleting, credentials, money, destructive infra), plus:

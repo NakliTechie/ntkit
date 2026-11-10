@@ -19,6 +19,7 @@ Look inside `plan/` for:
 - `workplan.md` — the chunked execution play (primary)
 - `pending.md` — open items, especially `## Open questions`; also scan `## Parked` so deferred "not now" items resurface
 - `history.md` — the recent `## Decisions`, for context
+- `failures.md` — if it exists, the command shapes earlier sessions saw fail, with the fix when one was found. Before running a command whose tool and command word match a line, use its fix; on a line with `fix: ?`, expect the error and check first
 - `standing.md` — if it exists, the standing questions and their current answers ([MEMORY.md §7](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#7-standing-questions)). Print them as they stand; never recompute an answer here
 - The most recent `plan/YYYY-MM-DD-summary.md` — the freshest "where we left off"
 - The newest open lab campaign in `plan/lab/*/` (newest leg report has no RETIRED or GOAL-MET end-state) — name it with its `Re-arm` line; a campaign waiting on a human re-arm is a next move
@@ -75,6 +76,7 @@ Last session (<date from latest summary, or "no summary on file">):
   Parked (<count>): <top 2–3 deferred items, or "—"> — not abandoned, still waiting
   Pick up: <the summary's Next action, or "—"> · last error: <its Last error, or "—">
   Transcript: <the summary's Transcript path, or "not kept"> · search: rg -n '<term>' <path>
+[if plan/failures.md exists:] Known failures: <N> shapes · with a fix: <top 3 by seen, each `tool cmd → fix`> · no fix yet: <count>
 [if an open lab campaign:]
 Lab: <slug> — leg <n> ended <state> · Re-arm: <CONTINUE … | STOP …>
 

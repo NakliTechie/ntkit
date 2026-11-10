@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- `/supervise-nt`, the 24th skill: register work that outlives the session (a cloud job, a detached script, another agent's CLI) with a probe and an ETA, check in every 15 minutes, and run one detached supervisor per project that alerts when check-ins lapse or a delegation passes ETA × 1.5 + 15 min. `--eta` takes `45`, `45m` or `2h`. Dependency-free shell. `SUBSTANCE.md` §8 states the five rules; `/lab-nt`, `/autopilot-nt` and `/research-nt` register through it when it is installed and skip it silently when not.
+- `[at: ...]` pointers on plan items (MEMORY.md §4): a repo path with optional lines, a commit, or `session:<id>`. `plancheck` resolves each one and reports a pointer that names a missing file, a line past the end or an unknown commit as **dangling** (exit 1); a transcript that is not on this machine is reported as unreachable, not as a failure. `/windup-nt` adds a pointer to every item it carries.
+- `plan/failures.md` and `windup-nt/bin/failures.py`: `/windup-nt` merges the session's failed tool calls, one line per shape (tool, command word, error), counting a session once and keeping any `fix:` already written; declined permissions and bare exit codes are left out. `/resume-nt` reads the file before acting.
+
 ## [2.11.1] — 2026-11-10
 
 Six small fixes for limits 2.11.0 left, plus two found by a Codex review of them. Each has a test that fails on the old code.

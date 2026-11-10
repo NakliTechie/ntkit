@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2.11.1] — 2026-11-10
+
+Six small fixes for limits 2.11.0 left, plus two found by a Codex review of them. Each has a test that fails on the old code.
+
 ### Fixed
 
 - `/lab-nt` paired mode reads its metric from the readings: `keep --paired <gains> --paired-cand <scores>` records the mean of the candidate's per-item scores (one per gain), and `keep` refuses `--actual` in every mode, so a typed-in number can no longer hide a HIGH surprise. Calls that passed `--paired … --actual V` must now pass `--paired-cand`. `keep` also refuses a NaN or infinite reading in any list, because NaN makes the surprise comparison false and would skip the confirmation runs (found by a Codex review).

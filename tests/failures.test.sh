@@ -68,4 +68,17 @@ python3 "$F" "$t/s1.jsonl" --ledger "$L" --write >/dev/null
 # a session argument is a literal id, never a glob
 set +e; NT_TRANSCRIPTS=$t/tx python3 "$F" '*' --ledger "$t/g.md" 2>/dev/null; rc=$?; set -e
 [ "$rc" -eq 2 ] || { echo "FAIL a glob resolved to a transcript"; bad=1; }
+# a heredoc body and shell punctuation are not commands; a missing timestamp never replaces a date
+python3 - "$t/s8.jsonl" <<'PY'
+import json, sys
+cmd = "cd /x && python3 - <<'EOF'\nfoo && bar; baz\nEOF\n{ echo a; } && [ -f x ] && git status"
+rows = [{"sessionId": "sess-8", "timestamp": "2026-11-10T11:00:00Z", "message": {"content": [{"type": "tool_use", "id": "h", "name": "Bash", "input": {"command": cmd}}]}},
+        {"sessionId": "sess-8", "message": {"content": [{"type": "tool_result", "tool_use_id": "h", "is_error": True, "content": "Exit code 1\nerror: boom"}]}},
+        {"sessionId": "sess-8", "timestamp": "2026-11-09T11:00:00Z", "message": {"content": [{"type": "tool_use", "id": "i", "name": "Bash", "input": {"command": "python3 -c 1"}}]}},
+        {"sessionId": "sess-8", "timestamp": "2026-11-09T11:00:01Z", "message": {"content": [{"type": "tool_result", "tool_use_id": "i", "is_error": True, "content": "Exit code 1\nerror: boom"}]}}]
+with open(sys.argv[1], "w") as f:
+    for r in rows: f.write(json.dumps(r) + "\n")
+PY
+python3 "$F" "$t/s8.jsonl" --ledger "$t/h.md" --write >/dev/null
+grep -q '^- Bash `python3` → error: boom · seen 2 · last 2026-11-09 ' "$t/h.md" || { echo "FAIL heredoc or date"; cat "$t/h.md"; bad=1; }
 [ "$bad" -eq 0 ] && echo ok

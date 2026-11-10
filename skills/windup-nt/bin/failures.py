@@ -64,8 +64,9 @@ def norm(text: str) -> str:
 def command_word(cmd: str) -> str:
     """The programs a shell command ran, each with its subcommand, in order: `make build && git push`.
     A failed compound command names every step, because the transcript does not say which one failed."""
-    words = [w for w in (_one_word(p) for p in re.split(r"\s*(?:&&|\|\||;|\|)\s*",
-             re.sub(r"\$\(|`", " ", cmd.strip()))) if w]
+    head = cmd.split("<<", 1)[0]          # a heredoc body is data, not commands
+    words = [w for w in (_one_word(p) for p in re.split(r"\s*(?:&&|\|\||;|\||\n)\s*",
+             re.sub(r"\$\(|`", " ", head.strip()))) if w]
     out = " && ".join(dict.fromkeys(words[:3])) or "sh"
     return CONTROL.sub(" ", out).replace("`", "'")[:80]
 
@@ -80,6 +81,8 @@ def _one_word(part: str) -> str | None:
         if not words or words[0] in ("cd", "set", "export", "source", ".", "sleep", "echo", "true",
                                      "for", "if", "while", "until", "done", "fi", "esac", "case"):
             return None
+        if not re.match(r"^[A-Za-z0-9_./~+-]+$", words[0]) or words[0].startswith("#"):
+            return None                   # a brace, bracket, comment or quote is not a program
         w = [os.path.basename(words[0])]
         if len(words) > 1 and re.match(r"^[a-z][\w.-]*$", words[1]):
             w.append(os.path.basename(words[1]))
@@ -183,7 +186,7 @@ def main(argv: list[str] | None = None) -> int:
         k = (f["tool"], f["cmd"], f["err"])
         s = shapes.setdefault(k, {"n": 0, "last": f["date"]})
         s["n"] += 1
-        s["last"] = max(s["last"], f["date"])
+        s["last"] = max(d for d in (s["last"], f["date"]) if d != "?") if f["date"] != "?" or s["last"] != "?" else "?"
 
     ledger = Path(a.ledger)
     text = ledger.read_text(errors="replace") if ledger.exists() else HEADER
@@ -207,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
                 if session not in merged and seen_here not in ats:   # a session counts once, ever
                     n = int(m["n"]) + shapes[k]["n"]
                     ats = (ats + [seen_here])[-KEEP_SESSIONS:]
-                    last = max(m["last"], shapes[k]["last"])
+                    last = max((d for d in (m["last"], shapes[k]["last"]) if d != "?"), default="?")
                     line = (f"- {m['tool']} `{m['cmd']}` → {m['err']} · seen {n} · last {last} · "
                             f"fix: {m['fix']}  [at: {', '.join(ats)}]")
         out.append(line)

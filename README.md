@@ -1,7 +1,7 @@
 <h1 align="center">ntkit</h1>
 
 <p align="center">
-  <strong>Give your coding agent 24 skills to remember decisions, audit your project, and check that fixes work.</strong>
+  <strong>Give your coding agent 25 skills to remember decisions, audit your project, and check that fixes work.</strong>
 </p>
 
 <p align="center">
@@ -69,6 +69,8 @@ The example uses the Claude Code CLI. Other hosts need their own non-interactive
 
 `--dangerously-skip-permissions` does what it says, so schedule only commands that carry their own guardrails. The morning report is what `/resume-nt` reads.
 
+`/fleet-nt` runs `/autopilot-nt` in several repositories at once. It triages which repos can run, writes one constraint brief before launch, relays your answers to each run, and keeps a morning digest.
+
 ## Commands
 
 ```
@@ -80,6 +82,7 @@ The example uses the Claude Code CLI. Other hosts need their own non-interactive
 /lab-nt                 # research: shape an idea into a falsifiable contract, run bounded legs
 /research-nt "<q>"      # research: a web question into a cited report; drafts the plan, then runs
 /supervise-nt           # anytime: register work that outlives the session; check in, alert on a stall
+/fleet-nt               # overnight: triage many repos, run /autopilot-nt in each, relay questions, keep a digest
 /forward-pass-nt        # anytime: fresh-eyes whole-app audit, batched fix-workplan
 /walkthrough-nt         # anytime: drive each role (browser, CLI, TUI, API), fix bugs, leave a harness
 /ux-review-nt           # anytime: cold first-timer review, ranked onboarding and nav failures

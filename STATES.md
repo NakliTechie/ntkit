@@ -109,7 +109,8 @@ own worktree, private state, **no reading another run's worktree or plan
 scratch**. The only communication is the mailbox — the morning report
 `plan/<date>-autopilot.md` (or the leg report `plan/lab/<slug>/<date>-leg.md`),
 one format, one location. `/resume-nt`, `/windup-nt` and `/replan-nt` read their own repo's
-mailboxes; no command reads another repo's. Message-passing, no shared
+mailboxes; no command reads another repo's. The one exception is `/fleet-nt`, which reads
+each child run's mailbox read-only to harvest questions, and never its worktree. Message-passing, no shared
 memory — that's what makes parallel runs safe to leave alone.
 
 ## Replay check

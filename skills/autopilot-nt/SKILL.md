@@ -25,7 +25,7 @@ On entering a phase, read its Detail file first, then act. Do not read ahead. Ph
 
 | Phase | Outcome | Detail |
 |---|---|---|
-| 0 Launch contract | Goal spec (done-when · because · never-degrade), stop-lines, default-decision policy, budget (default: the scoped batch or 6 hours), worktree, checker model — stated back as a veto window, then go. No user present → safest reading: top batch only, nothing destructive, default budget. | `references/launch.md` |
+| 0 Launch contract | Goal spec (done-when · because · never-degrade), stop-lines, default-decision policy, budget (default: the scoped batch or 6 hours), worktree, checker model — stated back as a veto window, then go. No user present → safest reading: top batch only, nothing destructive, default budget. A `/fleet-nt` brief in the invocation answers Phase 0; obey it and re-read its file at every batch boundary. | `references/launch.md` |
 | 0.5 Worktree | `.worktrees/autopilot-<date>` on branch `autopilot/<date>`, names fixed once and written into the record; `plan/` symlinked from the main checkout; install step rerun. Never on the user's live checkout. | `references/launch.md` |
 | 1 Order | An ordered queue: keystone first, unblockers front-loaded, stop-line candidates last. A prose goal is recorded verbatim and queued **in this run's own record**, never written into the shared workplan. | below |
 | 2 Loop | Per item: understand · do (a bug gets the smallest fix; a Stray or refactor item gets its end state, with no-caller paths deleted) · verify with fresh eyes · commit by path · log `[x]` with an evidence row. Status flips only — never add, drop, re-rank, or re-word an item in a shared derived file. No pause between items or batches. Push the run branch (never main) after each passing batch boundary. Fold at batch boundaries; discard only what a file re-read recovers. | `references/loop.md` |
@@ -42,7 +42,7 @@ Skim the top of the repo's vision or roadmap doc, if any, so default decisions f
 ## Phase 4 — The stop-lines (never cross these unattended)
 
 Park these; never perform them:
-- **Publishing, releasing, or deploying** — no release, no deploy, no CI trigger. The sanctioned outward actions are Phase 5's merge to the default branch and `git push`, only on a green final gate and clean main, and the backup push of the run's own `autopilot/<date>` branch after a passing batch boundary; never a force-push or a protected-branch override.
+- **Publishing, releasing, tagging or deploying** — no release (no GitHub release, no version bump published), no tag (no `git tag`, no `git push --tags`, no version tag pushed with a branch), no deploy, no CI trigger. The sanctioned outward actions are Phase 5's merge to the default branch and `git push`, only on a green final gate and clean main, and the backup push of the run's own `autopilot/<date>` branch after a passing batch boundary; never a force-push or a protected-branch override.
 - **Sending anything outward** — email, messages, PR/issue comments, posts.
 - **Deleting or moving data irreversibly** — hard deletes, history rewrites, `git push --force`, dropping tables, emptying trash.
 - **Credentials, secrets, money, access** — creating keys/accounts/IAM, changing permissions or sharing, anything financial.

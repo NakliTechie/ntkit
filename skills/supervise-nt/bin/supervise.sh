@@ -21,6 +21,8 @@
 #   one scope. Times print in local time; set TZ to change it.
 # Alerts: desktop (macOS osascript, Linux notify-send) and, when NTFY_TOPIC is set, an ntfy.sh push.
 #   NT_SUPERVISE_NO_NOTIFY=1 suppresses them (tests). Exit 64 on a usage error.
+# NT_SUPERVISE_CMD: the command printed in "start one detached" hints (default: this script). A wrapper
+#   that sets NT_SUPERVISE_HOME must set it to itself, or the hint starts a supervisor in the wrong state.
 set -u
 ROOT=${NT_SUPERVISE_HOME:-${XDG_STATE_HOME:-$HOME/.local/state}/ntkit/supervise}
 SCOPE=${NT_SUPERVISE_SCOPE:-$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")}
@@ -128,7 +130,7 @@ case $cmd in
     case $kind in cloud|job) [ -n "$probe" ] || { echo "--probe is required for $kind" >&2; exit 64; } ;; esac
     printf "name=%s\nkind=%s\nprobe=%s\neta=%s\nnote=%s\nstarted=%s\n" "$name" "$kind" "$probe" "$eta" "$note" "$(now)" | put "$D/active/$name" || exit 73
     echo "registered $name ($kind) in $SCOPE${eta:+, eta ${eta}m}${probe:+, probe: $probe}"
-    alive || echo "note: no supervisor running for $SCOPE; start one detached: nohup $0 supervise >/dev/null 2>&1 &"
+    alive || echo "note: no supervisor running for $SCOPE; start one detached: nohup ${NT_SUPERVISE_CMD:-$0} supervise >/dev/null 2>&1 &"
     ;;
   checkin|status)
     echo "== $SCOPE · $(stamp)"
@@ -136,7 +138,7 @@ case $cmd in
     if [ "$cmd" = checkin ]; then
       echo "$(now) $(stamp) checkin ${1:-}" >> "$D/ledger"
       if alive; then echo "  supervisor: pid $(cat "$D/supervisor.pid") alive"
-      else echo "  supervisor: NOT RUNNING; start it detached: nohup $0 supervise >/dev/null 2>&1 &"; fi
+      else echo "  supervisor: NOT RUNNING; start it detached: nohup ${NT_SUPERVISE_CMD:-$0} supervise >/dev/null 2>&1 &"; fi
     fi
     ;;
   done)

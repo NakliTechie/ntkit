@@ -12,6 +12,10 @@ edit='{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Edit"
 check='{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"pytest -q"}}]}}'
 list='{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"ls"}}]}}'
 done_='{"type":"assistant","message":{"content":[{"type":"text","text":"Fixed. All tests pass."}]}}'
+failed='{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"c1","is_error":true,"content":"Exit code 1"}]}}'
+okres='{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"c1","content":"3 passed"}]}}'
+check1='{"type":"assistant","message":{"content":[{"type":"tool_use","id":"c1","name":"Bash","input":{"command":"pytest -q"}}]}}'
+docedit='{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Edit","input":{"file_path":"README.md"}}]}}'
 plain='{"type":"assistant","message":{"content":[{"type":"text","text":"I changed a.py; not yet verified."}]}}'
 
 run() { # name expected-exit active transcript-lines...
@@ -29,5 +33,8 @@ run "check before the last edit"        2 false "$user" "$check" "$edit" "$done_
 run "no claim in the reply"             0 false "$user" "$edit" "$plain"
 run "no edit in the turn"               0 false "$user" "$done_"
 run "earlier turn's edit is ignored"    0 false "$user" "$edit" "$done_" "$user" "$done_"
+run "check ran but errored"            2 false "$user" "$edit" "$check1" "$failed" "$done_"
+run "check ran and succeeded"          0 false "$user" "$edit" "$check1" "$okres" "$done_"
+run "only a README was edited"         0 false "$user" "$docedit" "$done_"
 run "hook already fired"                0 true  "$user" "$edit" "$done_"
 echo "ok"

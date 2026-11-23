@@ -6,7 +6,9 @@ files the turn edited, and no check ran after the last edit. Exit 2 sends the me
 back to the agent, which then runs a check or downgrades the claim. Exit 0 lets the turn end.
 
 Input: the hook JSON on stdin ({"transcript_path": ..., "stop_hook_active": bool}).
-Reads the transcript only; writes nothing. One block per turn: when `stop_hook_active` is true
+A check that returned an error does not count, and edits to .md and .txt files are ignored.
+Known limits: edits made through Bash (sed -i, cat >) are not seen, and the check pattern is a
+heuristic that also matches commands such as `git check-ignore`. Reads the transcript only; writes nothing. One block per turn: when `stop_hook_active` is true
 the hook already fired, so it exits 0 and never loops.
 
 Install (optional), in the agent's settings.json:
@@ -17,6 +19,8 @@ import re
 import sys
 
 EDIT_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
+# Prose files need no test, so editing them never requires a check before a claim.
+PROSE_SUFFIXES = (".md", ".txt")
 # A shell command that can vouch for an edit: a test, build, lint, type-check or run.
 CHECK_CMD = re.compile(
     r"\b(test|pytest|jest|vitest|unittest|check|lint|build|make|cargo|tsc|mypy|ruff|verify|"
@@ -51,7 +55,8 @@ def main():
     path = hook.get("transcript_path")
     if not path:
         return 0
-    turn = []  # events of the current turn: ("edit"|"check"|"text", payload)
+    turn = []  # events of the current turn: [kind, payload, tool_use id]; kind is edit, check or text
+    check_ids = {}  # tool_use id -> its event, so a failed result can cancel the check
     try:
         with open(path, encoding="utf-8") as fh:
             for line in fh:
@@ -66,28 +71,38 @@ def main():
                         b.get("type") == "tool_result" for b in bs
                     ):
                         turn = []  # a new user message starts a new turn
+                        check_ids = {}
+                    for b in bs:
+                        if b.get("type") == "tool_result" and b.get("is_error"):
+                            event = check_ids.get(b.get("tool_use_id"))
+                            if event:
+                                event[0] = "failed-check"  # a check that errored vouches for nothing
                 elif kind == "assistant":
                     for b in blocks(entry):
                         if b.get("type") == "tool_use":
                             name, inp = b.get("name"), b.get("input") or {}
                             if name in EDIT_TOOLS:
-                                turn.append(("edit", inp.get("file_path", "")))
+                                target = str(inp.get("file_path", ""))
+                                if not target.lower().endswith(PROSE_SUFFIXES):
+                                    turn.append(["edit", target, b.get("id")])
                             elif name == "Bash" and CHECK_CMD.search(str(inp.get("command", ""))):
-                                turn.append(("check", inp.get("command", "")))
+                                event = ["check", inp.get("command", ""), b.get("id")]
+                                turn.append(event)
+                                check_ids[b.get("id")] = event
                         elif b.get("type") == "text":
-                            turn.append(("text", b.get("text", "")))
+                            turn.append(["text", b.get("text", ""), None])
     except OSError:
         return 0
-    last_edit = max((i for i, (k, _) in enumerate(turn) if k == "edit"), default=-1)
+    last_edit = max((i for i, (k, _, _) in enumerate(turn) if k == "edit"), default=-1)
     if last_edit < 0:
         return 0
-    if any(k == "check" for k, _ in turn[last_edit + 1 :]):
+    if any(k == "check" for k, _, _ in turn[last_edit + 1 :]):
         return 0
-    final = next((p for k, p in reversed(turn) if k == "text"), "")
+    final = next((p for k, p, _ in reversed(turn) if k == "text"), "")
     hit = CLAIM.search(NEGATED.sub("", final))
     if not hit:
         return 0
-    edited = sorted({p for k, p in turn if k == "edit" and p})
+    edited = sorted({p for k, p, _ in turn if k == "edit" and p})
     sys.stderr.write(
         "claim-guard: the reply says '%s', but no check ran after the last edit to %s. "
         "Run a check on the edited state and cite it, or restate the claim as 'changed, not yet verified'.\n"

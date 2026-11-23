@@ -69,7 +69,7 @@ The example uses the Claude Code CLI. Other hosts need their own non-interactive
 
 `--dangerously-skip-permissions` does what it says, so schedule only commands that carry their own guardrails. The morning report is what `/resume-nt` reads.
 
-`/fleet-nt` runs `/autopilot-nt` in several repositories at once. It triages which repos can run, writes one constraint brief before launch, relays your answers to each run, and keeps a morning digest.
+`/fleet-nt` runs `/autopilot-nt` in several repositories at once. It triages which repos can run, writes one constraint brief before launch, relays your answers to each run, and keeps a morning digest. Optional: `hooks/claim-guard.py` is a Claude Code Stop hook that blocks a reply saying "done" or "fixed" when no check ran after the last edit. `install.sh` does not install it; add `python3 -I <checkout>/hooks/claim-guard.py` under `hooks.Stop` in your settings.
 
 ## Commands
 

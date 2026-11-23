@@ -29,7 +29,7 @@ Unzip attached zips at the target root preserving structure, copy attached md fi
 
 ## Phase 4 — Git
 
-`git init -b main`; `.gitignore` with OS junk and `/plan` (no trailing slash, so a symlinked `plan` is covered, [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); stage by explicit path, never `git add -A`; commit `Initial commit — scaffolded from handoff`.
+`git init -b main`; `.gitignore` with OS junk, build outputs (`dist/`), archives (`*.zip`), model weights, profiling dumps and `/plan` (no trailing slash, so a symlinked `plan` is covered, [MEMORY.md §0](https://github.com/NakliTechie/ntkit/blob/main/MEMORY.md#0-where-plan-lives)); stage by explicit path, never `git add -A`; commit `Initial commit — scaffolded from handoff`.
 
 ## Phase 5 — Remote
 

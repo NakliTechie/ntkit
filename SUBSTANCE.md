@@ -150,7 +150,10 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
     type, assertion, test or lint rule. A comment about something outside the repo (a
     third-party quirk, a protocol rule) stays, with the reason. Detected by
     `/forward-pass-nt` (Comments as symptoms) and fixed by `/autopilot-nt`. Idea from Cursor's
-    `pstack` `no-comments`.
+    `pstack` `no-comments`. A comment that stays states a constraint or a non-obvious decision;
+    it never records the task that caused the change, because task history belongs in the commit
+    message and `plan/`, not in code or user documentation (idea from an agent-instructions file,
+    source not identified).
 16. **Unexplained number** — a speed, accuracy or cost number reported or acted on without knowing
     what it measured. A number is evidence only with three things beside it: the run count and
     spread; the limiter, meaning the resource or code path that stops it being twice as good (a
@@ -202,6 +205,15 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
     optional Claude Code Stop hook that enforces this item: it blocks a turn that ends with
     "done", "fixed" or "passing" when no check ran after the turn's last edit (idea from
     `ashhart/skills` `mythos-mode`, ideas only).
+21. **Doc sprawl** — Markdown committed to a repository with no purpose beyond recording the
+    current task, or copying details that code or configuration already holds. A new document
+    names its reader and what that reader does with it, and links to the authoritative file
+    instead of restating it. A small feature gets a short update in the existing relevant
+    section of the README, not a new headline or section. Build outputs (`dist/`), archives
+    (`*.zip`), model weights and profiling dumps are not committed; the tracked assets are the
+    ones the product serves or a reader asked for. `plan/` is exempt: it is where task records
+    belong. Detected by `/forward-pass-nt` (Stray). Idea from an agent-instructions file, source
+    not identified.
 
 ## 7. Gates and fan-out: general principles
 

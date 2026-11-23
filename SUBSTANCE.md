@@ -160,7 +160,17 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
     on default settings, noise, a part too small to matter end to end). A saving larger than the
     whole time the changed part used to take means the number measured something else. Applies to
     the Benchmark and Optimise phases, `/lab-nt` keeps and eval results. Idea from Cursor's `pstack`
-    `explain-the-number`.
+    `explain-the-number`. A speed comparison also fixes its protocol before the first run: one
+    unscored warm-up per arm, because the first run of a job is often the fastest or the slowest;
+    a noise phase that runs the base against itself under the same protocol; mirrored order (base,
+    candidate, candidate, base), so a machine that heats up or slows down favours neither arm; and
+    "faster" or "slower" only when one arm wins every round and the median gap exceeds the noise
+    floor, otherwise "no measurable difference". Concurrent workloads give each stream its own
+    input, because identical streams hit the same caches and run in step, so the rate swings
+    between repeats. A change is held when any real cell got slower (default settings, a short and
+    a long input, a cold start, one request and several at once), even with identical output; and
+    whoever judges the claim is a fresh session that did not build the change. Idea from
+    `ashhart/skills` `fair-bench` and `speedup-referee` (ideas only).
 17. **Unexecuted gate** — a check reported as passing on a change it never ran. A gate vouches only
     for the code it executed and the reference it compared against. Two failure shapes: the gate's
     inputs never reach the changed path (short prompts against a change that runs only on long
@@ -188,7 +198,10 @@ name-dropping, not applying (idea from Cursor's `pstack` principle names).
     check that is cited for them. A check vouches only for the state it ran on, so the claim cites
     a check run after the last write to every file it covers; otherwise it is reported as
     unverified. Item 17 is the same rule for the paths a gate never reached. Items 18 to 20 are
-    ideas from TandemLLM's conductor and chat runner (ideas only).
+    ideas from TandemLLM's conductor and chat runner (ideas only). `hooks/claim-guard.py` is an
+    optional Claude Code Stop hook that enforces this item: it blocks a turn that ends with
+    "done", "fixed" or "passing" when no check ran after the turn's last edit (idea from
+    `ashhart/skills` `mythos-mode`, ideas only).
 
 ## 7. Gates and fan-out: general principles
 
